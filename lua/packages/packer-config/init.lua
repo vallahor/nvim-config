@@ -29,6 +29,8 @@ require('packer').startup(function(use)
 
   use { 'mattn/emmet-vim' }
 
+  use { 'mg979/vim-visual-multi' }
+
   if packer_bootstrap then
     require('packer').sync()
   end

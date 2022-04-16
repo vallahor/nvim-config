@@ -78,3 +78,20 @@ command [[ map F <Plug>Sneak_F ]]
 command [[ map t <Plug>Sneak_t ]]
 command [[ map T <Plug>Sneak_T ]]
 command [[ let g:sneak#use_ic_scs = 1 ]]
+
+command [[
+let g:VM_default_mappings = 0
+let g:VM_maps = {}
+let g:VM_maps['Find Under']         = '<C-=>'           " replace C-n
+let g:VM_maps['Find Subword Under'] = '<C-=>'           " replace visual C-n
+let g:VM_maps["Add Cursor Down"]             = '<C-,>'
+let g:VM_maps["Add Cursor Up"]               = '<C-;>'
+let g:VM_maps["Select All"]                  = '<c-s-=>'
+
+let g:VM_maps["Switch Mode"]                 = '<Tab>'
+
+let g:VM_maps["Find Next"]                   = '<c-=>'
+let g:VM_maps["Find Prev"]                   = '<c-->'
+let g:VM_maps["Skip Region"]                   = '+'
+let g:VM_maps["Remove Region"]                   = '_'
+]]

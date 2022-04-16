@@ -12,6 +12,7 @@ set iskeyword-=_
 set cindent
 set cino+=L0,g0,N-s,(0,l1
 set nohlsearch 
+let g:VM_theme = 'iceblue'
 ]]
 
 vim.cmd [[ au BufWritePre *.lua lua vim.lsp.buf.formatting_sync()]]
