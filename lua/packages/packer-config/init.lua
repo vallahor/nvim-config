@@ -10,30 +10,17 @@ require('packer').startup(function(use)
   use { 'tpope/vim-surround' }
   use { 'tpope/vim-repeat' }
   use { 'justinmk/vim-sneak' }
-  use { 'junegunn/vim-easy-align' }
   use { 'terryma/vim-expand-region' }
   use { 'chaoren/vim-wordmotion' }
-  use { 'rockerBOO/boo-colorscheme-nvim', branch = 'main' }
   use { 'numToStr/Comment.nvim', }
-
   use { 'nvim-telescope/telescope.nvim', requires = { { 'nvim-lua/plenary.nvim' } } }
-
   use { 'ms-jpq/coq_nvim' }
-
   use { 'windwp/nvim-autopairs', }
-
   use { 'mattn/emmet-vim' }
-
   use { 'mg979/vim-visual-multi' }
-  use {
-    "catppuccin/nvim",
-    as = "catppuccin"
-  }
-
+  use { "catppuccin/nvim", as = "catppuccin" }
   use { 'TimUntersberger/neogit', requires = 'nvim-lua/plenary.nvim' }
-
   use { 'sbdchd/neoformat' }
-
   use { 'ms-jpq/chadtree' }
 
   if packer_bootstrap then
@@ -71,3 +58,12 @@ require "telescope".setup {
     },
   }
 }
+
+local chadtree_settings = {
+  theme = {
+    icon_glyph_set = "ascii"
+  }
+}
+
+
+vim.api.nvim_set_var("chadtree_settings", chadtree_settings)
