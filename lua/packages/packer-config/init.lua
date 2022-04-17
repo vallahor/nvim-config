@@ -32,6 +32,10 @@ require('packer').startup(function(use)
 
   use { 'TimUntersberger/neogit', requires = 'nvim-lua/plenary.nvim' }
 
+  use { 'sbdchd/neoformat' }
+
+  use { 'ms-jpq/chadtree' }
+
   if packer_bootstrap then
     require('packer').sync()
   end
@@ -42,6 +46,13 @@ vim.cmd [[
 "let g:user_emmet_leader_key='<C-y>'
 let g:user_emmet_install_global = 0
 autocmd FileType tsx,jsx,html EmmetInstall
+]]
+
+vim.cmd [[
+augroup fmt
+  autocmd!
+  autocmd BufWritePre * undojoin | Neoformat
+augroup END
 ]]
 
 require('nvim-autopairs').setup {}

@@ -1,5 +1,7 @@
 local map = vim.api.nvim_set_keymap
-local opts = { noremap = true, silent = true }
+
+local opts = {
+  noremap = true, silent = true }
 local global = vim.g
 local command = vim.cmd
 
@@ -20,6 +22,8 @@ map('v', 'e', '<Plug>WordMotion_e', { noremap = true })
 map('n', '<leader>g', '<cmd>Neogit<cr>', opts)
 
 map('c', '<c-v>', '<c-r>"', opts)
+
+map('n', '<c-t>', '<cmd>CHADopen<cr>', opts)
 
 map('n', '<c-1>', '<cmd>call emmet#toggleComment()<cr>', {})
 map('v', '<c-2>', '<cmd>call emmet#expandAbbr(2,"")<cr>', {})
