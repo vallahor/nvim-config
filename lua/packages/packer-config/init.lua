@@ -30,6 +30,10 @@ require('packer').startup(function(use)
   use { 'mattn/emmet-vim' }
 
   use { 'mg979/vim-visual-multi' }
+  use {
+    "catppuccin/nvim",
+    as = "catppuccin"
+  }
 
   if packer_bootstrap then
     require('packer').sync()

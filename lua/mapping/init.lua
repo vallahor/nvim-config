@@ -5,8 +5,7 @@ local command = vim.cmd
 
 map('n', '<space>', '<nop>', {})
 
-command 'let mapleader = "<Space>"'
---vim.g.mapleader = " "
+vim.g.mapleader = " "
 
 global['wordmotion_spaces'] = { '\\w\\@<=-\\w\\@=', '\\.' }
 
@@ -18,31 +17,34 @@ map('v', 'w', '<Plug>WordMotion_w', { noremap = true })
 map('v', 'b', '<Plug>WordMotion_b', { noremap = true })
 map('v', 'e', '<Plug>WordMotion_e', { noremap = true })
 
-map('c', '<c-v>', '<c-r>"', { noremap = true, silent = true })
+map('c', '<c-v>', '<c-r>"', opts)
 
 map('n', '<c-1>', '<cmd>call emmet#toggleComment()<cr>', {})
 map('v', '<c-2>', '<cmd>call emmet#expandAbbr(2,"")<cr>', {})
 map('n', '<c-4>', '<cmd>call emmet#removeTag()<cr>', {})
 
-map('i', '<c-bs>', '<c-w>', { noremap = true, silent = true })
-map('c', '<c-bs>', '<c-w>', { noremap = true, silent = true })
+map('i', '<c-bs>', '<c-w>', opts)
+map('c', '<c-bs>', '<c-w>', opts)
 
-map('n', 'm', '<c-w>w', { noremap = true, silent = true })
-map('n', '(', '<c-w>r', { noremap = true, silent = true })
+map('n', 'm', '<c-w>w', opts)
+map('n', '(', '<c-w>r', opts)
 
-map('n', '<Leader><Leader>', '<c-^>', { noremap = true, silent = true })
+map('n', '<Leader><Leader>', '<c-^>', opts)
 map('n', 'x', '"_x', { noremap = true })
-map('v', 'x', '"_d', { noremap = true, silent = true })
-map('n', 'Y', 'y$', { noremap = true, silent = true })
+map('v', 'x', '"_d', opts)
+map('n', 'Y', 'y$', opts)
 
-map('n', '*', '*``', { noremap = true, silent = true })
-map('v', '*', '"sy/\\V<c-r>s<cr>``', { noremap = true, silent = true })
+map('n', '*', '*``', opts)
+map('v', '*', '"sy/\\V<c-r>s<cr>``', opts)
 
 map('v', 'v', '<Plug>(expand_region_expand)', {})
 map('v', 'V', '<Plug>(expand_region_shrink)', {})
 
 map('n', '-', '$', { silent = true })
-map('n', '0', '^', { noremap = true, silent = true })
+map('n', '0', '^', opts)
+
+map('v', '-', '$', { silent = true })
+map('v', '0', '^', opts)
 
 map('n', '[', '{', { nowait = true, noremap = true })
 map('n', ']', '}', { nowait = true, noremap = true })
@@ -53,25 +55,25 @@ map('v', ']', '}', { nowait = true, noremap = true })
 map('n', '{', '<c-u>', { nowait = true })
 map('n', '}', '<c-d>', { nowait = true })
 
-map('n', '<c-enter>', '<cmd>w!<CR>', { noremap = true, silent = true })
-map('n', '<s-enter>', '<cmd>w!<CR>', { noremap = true, silent = true })
+map('n', '<c-enter>', '<cmd>w!<CR>', opts)
+map('n', '<s-enter>', '<cmd>w!<CR>', opts)
 
-map('n', '<F4>', '<cmd>e $MYVIMRC<CR>', { noremap = true, silent = true })
-map('n', '<F5>', '<cmd>luafile %<CR>', { noremap = true, silent = true })
+map('n', '<F4>', '<cmd>e $MYVIMRC<CR>', opts)
+map('n', '<F5>', '<cmd>luafile %<CR>', opts)
 
-map('n', '<c-p>', '<cmd>lua require(\'telescope.builtin\').find_files()<cr>', { noremap = true, silent = true })
-map('n', '<tab>', '<cmd>lua require(\'telescope.builtin\').buffers()<cr>', { noremap = true, silent = true })
-map('n', '<c-/>', '<cmd>lua require(\'telescope.builtin\').live_grep()<cr>', { noremap = true, silent = true })
+map('n', '<c-p>', '<cmd>lua require(\'telescope.builtin\').find_files()<cr>', opts)
+map('n', '<tab>', '<cmd>lua require(\'telescope.builtin\').buffers()<cr>', opts)
+map('n', '<c-/>', '<cmd>lua require(\'telescope.builtin\').live_grep()<cr>', opts)
 
 map('n', '|', '<cmd>bp<cr>:bd #<cr>', { silent = true })
 
-map('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', { noremap = true, silent = true })
-map('n', '<Leader>d', '<cmd>lua vim.lsp.buf.declaration()<CR>', { noremap = true, silent = true })
-map('n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', { noremap = true, silent = true })
-map('n', '<Leader>r', '<cmd>lua vim.lsp.buf.rename()<CR>', { noremap = true, silent = true })
-map('n', '<Leader>i', '<cmd>lua vim.lsp.buf.implementation()<CR>', { noremap = true, silent = true })
-map('n', '<C-j>', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', { noremap = true, silent = true })
-map('n', '<C-k>', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', { noremap = true, silent = true })
+map('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
+map('n', '<Leader>d', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
+map('n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
+map('n', '<Leader>r', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
+map('n', '<Leader>i', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
+map('n', '<C-j>', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
+map('n', '<C-k>', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
 
 command [[ map f <Plug>Sneak_f ]]
 command [[ map F <Plug>Sneak_F ]]
@@ -82,16 +84,16 @@ command [[ let g:sneak#use_ic_scs = 1 ]]
 command [[
 let g:VM_default_mappings = 0
 let g:VM_maps = {}
-let g:VM_maps['Find Under']         = '<C-=>'           " replace C-n
-let g:VM_maps['Find Subword Under'] = '<C-=>'           " replace visual C-n
-let g:VM_maps["Add Cursor Down"]             = '<C-,>'
-let g:VM_maps["Add Cursor Up"]               = '<C-;>'
-let g:VM_maps["Select All"]                  = '<c-s-=>'
+let g:VM_maps['Find Under'] = '<C-;>'
+let g:VM_maps['Find Subword Under'] = '<C-;>'      
+let g:VM_maps["Add Cursor Down"] = '<C-=>'
+let g:VM_maps["Add Cursor Up"] = '<C-->'
+let g:VM_maps["Select All"] = '<c-s-;>'
 
-let g:VM_maps["Switch Mode"]                 = '<Tab>'
+let g:VM_maps["Switch Mode"] = '<Tab>'
 
-let g:VM_maps["Find Next"]                   = '<c-=>'
-let g:VM_maps["Find Prev"]                   = '<c-->'
-let g:VM_maps["Skip Region"]                   = '+'
-let g:VM_maps["Remove Region"]                   = '_'
+let g:VM_maps["Find Next"] = '<c-;>'
+let g:VM_maps["Find Prev"] = '<c-,>'
+let g:VM_maps["Skip Region"] = '<'
+let g:VM_maps["Remove Region"] = '>'
 ]]
