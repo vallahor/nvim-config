@@ -3,7 +3,7 @@ require('packages.packer-config')
 require('packages.treesitter-config')
 require('packages.theme-config')
 require('packages.lsp-config')
-require('packages.cmp-config')
+require('packages.coq-config')
 require('mapping')
 
 vim.cmd [[ 

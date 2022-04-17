@@ -14,16 +14,11 @@ require('packer').startup(function(use)
   use { 'terryma/vim-expand-region' }
   use { 'chaoren/vim-wordmotion' }
   use { 'rockerBOO/boo-colorscheme-nvim', branch = 'main' }
-  use {
-    'numToStr/Comment.nvim',
-  }
-  use {
-    'nvim-telescope/telescope.nvim',
-    requires = { { 'nvim-lua/plenary.nvim' } }
-  }
+  use { 'numToStr/Comment.nvim', }
 
-  use { 'hrsh7th/cmp-nvim-lsp' }
-  use { 'hrsh7th/nvim-cmp' }
+  use { 'nvim-telescope/telescope.nvim', requires = { { 'nvim-lua/plenary.nvim' } } }
+
+  use { 'ms-jpq/coq_nvim' }
 
   use { 'windwp/nvim-autopairs', }
 
