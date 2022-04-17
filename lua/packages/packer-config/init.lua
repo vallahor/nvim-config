@@ -18,10 +18,10 @@ require('packer').startup(function(use)
   use { 'windwp/nvim-autopairs', }
   use { 'mattn/emmet-vim' }
   use { 'mg979/vim-visual-multi' }
-  use { "catppuccin/nvim", as = "catppuccin" }
   use { 'TimUntersberger/neogit', requires = 'nvim-lua/plenary.nvim' }
   use { 'sbdchd/neoformat' }
   use { 'ms-jpq/chadtree' }
+  use 'bluz71/vim-nightfly-guicolors'
 
   if packer_bootstrap then
     require('packer').sync()

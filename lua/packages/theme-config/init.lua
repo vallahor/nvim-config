@@ -1,2 +1,2 @@
 -- require 'boo-colorscheme'.use({})
-vim.cmd [[colorscheme catppuccin]]
+vim.cmd [[colorscheme nightfly]]
