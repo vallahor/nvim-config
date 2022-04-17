@@ -17,6 +17,8 @@ map('v', 'w', '<Plug>WordMotion_w', { noremap = true })
 map('v', 'b', '<Plug>WordMotion_b', { noremap = true })
 map('v', 'e', '<Plug>WordMotion_e', { noremap = true })
 
+map('n', '<leader>g', '<cmd>Neogit<cr>', opts)
+
 map('c', '<c-v>', '<c-r>"', opts)
 
 map('n', '<c-1>', '<cmd>call emmet#toggleComment()<cr>', {})

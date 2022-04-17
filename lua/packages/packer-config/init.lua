@@ -35,6 +35,8 @@ require('packer').startup(function(use)
     as = "catppuccin"
   }
 
+  use { 'TimUntersberger/neogit', requires = 'nvim-lua/plenary.nvim' }
+
   if packer_bootstrap then
     require('packer').sync()
   end
@@ -49,3 +51,17 @@ autocmd FileType tsx,jsx,html EmmetInstall
 
 require('nvim-autopairs').setup {}
 require('Comment').setup()
+
+require('neogit').setup {}
+
+require "telescope".setup {
+  defaults = {
+    mappings = {
+      i = {
+        ["<C-bs>"] = function()
+          vim.api.nvim_input "<c-s-w>"
+        end,
+      },
+    },
+  }
+}
