@@ -19,3 +19,12 @@ vim.cmd [[ au BufWritePre *.lua lua vim.lsp.buf.formatting_sync()]]
 vim.cmd [[ au BufWritePre *.html lua vim.lsp.buf.formatting_sync()]]
 vim.cmd [[ au BufWritePre *.css,*.scss lua vim.lsp.buf.formatting_sync()]]
 vim.cmd [[ au BufWritePre *.tsx,*.ts,*.jsx,*.js lua vim.lsp.buf.formatting_sync()]]
+
+vim.cmd [[colorscheme gruvball]]
+
+vim.cmd [[
+nm <silent> <F1> :echo "hi<" . synIDattr(synID(line("."),col("."),1),"name")
+    \ . '> trans<' . synIDattr(synID(line("."),col("."),0),"name")
+    \ . "> lo<" . synIDattr(synIDtrans(synID(line("."),col("."),1)),"name")
+    \ . ">"<CR>
+]]
