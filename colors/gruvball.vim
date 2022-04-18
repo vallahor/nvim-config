@@ -666,8 +666,8 @@ hi MatchParen       guisp=NONE guifg=#ff8080 guibg=#040004    ctermfg=210 ctermb
 hi ModeMsg          guisp=NONE guifg=#C0AEA0 guibg=#382536    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi MoreMsg          guisp=NONE guifg=#C0AEA0 guibg=#382536    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi NonText          guisp=NONE guifg=NONE guibg=NONE ctermfg=NONE ctermbg=NONE  gui=NONE cterm=NONE
-hi Pmenu            guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
-hi PmenuSel         guisp=NONE guifg=NONE guibg=#ff8080    ctermfg=139 ctermbg=NONE gui=NONE cterm=NONE
+hi Pmenu            guisp=NONE guifg=#C0AEA0 guibg=#382536    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
+hi PmenuSel         guisp=NONE guifg=NONE guibg=#493441    ctermfg=139 ctermbg=NONE gui=NONE cterm=NONE
 hi PmenuSbar        guisp=NONE guifg=#C0AEA0 guibg=#382536    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi PmenuThumb       guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi Question         guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
@@ -783,7 +783,7 @@ hi TSOperator        guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=
 hi TSType            guisp=NONE guifg=#806292 guibg=NONE    ctermfg=96  ctermbg=NONE gui=NONE cterm=NONE
 hi TSTypeBuiltin     guisp=NONE guifg=#806292 guibg=NONE    ctermfg=96  ctermbg=NONE gui=NONE cterm=NONE
 hi TSFunction        guisp=NONE guifg=#c58d5d guibg=NONE    ctermfg=173 ctermbg=NONE gui=NONE cterm=NONE
-hi TSFunctionBuiltin guisp=NONE guifg=#c58d5d guibg=NONE    ctermfg=173 ctermbg=NONE gui=NONE cterm=NONE
+hi TSFuncBuiltin guisp=NONE guifg=#c58d5d guibg=NONE    ctermfg=173 ctermbg=NONE gui=NONE cterm=NONE
 hi TSFunctionMacro   guisp=NONE guifg=#c58d5d guibg=NONE    ctermfg=173 ctermbg=NONE gui=NONE cterm=NONE
 hi TSMethod       guisp=NONE guifg=#c58d5d guibg=NONE    ctermfg=173 ctermbg=NONE gui=NONE cterm=NONE
 hi TSConstructor     guisp=NONE guifg=#c58d5d guibg=NONE    ctermfg=173 ctermbg=NONE gui=NONE cterm=NONE
