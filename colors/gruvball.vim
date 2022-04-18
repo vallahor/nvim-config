@@ -735,6 +735,12 @@ hi SpecialComment guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NON
 hi Debug          guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=NONE cterm=NONE
 
 hi gitcommitSummary guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
+hi NeogitDiffAdd          guisp=NONE guifg=#b9e0d3 guibg=#1e4839 ctermfg=231 ctermbg=NONE  gui=NONE cterm=NONE
+"hi NeogitDiffChange          guisp=NONE guifg=#02f79922 guibg=NONE ctermfg=231 ctermbg=NONE  gui=NONE cterm=NONE
+hi NeogitDiffChange       guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
+hi NeogitDiffDelete       guisp=NONE guifg=#e8b9b8 guibg=#4c232d ctermfg=231 ctermbg=NONE  gui=NONE cterm=NONE
+hi NeogitDiffText         guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
+
 
 hi LspDiagnosticsDefaultError guisp=NONE guifg=#b1314c guibg=NONE    ctermfg=131 ctermbg=NONE gui=NONE cterm=NONE
 hi LspDiagnosticsDefaultWarning  guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=NONE cterm=NONE

@@ -66,6 +66,7 @@ map('n', '<s-enter>', '<cmd>w!<CR>', opts)
 
 map('n', '<F4>', '<cmd>e $MYVIMRC<CR>', opts)
 map('n', '<F5>', '<cmd>luafile %<CR>', opts)
+map('n', '<F6>', '<cmd>luafile $MYVIMRC<CR>', opts)
 
 map('n', '<c-p>', '<cmd>lua require(\'telescope.builtin\').find_files()<cr>', opts)
 map('n', '<tab>', '<cmd>lua require(\'telescope.builtin\').buffers()<cr>', opts)
