@@ -30,17 +30,16 @@ end)
 
 
 vim.cmd [[ 
-"let g:user_emmet_leader_key='<C-y>'
 let g:user_emmet_install_global = 0
 autocmd FileType tsx,jsx,html EmmetInstall
 ]]
 
-vim.cmd [[
-augroup fmt
-  autocmd!
-  autocmd BufWritePre * undojoin | Neoformat
-augroup END
-]]
+-- vim.cmd [[
+-- augroup fmt
+--   autocmd!
+--   autocmd BufWritePre * undojoin | Neoformat
+-- augroup END
+-- ]]
 
 require('nvim-autopairs').setup {}
 require('Comment').setup()
