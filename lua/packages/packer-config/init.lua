@@ -15,19 +15,24 @@ require('packer').startup(function(use)
   use { 'chaoren/vim-wordmotion' }
   use { 'numToStr/Comment.nvim', }
   use { 'nvim-telescope/telescope.nvim', requires = { { 'nvim-lua/plenary.nvim' } } }
-  use { 'ms-jpq/coq_nvim' }
   use { 'windwp/nvim-autopairs', }
   use { 'mattn/emmet-vim' }
   use { 'mg979/vim-visual-multi' }
   use { 'TimUntersberger/neogit', requires = 'nvim-lua/plenary.nvim' }
   use { 'sbdchd/neoformat' }
   use { 'ms-jpq/chadtree' }
-  use 'bluz71/vim-nightfly-guicolors'
+
+  use { 'hrsh7th/cmp-nvim-lsp' }
+  use { 'hrsh7th/cmp-buffer' }
+  use { 'hrsh7th/cmp-path' }
+  use { 'hrsh7th/nvim-cmp' }
+
 
   if packer_bootstrap then
     require('packer').sync()
   end
 end)
+
 
 
 vim.cmd [[ 
@@ -88,4 +93,54 @@ require "nvim-treesitter.configs".setup {
       show_help = '?',
     },
   }
+}
+
+local cmp = require('cmp')
+cmp.setup {
+  sources = {
+    { name = 'nvim_lsp' },
+    { name = 'path' },
+    { name = 'buffer' }
+  },
+  mapping = {
+    ['<C-Space>'] = cmp.mapping.complete(),
+    ["<c-n>"] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.select_next_item({ behavior = cmp.SelectBehavior.Insert, select = false })
+      else
+        fallback() -- The fallback function sends a already mapped key. In this case, it's probably `<Tab>`.
+      end
+    end, { "i", "s" }),
+
+    ["<c-p>"] = cmp.mapping(function()
+      if cmp.visible() then
+        cmp.select_prev_item({ behavior = cmp.SelectBehavior.Insert, select = false })
+      end
+    end, { "i", "s" }),
+    ['<CR>'] = cmp.mapping.confirm({ select = true }),
+  },
+
+  snippet = {
+    -- We recommend using *actual* snippet engine.
+    -- It's a simple implementation so it might not work in some of the cases.
+    expand = function(args)
+      local line_num, col = unpack(vim.api.nvim_win_get_cursor(0))
+      local line_text = vim.api.nvim_buf_get_lines(0, line_num - 1, line_num, true)[1]
+      local indent = string.match(line_text, '^%s*')
+      local replace = vim.split(args.body, '\n', true)
+      local surround = string.match(line_text, '%S.*') or ''
+      local surround_end = surround:sub(col)
+
+      replace[1] = surround:sub(0, col - 1) .. replace[1]
+      replace[#replace] = replace[#replace] .. (#surround_end > 1 and ' ' or '') .. surround_end
+      if indent ~= '' then
+        for i, line in ipairs(replace) do
+          replace[i] = indent .. line
+        end
+      end
+
+      vim.api.nvim_buf_set_lines(0, line_num - 1, line_num, true, replace)
+    end,
+  },
+
 }
