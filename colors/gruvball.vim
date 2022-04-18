@@ -124,7 +124,7 @@ hi typescriptOptionalMark              guisp=NONE guifg=#794966 guibg=NONE    ct
 hi typescriptTypeParameters            guisp=NONE guifg=#ffffff guibg=NONE ctermfg=231 ctermbg=NONE  gui=NONE cterm=NONE
 hi typescriptTypeParameter             guisp=NONE guifg=#ffffff guibg=NONE ctermfg=231 ctermbg=NONE  gui=NONE cterm=NONE
 hi typescriptGenericDefault            guisp=NONE guifg=#ffffff guibg=NONE ctermfg=231 ctermbg=NONE  gui=NONE cterm=NONE
-hi typescriptTypeArguments             guisp=NONE guifg=#ffffff guibg=NONE ctermfg=231 ctermbg=NONE  gui=NONE cterm=NONE
+hi typescriptTypeArguments             guisp=NONE guifg=#A8899C guibg=NONE    ctermfg=139 ctermbg=NONE gui=NONE cterm=NONE
 hi typescriptTypeBracket               guisp=NONE guifg=#A8899C guibg=NONE    ctermfg=139 ctermbg=NONE gui=NONE cterm=NONE
 hi typescriptStringLiteralType         guisp=NONE guifg=#ffffff guibg=NONE ctermfg=231 ctermbg=NONE  gui=NONE cterm=NONE
 hi typescriptTemplateLiteralType       guisp=NONE guifg=#ffffff guibg=NONE ctermfg=231 ctermbg=NONE  gui=NONE cterm=NONE
@@ -647,9 +647,9 @@ hi CursorIM         guisp=NONE guifg=NONE guibg=#382536    ctermfg=145 ctermbg=N
 hi CursorColumn     guisp=NONE guifg=NONE guibg=#382536    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi CursorLine       guisp=NONE guifg=NONE guibg=#382536    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi Directory        guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
-hi DiffAdd          guisp=NONE guifg=#02f79922 guibg=NONE ctermfg=231 ctermbg=NONE  gui=NONE cterm=NONE
+hi DiffAdd          guisp=NONE guifg=#b9e0d3 guibg=#1a563f ctermfg=231 ctermbg=NONE  gui=NONE cterm=NONE
 hi DiffChange       guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
-hi DiffDelete       guisp=NONE guifg=#ec264755 guibg=NONE ctermfg=231 ctermbg=NONE  gui=NONE cterm=NONE
+hi DiffDelete       guisp=NONE guifg=#e8b9b8 guibg=#9d2640 ctermfg=231 ctermbg=NONE  gui=NONE cterm=NONE
 hi DiffText         guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi EndOfBuffer      guisp=NONE guifg=#493441 guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi ErrorMsg         guisp=NONE guifg=#b1314c guibg=NONE ctermfg=231 ctermbg=NONE  gui=NONE cterm=NONE
@@ -687,8 +687,8 @@ hi TabLineFill      guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 ctermbg=N
 hi TabLineSel       guisp=NONE guifg=#141114 guibg=NONE ctermfg=231 ctermbg=NONE  gui=NONE cterm=NONE
 hi Terminal         guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi Title            guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
-hi Visual           guisp=NONE guifg=NONE guibg=#191819 ctermfg=235 ctermbg=NONE  gui=NONE cterm=NONE
-hi VisualNOS        guisp=NONE guifg=NONE guibg=#191819 ctermfg=235 ctermbg=NONE  gui=NONE cterm=NONE
+hi Visual           guisp=NONE guifg=NONE guibg=#363436 ctermfg=235 ctermbg=NONE  gui=NONE cterm=NONE
+hi VisualNOS        guisp=NONE guifg=NONE guibg=#363436 ctermfg=235 ctermbg=NONE  gui=NONE cterm=NONE
 hi WarningMsg       guisp=NONE guifg=#d16d8a guibg=NONE ctermfg=231 ctermbg=NONE  gui=NONE cterm=NONE
 hi WildMenu         guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 
@@ -735,9 +735,9 @@ hi SpecialComment guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NON
 hi Debug          guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=NONE cterm=NONE
 
 hi gitcommitSummary guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
-hi NeogitDiffAdd          guisp=NONE guifg=#b9e0d3 guibg=#1e4839 ctermfg=231 ctermbg=NONE  gui=NONE cterm=NONE
+hi NeogitDiffAdd          guisp=NONE guifg=#b9e0d3 guibg=#1a563f ctermfg=231 ctermbg=NONE  gui=NONE cterm=NONE
 hi NeogitDiffChange       guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
-hi NeogitDiffDelete       guisp=NONE guifg=#e8b9b8 guibg=#4c232d ctermfg=231 ctermbg=NONE  gui=NONE cterm=NONE
+hi NeogitDiffDelete       guisp=NONE guifg=#e8b9b8 guibg=#9d2640 ctermfg=231 ctermbg=NONE  gui=NONE cterm=NONE
 hi NeogitDiffText         guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 
 
