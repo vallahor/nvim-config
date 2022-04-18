@@ -29,6 +29,8 @@ map('n', '<c-1>', '<cmd>call emmet#toggleComment()<cr>', {})
 map('v', '<c-2>', '<cmd>call emmet#expandAbbr(2,"")<cr>', {})
 map('n', '<c-4>', '<cmd>call emmet#removeTag()<cr>', {})
 
+map('n', '<F3>', '<cmd>TSHighlightCapturesUnderCursor<cr>', {})
+
 map('i', '<c-bs>', '<c-w>', opts)
 map('c', '<c-bs>', '<c-w>', opts)
 
