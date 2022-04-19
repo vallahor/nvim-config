@@ -20,7 +20,7 @@ require('packer').startup(function(use)
   use { 'mg979/vim-visual-multi' }
   use { 'TimUntersberger/neogit', requires = 'nvim-lua/plenary.nvim' }
   use { 'sbdchd/neoformat' }
-  use { 'ms-jpq/chadtree' }
+  use { 'ms-jpq/chadtree', run = ':CHADdeps' }
 
   use { 'hrsh7th/cmp-nvim-lsp' }
   use { 'hrsh7th/cmp-buffer' }
