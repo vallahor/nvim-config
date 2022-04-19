@@ -27,6 +27,7 @@ require('packer').startup(function(use)
   use { 'hrsh7th/cmp-path' }
   use { 'hrsh7th/nvim-cmp' }
 
+  use { 'windwp/nvim-ts-autotag' }
 
   if packer_bootstrap then
     require('packer').sync()
