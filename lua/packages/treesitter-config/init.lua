@@ -5,5 +5,14 @@ require 'nvim-treesitter.configs'.setup {
   },
   autotag = {
     enable = true
-  }
+  },
+  incremental_selection = {
+    enable = true,
+    keymaps = {
+      init_selection = "<c-=>",
+      node_incremental = "<c-=>",
+      node_decremental = "<c-->",
+      scope_incremental = "<c-]>",
+    },
+  },
 }
