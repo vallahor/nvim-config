@@ -1,11 +1,12 @@
 local fn = vim.fn
 local install_path = fn.stdpath('data') .. '/site/pack/packer/start/packer.nvim'
 if fn.empty(fn.glob(install_path)) > 0 then
-  packer_bootstrap = fn.system({ 'git', 'clone', '--depth', '1', 'https://github.com/wbthomason/packer.nvim', install_path })
+  packer_bootstrap = fn.system({ 'git', 'clone', "--depth", '1', 'https://github.com/wbthomason/packer.nvim', install_path })
 end
 
 require('packer').startup(function(use)
   use { 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate' }
+  use { 'nvim-treesitter/nvim-treesitter-textobjects' }
   use { 'nvim-treesitter/playground' }
   use { 'neovim/nvim-lspconfig' }
   use { 'tpope/vim-surround' }
@@ -34,99 +35,3 @@ require('packer').startup(function(use)
     require('packer').sync()
   end
 end)
-
-
-
-vim.cmd [[ 
-let g:user_emmet_install_global = 0
-autocmd FileType tsx,jsx,html EmmetInstall
-]]
-
--- vim.cmd [[
--- augroup fmt
---   autocmd!
---   autocmd BufWritePre * undojoin | Neoformat
--- augroup END
--- ]]
-
-require('nvim-autopairs').setup {}
-require('Comment').setup()
-
-require('neogit').setup {}
-
-require "telescope".setup {
-  defaults = {
-    mappings = {
-      i = {
-        ["<C-bs>"] = function()
-          vim.api.nvim_input "<c-s-w>"
-        end,
-      },
-    },
-  }
-}
-
-local chadtree_settings = {
-  theme = {
-    icon_glyph_set = "ascii"
-  }
-}
-
-
-vim.api.nvim_set_var("chadtree_settings", chadtree_settings)
-
-
-require "nvim-treesitter.configs".setup {
-  playground = {
-    enable = true,
-    disable = {},
-    updatetime = 25, -- Debounced time for highlighting nodes in the playground from source code
-    persist_queries = false, -- Whether the query persists across vim sessions
-    keybindings = {
-      toggle_query_editor = 'o',
-      toggle_hl_groups = 'i',
-      toggle_injected_languages = 't',
-      toggle_anonymous_nodes = 'a',
-      toggle_language_display = 'I',
-      focus_language = 'f',
-      unfocus_language = 'F',
-      update = 'R',
-      goto_node = '<cr>',
-      show_help = '?',
-    },
-  }
-}
-
-local cmp = require('cmp')
-cmp.setup {
-  sources = {
-    { name = 'nvim_lsp' },
-    { name = 'path' },
-    { name = 'buffer' }
-  },
-  mapping = {
-    ['<C-Space>'] = cmp.mapping.complete(),
-    ["<c-n>"] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.select_next_item({ behavior = cmp.SelectBehavior.Insert, select = false })
-      else
-        fallback() -- The fallback function sends a already mapped key. In this case, it's probably `<Tab>`.
-      end
-    end, { "i", "s" }),
-
-    ["<c-p>"] = cmp.mapping(function()
-      if cmp.visible() then
-        cmp.select_prev_item({ behavior = cmp.SelectBehavior.Insert, select = false })
-      end
-    end, { "i", "s" }),
-    ['<cr>'] = cmp.mapping.confirm({ select = true }),
-    ['<tab>'] = cmp.mapping.confirm({ select = true }),
-  },
-
-  snippet = {
-    expand = function(args)
-      require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
-    end,
-  },
-
-}
