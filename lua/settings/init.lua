@@ -51,3 +51,12 @@ config_buffer.copyindent = true
 config_buffer.grepprg = 'rg'
 config_buffer.swapfile = false
 config_buffer.undofile = true
+
+vim.cmd [[ 
+language en
+set iskeyword-=_
+set cindent
+set cino+=L0,g0,N-s,(0,l1
+set nohlsearch 
+let g:VM_theme = 'iceblue'
+]]

@@ -110,3 +110,11 @@ let g:VM_maps["Seek Prev"] = '<C-,>'
 let g:VM_maps["Skip Region"] = '>'
 let g:VM_maps["Remove Region"] = '<'
 ]]
+
+-- show current token
+vim.cmd [[
+nm <silent> <F1> :echo "hi<" . synIDattr(synID(line("."),col("."),1),"name")
+    \ . '> trans<' . synIDattr(synID(line("."),col("."),0),"name")
+    \ . "> lo<" . synIDattr(synIDtrans(synID(line("."),col("."),1)),"name")
+    \ . ">"<CR>
+]]
