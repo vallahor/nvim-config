@@ -99,7 +99,7 @@ let g:VM_custom_remaps = {'-': '$'}
 
 let g:VM_maps["Switch Mode"] = '<Tab>'
 
-let g:VM_maps["Align"] = '\\a'
+let g:VM_maps["Align"] = '<c-\\>'
 
 let g:VM_maps["Find Next"] = "<c-\'>"
 let g:VM_maps["Find Prev"] = '<c-;>'
