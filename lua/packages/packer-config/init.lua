@@ -117,7 +117,7 @@ cmp.setup {
         cmp.select_prev_item({ behavior = cmp.SelectBehavior.Insert, select = false })
       end
     end, { "i", "s" }),
-    ['<cr>'] = cmp.mapping.confirm({ select = false }),
+    --['<cr>'] = cmp.mapping.confirm({ select = false }),
   },
 
   snippet = {
