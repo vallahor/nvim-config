@@ -16,7 +16,7 @@ map({ 'n', 'v' }, 'w', '<Plug>WordMotion_w', { noremap = true })
 map({ 'n', 'v' }, 'b', '<Plug>WordMotion_b', { noremap = true })
 map({ 'n', 'v' }, 'e', '<Plug>WordMotion_e', { noremap = true })
 
-map('n', '<leader>g', '<cmd>Neogit<cr>', opts)
+map('n', '<c-f>', '<cmd>Neogit<cr>', opts)
 
 map('c', '<c-v>', '<c-r>"', opts)
 
@@ -25,7 +25,7 @@ map('n', '<c-0>', '<cmd>CHADopen<cr>', opts)
 
 map('n', '<c-1>', '<cmd>call emmet#toggleComment()<cr>', {})
 map('v', '<c-2>', '<cmd>call emmet#expandAbbr(2,"")<cr>', {})
-map('n', '<c-4>', '<cmd>call emmet#removeTag()<cr>', {})
+map('n', '<c-3>', '<cmd>call emmet#removeTag()<cr>', {})
 
 map('n', '<F3>', '<cmd>TSHighlightCapturesUnderCursor<cr>', {})
 
@@ -37,7 +37,6 @@ map('n', '(', '<c-w>r', opts)
 map('n', '<Leader><Leader>', '<c-^>', opts)
 map('n', 'x', '"_x', { noremap = true })
 map('v', 'x', '"_d', opts)
-map('n', 'Y', 'y$', opts)
 
 map('n', '*', '*``', opts)
 map('v', '*', '"sy/\\V<c-r>s<cr>``', opts)
@@ -54,8 +53,8 @@ map({ 'n', 'v' }, ']', '}', { nowait = true, noremap = true })
 map('n', '{', '<c-u>', { nowait = true })
 map('n', '}', '<c-d>', { nowait = true })
 
-map('n', '<c-enter>', '<cmd>w!<CR>', opts)
-map('n', '<s-enter>', '<cmd>w!<CR>', opts)
+map({ 'n', 'v' }, '<c-enter>', '<cmd>w!<CR>', opts)
+map({ 'n', 'v' }, '<s-enter>', '<cmd>w!<CR>', opts)
 
 map('n', '<F4>', '<cmd>e $MYVIMRC<CR>', opts)
 map('n', '<F5>', '<cmd>luafile %<CR>', opts)
@@ -63,15 +62,15 @@ map('n', '<F6>', '<cmd>luafile $MYVIMRC<CR>', opts)
 
 map('n', '<c-p>', '<cmd>lua require(\'telescope.builtin\').find_files()<cr>', opts)
 map('n', '<tab>', '<cmd>lua require(\'telescope.builtin\').buffers()<cr>', opts)
-map('n', '<c-/>', '<cmd>lua require(\'telescope.builtin\').live_grep()<cr>', opts)
+map('n', '<c-s>', '<cmd>lua require(\'telescope.builtin\').live_grep()<cr>', opts)
 
 map('n', '|', '<cmd>bp<cr>:bd #<cr>', { silent = true })
 
 map('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
-map('n', '<Leader>d', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
+map('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
+--map('n', '<Leader>d', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
 map('n', '<c-h>', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
-map('n', '<Leader>r', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
-map('n', '<Leader>i', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
+map('n', '<c-4>', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
 map('n', '<C-j>', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
 map('n', '<C-k>', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
 

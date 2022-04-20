@@ -13,7 +13,10 @@ require('packer').startup(function(use)
   use { 'tpope/vim-repeat' }
   use { 'justinmk/vim-sneak' }
   use { 'chaoren/vim-wordmotion' }
+
   use { 'numToStr/Comment.nvim', }
+  use { 'JoosepAlviste/nvim-ts-context-commentstring' }
+
   use { 'nvim-telescope/telescope.nvim', requires = { { 'nvim-lua/plenary.nvim' } } }
   use { 'windwp/nvim-autopairs', }
   use { 'mattn/emmet-vim' }
