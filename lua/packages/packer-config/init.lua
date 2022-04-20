@@ -11,7 +11,6 @@ require('packer').startup(function(use)
   use { 'tpope/vim-surround' }
   use { 'tpope/vim-repeat' }
   use { 'justinmk/vim-sneak' }
-  use { 'terryma/vim-expand-region' }
   use { 'chaoren/vim-wordmotion' }
   use { 'numToStr/Comment.nvim', }
   use { 'nvim-telescope/telescope.nvim', requires = { { 'nvim-lua/plenary.nvim' } } }
@@ -118,7 +117,7 @@ cmp.setup {
         cmp.select_prev_item({ behavior = cmp.SelectBehavior.Insert, select = false })
       end
     end, { "i", "s" }),
-    ['<CR>'] = cmp.mapping.confirm({ select = true }),
+    ['<cr>'] = cmp.mapping.confirm({ select = false }),
   },
 
   snippet = {

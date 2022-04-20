@@ -1,7 +1,6 @@
 local map = vim.keymap.set
 
-local opts = {
-  noremap = true, silent = true }
+local opts = { noremap = true, silent = true }
 local global = vim.g
 local command = vim.cmd
 
@@ -43,8 +42,7 @@ map('n', 'Y', 'y$', opts)
 map('n', '*', '*``', opts)
 map('v', '*', '"sy/\\V<c-r>s<cr>``', opts)
 
-map('v', 'v', '<Plug>(expand_region_expand)', {})
-map('v', 'V', '<Plug>(expand_region_shrink)', {})
+map('v', 'v', 'V', {})
 
 map({ 'n', 'v' }, '-', '$', { silent = true })
 map({ 'n', 'v' }, '0', '^', opts)
@@ -70,17 +68,23 @@ map('n', '|', '<cmd>bp<cr>:bd #<cr>', { silent = true })
 
 map('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
 map('n', '<Leader>d', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
-map('n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
+map('n', '<c-h>', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
 map('n', '<Leader>r', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
 map('n', '<Leader>i', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
 map('n', '<C-j>', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
 map('n', '<C-k>', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
 
-command [[ map f <Plug>Sneak_f ]]
-command [[ map F <Plug>Sneak_F ]]
-command [[ map t <Plug>Sneak_t ]]
-command [[ map T <Plug>Sneak_T ]]
-command [[ let g:sneak#use_ic_scs = 1 ]]
+map({ 'n', 'v' }, 'f', '<Plug>Sneak_f', opts)
+map({ 'n', 'v' }, 'F', '<Plug>Sneak_F', opts)
+map({ 'n', 'v' }, 't', '<Plug>Sneak_t', opts)
+map({ 'n', 'v' }, 'T', '<Plug>Sneak_T', opts)
+
+command [[
+let g:sneak#use_ic_scs = 1 
+
+highlight Sneak guifg=none guibg=none ctermfg=none ctermbg=none
+highlight SneakScope guifg=none guibg=none ctermfg=none ctermbg=none
+]]
 
 command [[
 let g:VM_default_mappings = 0
@@ -91,10 +95,18 @@ let g:VM_maps["Add Cursor Down"] = '<C-.>'
 let g:VM_maps["Add Cursor Up"] = '<C-,>'
 let g:VM_maps["Select All"] = '<c-s-;>'
 
+let g:VM_custom_remaps = {'-': '$'}
+
 let g:VM_maps["Switch Mode"] = '<Tab>'
+
+let g:VM_maps["Align"] = '\\a'
 
 let g:VM_maps["Find Next"] = "<c-\'>"
 let g:VM_maps["Find Prev"] = '<c-;>'
+
+let g:VM_maps["Seek Next"] = '<C-;>'
+let g:VM_maps["Seek Prev"] = '<C-,>'
+
 let g:VM_maps["Skip Region"] = '>'
 let g:VM_maps["Remove Region"] = '<'
 ]]
