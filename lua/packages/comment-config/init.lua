@@ -1,17 +1,19 @@
 require('Comment').setup(
   {
+    padding = true,
+    sticky = true,
+    ignore = nil,
     toggler = {
-      ---Line-comment toggle keymap
-      line = '<c-/>',
-      ---Block-comment toggle keymap
-      block = '<c-s-/>',
+      line = 'gcc',
+      block = 'gbc',
     },
-
     opleader = {
-      ---Line-comment toggle keymap
-      line = '<c-/>',
-      ---Block-comment toggle keymap
-      block = '<c-s-/>',
+      line = 'gc',
+      block = 'gb',
+    },
+    mappings = {
+      basic = true,
+      extra = true,
     },
   }
 )
