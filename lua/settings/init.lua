@@ -54,6 +54,7 @@ config_buffer.undofile = true
 
 vim.cmd [[ 
 language en
+set nowrap
 set iskeyword-=_
 set cindent
 set cino+=L0,g0,N-s,(0,l1

@@ -45,6 +45,7 @@ map('v', '*', '"sy/\\V<c-r>s<cr>``', opts)
 map('v', 'v', 'V', {})
 
 map({ 'n', 'v' }, '-', '$', { silent = true })
+map({ 'n', 'v' }, '<c-9>', '0', opts)
 map({ 'n', 'v' }, '0', '^', opts)
 
 map({ 'n', 'v' }, '[', '{', { nowait = true, noremap = true })
