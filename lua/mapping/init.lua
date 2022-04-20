@@ -1,4 +1,4 @@
-local map = vim.api.nvim_set_keymap
+local map = vim.keymap.set
 
 local opts = {
   noremap = true, silent = true }
@@ -6,24 +6,23 @@ local global = vim.g
 local command = vim.cmd
 
 map('n', '<space>', '<nop>', {})
+map('n', '<c-]>', '<nop>', {})
+map('n', '<c-[>', '<nop>', {})
 
 vim.g.mapleader = " "
 
 global['wordmotion_spaces'] = { '\\w\\@<=-\\w\\@=', '\\.' }
 
-map('n', 'w', '<Plug>WordMotion_w', { noremap = true })
-map('n', 'b', '<Plug>WordMotion_b', { noremap = true })
-map('n', 'e', '<Plug>WordMotion_e', { noremap = true })
-
-map('v', 'w', '<Plug>WordMotion_w', { noremap = true })
-map('v', 'b', '<Plug>WordMotion_b', { noremap = true })
-map('v', 'e', '<Plug>WordMotion_e', { noremap = true })
+map({ 'n', 'v' }, 'w', '<Plug>WordMotion_w', { noremap = true })
+map({ 'n', 'v' }, 'b', '<Plug>WordMotion_b', { noremap = true })
+map({ 'n', 'v' }, 'e', '<Plug>WordMotion_e', { noremap = true })
 
 map('n', '<leader>g', '<cmd>Neogit<cr>', opts)
 
 map('c', '<c-v>', '<c-r>"', opts)
 
 map('n', '<c-t>', '<cmd>CHADopen<cr>', opts)
+map('n', '<c-0>', '<cmd>CHADopen<cr>', opts)
 
 map('n', '<c-1>', '<cmd>call emmet#toggleComment()<cr>', {})
 map('v', '<c-2>', '<cmd>call emmet#expandAbbr(2,"")<cr>', {})
@@ -31,8 +30,7 @@ map('n', '<c-4>', '<cmd>call emmet#removeTag()<cr>', {})
 
 map('n', '<F3>', '<cmd>TSHighlightCapturesUnderCursor<cr>', {})
 
-map('i', '<c-bs>', '<c-w>', opts)
-map('c', '<c-bs>', '<c-w>', opts)
+map({ 'i', 'c' }, '<c-bs>', '<c-w>', opts)
 
 map('n', 'm', '<c-w>w', opts)
 map('n', '(', '<c-w>r', opts)
@@ -48,17 +46,11 @@ map('v', '*', '"sy/\\V<c-r>s<cr>``', opts)
 map('v', 'v', '<Plug>(expand_region_expand)', {})
 map('v', 'V', '<Plug>(expand_region_shrink)', {})
 
-map('n', '-', '$', { silent = true })
-map('n', '0', '^', opts)
+map({ 'n', 'v' }, '-', '$', { silent = true })
+map({ 'n', 'v' }, '0', '^', opts)
 
-map('v', '-', '$', { silent = true })
-map('v', '0', '^', opts)
-
-map('n', '[', '{', { nowait = true, noremap = true })
-map('n', ']', '}', { nowait = true, noremap = true })
-
-map('v', '[', '{', { nowait = true, noremap = true })
-map('v', ']', '}', { nowait = true, noremap = true })
+map({ 'n', 'v' }, '[', '{', { nowait = true, noremap = true })
+map({ 'n', 'v' }, ']', '}', { nowait = true, noremap = true })
 
 map('n', '{', '<c-u>', { nowait = true })
 map('n', '}', '<c-d>', { nowait = true })
@@ -93,16 +85,16 @@ command [[ let g:sneak#use_ic_scs = 1 ]]
 command [[
 let g:VM_default_mappings = 0
 let g:VM_maps = {}
-let g:VM_maps['Find Under'] = '<C-;>'
-let g:VM_maps['Find Subword Under'] = '<C-;>'      
-let g:VM_maps["Add Cursor Down"] = '<C-=>'
-let g:VM_maps["Add Cursor Up"] = '<C-->'
+let g:VM_maps['Find Under'] = "<C-\'>"
+let g:VM_maps['Find Subword Under'] = "<C-\'>"      
+let g:VM_maps["Add Cursor Down"] = '<C-.>'
+let g:VM_maps["Add Cursor Up"] = '<C-,>'
 let g:VM_maps["Select All"] = '<c-s-;>'
 
 let g:VM_maps["Switch Mode"] = '<Tab>'
 
-let g:VM_maps["Find Next"] = '<c-;>'
-let g:VM_maps["Find Prev"] = '<c-,>'
-let g:VM_maps["Skip Region"] = '<'
-let g:VM_maps["Remove Region"] = '>'
+let g:VM_maps["Find Next"] = "<c-\'>"
+let g:VM_maps["Find Prev"] = '<c-;>'
+let g:VM_maps["Skip Region"] = '>'
+let g:VM_maps["Remove Region"] = '<'
 ]]
