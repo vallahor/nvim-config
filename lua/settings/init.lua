@@ -5,11 +5,6 @@ local config_window = vim.wo
 
 config_global.guifont = { "JetBrains Mono:h11" }
 
-vim.cmd [[ 
-let g:neovide_cursor_animation_length=0
-let g:neovide_refresh_rate=120
-]]
-
 local indent = 2
 config_global.shiftwidth = indent
 config_global.tabstop = indent
