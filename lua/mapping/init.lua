@@ -2,7 +2,6 @@ local map = vim.keymap.set
 
 local opts = { noremap = true, silent = true }
 local global = vim.g
-local command = vim.cmd
 
 map('n', '<space>', '<nop>', {})
 map('n', '<c-]>', '<nop>', {})
@@ -16,7 +15,7 @@ map({ 'n', 'v' }, 'w', '<Plug>WordMotion_w', { noremap = true })
 map({ 'n', 'v' }, 'b', '<Plug>WordMotion_b', { noremap = true })
 map({ 'n', 'v' }, 'e', '<Plug>WordMotion_e', { noremap = true })
 
-map('n', '<c-f>', '<cmd>Neogit<cr>', opts)
+map('n', '<leader>g', '<cmd>Neogit<cr>', opts)
 
 map('c', '<c-v>', '<c-r>"', opts)
 
@@ -67,48 +66,50 @@ map('n', '<c-s>', '<cmd>lua require(\'telescope.builtin\').live_grep()<cr>', opt
 map('n', '|', '<cmd>bp<cr>:bd #<cr>', { silent = true })
 
 map('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
-map('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
+map('n', '<leader>i', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
 --map('n', '<Leader>d', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
 map('n', '<c-h>', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
-map('n', '<c-4>', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
-map('n', '<C-n>', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
-map('n', '<C-s-n>', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
+map('n', '<leader>r', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
+-- map('n', '<C-n>', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
+-- map('n', '<C-s-n>', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
 
 map({ 'n', 'v' }, 'f', '<Plug>Sneak_f', opts)
 map({ 'n', 'v' }, 'F', '<Plug>Sneak_F', opts)
 map({ 'n', 'v' }, 't', '<Plug>Sneak_t', opts)
 map({ 'n', 'v' }, 'T', '<Plug>Sneak_T', opts)
 
-command [[
+-- sneak
+vim.cmd [[
 let g:sneak#use_ic_scs = 1 
 
 highlight Sneak guifg=none guibg=none ctermfg=none ctermbg=none
 highlight SneakScope guifg=none guibg=none ctermfg=none ctermbg=none
 ]]
 
-command [[
+-- cursors
+vim.cmd [[
 let g:VM_default_mappings = 0
 let g:VM_maps = {}
-let g:VM_maps['Find Under'] = "<C-\'>"
-let g:VM_maps['Find Subword Under'] = "<C-\'>"      
-let g:VM_maps["Add Cursor Down"] = '<C-.>'
-let g:VM_maps["Add Cursor Up"] = '<C-,>'
-let g:VM_maps["Select All"] = '<c-s-;>'
+let g:VM_maps['Find Under']         = "<c-u>"
+let g:VM_maps['Find Subword Under'] = "<c-u>"      
+let g:VM_maps["Select All"]         = '<c-s-u>'
+
+let g:VM_maps["Add Cursor Down"]    = "<C-\'>"
+let g:VM_maps["Add Cursor Up"]      = '<C-;>'
 
 let g:VM_custom_remaps = {'-': '$'}
 
 let g:VM_maps["Switch Mode"] = '<Tab>'
 
-let g:VM_maps["Align"] = '<c-\\>'
+let g:VM_maps["Align"] = '<c-a>'
 
-let g:VM_maps["Find Next"] = "<c-\'>"
-let g:VM_maps["Find Prev"] = '<c-;>'
+let g:VM_maps["Find Next"] = ']'
+let g:VM_maps["Find Prev"] = '['
+let g:VM_maps["Goto Next"] = '}'
+let g:VM_maps["Goto Prev"] = '{'
 
-let g:VM_maps["Seek Next"] = '<C-;>'
-let g:VM_maps["Seek Prev"] = '<C-,>'
-
-let g:VM_maps["Skip Region"] = '>'
-let g:VM_maps["Remove Region"] = '<'
+let g:VM_maps["Skip Region"]   = '='
+let g:VM_maps["Remove Region"] = '+'
 ]]
 
 -- show current token

@@ -21,7 +21,6 @@ cmp.setup {
         cmp.select_prev_item({ behavior = cmp.SelectBehavior.Insert, select = false })
       end
     end, { "i", "s" }),
-    ['<cr>'] = cmp.mapping.confirm({ select = true }),
     ['<tab>'] = cmp.mapping.confirm({ select = true }),
     ['<c-e>'] = cmp.mapping.abort(),
   },

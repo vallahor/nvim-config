@@ -6,13 +6,16 @@ require 'nvim-treesitter.configs'.setup {
   autotag = {
     enable = true
   },
+  indent = {
+    enable = true
+  },
   incremental_selection = {
     enable = true,
     keymaps = {
-      init_selection = "<c-=>",
-      node_incremental = "<c-=>",
-      node_decremental = "<c-->",
-      scope_incremental = "<c-]>",
+      init_selection = "<c-.>",
+      node_incremental = "<c-.>",
+      node_decremental = "<c-,>",
+      scope_incremental = "<c-/>",
     },
   },
   textobjects = {
@@ -29,10 +32,10 @@ require 'nvim-treesitter.configs'.setup {
     swap = {
       enable = true,
       swap_next = {
-        ["#"] = "@parameter.inner",
+        ["<c-5>"] = "@parameter.inner",
       },
       swap_previous = {
-        ["$"] = "@parameter.inner",
+        ["<c-4>"] = "@parameter.inner",
       },
     },
   },
