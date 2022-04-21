@@ -13,6 +13,47 @@ endif
 let g:colors_name='gruvball'
 set t_Co=256
 
+" javascript
+
+hi javaScriptLineComment      guisp=NONE guifg=#9F8D8C guibg=NONE    ctermfg=246 ctermbg=NONE gui=NONE cterm=NONE
+hi javaScriptCommentSkip      guisp=NONE guifg=#9F8D8C guibg=NONE    ctermfg=246 ctermbg=NONE gui=NONE cterm=NONE
+hi javaScriptComment          guisp=NONE guifg=#9F8D8C guibg=NONE    ctermfg=246 ctermbg=NONE gui=NONE cterm=NONE
+hi javaScriptSpecial          guisp=NONE guifg=#ffffff guibg=NONE ctermfg=231 ctermbg=234  gui=NONE cterm=NONE
+hi javaScriptStringD          guisp=NONE guifg=#B16D8A guibg=NONE    ctermfg=132 ctermbg=NONE gui=NONE cterm=NONE
+hi javaScriptStringS          guisp=NONE guifg=#B16D8A guibg=NONE    ctermfg=132 ctermbg=NONE gui=NONE cterm=NONE
+hi javaScriptStringT          guisp=NONE guifg=#B16D8A guibg=NONE    ctermfg=132 ctermbg=NONE gui=NONE cterm=NONE 
+hi javaScriptEmbed            guisp=NONE guifg=#ffffff guibg=NONE ctermfg=231 ctermbg=234  gui=NONE cterm=NONE
+hi javaScriptSpecialCharacter guisp=NONE guifg=#ffffff guibg=NONE ctermfg=231 ctermbg=234  gui=NONE cterm=NONE
+hi javaScriptNumber           guisp=NONE guifg=#D16D8A guibg=NONE    ctermfg=168 ctermbg=NONE gui=NONE cterm=NONE
+hi javaScriptRegexpString     guisp=NONE guifg=#B16D8A guibg=NONE    ctermfg=132 ctermbg=NONE gui=NONE cterm=NONE 
+hi javaScriptFunction         guisp=NONE guifg=#A1495C guibg=NONE    ctermfg=131 ctermbg=NONE gui=NONE cterm=NONE
+hi javaScriptFunctionFold     guisp=NONE guifg=#A1495C guibg=NONE    ctermfg=131 ctermbg=NONE gui=NONE cterm=NONE
+hi javaScriptBraces           guisp=NONE guifg=#A8899C guibg=NONE    ctermfg=139 ctermbg=NONE gui=NONE cterm=NONE
+hi javaScriptParens           guisp=NONE guifg=#A8899C guibg=NONE    ctermfg=139 ctermbg=NONE gui=NONE cterm=NONE
+hi javaScriptCommentTodo      guisp=NONE guifg=#9F8D8C guibg=NONE    ctermfg=246 ctermbg=NONE gui=NONE cterm=NONE
+hi javaScriptCharacter        guisp=NONE guifg=#B16D8A guibg=NONE    ctermfg=132 ctermbg=NONE gui=NONE cterm=NONE
+hi javaScriptConditional      guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=NONE cterm=NONE
+hi javaScriptRepeat           guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold cterm=bold
+hi javaScriptBranch           guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold cterm=bold
+hi javaScriptOperator         guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold cterm=bold
+hi javaScriptType             guisp=NONE guifg=#806292 guibg=NONE    ctermfg=96  ctermbg=NONE gui=NONE cterm=NONE
+hi javaScriptStatement        guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=NONE cterm=NONE
+hi javaScriptError            guisp=NONE guifg=#ffffff guibg=NONE ctermfg=231 ctermbg=234  gui=NONE cterm=NONE
+hi javaScrParenError          guisp=NONE guifg=#ffffff guibg=NONE ctermfg=231 ctermbg=234  gui=NONE cterm=NONE
+hi javaScriptNull             guisp=NONE guifg=#D16D8A guibg=NONE    ctermfg=168 ctermbg=NONE gui=NONE cterm=NONE
+hi javaScriptBoolean          guisp=NONE guifg=#D16D8A guibg=NONE    ctermfg=168 ctermbg=NONE gui=NONE cterm=NONE
+hi javaScriptIdentifier       guisp=NONE guifg=#806292 guibg=NONE    ctermfg=96  ctermbg=NONE gui=NONE cterm=NONE
+hi javaScriptLabel            guisp=NONE guifg=#ffffff guibg=NONE ctermfg=231 ctermbg=234  gui=NONE cterm=NONE
+hi javaScriptException        guisp=NONE guifg=#ffffff guibg=NONE ctermfg=231 ctermbg=234  gui=NONE cterm=NONE
+hi javaScriptMessage          guisp=NONE guifg=#ffffff guibg=NONE ctermfg=231 ctermbg=234  gui=NONE cterm=NONE
+hi javaScriptGlobal           guisp=NONE guifg=#ffffff guibg=NONE ctermfg=231 ctermbg=234  gui=NONE cterm=NONE
+hi javaScriptMember           guisp=NONE guifg=#A8899C guibg=NONE    ctermfg=139 ctermbg=NONE gui=NONE cterm=NONE
+hi javaScriptDeprecated       guisp=NONE guifg=#ffffff guibg=NONE ctermfg=231 ctermbg=234  gui=NONE cterm=NONE
+hi javaScriptReserved         guisp=NONE guifg=#A1495C guibg=NONE    ctermfg=131 ctermbg=NONE gui=bold cterm=bold
+hi javaScriptDebug            guisp=NONE guifg=#ffffff guibg=NONE ctermfg=231 ctermbg=234  gui=NONE cterm=NONE
+hi javaScriptConstant         guisp=NONE guifg=#A8899C guibg=NONE    ctermfg=139 ctermbg=NONE gui=NONE cterm=NONE
+
+
 " typescript
 
 hi typescriptLabel                     guisp=NONE guifg=#ffffff guibg=NONE    ctermfg=231 ctermbg=NONE  gui=NONE cterm=NONE
