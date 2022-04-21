@@ -45,6 +45,7 @@ config_global.magic = true
 config_global.splitright = true
 config_global.splitbelow = true
 config_global.cursorline = true
+config_global.scrolloff = 3
 
 config_window.signcolumn = 'no'
 config_window.number = true
