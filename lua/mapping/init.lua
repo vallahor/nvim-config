@@ -86,32 +86,6 @@ highlight Sneak guifg=none guibg=none ctermfg=none ctermbg=none
 highlight SneakScope guifg=none guibg=none ctermfg=none ctermbg=none
 ]]
 
--- cursors
-vim.cmd [[
-let g:VM_default_mappings = 0
-let g:VM_maps = {}
-let g:VM_custom_remaps = {'-': '$'}
-
-let g:VM_maps['Find Under']         = "<c-u>"
-let g:VM_maps['Find Subword Under'] = "<c-u>"      
-let g:VM_maps["Select All"]         = '<c-s-u>'
-
-let g:VM_maps["Add Cursor Down"]    = "<C-\'>"
-let g:VM_maps["Add Cursor Up"]      = '<C-;>'
-
-let g:VM_maps["Switch Mode"] = '<Tab>'
-
-let g:VM_maps["Align"] = '<c-a>'
-
-let g:VM_maps["Find Next"] = ']'
-let g:VM_maps["Find Prev"] = '['
-let g:VM_maps["Goto Next"] = '}'
-let g:VM_maps["Goto Prev"] = '{'
-
-let g:VM_maps["Skip Region"]   = '='
-let g:VM_maps["Remove Region"] = '+'
-]]
-
 -- show current token
 vim.cmd [[
 nm <silent> <F1> :echo "hi<" . synIDattr(synID(line("."),col("."),1),"name")

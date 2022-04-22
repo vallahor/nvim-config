@@ -672,7 +672,7 @@ hi PmenuSbar        guisp=NONE guifg=#C0AEA0  guibg=#382536 ctermfg=145 ctermbg=
 hi PmenuThumb       guisp=NONE guifg=#C0AEA0  guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi Question         guisp=NONE guifg=#C0AEA0  guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi QuickFixLine     guisp=NONE guifg=#b1314c  guibg=NONE    ctermfg=131 ctermbg=NONE gui=NONE cterm=NONE
-hi Search           guisp=NONE guifg=#382536  guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
+hi Search           guisp=NONE guifg=#c64964  guibg=NONE ctermfg=167 ctermbg=NONE  gui=NONE cterm=NONE
 hi SpecialKey       guisp=NONE guifg=#d16d8a  guibg=NONE    ctermfg=231 ctermbg=NONE  gui=NONE cterm=NONE
 hi SpellBad         guisp=NONE guifg=#b1314c  guibg=NONE    ctermfg=131 ctermbg=NONE gui=NONE cterm=NONE
 hi SpellCap         guisp=NONE guifg=#b1314c  guibg=NONE    ctermfg=131 ctermbg=NONE gui=NONE cterm=NONE

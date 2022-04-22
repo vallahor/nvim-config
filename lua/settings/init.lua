@@ -37,15 +37,13 @@ config_global.mouse = 'a'
 config_global.mousefocus = true
 config_global.fsync = true
 config_global.magic = true
-config_global.splitright = true
-config_global.splitbelow = true
 config_global.cursorline = true
 config_global.scrolloff = 3
 
 config_window.signcolumn = 'no'
 config_window.number = true
 --config_window.relativenumber = true
-config_window.wrap = true
+config_window.wrap = false
 config_buffer.autoread = true
 config_buffer.copyindent = true
 config_buffer.grepprg = 'rg'
@@ -54,10 +52,8 @@ config_buffer.undofile = true
 
 vim.cmd [[ 
 language en
-set nowrap
 set iskeyword-=_
-set cindent
-set cino+=L0,g0,N-s,(0,l1
+" set cindent
+" set cino+=L0,g0,N-s,(0,l1
 set nohlsearch 
-let g:VM_theme = 'iceblue'
 ]]
