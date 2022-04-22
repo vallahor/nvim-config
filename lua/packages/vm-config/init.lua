@@ -11,8 +11,9 @@ vim.g.VM_maps = {
   ["Align"]              = "<c-a>",
   ["Find Next"]          = "]",
   ["Find Prev"]          = "[",
-  ["Goto Next"]          = '}',
-  ["Goto Prev"]          = '{',
+  ["Goto Next"]          = "}",
+  ["Goto Prev"]          = "{",
   ["Skip Region"]        = "=",
   ["Remove Region"]      = "+",
+  ["I BS"]               = ""
 }
