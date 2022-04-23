@@ -8,6 +8,10 @@
  "=>"
 ] @TSExtendArrowFunc
 
+(jsx_opening_element (identifier) @TSJSXOpeningElement)
+;; (jsx_closing_element (identifier) @TSJSXClosingElement)
+;; (jsx_self_closing_element (identifier) @TSJSXSelfClosing)
+;;
 (import_statement
    (import_clause 
      (named_imports 

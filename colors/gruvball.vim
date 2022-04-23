@@ -782,7 +782,8 @@ hi TSURI                 guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 cter
 hi TSTitle               guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi TSNamespace           guisp=NONE guifg=#9F8D8C guibg=NONE    ctermfg=246 ctermbg=NONE gui=NONE cterm=NONE
 hi TSType                guisp=NONE guifg=#806292 guibg=NONE    ctermfg=96  ctermbg=NONE gui=NONE cterm=NONE
-hi TSTypeBuiltin         guisp=NONE guifg=#a1495c guibg=NONE    ctermfg=131 ctermbg=NONE gui=NONE cterm=NONE
+hi TSTypeBuiltin         guisp=NONE guifg=#806292 guibg=NONE    ctermfg=96  ctermbg=NONE gui=NONE cterm=NONE
+"hi TSTypeBuiltin         guisp=NONE guifg=#a1495c guibg=NONE    ctermfg=131 ctermbg=NONE gui=NONE cterm=NONE
 hi TSFunction            guisp=NONE guifg=#c58d5d guibg=NONE    ctermfg=173 ctermbg=NONE gui=NONE cterm=NONE
 hi TSFuncBuiltin         guisp=NONE guifg=#c58d5d guibg=NONE    ctermfg=173 ctermbg=NONE gui=NONE cterm=NONE
 "hi TSFuncBuiltin        guisp=NONE guifg=#806292 guibg=NONE    ctermfg=96  ctermbg=NONE gui=NONE cterm=NONE
@@ -810,3 +811,5 @@ hi TSRepeat              guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  cter
 
 hi TSExtendKeyword            guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold cterm=bold
 hi TSExtendArrowFunc              guisp=NONE guifg=#A1495C guibg=NONE    ctermfg=131 ctermbg=NONE gui=NONE cterm=NONE
+hi TSJSNamedImport guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
+hi TSJSImport guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
