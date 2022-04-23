@@ -2,8 +2,6 @@
  "export"
  "async"
  "await"
- "typeof"
- "keyof"
 ] @js.keyword
 
 [
