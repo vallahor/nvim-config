@@ -7,5 +7,6 @@ require "telescope".setup {
         end,
       },
     },
+    file_ignore_patterns = { "android", "ios" }
   }
 }
