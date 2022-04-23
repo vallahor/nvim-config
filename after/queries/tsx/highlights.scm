@@ -2,23 +2,29 @@
  "export"
  "async"
  "await"
-] @TSExtendKeyword
+ "typeof"
+ "keyof"
+] @js.keyword
+
+[
+  "declare"
+  "extends"
+] @js.keyword_bold
 
 [
  "=>"
-] @TSExtendArrowFunc
+] @js.arrow_func
 
-(jsx_opening_element (identifier) @TSJSXOpeningElement)
-;; (jsx_closing_element (identifier) @TSJSXClosingElement)
-;; (jsx_self_closing_element (identifier) @TSJSXSelfClosing)
-;;
+(jsx_opening_element (identifier) @js.opening_element)
+(jsx_closing_element (identifier) @js.closing_element)
+(jsx_self_closing_element (identifier) @js.self_closing_element)
+
 (import_statement
-   (import_clause 
-     (named_imports 
-       (import_specifier 
-         (identifier) @TSJSNamedImport)))) 
+  (import_clause 
+    (named_imports 
+      (import_specifier 
+        (identifier) @js.named_import)))) 
 
- (import_statement
-   (import_clause 
-     (identifier) @TSJSImport))
-
+(import_statement
+  (import_clause 
+    (identifier) @js.import))

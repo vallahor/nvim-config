@@ -764,8 +764,6 @@ hi TSStringEscape        guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  cter
 hi TSStringSpecial       guisp=NONE guifg=#d16d8a guibg=NONE    ctermfg=168 ctermbg=NONE gui=NONE cterm=NONE
 hi TSKeyword             guisp=NONE guifg=#a1495c guibg=NONE    ctermfg=131 ctermbg=NONE gui=NONE cterm=NONE
 hi TSKeywordFunction     guisp=NONE guifg=#a1495c guibg=NONE    ctermfg=131 ctermbg=NONE gui=NONE cterm=NONE
-" hi TSKeyword             guisp=NONE guifg=#a1495c guibg=NONE    ctermfg=131 ctermbg=NONE gui=italic cterm=italic
-" hi TSKeywordFunction     guisp=NONE guifg=#a1495c guibg=NONE    ctermfg=131 ctermbg=NONE gui=italic cterm=italic
 hi TSKeywordReturn       guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold cterm=bold
 hi TSKeywordOperator     guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold cterm=bold     
 hi TSVariable            guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
@@ -783,20 +781,17 @@ hi TSTitle               guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 cter
 hi TSNamespace           guisp=NONE guifg=#9F8D8C guibg=NONE    ctermfg=246 ctermbg=NONE gui=NONE cterm=NONE
 hi TSType                guisp=NONE guifg=#806292 guibg=NONE    ctermfg=96  ctermbg=NONE gui=NONE cterm=NONE
 hi TSTypeBuiltin         guisp=NONE guifg=#806292 guibg=NONE    ctermfg=96  ctermbg=NONE gui=NONE cterm=NONE
-"hi TSTypeBuiltin         guisp=NONE guifg=#a1495c guibg=NONE    ctermfg=131 ctermbg=NONE gui=NONE cterm=NONE
 hi TSFunction            guisp=NONE guifg=#c58d5d guibg=NONE    ctermfg=173 ctermbg=NONE gui=NONE cterm=NONE
 hi TSFuncBuiltin         guisp=NONE guifg=#c58d5d guibg=NONE    ctermfg=173 ctermbg=NONE gui=NONE cterm=NONE
 "hi TSFuncBuiltin        guisp=NONE guifg=#806292 guibg=NONE    ctermfg=96  ctermbg=NONE gui=NONE cterm=NONE
 hi TSFunctionMacro       guisp=NONE guifg=#c58d5d guibg=NONE    ctermfg=173 ctermbg=NONE gui=NONE cterm=NONE
 hi TSMethod              guisp=NONE guifg=#c58d5d guibg=NONE    ctermfg=173 ctermbg=NONE gui=NONE cterm=NONE
-"hi TSConstructor        guisp=NONE guifg=#c58d5d guibg=NONE    ctermfg=173 ctermbg=NONE gui=NONE cterm=NONE
 hi TSConstructor         guisp=NONE guifg=#806292 guibg=NONE    ctermfg=96  ctermbg=NONE gui=NONE cterm=NONE
 hi TSField               guisp=NONE guifg=#A8899C guibg=NONE    ctermfg=139 ctermbg=NONE gui=NONE cterm=NONE
 hi TSProperty            guisp=NONE guifg=#A8899C guibg=NONE    ctermfg=139 ctermbg=NONE gui=NONE cterm=NONE
 hi TSParameter           guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi TSParameterReference  guisp=NONE guifg=#9F8D8C guibg=NONE    ctermfg=246 ctermbg=NONE gui=NONE cterm=NONE
 hi TSNumber              guisp=NONE guifg=#d16d8a guibg=NONE    ctermfg=168 ctermbg=NONE gui=NONE cterm=NONE
-"hi TSNumber             guisp=NONE guifg=#9d6d7f guibg=NONE    ctermfg=168 ctermbg=NONE gui=NONE cterm=NONE
 hi TSFloat               guisp=NONE guifg=#d16d8a guibg=NONE    ctermfg=168 ctermbg=NONE gui=NONE cterm=NONE
 hi TSBoolean             guisp=NONE guifg=#d16d8a guibg=NONE    ctermfg=168 ctermbg=NONE gui=NONE cterm=NONE
 hi TSConstant            guisp=NONE guifg=#A8899C guibg=NONE    ctermfg=139 ctermbg=NONE gui=NONE cterm=NONE
@@ -808,8 +803,3 @@ hi TSPunctSpecial        guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  cter
 hi TSOperator            guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold cterm=bold
 hi TSConditional         guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold cterm=bold
 hi TSRepeat              guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold cterm=bold
-
-hi TSExtendKeyword            guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold cterm=bold
-hi TSExtendArrowFunc              guisp=NONE guifg=#A1495C guibg=NONE    ctermfg=131 ctermbg=NONE gui=NONE cterm=NONE
-hi TSJSNamedImport guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
-hi TSJSImport guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE

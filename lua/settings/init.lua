@@ -56,4 +56,6 @@ set iskeyword-=_
 " set cindent
 " set cino+=L0,g0,N-s,(0,l1
 set nohlsearch 
+
+au BufEnter *.scm set filetype=query
 ]]

@@ -2,6 +2,7 @@ require 'nvim-treesitter.configs'.setup {
   ensure_installed = { "lua", "c", "cpp", "javascript", "typescript", "tsx", "zig", "jsonc", "json", "css", "scss", "query" },
   highlight = {
     enable = true,
+    use_languagetree = true,
   },
   autotag = {
     enable = true
@@ -57,4 +58,12 @@ require 'nvim-treesitter.configs'.setup {
       show_help = '?',
     },
   }
+}
+
+require "nvim-treesitter.highlight".set_custom_captures {
+  ["js.named_import"] = "TSLiteral",
+  ["js.import"] = "TSLiteral",
+  ["js.keyword"] = "TSOperator",
+  ["js.keyword_bold"] = "TSInclude",
+  ["js.arrow_func"] = "TSKeyword",
 }
