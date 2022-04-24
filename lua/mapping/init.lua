@@ -1,6 +1,5 @@
 local map = vim.keymap.set
 
-local opts = { noremap = true, silent = true }
 local global = vim.g
 
 map("n", "<space>", "<nop>", {})
@@ -11,16 +10,15 @@ vim.g.mapleader = " "
 
 global["wordmotion_spaces"] = { "\\w\\@<=-\\w\\@=", "\\." }
 
-map({ "n", "v" }, "w", "<Plug>WordMotion_w", { noremap = true })
-map({ "n", "v" }, "b", "<Plug>WordMotion_b", { noremap = true })
-map({ "n", "v" }, "e", "<Plug>WordMotion_e", { noremap = true })
+map({ "n", "v" }, "w", "<Plug>WordMotion_w")
+map({ "n", "v" }, "b", "<Plug>WordMotion_b")
+map({ "n", "v" }, "e", "<Plug>WordMotion_e")
 
-map("n", "<leader>g", "<cmd>Neogit<cr>", opts)
+map("n", "<leader>g", "<cmd>Neogit<cr>")
 
-map("c", "<c-v>", '<c-r>"', opts)
+map("c", "<c-v>", '<c-r>"')
 
-map("n", "<c-t>", "<cmd>CHADopen<cr>", opts)
-map("n", "<c-0>", "<cmd>CHADopen<cr>", opts)
+map("n", "<c-t>", "<cmd>CHADopen<cr>")
 
 map("n", "<c-1>", "<cmd>call emmet#toggleComment()<cr>", {})
 map("v", "<c-2>", '<cmd>call emmet#expandAbbr(2,"")<cr>', {})
@@ -28,59 +26,67 @@ map("n", "<c-3>", "<cmd>call emmet#removeTag()<cr>", {})
 
 map("n", "<F3>", "<cmd>TSHighlightCapturesUnderCursor<cr>", {})
 
-map({ "i", "c" }, "<c-bs>", "<c-w>", opts)
+map({ "i", "c" }, "<c-bs>", "<c-w>")
 
-map("n", "m", "<c-w>w", opts)
-map("n", "(", "<c-w>r", opts)
+map("n", "<Leader><Leader>", "<c-^>")
+map("n", "x", '"_x')
+map("v", "x", '_d')
+map({"n", "v"}, "c", '"_c')
+map("n", "D", '"_D')
+map("v", "p", '"_c<C-r>*<Esc> ')
 
-map("n", "<Leader><Leader>", "<c-^>", opts)
-map("n", "x", '"_x', { noremap = true })
-map("v", "x", 'd', opts)
-map({"n", "v"}, "c", '"_c', opts)
-map({"n", "v"}, "d", '"_d', opts)
-map("n", "D", '"_D', opts)
-map("v", "p", '"_c<C-r>*<Esc> ', opts)
-
-map("n", "*", "*``", opts)
-map("v", "*", '"sy/\\V<c-r>s<cr>``', opts)
+map("n", "*", "*``")
+map("v", "*", '"sy/\\V<c-r>s<cr>``')
 
 map("v", "v", "V", {})
 
-map({ "n", "v" }, "-", "$", { silent = true })
-map({ "n", "v" }, "<c-9>", "0", opts)
-map({ "n", "v" }, "0", "^", opts)
+map({ "n", "v" }, "-", "$")
+map({ "n", "v" }, "<c-9>", "0")
+map({ "n", "v" }, "0", "^")
 
-map({ "n", "v" }, "<c-k>", "{", { silent = true })
-map({ "n", "v" }, "<c-j>", "}", { silent = true })
+map({ "n", "v" }, "<c-k>", "{")
+map({ "n", "v" }, "<c-j>", "}")
 
-map("n", "{", "<c-u>", { nowait = true })
-map("n", "}", "<c-d>", { nowait = true })
+map("n", "{", "<c-u>")
+map("n", "}", "<c-d>")
 
-map({ "n", "v" }, "<c-enter>", "<cmd>w!<CR>", opts)
-map({ "n", "v" }, "<s-enter>", "<cmd>w!<CR>", opts)
+map({ "n", "v" }, "<c-enter>", "<cmd>w!<CR>")
+map({ "n", "v" }, "<s-enter>", "<cmd>w!<CR>")
 
-map("n", "<F4>", "<cmd>e $MYVIMRC<CR>", opts)
-map("n", "<F5>", "<cmd>luafile %<CR>", opts)
-map("n", "<F6>", "<cmd>luafile $MYVIMRC<CR>", opts)
+map("n", "<F4>", "<cmd>e $MYVIMRC<CR>")
+map("n", "<F5>", "<cmd>luafile %<CR>")
+map("n", "<F6>", "<cmd>luafile $MYVIMRC<CR>")
 
-map("n", "<c-p>", "<cmd>lua require('telescope.builtin').find_files()<cr>", opts)
-map("n", "<tab>", "<cmd>lua require('telescope.builtin').buffers()<cr>", opts)
-map("n", "<c-s>", "<cmd>lua require('telescope.builtin').live_grep()<cr>", opts)
+map("n", "<c-p>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
+map("n", "<tab>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
+map("n", "<c-s>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
 
-map("n", "|", "<cmd>bp<cr>:bd #<cr>", { silent = true })
+map("n", "|", "<cmd>bp<cr>:bd #<cr>")
 
-map("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", opts)
-map("n", "<leader>i", "<cmd>lua vim.lsp.buf.implementation()<CR>", opts)
---map('n', '<Leader>d', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
-map("n", "<c-h>", "<cmd>lua vim.lsp.buf.hover()<CR>", opts)
-map("n", "<leader>r", "<cmd>lua vim.lsp.buf.rename()<CR>", opts)
-map("n", "<a-j>", "<cmd>lua vim.lsp.diagnostic.goto_next()<CR>", opts)
-map("n", "<a-k>", "<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>", opts)
+map("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>")
+map("n", "<leader>i", "<cmd>lua vim.lsp.buf.implementation()<CR>")
+map('n', '<Leader>d', '<cmd>lua vim.lsp.buf.declaration()<CR>')
+map("n", "H", "<cmd>lua vim.lsp.buf.hover()<CR>")
+map("n", "<leader>r", "<cmd>lua vim.lsp.buf.rename()<CR>")
+map("n", "<a-j>", "<cmd>lua vim.lsp.diagnostic.goto_next()<CR>")
+map("n", "<a-k>", "<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>")
 
-map({ "n", "v" }, "f", "<Plug>Sneak_f", opts)
-map({ "n", "v" }, "F", "<Plug>Sneak_F", opts)
-map({ "n", "v" }, "t", "<Plug>Sneak_t", opts)
-map({ "n", "v" }, "T", "<Plug>Sneak_T", opts)
+map({ "n", "v" }, "f", "<Plug>Sneak_f")
+map({ "n", "v" }, "F", "<Plug>Sneak_F")
+map({ "n", "v" }, "t", "<Plug>Sneak_t")
+map({ "n", "v" }, "T", "<Plug>Sneak_T")
+
+map({ "n", "v" }, "<c-h>", "<c-w>h")
+map({ "n", "v" }, "<c-j>", "<c-w>j")
+map({ "n", "v" }, "<c-k>", "<c-w>k")
+map({ "n", "v" }, "<c-l>", "<c-w>l")
+
+map("n", "<c-0>", "<c-w>o")
+map("n", "<c-9>", "<c-w>r")
+
+map("n", "<c-=>", "<cmd>vs<cr>")
+map("n", "<c-->", "<cmd>sp<cr>")
+map("n", "<c-]>", "<cmd>clo<cr>")
 
 -- sneak
 vim.cmd([[
