@@ -11,6 +11,7 @@
 (jsx_opening_element (identifier) @js.opening_element)
 (jsx_closing_element (identifier) @js.closing_element)
 (jsx_self_closing_element (identifier) @js.self_closing_element)
+(jsx_attribute (property_identifier) @js.property_identifier)
 
 (import_statement
   (import_clause 
