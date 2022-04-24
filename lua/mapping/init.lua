@@ -18,7 +18,7 @@ map("n", "<leader>g", "<cmd>Neogit<cr>")
 
 map("c", "<c-v>", '<c-r>"')
 
-map("n", "<c-t>", "<cmd>CHADopen<cr>")
+map("n", "<c-f>", "<cmd>CHADopen<cr>")
 
 map("n", "<c-1>", "<cmd>call emmet#toggleComment()<cr>", {})
 map("v", "<c-2>", '<cmd>call emmet#expandAbbr(2,"")<cr>', {})
@@ -102,4 +102,9 @@ nm <silent> <F1> :echo "hi<" . synIDattr(synID(line("."),col("."),1),"name")
     \ . '> trans<' . synIDattr(synID(line("."),col("."),0),"name")
     \ . "> lo<" . synIDattr(synIDtrans(synID(line("."),col("."),1)),"name")
     \ . ">"<CR>
+]])
+
+vim.cmd([[
+vnoremap J :m '>+1<CR>gv=gv
+vnoremap K :m '<-2<CR>gv=gv
 ]])
