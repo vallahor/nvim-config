@@ -22,8 +22,6 @@ require('packer').startup(function(use)
   use { 'mattn/emmet-vim' }
   use { 'mg979/vim-visual-multi' }
   use { 'TimUntersberger/neogit', requires = 'nvim-lua/plenary.nvim' }
-  use { 'sbdchd/neoformat' }
-  use { 'ms-jpq/chadtree', run = ':CHADdeps' }
 
   use { 'hrsh7th/cmp-nvim-lsp' }
   use { 'hrsh7th/cmp-buffer' }
@@ -33,6 +31,10 @@ require('packer').startup(function(use)
   use { 'L3MON4D3/LuaSnip' }
 
   use { 'windwp/nvim-ts-autotag' }
+
+  use { 'jose-elias-alvarez/null-ls.nvim' }
+
+  use { 'kyazdani42/nvim-tree.lua' }
 
   if packer_bootstrap then
     require('packer').sync()

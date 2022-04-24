@@ -18,7 +18,7 @@ map("n", "<leader>g", "<cmd>Neogit<cr>")
 
 map("c", "<c-v>", '<c-r>"')
 
-map("n", "<c-f>", "<cmd>CHADopen<cr>")
+map("n", "<c-f>", "<cmd>NvimTreeToggle<cr>")
 
 map("n", "<c-1>", "<cmd>call emmet#toggleComment()<cr>", {})
 map("v", "<c-2>", '<cmd>call emmet#expandAbbr(2,"")<cr>', {})
@@ -31,7 +31,7 @@ map({ "i", "c" }, "<c-bs>", "<c-w>")
 map("n", "<Leader><Leader>", "<c-^>")
 map("n", "x", '"_x')
 map("v", "x", '_d')
-map({"n", "v"}, "c", '"_c')
+map({ "n", "v" }, "c", '"_c')
 map("n", "D", '"_D')
 map("v", "p", '"_c<C-r>*<Esc> ')
 

@@ -13,7 +13,6 @@ require("lspconfig").tsserver.setup({})
 require("lspconfig").prismals.setup({})
 
 require("lspconfig").sumneko_lua.setup({
-	on_attach = on_attach,
 })
 
 require("lspconfig").html.setup({})
