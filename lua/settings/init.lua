@@ -42,7 +42,7 @@ config_global.scrolloff = 3
 
 config_window.signcolumn = 'no'
 config_window.number = true
---config_window.relativenumber = true
+config_window.relativenumber = true
 config_window.wrap = false
 config_buffer.autoread = true
 config_buffer.copyindent = true

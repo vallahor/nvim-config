@@ -78,6 +78,9 @@ map({ "n", "v" }, "<c-j>", "<c-w>j")
 map({ "n", "v" }, "<c-k>", "<c-w>k")
 map({ "n", "v" }, "<c-l>", "<c-w>l")
 
+map({ "n", "v" }, "gj", "G")
+map({ "n", "v" }, "gk", "gg")
+
 map("n", "<c-0>", "<c-w>o")
 map("n", "<c-9>", "<c-w>r")
 
