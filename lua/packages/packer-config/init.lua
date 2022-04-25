@@ -36,6 +36,8 @@ require('packer').startup(function(use)
 
   use { 'kyazdani42/nvim-tree.lua' }
 
+  use { "kdheepak/lazygit.nvim" }
+
   if packer_bootstrap then
     require('packer').sync()
   end
