@@ -659,16 +659,16 @@ hi FoldColumn       guisp=NONE guifg=#C0AEA0  guibg=NONE    ctermfg=145 ctermbg=
 hi SignColumn       guisp=NONE guifg=#C0AEA0  guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi IncSearch        guisp=NONE guifg=NONE     guibg=#c64964 ctermfg=231 ctermbg=NONE  gui=NONE cterm=NONE
 hi LineNr           guisp=NONE guifg=#493441  guibg=NONE    ctermfg=95  ctermbg=NONE gui=NONE cterm=NONE
-"hi LineNrAbove      guisp=NONE guifg=#ffffff guibg=NONE    ctermfg=231 ctermbg=NONE  gui=NONE cterm=NONE
-"hi LineNrBelow      guisp=NONE guifg=#ffffff guibg=NONE    ctermfg=231 ctermbg=NONE  gui=NONE cterm=NONE
-hi CursorLineNr     guisp=NONE guifg=#a1495c  guibg=#382536 ctermfg=95  ctermbg=NONE gui=NONE cterm=NONE
+hi LineNrAbove      guisp=NONE guifg=#493441  guibg=NONE    ctermfg=95  ctermbg=NONE gui=NONE cterm=NONE
+hi LineNrBelow      guisp=NONE guifg=#493441  guibg=NONE    ctermfg=95  ctermbg=NONE gui=NONE cterm=NONE
+hi CursorLineNr     guisp=NONE guifg=#a1495c  guibg=#382536 ctermfg=95  ctermbg=236 gui=NONE cterm=NONE
 hi MatchParen       guisp=NONE guifg=#ff8080  guibg=#040004 ctermfg=210 ctermbg=NONE gui=NONE cterm=NONE
-hi ModeMsg          guisp=NONE guifg=#C0AEA0  guibg=#382536 ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
-hi MoreMsg          guisp=NONE guifg=#C0AEA0  guibg=#382536 ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
+hi ModeMsg          guisp=NONE guifg=#C0AEA0  guibg=#382536 ctermfg=145 ctermbg=236 gui=NONE cterm=NONE
+hi MoreMsg          guisp=NONE guifg=#C0AEA0  guibg=#382536 ctermfg=145 ctermbg=236 gui=NONE cterm=NONE
 hi NonText          guisp=NONE guifg=NONE     guibg=NONE    ctermfg=NONE ctermbg=NONE  gui=NONE cterm=NONE
-hi Pmenu            guisp=NONE guifg=#C0AEA0  guibg=#382536 ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
+hi Pmenu            guisp=NONE guifg=#C0AEA0  guibg=NONE ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi PmenuSel         guisp=NONE guifg=NONE     guibg=#493441 ctermfg=139 ctermbg=NONE gui=NONE cterm=NONE
-hi PmenuSbar        guisp=NONE guifg=#C0AEA0  guibg=#382536 ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
+hi PmenuSbar        guisp=NONE guifg=#C0AEA0  guibg=#382536 ctermfg=145 ctermbg=236 gui=NONE cterm=NONE
 hi PmenuThumb       guisp=NONE guifg=#C0AEA0  guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi Question         guisp=NONE guifg=#C0AEA0  guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi QuickFixLine     guisp=NONE guifg=#b1314c  guibg=NONE    ctermfg=131 ctermbg=NONE gui=NONE cterm=NONE
@@ -678,19 +678,19 @@ hi SpellBad         guisp=NONE guifg=#b1314c  guibg=NONE    ctermfg=131 ctermbg=
 hi SpellCap         guisp=NONE guifg=#b1314c  guibg=NONE    ctermfg=131 ctermbg=NONE gui=NONE cterm=NONE
 hi SpellLocal       guisp=NONE guifg=#b1314c  guibg=NONE    ctermfg=131 ctermbg=NONE gui=NONE cterm=NONE
 hi SpellRare        guisp=NONE guifg=#b1314c  guibg=NONE    ctermfg=131 ctermbg=NONE gui=NONE cterm=NONE
-hi StatusLine       guisp=NONE guifg=#C0AEA0  guibg=#382536 ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
-hi StatusLineNC     guisp=NONE guifg=NONE     guibg=#363436 ctermfg=235 ctermbg=NONE  gui=NONE cterm=NONE
-hi StatusLineTerm   guisp=NONE guifg=#C0AEA0  guibg=#382536 ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
-hi StatusLineTermNC guisp=NONE guifg=NONE     guibg=#363436 ctermfg=235 ctermbg=NONE  gui=NONE cterm=NONE
+hi StatusLine       guisp=NONE guifg=#C0AEA0  guibg=#382536 ctermfg=145 ctermbg=236 gui=NONE cterm=NONE
+hi StatusLineNC     guisp=NONE guifg=NONE     guibg=#363436 ctermfg=NONE ctermbg=237 gui=NONE cterm=NONE
+hi StatusLineTerm   guisp=NONE guifg=#C0AEA0  guibg=#382536 ctermfg=145 ctermbg=236 gui=NONE cterm=NONE
+hi StatusLineTermNC guisp=NONE guifg=NONE     guibg=#363436 ctermfg=NONE ctermbg=237 gui=NONE cterm=NONE
 hi TabLine          guisp=NONE guifg=#C0AEA0  guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi TabLineFill      guisp=NONE guifg=#C0AEA0  guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi TabLineSel       guisp=NONE guifg=#141114  guibg=NONE    ctermfg=231 ctermbg=NONE  gui=NONE cterm=NONE
 hi Terminal         guisp=NONE guifg=#C0AEA0  guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi Title            guisp=NONE guifg=#C0AEA0  guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
-hi Visual           guisp=NONE guifg=NONE     guibg=#363436 ctermfg=235 ctermbg=NONE  gui=NONE cterm=NONE
-hi VisualNOS        guisp=NONE guifg=NONE     guibg=#363436 ctermfg=235 ctermbg=NONE  gui=NONE cterm=NONE
+hi Visual           guisp=NONE guifg=NONE     guibg=#363436 ctermfg=NONE ctermbg=237 gui=NONE cterm=NONE
+hi VisualNOS        guisp=NONE guifg=NONE     guibg=#363436 ctermfg=NONE ctermbg=237 gui=NONE cterm=NONE
 hi WarningMsg       guisp=NONE guifg=#d16d8a  guibg=NONE    ctermfg=231 ctermbg=NONE  gui=NONE cterm=NONE
-hi WildMenu         guisp=NONE guifg=#C0AEA0  guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
+hi WildMenu         guisp=NONE guifg=NONE     guibg=#493441 ctermfg=139 ctermbg=NONE gui=NONE cterm=NONE
 
 " major
 

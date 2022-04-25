@@ -15,6 +15,7 @@ map({ "n", "v" }, "b", "<Plug>WordMotion_b")
 map({ "n", "v" }, "e", "<Plug>WordMotion_e")
 
 map("n", "<leader>g", "<cmd>Neogit<cr>")
+map("n", "gs", "<cmd>LazyGit<cr>")
 
 map("c", "<c-v>", '<c-r>"')
 
