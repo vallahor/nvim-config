@@ -63,7 +63,7 @@ map("n", "|", "<cmd>bp<cr>:bd #<cr>")
 
 map("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>")
 map("n", "<leader>i", "<cmd>lua vim.lsp.buf.implementation()<CR>")
-map('n', '<Leader>d', '<cmd>lua vim.lsp.buf.declaration()<CR>')
+map("n", "<Leader>d", "<cmd>lua vim.lsp.buf.declaration()<CR>")
 map("n", "K", "<cmd>lua vim.lsp.buf.hover()<CR>")
 map("n", "<leader>r", "<cmd>lua vim.lsp.buf.rename()<CR>")
 map("n", "<a-j>", "<cmd>lua vim.lsp.diagnostic.goto_next()<CR>")
