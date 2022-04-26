@@ -2,9 +2,9 @@ local map = vim.keymap.set
 
 local global = vim.g
 
-map("n", "<space>", "<nop>", {})
-map("n", "<c-]>", "<nop>", {})
-map("n", "<c-[>", "<nop>", {})
+map("n", "<space>", "<nop>")
+map("n", "<c-]>", "<nop>")
+map("n", "<c-[>", "<nop>")
 
 vim.g.mapleader = " "
 
@@ -21,17 +21,17 @@ map("c", "<c-v>", '<c-r>"')
 
 map("n", "<c-f>", "<cmd>NvimTreeToggle<cr>")
 
-map("n", "<c-1>", "<cmd>call emmet#toggleComment()<cr>", {})
-map("v", "<c-2>", '<cmd>call emmet#expandAbbr(2,"")<cr>', {})
-map("n", "<c-3>", "<cmd>call emmet#removeTag()<cr>", {})
+map("n", "<c-1>", "<cmd>call emmet#toggleComment()<cr>")
+map("v", "<c-2>", '<cmd>call emmet#expandAbbr(2,"")<cr>')
+map("n", "<c-3>", "<cmd>call emmet#removeTag()<cr>")
 
-map("n", "<F3>", "<cmd>TSHighlightCapturesUnderCursor<cr>", {})
+map("n", "<F3>", "<cmd>TSHighlightCapturesUnderCursor<cr>")
 
 map({ "i", "c" }, "<c-bs>", "<c-w>")
 
 map("n", "<Leader><Leader>", "<c-^>")
 map("n", "x", '"_x')
-map("v", "x", '_d')
+map("v", "x", '"_d')
 map({ "n", "v" }, "c", '"_c')
 map("n", "D", '"_D')
 map("v", "p", '"_c<C-r>*<Esc> ')
@@ -39,7 +39,7 @@ map("v", "p", '"_c<C-r>*<Esc> ')
 map("n", "*", "*``")
 map("v", "*", '"sy/\\V<c-r>s<cr>``')
 
-map("v", "v", "V", {})
+map("v", "v", "V")
 
 map({ "n", "v" }, "-", "$")
 map({ "n", "v" }, "<c-9>", "0")
