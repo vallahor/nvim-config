@@ -38,6 +38,7 @@ config_global.fsync = true
 config_global.magic = true
 config_global.cursorline = true
 config_global.scrolloff = 3
+config_global.backup = false
 
 config_window.signcolumn = "no"
 config_window.number = true
@@ -47,7 +48,6 @@ config_buffer.autoread = true
 config_buffer.copyindent = true
 config_buffer.grepprg = "rg"
 config_buffer.swapfile = false
-config_buffer.undofile = true
 
 vim.cmd([[ 
 language en
