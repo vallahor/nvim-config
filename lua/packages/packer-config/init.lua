@@ -15,7 +15,10 @@ require("packer").startup(function(use)
 	use({ "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" })
 	use({ "nvim-treesitter/nvim-treesitter-textobjects" })
 	use({ "nvim-treesitter/playground" })
+
 	use({ "neovim/nvim-lspconfig" })
+	use({ "tami5/lspsaga.nvim" })
+
 	use({ "tpope/vim-surround" })
 	use({ "tpope/vim-repeat" })
 	use({ "justinmk/vim-sneak" })
@@ -38,8 +41,6 @@ require("packer").startup(function(use)
 	use({ "L3MON4D3/LuaSnip" })
 
 	use({ "windwp/nvim-ts-autotag" })
-
-	use({ "jose-elias-alvarez/null-ls.nvim" })
 
 	use({ "kyazdani42/nvim-tree.lua" })
 
