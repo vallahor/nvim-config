@@ -12,6 +12,7 @@ if fn.empty(fn.glob(install_path)) > 0 then
 end
 
 require("packer").startup(function(use)
+	use({ "wbthomason/packer.nvim" })
 	use({ "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" })
 	use({ "nvim-treesitter/nvim-treesitter-textobjects" })
 	use({ "nvim-treesitter/playground" })
@@ -42,9 +43,14 @@ require("packer").startup(function(use)
 
 	use({ "windwp/nvim-ts-autotag" })
 
-	use({ "kyazdani42/nvim-tree.lua" })
-
 	use({ "kdheepak/lazygit.nvim" })
+
+	use({
+		"kyazdani42/nvim-tree.lua",
+		requires = {
+			"kyazdani42/nvim-web-devicons", -- optional, for file icon
+		},
+	})
 
 	if packer_bootstrap then
 		require("packer").sync()
