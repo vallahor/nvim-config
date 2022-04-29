@@ -8,7 +8,6 @@ require("nvim-treesitter.configs").setup({
 		"tsx",
 		"zig",
 		"jsonc",
-		"json",
 		"css",
 		"scss",
 		"query",

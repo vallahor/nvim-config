@@ -18,7 +18,6 @@ require("packer").startup(function(use)
 	use({ "nvim-treesitter/playground" })
 
 	use({ "neovim/nvim-lspconfig" })
-	use({ "tami5/lspsaga.nvim" })
 
 	use({ "tpope/vim-surround" })
 	use({ "tpope/vim-repeat" })
