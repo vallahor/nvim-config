@@ -666,7 +666,7 @@ hi MatchParen       guisp=NONE guifg=#ff8080  guibg=#040004 ctermfg=210 ctermbg=
 hi ModeMsg          guisp=NONE guifg=#C0AEA0  guibg=#382536 ctermfg=145 ctermbg=236 gui=NONE cterm=NONE
 hi MoreMsg          guisp=NONE guifg=#C0AEA0  guibg=#382536 ctermfg=145 ctermbg=236 gui=NONE cterm=NONE
 hi NonText          guisp=NONE guifg=NONE     guibg=NONE    ctermfg=NONE ctermbg=NONE  gui=NONE cterm=NONE
-hi Pmenu            guisp=NONE guifg=#C0AEA0  guibg=NONE ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
+hi Pmenu            guisp=NONE guifg=#C0AEA0  guibg=#363436 ctermfg=145 ctermbg=237 gui=NONE cterm=NONE
 hi PmenuSel         guisp=NONE guifg=NONE     guibg=#493441 ctermfg=139 ctermbg=NONE gui=NONE cterm=NONE
 hi PmenuSbar        guisp=NONE guifg=#C0AEA0  guibg=#382536 ctermfg=145 ctermbg=236 gui=NONE cterm=NONE
 hi PmenuThumb       guisp=NONE guifg=#C0AEA0  guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE

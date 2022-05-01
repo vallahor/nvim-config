@@ -1,5 +1,7 @@
 require("lspconfig").cssmodules_ls.setup({})
 
+require("lspconfig").cssmodules_ls.setup({})
+
 require("lspconfig").eslint.setup({})
 
 require("lspconfig").tsserver.setup({})
