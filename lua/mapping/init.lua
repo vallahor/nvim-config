@@ -21,10 +21,6 @@ map("c", "<c-v>", '<c-r>"')
 
 map("n", "<c-f>", "<cmd>NvimTreeToggle<cr>")
 
-map("n", "<c-1>", "<cmd>call emmet#toggleComment()<cr>")
-map("v", "<c-2>", '<cmd>call emmet#expandAbbr(2,"")<cr>')
-map("n", "<c-3>", "<cmd>call emmet#removeTag()<cr>")
-
 map("n", "<F3>", "<cmd>TSHighlightCapturesUnderCursor<cr>")
 
 map({ "i", "c" }, "<c-bs>", "<c-w>")

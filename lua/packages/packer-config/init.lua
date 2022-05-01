@@ -51,6 +51,8 @@ require("packer").startup(function(use)
 		},
 	})
 
+	use({ "ziglang/zig.vim" })
+
 	if packer_bootstrap then
 		require("packer").sync()
 	end

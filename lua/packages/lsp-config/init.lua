@@ -1,13 +1,16 @@
-require("lspconfig").cssmodules_ls.setup({})
+local nvim_lsp = require("lspconfig")
+nvim_lsp.cssmodules_ls.setup({})
 
-require("lspconfig").cssmodules_ls.setup({})
+nvim_lsp.cssmodules_ls.setup({})
 
-require("lspconfig").eslint.setup({})
+nvim_lsp.zls.setup({})
 
-require("lspconfig").tsserver.setup({})
+nvim_lsp.eslint.setup({})
 
-require("lspconfig").prismals.setup({})
+nvim_lsp.tsserver.setup({})
 
-require("lspconfig").sumneko_lua.setup({})
+nvim_lsp.prismals.setup({})
 
-require("lspconfig").html.setup({})
+nvim_lsp.sumneko_lua.setup({})
+
+nvim_lsp.html.setup({})
