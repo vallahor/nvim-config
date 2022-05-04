@@ -5,13 +5,12 @@ cmp.setup({
 		{ name = "path" },
 		{ name = "buffer" },
 		{ name = "luasnip" },
+		{ name = "git" },
 	},
 	mapping = {
-		["<c-j>"] = cmp.mapping(function(fallback)
+		["<c-j>"] = cmp.mapping(function()
 			if cmp.visible() then
 				cmp.select_next_item({ behavior = cmp.SelectBehavior.Insert, select = false })
-			else
-				fallback() -- The fallback function sends a already mapped key. In this case, it's probably `<Tab>`.
 			end
 		end, { "i", "s" }),
 

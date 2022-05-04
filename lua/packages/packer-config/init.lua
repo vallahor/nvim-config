@@ -47,11 +47,13 @@ require("packer").startup(function(use)
 	use({
 		"kyazdani42/nvim-tree.lua",
 		requires = {
-			"kyazdani42/nvim-web-devicons", -- optional, for file icon
+			"kyazdani42/nvim-web-devicons",
 		},
 	})
 
 	use({ "ziglang/zig.vim" })
+
+	use({ "petertriho/cmp-git" })
 
 	if packer_bootstrap then
 		require("packer").sync()
