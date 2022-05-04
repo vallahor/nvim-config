@@ -32,13 +32,15 @@ map({ "n", "v" }, "c", '"_c')
 map("n", "D", '"_D')
 map("v", "p", '"_c<C-r>*<Esc> ')
 
+map("v", "s", "<Plug>VSurround")
+
 map("n", "*", "*``")
 map("v", "*", '"sy/\\V<c-r>s<cr>``')
 
 map("v", "v", "V")
 
 map({ "n", "v" }, "-", "$")
-map({ "n", "v" }, "<c-9>", "0")
+map({ "n", "v" }, "_", "0")
 map({ "n", "v" }, "0", "^")
 
 map("n", "H", "<c-u>")
@@ -55,7 +57,7 @@ map("n", "<c-p>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
 map("n", "<tab>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
 map("n", "<c-s>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
 
-map("n", "|", "<cmd>bp<cr>:bd #<cr>")
+map("n", "|", "<cmd>bp<cr><cmd>bd #<cr>")
 
 map("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>")
 map("n", "<leader>i", "<cmd>lua vim.lsp.buf.implementation()<CR>")

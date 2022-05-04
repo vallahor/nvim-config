@@ -20,11 +20,16 @@ cmp.setup({
 				cmp.select_prev_item({ behavior = cmp.SelectBehavior.Insert, select = false })
 			end
 		end, { "i", "s" }),
-		["<tab>"] = cmp.mapping.confirm({ select = true }),
-		["<c-space>"] = cmp.mapping.confirm({ select = true }),
+		["<tab>"] = cmp.mapping.confirm({
+			select = true,
+			behavior = cmp.ConfirmBehavior.Replace,
+		}),
+		["<CR>"] = cmp.mapping.confirm({
+			select = false,
+			behavior = cmp.ConfirmBehavior.Replace,
+		}),
 		["<c-e>"] = cmp.mapping.abort(),
 	},
-
 	snippet = {
 		expand = function(args)
 			require("luasnip").lsp_expand(args.body)

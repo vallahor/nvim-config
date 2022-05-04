@@ -80,4 +80,5 @@ require("nvim-treesitter.highlight").set_custom_captures({
 	["js.opening_element"] = "TSElement",
 	["js.closing_element"] = "TSElement",
 	["js.self_closing_element"] = "TSElement",
+	["zig.assignop"] = "TSOperator",
 })

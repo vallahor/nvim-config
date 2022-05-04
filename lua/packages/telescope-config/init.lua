@@ -10,6 +10,6 @@ require("telescope").setup({
 				end,
 			},
 		},
-		file_ignore_patterns = { "android", "ios" },
+		file_ignore_patterns = { "android", "ios", "zig-cache" },
 	},
 })
