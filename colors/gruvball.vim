@@ -639,7 +639,7 @@ hi luaTable         guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 ctermbg=N
 
 " misc
 
-hi ColorColumn      guisp=NONE guifg=NONE     guibg=#382536 ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
+hi ColorColumn      guisp=NONE guifg=#C0AEA0     guibg=#493441 ctermfg=NONE ctermbg=95 gui=NONE cterm=NONE
 hi Conceal          guisp=NONE guifg=#C0AEA0  guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi Cursor           guisp=NONE guifg=#222022  guibg=#f4ddcc ctermfg=235 ctermbg=145  gui=NONE cterm=NONE
 hi lCursor          guisp=NONE guifg=NONE     guibg=#382536 ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
@@ -684,7 +684,7 @@ hi StatusLineTerm   guisp=NONE guifg=#C0AEA0  guibg=#382536 ctermfg=145 ctermbg=
 hi StatusLineTermNC guisp=NONE guifg=NONE     guibg=#363436 ctermfg=NONE ctermbg=237 gui=NONE cterm=NONE
 hi TabLine          guisp=NONE guifg=#C0AEA0  guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi TabLineFill      guisp=NONE guifg=#C0AEA0  guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
-hi TabLineSel       guisp=NONE guifg=#141114  guibg=NONE    ctermfg=231 ctermbg=NONE  gui=NONE cterm=NONE
+hi TabLineSel       guisp=NONE guifg=#C0AEA0  guibg=#3d3339    ctermfg=145 ctermbg=237   gui=bold cterm=bold
 hi Terminal         guisp=NONE guifg=#C0AEA0  guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi Title            guisp=NONE guifg=#C0AEA0  guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi Visual           guisp=NONE guifg=NONE     guibg=#363436 ctermfg=NONE ctermbg=237 gui=NONE cterm=NONE
@@ -756,7 +756,7 @@ hi TSInclude             guisp=NONE guifg=#a1495c guibg=NONE    ctermfg=131 cter
 hi TSString              guisp=NONE guifg=#b16D8A guibg=NONE    ctermfg=132 ctermbg=NONE gui=NONE cterm=NONE
 hi TSStringRegex         guisp=NONE guifg=#b16D8A guibg=NONE    ctermfg=132 ctermbg=NONE gui=NONE cterm=NONE
 hi TSStringEscape        guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=NONE cterm=NONE
-hi TSStringSpecial       guisp=NONE guifg=#d16d8a guibg=NONE    ctermfg=168 ctermbg=NONE gui=NONE cterm=NONE
+hi TSStringSpecial       guisp=NONE guifg=#A8899C guibg=NONE    ctermfg=139 ctermbg=NONE gui=NONE cterm=NONE
 hi TSKeyword             guisp=NONE guifg=#a1495c guibg=NONE    ctermfg=131 ctermbg=NONE gui=italic cterm=italic
 hi TSKeywordFunction     guisp=NONE guifg=#a1495c guibg=NONE    ctermfg=131 ctermbg=NONE gui=italic cterm=italic
 hi TSKeywordReturn       guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold cterm=bold

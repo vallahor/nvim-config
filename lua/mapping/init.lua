@@ -21,6 +21,9 @@ map("c", "<c-v>", '<c-r>"')
 
 map("n", "<c-f>", "<cmd>NvimTreeToggle<cr>")
 
+map("n", "<", "<cmd>BufferLineCyclePrev<cr>")
+map("n", ">", "<cmd>BufferLineCycleNext<cr>")
+
 map("n", "<F3>", "<cmd>TSHighlightCapturesUnderCursor<cr>")
 
 map({ "i", "c" }, "<c-bs>", "<c-w>")
@@ -48,10 +51,10 @@ map("n", "L", "<c-d>")
 
 map({ "n", "v" }, "<c-enter>", "<cmd>w!<CR>")
 map({ "n", "v" }, "<s-enter>", "<cmd>w!<CR>")
+map({ "n", "v" }, "<leader>fs", "<cmd>w!<CR>")
 
 map("n", "<F4>", "<cmd>e $MYVIMRC<CR>")
 map("n", "<F5>", "<cmd>luafile %<CR>")
-map("n", "<F6>", "<cmd>luafile $MYVIMRC<CR>")
 
 map("n", "<c-p>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
 map("n", "<tab>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
@@ -64,8 +67,6 @@ map("n", "<leader>i", "<cmd>lua vim.lsp.buf.implementation()<CR>")
 map("n", "<Leader>d", "<cmd>lua vim.lsp.buf.declaration()<CR>")
 map("n", "K", "<cmd>lua vim.lsp.buf.hover()<CR>")
 map("n", "<leader>r", "<cmd>lua vim.lsp.buf.rename()<CR>")
-map("n", "<a-j>", "<cmd>lua vim.lsp.diagnostic.goto_next()<CR>")
-map("n", "<a-k>", "<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>")
 
 map({ "n", "v" }, "f", "<Plug>Sneak_f")
 map({ "n", "v" }, "F", "<Plug>Sneak_F")
@@ -80,11 +81,11 @@ map({ "n", "v" }, "<c-l>", "<c-w>l")
 map({ "n", "v" }, "gj", "G")
 map({ "n", "v" }, "gk", "gg")
 
-map("n", "<c-0>", "<c-w>o")
-map("n", "<c-9>", "<c-w>r")
+map("n", ")", "<c-w>o")
+map("n", "(", "<c-w>r")
 
-map("n", "<c-=>", "<cmd>vs<cr>")
-map("n", "<c-->", "<cmd>sp<cr>")
+map("n", "<leader>=", "<cmd>vs<cr>")
+map("n", "<leader>-", "<cmd>sp<cr>")
 map("n", "<c-]>", "<cmd>clo<cr>")
 
 -- sneak
