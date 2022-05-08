@@ -42,7 +42,7 @@ config_global.backup = false
 -- config_global.columns = 100
 
 config_window.signcolumn = "no"
-config_window.colorcolumn = "100"
+-- config_window.colorcolumn = "100"
 config_window.number = true
 config_window.relativenumber = true
 config_window.wrap = false
