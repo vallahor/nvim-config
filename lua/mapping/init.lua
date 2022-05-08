@@ -20,7 +20,7 @@ map("c", "<c-v>", '<c-r>"')
 
 map("n", "<c-f>", "<cmd>NvimTreeToggle<cr>")
 
-map("n", "<F3>", "<cmd>TSHighlightCapturesUnderCursor<cr>")
+map("n", "<leader><bs>", "<cmd>TSHighlightCapturesUnderCursor<cr>")
 
 map({ "i", "c" }, "<c-bs>", "<c-w>")
 
@@ -49,8 +49,7 @@ map("n", "L", "<c-d>")
 map({ "n", "v" }, "<c-enter>", "<cmd>w!<CR>")
 map({ "n", "v" }, "<s-enter>", "<cmd>w!<CR>")
 
-map("n", "<F4>", "<cmd>e $MYVIMRC<CR>")
-map("n", "<F5>", "<cmd>luafile %<CR>")
+map("n", "<leader><enter>", "<cmd>so %<CR>")
 
 map("n", "<c-p>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
 map("n", "<tab>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
