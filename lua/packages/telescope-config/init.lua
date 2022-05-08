@@ -1,4 +1,8 @@
-require("telescope").setup({
+local ok, nvim_telescope = pcall(require, "telescope")
+if not ok then
+	return
+end
+nvim_telescope.setup({
 	defaults = {
 		mappings = {
 			n = {

@@ -1,4 +1,8 @@
-require("nvim-treesitter.configs").setup({
+local ok, nvim_treesitter = pcall(require, "nvim_treesitter.configs")
+if not ok then
+	return
+end
+nvim_treesitter.setup({
 	ensure_installed = {
 		"lua",
 		"c",

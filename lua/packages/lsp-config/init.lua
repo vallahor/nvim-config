@@ -1,4 +1,7 @@
-local nvim_lsp = require("lspconfig")
+local ok, nvim_lsp = pcall(require, "lspconfig")
+if not ok then
+	return
+end
 nvim_lsp.cssmodules_ls.setup({})
 
 nvim_lsp.cssmodules_ls.setup({})
