@@ -14,15 +14,11 @@ map({ "n", "v" }, "w", "<Plug>WordMotion_w")
 map({ "n", "v" }, "b", "<Plug>WordMotion_b")
 map({ "n", "v" }, "e", "<Plug>WordMotion_e")
 
-map("n", "<leader>g", "<cmd>Neogit<cr>")
 map("n", "gs", "<cmd>LazyGit<cr>")
 
 map("c", "<c-v>", '<c-r>"')
 
 map("n", "<c-f>", "<cmd>NvimTreeToggle<cr>")
-
-map("n", "<", "<cmd>BufferLineCyclePrev<cr>")
-map("n", ">", "<cmd>BufferLineCycleNext<cr>")
 
 map("n", "<F3>", "<cmd>TSHighlightCapturesUnderCursor<cr>")
 
@@ -33,6 +29,7 @@ map("n", "x", '"_x')
 map("v", "x", '"_d')
 map({ "n", "v" }, "c", '"_c')
 map("n", "D", '"_D')
+map("n", "<c-d>", '"_D')
 map("v", "p", '"_c<C-r>*<Esc> ')
 
 map("v", "s", "<Plug>VSurround")
@@ -51,7 +48,6 @@ map("n", "L", "<c-d>")
 
 map({ "n", "v" }, "<c-enter>", "<cmd>w!<CR>")
 map({ "n", "v" }, "<s-enter>", "<cmd>w!<CR>")
-map({ "n", "v" }, "<leader>fs", "<cmd>w!<CR>")
 
 map("n", "<F4>", "<cmd>e $MYVIMRC<CR>")
 map("n", "<F5>", "<cmd>luafile %<CR>")
@@ -84,8 +80,8 @@ map({ "n", "v" }, "gk", "gg")
 map("n", ")", "<c-w>o")
 map("n", "(", "<c-w>r")
 
-map("n", "<leader>=", "<cmd>vs<cr>")
-map("n", "<leader>-", "<cmd>sp<cr>")
+map("n", "<c-=>", "<cmd>vs<cr>")
+map("n", "<c-->", "<cmd>sp<cr>")
 map("n", "<c-]>", "<cmd>clo<cr>")
 
 -- sneak

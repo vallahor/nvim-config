@@ -1,7 +1,6 @@
 require("settings")
 require("packages.packer-config")
 require("packages.treesitter-config")
-require("packages.bufferline-config")
 require("packages.theme-config")
 require("packages.lsp-config")
 require("packages.cmp-config")

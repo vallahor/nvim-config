@@ -54,7 +54,6 @@ require("packer").startup(function(use)
 	use({ "ziglang/zig.vim" })
 
 	use({ "petertriho/cmp-git" })
-	use({ "akinsho/bufferline.nvim", tag = "v2.*", requires = "kyazdani42/nvim-web-devicons" })
 
 	if packer_bootstrap then
 		require("packer").sync()
