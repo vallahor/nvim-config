@@ -1,6 +1,7 @@
-local swap = function(direction)
+function Swap(direction)
 	local old_buf = vim.api.nvim_get_current_buf()
 	local old_win = vim.api.nvim_get_current_win()
+
 	vim.cmd(string.format("wincmd %s", direction))
 	local buf = vim.api.nvim_get_current_buf()
 	local win = vim.api.nvim_get_current_win()
@@ -12,17 +13,21 @@ local swap = function(direction)
 end
 
 function Swap_left()
-	swap("h")
+	Swap("h")
 end
 
 function Swap_down()
-	swap("j")
+	Swap("j")
 end
 
 function Swap_up()
-	swap("k")
+	Swap("k")
 end
 
 function Swap_right()
-	swap("l")
+	Swap("l")
+end
+
+function _G.put(arg)
+	vim.pretty_print(arg)
 end
