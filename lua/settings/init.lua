@@ -40,6 +40,7 @@ config_global.cursorline = true
 config_global.scrolloff = 3
 config_global.backup = false
 -- config_global.columns = 100
+config_global.spell = true
 
 config_window.signcolumn = "no"
 -- config_window.colorcolumn = "100"

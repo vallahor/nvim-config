@@ -54,6 +54,8 @@ require("packer").startup(function(use)
 
 	use({ "petertriho/cmp-git" })
 
+	use({ "lewis6991/spellsitter.nvim" })
+
 	if packer_bootstrap then
 		require("packer").sync()
 	end
