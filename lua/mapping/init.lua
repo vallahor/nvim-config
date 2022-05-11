@@ -8,12 +8,6 @@ map("n", "<c-[>", "<nop>")
 
 vim.g.mapleader = " "
 
-global["wordmotion_spaces"] = { "\\w\\@<=-\\w\\@=", "\\." }
-
-map({ "n", "v" }, "<leader>w", "<Plug>WordMotion_w")
-map({ "n", "v" }, "<leader>b", "<Plug>WordMotion_b")
-map({ "n", "v" }, "<leader>e", "<Plug>WordMotion_e")
-
 map("n", "gs", "<cmd>LazyGit<cr>")
 
 map("c", "<c-v>", '<c-r>"')
