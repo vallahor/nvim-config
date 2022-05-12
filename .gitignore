@@ -1,4 +1,2 @@
-/plugin/**
-
 .luarc.json
 package-lock.json

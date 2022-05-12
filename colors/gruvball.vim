@@ -642,6 +642,7 @@ hi luaTable         guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 ctermbg=N
 hi ColorColumn      guisp=NONE guifg=#C0AEA0     guibg=#493441 ctermfg=NONE ctermbg=95 gui=NONE cterm=NONE
 hi Conceal          guisp=NONE guifg=#C0AEA0  guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi Cursor           guisp=NONE guifg=#222022  guibg=#f4ddcc ctermfg=235 ctermbg=145  gui=NONE cterm=NONE
+hi iCursor         guisp=NONE guifg=NONE     guibg=#b1314c ctermfg=145 ctermbg=131 gui=NONE cterm=NONE
 hi lCursor          guisp=NONE guifg=NONE     guibg=#382536 ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi CursorIM         guisp=NONE guifg=NONE     guibg=#382536 ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi CursorColumn     guisp=NONE guifg=NONE     guibg=#382536 ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
