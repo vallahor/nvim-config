@@ -2,6 +2,37 @@ local ok, nvim_tree = pcall(require, "nvim-tree")
 if not ok then
 	return
 end
+vim.g.nvim_tree_special_files = {}
+vim.g.nvim_tree_add_trailing = 1
+vim.g.nvim_tree_show_icons = {
+	git = 1,
+	folders = 1,
+	files = 1,
+	folder_arrows = 0,
+}
+vim.g.nvim_tree_icons = {
+	default = "",
+	symlink = "",
+	git = {
+		unstaged = "[]",
+		staged = "[ﰶ]",
+		unmerged = "[]",
+		renamed = "[➜]",
+		untracked = "[]",
+		deleted = "[﯀]",
+		ignored = "[]",
+	},
+	folder = {
+		arrow_open = "",
+		arrow_closed = "",
+		default = "",
+		open = "",
+		empty = "",
+		empty_open = "",
+		symlink = "",
+		symlink_open = "",
+	},
+}
 nvim_tree.setup({ -- BEGIN_DEFAULT_OPTS
 	auto_reload_on_write = true,
 	disable_netrw = false,
@@ -15,24 +46,21 @@ nvim_tree.setup({ -- BEGIN_DEFAULT_OPTS
 	sort_by = "name",
 	update_cwd = false,
 	view = {
-		width = 30,
+		width = 35,
 		height = 30,
-		hide_root_folder = false,
+		hide_root_folder = true,
 		side = "left",
-		preserve_window_proportions = false,
+		mappings = {
+			custom_only = false,
+			list = {},
+		},
 		number = false,
 		relativenumber = false,
 		signcolumn = "yes",
-		mappings = {
-			custom_only = false,
-			list = {
-				-- user mappings go here
-			},
-		},
 	},
 	renderer = {
 		indent_markers = {
-			enable = false,
+			enable = true,
 			icons = {
 				corner = "└ ",
 				edge = "│ ",
@@ -74,7 +102,7 @@ nvim_tree.setup({ -- BEGIN_DEFAULT_OPTS
 	},
 	git = {
 		enable = true,
-		ignore = true,
+		ignore = false,
 		timeout = 400,
 	},
 	actions = {
@@ -113,10 +141,4 @@ nvim_tree.setup({ -- BEGIN_DEFAULT_OPTS
 			profile = false,
 		},
 	},
-}) -- END_DEFAULT_OPTS
-vim.g.nvim_tree_show_icons = {
-	git = 0,
-	folders = 1,
-	files = 1,
-	folder_arrows = 1,
-}
+})
