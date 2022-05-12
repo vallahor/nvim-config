@@ -42,23 +42,5 @@ telescope.setup({
 		path_display = { "absolute" },
 		color_devicons = true,
 		use_less = true,
-		-- set_env = { ["COLORTERM"] = "truecolor" },
-		sorting_strategy = "ascending",
-		layout_strategy = "horizontal",
-		layout_config = {
-			horizontal = {
-				prompt_position = "top",
-				preview_width = 0,
-			},
-			-- vertical = {
-			-- 	mirror = false,
-			-- },
-			width = 0.4,
-			height = 0.4,
-		},
-		-- file_previewer = require("telescope.previewers").vim_buffer_cat.new,
-		-- grep_previewer = require("telescope.previewers").vim_buffer_vimgrep.new,
-		-- qflist_previewer = require("telescope.previewers").vim_buffer_qflist.new,
-		-- buffer_previewer_maker = require("telescope.previewers").buffer_previewer_maker,
 	},
 })

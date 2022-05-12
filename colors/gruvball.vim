@@ -800,3 +800,14 @@ hi TSLabel               guisp=NONE guifg=#A8899C guibg=NONE    ctermfg=139 cter
 
 hi TSElement guisp=NONE guifg=#c58d5d guibg=NONE    ctermfg=173 ctermbg=NONE gui=italic cterm=italic
 
+"TelescopeResultsNormal       
+"TelescopeResultsBorder
+"TelescopeResultsTitle
+
+"TelescopePromptNormal       
+"TelescopePromptBorder
+"TelescopePromptTitle
+
+"TelescopePreviewNormal       
+"TelescopePreviewBorder
+"TelescopePreviewTitle
