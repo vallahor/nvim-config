@@ -82,6 +82,14 @@ map("n", "<leader>j", "<cmd>lua Swap_down()<cr>")
 map("n", "<leader>k", "<cmd>lua Swap_up()<cr>")
 map("n", "<leader>l", "<cmd>lua Swap_right()<cr>")
 
+map("n", "ci_", '<cmd>set iskeyword-=_<cr>"_diw<cmd>set iskeyword+=_<cr>i')
+map("n", "di_", '<cmd>set iskeyword-=_<cr>"_diw<cmd>set iskeyword+=_<cr>i')
+map("n", "vi_", "<cmd>set iskeyword-=_<cr>viw<cmd>set iskeyword+=_<cr>")
+
+map("n", "ca_", '<cmd>set iskeyword-=_<cr>"_daw<cmd>set iskeyword+=_<cr>i')
+map("n", "da_", '<cmd>set iskeyword-=_<cr>"_daw<cmd>set iskeyword+=_<cr>i')
+map("n", "va_", "<cmd>set iskeyword-=_<cr>vaw<cmd>set iskeyword+=_<cr>")
+
 -- sneak
 vim.cmd([[
 let g:sneak#use_ic_scs = 1 
