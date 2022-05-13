@@ -76,6 +76,7 @@ map("n", "(", "<c-w>r")
 map("n", "<c-=>", "<cmd>vs<cr>")
 map("n", "<c-->", "<cmd>sp<cr>")
 map("n", "<c-]>", "<cmd>clo<cr>")
+map("n", "<c-0>", "<c-w>o")
 
 map("n", "<leader>h", "<cmd>lua Swap_left()<cr>")
 map("n", "<leader>j", "<cmd>lua Swap_down()<cr>")
@@ -96,14 +97,6 @@ let g:sneak#use_ic_scs = 1
 
 highlight Sneak guifg=none guibg=none ctermfg=none ctermbg=none
 highlight SneakScope guifg=none guibg=none ctermfg=none ctermbg=none
-]])
-
--- show current token
-vim.cmd([[
-nm <silent> <F1> :echo "hi<" . synIDattr(synID(line("."),col("."),1),"name")
-    \ . '> trans<' . synIDattr(synID(line("."),col("."),0),"name")
-    \ . "> lo<" . synIDattr(synIDtrans(synID(line("."),col("."),1)),"name")
-    \ . ">"<CR>
 ]])
 
 vim.cmd([[

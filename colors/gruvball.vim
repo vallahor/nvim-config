@@ -737,15 +737,15 @@ hi Debug          guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NON
 
 hi gitcommitSummary guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 
-hi DiagnosticError guisp=NONE guifg=#e8b9b8 guibg=#9d2640 ctermfg=231 ctermbg=NONE  gui=bold cterm=bold
-hi DiagnosticWarn  guisp=NONE guifg=#a1495c guibg=NONE    ctermfg=131 ctermbg=NONE gui=bold cterm=bold
-hi DiagnosticInfo  guisp=NONE guifg=#a1495c guibg=NONE    ctermfg=131 ctermbg=NONE gui=bold cterm=bold
-hi DiagnosticHint  guisp=NONE guifg=#a1495c guibg=NONE    ctermfg=131 ctermbg=NONE gui=bold cterm=bold
+hi DiagnosticError guisp=NONE guifg=#794966 guibg=NONE ctermfg=95 ctermbg=NONE gui=italic cterm=bold
+hi DiagnosticWarn  guisp=NONE guifg=#794966 guibg=NONE ctermfg=95 ctermbg=NONE gui=italic cterm=bold
+hi DiagnosticInfo  guisp=NONE guifg=#794966 guibg=NONE ctermfg=95 ctermbg=NONE gui=italic cterm=bold
+hi DiagnosticHint  guisp=NONE guifg=#794966 guibg=NONE ctermfg=95 ctermbg=NONE gui=italic cterm=bold
 
-hi DiagnosticUnderlineError guisp=NONE guifg=#b1314c guibg=NONE    ctermfg=131 ctermbg=NONE gui=NONE cterm=NONE
-hi DiagnosticUnderlineWarn  guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=NONE cterm=NONE
-hi DiagnosticUnderlineInfo  guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=NONE cterm=NONE
-hi DiagnosticUnderlineHint  guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=NONE cterm=NONE
+hi DiagnosticUnderlineError guisp=#a1495c guifg=#794966 guibg=NONE ctermfg=95 ctermbg=NONE gui=undercurl,bold cterm=underline,bold
+hi DiagnosticUnderlineWarn  guisp=#a1495c guifg=#794966 guibg=NONE ctermfg=95 ctermbg=NONE gui=undercurl,bold cterm=underline,bold
+hi DiagnosticUnderlineInfo  guisp=#a1495c guifg=#794966 guibg=NONE ctermfg=95 ctermbg=NONE gui=italic cterm=italic
+hi DiagnosticUnderlineHint  guisp=#a1495c guifg=#794966 guibg=NONE ctermfg=95 ctermbg=NONE gui=undercurl,bold cterm=underline,bold
 
 
 hi TSInclude             guisp=NONE guifg=#a1495c guibg=NONE    ctermfg=131 ctermbg=NONE gui=bold cterm=bold
