@@ -13,9 +13,11 @@ end
 
 require("packer").startup(function(use)
 	use({ "wbthomason/packer.nvim" })
+
 	use({ "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" })
 	use({ "nvim-treesitter/nvim-treesitter-textobjects" })
 	use({ "nvim-treesitter/playground" })
+	use({ "lewis6991/spellsitter.nvim" })
 
 	use({ "chaoren/vim-wordmotion" })
 	use({ "neovim/nvim-lspconfig" })
@@ -23,24 +25,26 @@ require("packer").startup(function(use)
 	use({ "tpope/vim-surround" })
 	use({ "tpope/vim-repeat" })
 	use({ "justinmk/vim-sneak" })
+	use({ "mg979/vim-visual-multi" })
 
 	use({ "numToStr/Comment.nvim" })
-	use({ "JoosepAlviste/nvim-ts-context-commentstring" })
 
-	use({ "nvim-telescope/telescope.nvim", requires = { { "nvim-lua/plenary.nvim" } } })
-	use({ "windwp/nvim-autopairs" })
-	use({ "mg979/vim-visual-multi" })
+	use({ "nvim-lua/plenary.nvim" })
+	use({ "nvim-telescope/telescope.nvim" })
 
 	use({ "sbdchd/neoformat" })
 
+	use({ "L3MON4D3/LuaSnip" })
+	use({ "hrsh7th/nvim-cmp" })
 	use({ "hrsh7th/cmp-nvim-lsp" })
 	use({ "hrsh7th/cmp-buffer" })
 	use({ "hrsh7th/cmp-path" })
-	use({ "hrsh7th/nvim-cmp" })
+	use({ "petertriho/cmp-git" })
 
-	use({ "L3MON4D3/LuaSnip" })
-
-	use({ "windwp/nvim-ts-autotag" })
+	-- using only when doing some kind of frontend stuff
+	-- use({ "windwp/nvim-autopairs" })
+	-- use({ "windwp/nvim-ts-autotag" })
+	-- use({ "JoosepAlviste/nvim-ts-context-commentstring" })
 
 	use({ "kdheepak/lazygit.nvim" })
 
@@ -52,10 +56,6 @@ require("packer").startup(function(use)
 	})
 
 	use({ "ziglang/zig.vim" })
-
-	use({ "petertriho/cmp-git" })
-
-	use({ "lewis6991/spellsitter.nvim" })
 
 	if packer_bootstrap then
 		require("packer").sync()
