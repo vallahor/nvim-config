@@ -22,7 +22,7 @@ map("n", "<Leader><Leader>", "<c-^>")
 map("n", "x", '"_x')
 map("v", "x", '"_d')
 map({ "n", "v" }, "c", '"_c')
-map("n", "D", '"_D')
+map("n", "X", '"_D')
 map("n", "<c-d>", '"_D')
 map("v", "p", '"_c<C-r>*<Esc> ')
 

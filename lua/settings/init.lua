@@ -46,7 +46,7 @@ config_global.guicursor = "i:block-iCursor"
 
 config_window.signcolumn = "no"
 -- config_window.colorcolumn = "100"
-config_window.number = true
+-- config_window.number = true
 config_window.relativenumber = true
 config_window.wrap = false
 config_buffer.autoread = true

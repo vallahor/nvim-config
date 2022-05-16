@@ -737,10 +737,10 @@ hi Debug          guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NON
 
 hi gitcommitSummary guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 
-hi DiagnosticError guisp=NONE guifg=#794966 guibg=NONE ctermfg=95 ctermbg=NONE gui=italic cterm=bold
-hi DiagnosticWarn  guisp=NONE guifg=#794966 guibg=NONE ctermfg=95 ctermbg=NONE gui=italic cterm=bold
-hi DiagnosticInfo  guisp=NONE guifg=#794966 guibg=NONE ctermfg=95 ctermbg=NONE gui=italic cterm=bold
-hi DiagnosticHint  guisp=NONE guifg=#794966 guibg=NONE ctermfg=95 ctermbg=NONE gui=italic cterm=bold
+hi DiagnosticError guisp=NONE guifg=#794966 guibg=NONE ctermfg=95 ctermbg=NONE gui=italic cterm=italic
+hi DiagnosticWarn  guisp=NONE guifg=#794966 guibg=NONE ctermfg=95 ctermbg=NONE gui=italic cterm=italic
+hi DiagnosticInfo  guisp=NONE guifg=#794966 guibg=NONE ctermfg=95 ctermbg=NONE gui=italic cterm=italic
+hi DiagnosticHint  guisp=NONE guifg=#794966 guibg=NONE ctermfg=95 ctermbg=NONE gui=italic cterm=italic
 
 hi DiagnosticUnderlineError guisp=#a1495c guifg=#794966 guibg=NONE ctermfg=95 ctermbg=NONE gui=undercurl,bold cterm=underline,bold
 hi DiagnosticUnderlineWarn  guisp=#a1495c guifg=#794966 guibg=NONE ctermfg=95 ctermbg=NONE gui=undercurl,bold cterm=underline,bold
