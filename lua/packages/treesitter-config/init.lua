@@ -15,6 +15,7 @@ nvim_treesitter.setup({
 		"css",
 		"scss",
 		"query",
+		"rust",
 	},
 	highlight = {
 		enable = true,

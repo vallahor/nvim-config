@@ -56,7 +56,7 @@ config_buffer.swapfile = false
 
 vim.cmd([[ 
 language en
-" set iskeyword-=_
+set iskeyword-=_
 set cindent
 set cino+=L0,g0,N-s,(0,l1
 set nohlsearch 
