@@ -10,9 +10,9 @@ vim.g.mapleader = " "
 
 global["wordmotion_spaces"] = { "\\w\\@<=-\\w\\@=", "\\." }
 
-map({ "n", "v" }, "<leader>w", "<Plug>WordMotion_w")
-map({ "n", "v" }, "<leader>b", "<Plug>WordMotion_b")
-map({ "n", "v" }, "<leader>e", "<Plug>WordMotion_e")
+-- map({ "n", "v" }, "<leader>w", "<Plug>WordMotion_w")
+-- map({ "n", "v" }, "<leader>b", "<Plug>WordMotion_b")
+-- map({ "n", "v" }, "<leader>e", "<Plug>WordMotion_e")
 
 map("n", "gs", "<cmd>LazyGit<cr>")
 
@@ -22,7 +22,8 @@ map("n", "<c-f>", "<cmd>NvimTreeToggle<cr>")
 
 map("n", "<leader><bs>", "<cmd>TSHighlightCapturesUnderCursor<cr>")
 
-map({ "i", "c" }, "<c-bs>", "<c-w>")
+map("c", "<c-bs>", "<c-w>")
+map("i", "<c-bs>", "<cmd>normal vbc<cr>")
 
 map("n", "<Leader><Leader>", "<c-^>")
 map("n", "x", '"_x')
