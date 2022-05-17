@@ -675,10 +675,11 @@ hi Question         guisp=NONE guifg=#C0AEA0  guibg=NONE    ctermfg=145 ctermbg=
 hi QuickFixLine     guisp=NONE guifg=#b1314c  guibg=NONE    ctermfg=131 ctermbg=NONE gui=NONE cterm=NONE
 hi Search           guisp=NONE guifg=#c64964  guibg=NONE ctermfg=167 ctermbg=NONE  gui=NONE cterm=NONE
 hi SpecialKey       guisp=NONE guifg=#d16d8a  guibg=NONE    ctermfg=231 ctermbg=NONE  gui=NONE cterm=NONE
-hi SpellBad         guisp=NONE guifg=#b1314c  guibg=NONE    ctermfg=131 ctermbg=NONE gui=NONE cterm=NONE
-hi SpellCap         guisp=NONE guifg=#b1314c  guibg=NONE    ctermfg=131 ctermbg=NONE gui=NONE cterm=NONE
-hi SpellLocal       guisp=NONE guifg=#b1314c  guibg=NONE    ctermfg=131 ctermbg=NONE gui=NONE cterm=NONE
-hi SpellRare        guisp=NONE guifg=#b1314c  guibg=NONE    ctermfg=131 ctermbg=NONE gui=NONE cterm=NONE
+"hi SpellBad         guisp=NONE guifg=#b1314c  guibg=NONE    ctermfg=131 ctermbg=NONE gui=NONE cterm=NONE
+hi SpellBad         guisp=#a1495c guifg=NONE guibg=NONE ctermfg=NONE ctermbg=NONE gui=undercurl cterm=underline
+hi SpellCap         guisp=#a1495c guifg=NONE guibg=NONE ctermfg=NONE ctermbg=NONE gui=undercurl cterm=underline
+hi SpellLocal       guisp=#a1495c guifg=NONE guibg=NONE ctermfg=NONE ctermbg=NONE gui=undercurl cterm=underline
+hi SpellRare        guisp=#a1495c guifg=NONE guibg=NONE ctermfg=NONE ctermbg=NONE gui=undercurl cterm=underline
 hi StatusLine       guisp=NONE guifg=#C0AEA0  guibg=#382536 ctermfg=145 ctermbg=236 gui=NONE cterm=NONE
 hi StatusLineNC     guisp=NONE guifg=NONE     guibg=#363436 ctermfg=NONE ctermbg=237 gui=NONE cterm=NONE
 hi StatusLineTerm   guisp=NONE guifg=#C0AEA0  guibg=#382536 ctermfg=145 ctermbg=236 gui=NONE cterm=NONE
