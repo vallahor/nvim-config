@@ -20,8 +20,8 @@ end
 
 tabline.setup({
 	render = render,
-	--
-	-- hl = { fg = "#abb2bf", bg = "#31353f" },
-	-- hl_sel = { fg = "#282c34", bg = "#abb2bf" },
-	-- hl_fill = { fg = "#282c34", bg = "#abb2bf" },
+
+	hl = { fg = "#C0AEA0", bg = "#222022" },
+	hl_sel = { fg = "#C0AEA0", bg = "#3d3339" },
+	hl_fill = { fg = "#C0AEA0", bg = "#222022" },
 })

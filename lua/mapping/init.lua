@@ -51,7 +51,7 @@ map({ "n", "v" }, "<s-enter>", "<cmd>w!<CR>")
 
 map("n", "<leader><enter>", "<cmd>so %<CR>")
 
-map("n", "<c-p>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
+map("n", "<c-f>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
 map("n", "<tab>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
 map("n", "<c-s>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
 
@@ -68,16 +68,13 @@ map({ "n", "v" }, "F", "<Plug>Sneak_F")
 map({ "n", "v" }, "t", "<Plug>Sneak_t")
 map({ "n", "v" }, "T", "<Plug>Sneak_T")
 
-map({ "n", "v" }, "<leader>h", "<c-w>h")
-map({ "n", "v" }, "<leader>j", "<c-w>j")
-map({ "n", "v" }, "<leader>k", "<c-w>k")
-map({ "n", "v" }, "<leader>l", "<c-w>l")
+map({ "n", "v" }, "<c-h>", "<c-w>h")
+map({ "n", "v" }, "<c-j>", "<c-w>j")
+map({ "n", "v" }, "<c-k>", "<c-w>k")
+map({ "n", "v" }, "<c-l>", "<c-w>l")
 
-map({ "n", "v" }, "<c-h>", "<cmd>bp<cr>")
-map({ "n", "v" }, "<c-l>", "<cmd>bn<cr>")
-
-map({ "n", "v" }, "<c-k>", "{")
-map({ "n", "v" }, "<c-j>", "}")
+map({ "n", "v" }, "<c-p>", "<cmd>bp<cr>")
+map({ "n", "v" }, "<c-n>", "<cmd>bn<cr>")
 
 map({ "n", "v" }, "gj", "G")
 map({ "n", "v" }, "gk", "gg")
