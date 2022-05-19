@@ -73,11 +73,14 @@ map({ "n", "v" }, "<c-j>", "<c-w>j")
 map({ "n", "v" }, "<c-k>", "<c-w>k")
 map({ "n", "v" }, "<c-l>", "<c-w>l")
 
-map({ "n", "v" }, "<c-p>", "<cmd>bp<cr>")
-map({ "n", "v" }, "<c-n>", "<cmd>bn<cr>")
+map({ "n", "v" }, "<c-,>", "<cmd>bp<cr>")
+map({ "n", "v" }, "<c-.>", "<cmd>bn<cr>")
 
 map({ "n", "v" }, "gj", "G")
 map({ "n", "v" }, "gk", "gg")
+
+map({ "n", "v" }, "<c-p>", "{")
+map({ "n", "v" }, "<c-n>", "}")
 
 map("n", ")", "<c-w>o")
 map("n", "(", "<c-w>r")
