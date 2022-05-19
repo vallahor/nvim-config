@@ -14,7 +14,7 @@ global["wordmotion_spaces"] = { "\\w\\@<=-\\w\\@=", "\\." }
 -- map({ "n", "v" }, "<leader>b", "<Plug>WordMotion_b")
 -- map({ "n", "v" }, "<leader>e", "<Plug>WordMotion_e")
 
-map("n", "gs", "<cmd>LazyGit<cr>")
+map("n", "<leader>gg", "<cmd>LazyGit<cr>")
 
 map("c", "<c-v>", '<c-r>"')
 
@@ -22,8 +22,7 @@ map("n", "<c-f>", "<cmd>NvimTreeToggle<cr>")
 
 map("n", "<leader><bs>", "<cmd>TSHighlightCapturesUnderCursor<cr>")
 
-map("c", "<c-bs>", "<c-w>")
-map("i", "<c-bs>", "<cmd>normal vbc<cr>")
+map({ "i", "c" }, "<c-bs>", "<c-w>")
 
 map("n", "<Leader><Leader>", "<c-^>")
 map("n", "x", '"_x')
@@ -89,6 +88,10 @@ map("n", "<leader>h", "<cmd>lua Swap_left()<cr>")
 map("n", "<leader>j", "<cmd>lua Swap_down()<cr>")
 map("n", "<leader>k", "<cmd>lua Swap_up()<cr>")
 map("n", "<leader>l", "<cmd>lua Swap_right()<cr>")
+
+-- zig related
+map("n", "<leader>mm", "<cmd>!zig-doc %<cr><cr>")
+map("n", "<leader>md", "<cmd>!zig-doc-build<cr>")
 
 -- sneak
 vim.cmd([[

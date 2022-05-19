@@ -756,7 +756,8 @@ hi TSStringEscape        guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  cter
 hi TSStringSpecial       guisp=NONE guifg=#A8899C guibg=NONE    ctermfg=139 ctermbg=NONE gui=NONE cterm=NONE
 hi TSKeyword             guisp=NONE guifg=#a1495c guibg=NONE    ctermfg=131 ctermbg=NONE gui=italic cterm=italic
 hi TSKeywordFunction     guisp=NONE guifg=#a1495c guibg=NONE    ctermfg=131 ctermbg=NONE gui=italic cterm=italic
-hi TSKeywordReturn       guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold cterm=bold
+hi TSKeywordReturn       guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold,italic cterm=bold,italic
+"hi TSKeywordReturn       guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold cterm=bold
 hi TSKeywordOperator     guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold cterm=bold     
 hi TSVariable            guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi TSVariableBuiltin     guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
@@ -792,7 +793,8 @@ hi TSConstMacro          guisp=NONE guifg=#d16d8a guibg=NONE    ctermfg=168 cter
 hi TSPunctDelimiter      guisp=NONE guifg=#A8899C guibg=NONE    ctermfg=139 ctermbg=NONE gui=NONE cterm=NONE
 hi TSPunctBracket        guisp=NONE guifg=#A8899C guibg=NONE    ctermfg=139 ctermbg=NONE gui=NONE cterm=NONE
 hi TSPunctSpecial        guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold cterm=bold  
-hi TSOperator            guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold cterm=bold
+hi TSOperator            guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=NONE cterm=NONE
+"hi TSOperator            guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold cterm=bold
 hi TSConditional         guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold,italic cterm=bold,italic
 hi TSRepeat              guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold,italic cterm=bold,italic
 hi TSFuncMacro           guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold,italic cterm=bold,italic

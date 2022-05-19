@@ -57,6 +57,8 @@ require("packer").startup(function(use)
 
 	use({ "ziglang/zig.vim" })
 
+	use({ "rebelot/heirline.nvim" })
+
 	if packer_bootstrap then
 		require("packer").sync()
 	end
