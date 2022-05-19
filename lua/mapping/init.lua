@@ -90,10 +90,10 @@ map("n", "<c-->", "<cmd>sp<cr>")
 map("n", "<c-]>", "<cmd>clo<cr>")
 map("n", "<c-0>", "<c-w>o")
 
-map("n", "<leader>H", "<cmd>lua Swap_left()<cr>")
-map("n", "<leader>J", "<cmd>lua Swap_down()<cr>")
-map("n", "<leader>K", "<cmd>lua Swap_up()<cr>")
-map("n", "<leader>L", "<cmd>lua Swap_right()<cr>")
+map("n", "<leader>h", "<cmd>lua Swap_left()<cr>")
+map("n", "<leader>j", "<cmd>lua Swap_down()<cr>")
+map("n", "<leader>k", "<cmd>lua Swap_up()<cr>")
+map("n", "<leader>l", "<cmd>lua Swap_right()<cr>")
 
 -- zig related
 map("n", "<leader>mm", "<cmd>!zig-doc %<cr><cr>")
