@@ -68,10 +68,16 @@ map({ "n", "v" }, "F", "<Plug>Sneak_F")
 map({ "n", "v" }, "t", "<Plug>Sneak_t")
 map({ "n", "v" }, "T", "<Plug>Sneak_T")
 
-map({ "n", "v" }, "<c-h>", "<c-w>h")
-map({ "n", "v" }, "<c-j>", "<c-w>j")
-map({ "n", "v" }, "<c-k>", "<c-w>k")
-map({ "n", "v" }, "<c-l>", "<c-w>l")
+map({ "n", "v" }, "<leader>h", "<c-w>h")
+map({ "n", "v" }, "<leader>j", "<c-w>j")
+map({ "n", "v" }, "<leader>k", "<c-w>k")
+map({ "n", "v" }, "<leader>l", "<c-w>l")
+
+map({ "n", "v" }, "<c-h>", "<cmd>bp<cr>")
+map({ "n", "v" }, "<c-l>", "<cmd>bn<cr>")
+
+map({ "n", "v" }, "<c-k>", "{")
+map({ "n", "v" }, "<c-j>", "}")
 
 map({ "n", "v" }, "gj", "G")
 map({ "n", "v" }, "gk", "gg")
@@ -84,10 +90,10 @@ map("n", "<c-->", "<cmd>sp<cr>")
 map("n", "<c-]>", "<cmd>clo<cr>")
 map("n", "<c-0>", "<c-w>o")
 
-map("n", "<leader>h", "<cmd>lua Swap_left()<cr>")
-map("n", "<leader>j", "<cmd>lua Swap_down()<cr>")
-map("n", "<leader>k", "<cmd>lua Swap_up()<cr>")
-map("n", "<leader>l", "<cmd>lua Swap_right()<cr>")
+map("n", "<leader>H", "<cmd>lua Swap_left()<cr>")
+map("n", "<leader>J", "<cmd>lua Swap_down()<cr>")
+map("n", "<leader>K", "<cmd>lua Swap_up()<cr>")
+map("n", "<leader>L", "<cmd>lua Swap_right()<cr>")
 
 -- zig related
 map("n", "<leader>mm", "<cmd>!zig-doc %<cr><cr>")

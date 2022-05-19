@@ -44,6 +44,8 @@ config_global.backup = false
 config_global.spell = true
 config_global.spelloptions = "camel"
 config_global.guicursor = "i:block-iCursor"
+config_global.laststatus = 0
+config_global.showtabline = 2
 
 config_window.signcolumn = "no"
 -- config_window.colorcolumn = "100"
@@ -63,4 +65,7 @@ set cino+=L0,g0,N-s,(0,l1
 set nohlsearch 
 
 au BufEnter *.scm set filetype=query
+
+au UiEnter * GuiFont! JetBrains Mono:h11
+au UiEnter * GuiTabline 0
 ]])
