@@ -24,7 +24,6 @@ require("packer").startup(function(use)
 	use({ "tpope/vim-surround" })
 	use({ "tpope/vim-repeat" })
 	use({ "justinmk/vim-sneak" })
-	use({ "mg979/vim-visual-multi" })
 
 	use({ "numToStr/Comment.nvim" })
 
