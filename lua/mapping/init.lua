@@ -18,7 +18,7 @@ map("n", "<leader>gg", "<cmd>LazyGit<cr>")
 
 map("c", "<c-v>", '<c-r>"')
 
-map("n", "<c-f>", "<cmd>NvimTreeToggle<cr>")
+map("n", "<leader>t", "<cmd>NvimTreeToggle<cr>")
 
 map("n", "<leader><bs>", "<cmd>TSHighlightCapturesUnderCursor<cr>")
 

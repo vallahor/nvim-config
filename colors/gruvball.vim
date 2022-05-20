@@ -130,8 +130,8 @@ hi TSString              guisp=NONE guifg=#b16D8A guibg=NONE    ctermfg=132 cter
 hi TSStringRegex         guisp=NONE guifg=#b16D8A guibg=NONE    ctermfg=132 ctermbg=NONE gui=NONE cterm=NONE
 hi TSStringEscape        guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=NONE cterm=NONE
 hi TSStringSpecial       guisp=NONE guifg=#A8899C guibg=NONE    ctermfg=139 ctermbg=NONE gui=NONE cterm=NONE
-hi TSKeyword             guisp=NONE guifg=#a1495c guibg=NONE    ctermfg=131 ctermbg=NONE gui=italic cterm=italic
-hi TSKeywordFunction     guisp=NONE guifg=#a1495c guibg=NONE    ctermfg=131 ctermbg=NONE gui=italic cterm=italic
+hi TSKeyword             guisp=NONE guifg=#a1495c guibg=NONE    ctermfg=131 ctermbg=NONE gui=NONE cterm=NONE
+hi TSKeywordFunction     guisp=NONE guifg=#a1495c guibg=NONE    ctermfg=131 ctermbg=NONE gui=NONE cterm=NONE
 hi TSKeywordReturn       guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold,italic cterm=bold,italic
 "hi TSKeywordReturn       guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold cterm=bold
 hi TSKeywordOperator     guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold cterm=bold     

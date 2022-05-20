@@ -40,16 +40,11 @@ config_global.magic = true
 config_global.cursorline = true
 config_global.scrolloff = 3
 config_global.backup = false
--- config_global.columns = 100
-config_global.spell = true
-config_global.spelloptions = "camel"
 config_global.guicursor = "i:block-iCursor"
 config_global.laststatus = 0
 config_global.showtabline = 2
 
 config_window.signcolumn = "no"
--- config_window.colorcolumn = "100"
--- config_window.number = true
 config_window.relativenumber = true
 config_window.wrap = false
 config_buffer.autoread = true
@@ -65,7 +60,6 @@ set cino+=L0,g0,N-s,(0,l1
 set nohlsearch 
 
 au BufEnter *.scm set filetype=query
-
 au UiEnter * GuiFont! JetBrains Mono:h11
 au UiEnter * GuiTabline 0
 ]])

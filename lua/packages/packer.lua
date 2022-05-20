@@ -17,7 +17,6 @@ require("packer").startup(function(use)
 	use({ "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" })
 	use({ "nvim-treesitter/nvim-treesitter-textobjects" })
 	use({ "nvim-treesitter/playground" })
-	use({ "lewis6991/spellsitter.nvim" })
 
 	use({ "chaoren/vim-wordmotion" })
 	use({ "neovim/nvim-lspconfig" })
@@ -41,13 +40,13 @@ require("packer").startup(function(use)
 	use({ "hrsh7th/cmp-path" })
 	use({ "petertriho/cmp-git" })
 
-	-- using only when doing some kind of frontend stuff
 	-- use({ "windwp/nvim-autopairs" })
 	-- use({ "windwp/nvim-ts-autotag" })
 	-- use({ "JoosepAlviste/nvim-ts-context-commentstring" })
 
 	use({ "kdheepak/lazygit.nvim" })
 
+	use({ "rafcamlet/tabline-framework.nvim" })
 	use({
 		"kyazdani42/nvim-tree.lua",
 		requires = {
@@ -56,9 +55,6 @@ require("packer").startup(function(use)
 	})
 
 	use({ "ziglang/zig.vim" })
-
-	-- use({ "rebelot/heirline.nvim" })
-	use({ "rafcamlet/tabline-framework.nvim" })
 
 	if packer_bootstrap then
 		require("packer").sync()
