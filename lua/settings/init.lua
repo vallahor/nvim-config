@@ -2,7 +2,7 @@ local config_global = vim.opt
 local config_buffer = vim.bo
 local config_window = vim.wo
 
-config_global.guifont = { "JetBrains Mono:h11" }
+-- config_global.guifont = { "JetBrains Mono:h11" }
 
 local indent = 2
 config_global.shiftwidth = indent

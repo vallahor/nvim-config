@@ -56,6 +56,7 @@ map("n", "<tab>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
 map("n", "<c-s>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
 
 map("n", "|", "<cmd>bp<cr><cmd>bd #<cr>")
+map("n", "<c-w>", "<cmd>bp<cr><cmd>bd #<cr>")
 
 map("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>")
 map("n", "<leader>i", "<cmd>lua vim.lsp.buf.implementation()<CR>")
