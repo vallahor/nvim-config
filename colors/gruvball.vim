@@ -60,8 +60,8 @@ hi StatusLine       guisp=NONE guifg=#C0AEA0  guibg=#382536 ctermfg=145 ctermbg=
 hi StatusLineNC     guisp=NONE guifg=NONE     guibg=#363436 ctermfg=NONE ctermbg=237 gui=NONE cterm=NONE
 hi StatusLineTerm   guisp=NONE guifg=#C0AEA0  guibg=#382536 ctermfg=145 ctermbg=236 gui=NONE cterm=NONE
 hi StatusLineTermNC guisp=NONE guifg=NONE     guibg=#363436 ctermfg=NONE ctermbg=237 gui=NONE cterm=NONE
-hi TabLine          guisp=NONE guifg=#3d3339  guibg=NONE    ctermfg=237 ctermbg=NONE gui=NONE cterm=NONE
-hi TabLineFill      guisp=NONE guifg=#C0AEA0  guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
+hi TabLine          guisp=NONE guifg=NONE  guibg=#3d3339    ctermfg=NONE ctermbg=237 gui=NONE cterm=NONE
+hi TabLineFill      guisp=NONE guifg=NONE  guibg=#222022    ctermfg=NONE ctermbg=235 gui=NONE cterm=NONE
 hi TabLineSel       guisp=NONE guifg=#C0AEA0  guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi Terminal         guisp=NONE guifg=#C0AEA0  guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi Title            guisp=NONE guifg=#C0AEA0  guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
@@ -181,14 +181,23 @@ hi TSLabel               guisp=NONE guifg=#A8899C guibg=NONE    ctermfg=139 cter
 
 hi TSElement guisp=NONE guifg=#c58d5d guibg=NONE    ctermfg=173 ctermbg=NONE gui=italic cterm=italic
 
-"TelescopeResultsNormal       
-"TelescopeResultsBorder
-"TelescopeResultsTitle
+hi BufferCurrent       guisp=NONE guifg=NONE  guibg=#3d3339    ctermfg=NONE ctermbg=237 gui=NONE cterm=NONE
+hi BufferCurrentIndex  guisp=NONE guifg=NONE  guibg=#3d3339    ctermfg=NONE ctermbg=237 gui=NONE cterm=NONE
+hi BufferCurrentMod    guisp=NONE guifg=#d16d8a  guibg=#3d3339 ctermfg=231 ctermbg=237 gui=NONE cterm=NONE
+hi BufferCurrentSign   guisp=NONE guifg=NONE  guibg=#3d3339    ctermfg=NONE ctermbg=237 gui=NONE cterm=NONE
+hi BufferCurrentTarget guisp=NONE guifg=NONE  guibg=#3d3339    ctermfg=NONE ctermbg=237 gui=NONE cterm=NONE
 
-"TelescopePromptNormal       
-"TelescopePromptBorder
-"TelescopePromptTitle
+hi BufferVisible       guisp=NONE guifg=NONE  guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
+hi BufferVisibleIndex  guisp=NONE guifg=NONE  guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
+hi BufferVisibleMod    guisp=NONE guifg=#d16d8a  guibg=#3d3339 ctermfg=231 ctermbg=237 gui=NONE cterm=NONE
+hi BufferVisibleSign   guisp=NONE guifg=NONE  guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
+hi BufferVisibleTarget guisp=NONE guifg=NONE  guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 
-"TelescopePreviewNormal       
-"TelescopePreviewBorder
-"TelescopePreviewTitle
+hi BufferInactive       guisp=NONE guifg=NONE  guibg=#222022    ctermfg=NONE ctermbg=235 gui=NONE cterm=NONE
+hi BufferInactiveIndex  guisp=NONE guifg=#C0AEA0  guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
+hi BufferInactiveMod    guisp=NONE guifg=NONE  guibg=#222022    ctermfg=NONE ctermbg=235 gui=NONE cterm=NONE
+hi BufferInactiveSign   guisp=NONE guifg=NONE  guibg=#222022    ctermfg=NONE ctermbg=235 gui=NONE cterm=NONE
+hi BufferInactiveTarget guisp=NONE guifg=NONE  guibg=#222022    ctermfg=NONE ctermbg=235 gui=NONE cterm=NONE
+
+hi BufferTabpages       guisp=NONE guifg=NONE  guibg=#222022    ctermfg=NONE ctermbg=235 gui=NONE cterm=NONE
+hi BufferTabpagesFill   guisp=NONE guifg=NONE  guibg=#222022    ctermfg=NONE ctermbg=235 gui=NONE cterm=NONE

@@ -55,8 +55,8 @@ map("n", "<c-f>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
 map("n", "<tab>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
 map("n", "<c-s>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
 
-map("n", "|", "<cmd>bp<cr><cmd>bd #<cr>")
-map("n", "<c-w>", "<cmd>bp<cr><cmd>bd #<cr>")
+-- map("n", "|", "<cmd>bp<cr><cmd>bd #<cr>")
+-- map("n", "<c-w>", "<cmd>bp<cr><cmd>bd #<cr>")
 
 map("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>")
 map("n", "<leader>i", "<cmd>lua vim.lsp.buf.implementation()<CR>")
@@ -77,8 +77,8 @@ map({ "n", "v" }, "<c-j>", "<c-w>j")
 map({ "n", "v" }, "<c-k>", "<c-w>k")
 map({ "n", "v" }, "<c-l>", "<c-w>l")
 
-map({ "n", "v" }, "<c-,>", "<cmd>bp<cr>")
-map({ "n", "v" }, "<c-.>", "<cmd>bn<cr>")
+-- map({ "n", "v" }, "<c-,>", "<cmd>bp<cr>")
+-- map({ "n", "v" }, "<c-.>", "<cmd>bn<cr>")
 
 map({ "n", "v" }, "gj", "G")
 map({ "n", "v" }, "gk", "gg")
@@ -98,6 +98,19 @@ map("n", "<leader>h", "<cmd>lua Swap_left()<cr>")
 map("n", "<leader>j", "<cmd>lua Swap_down()<cr>")
 map("n", "<leader>k", "<cmd>lua Swap_up()<cr>")
 map("n", "<leader>l", "<cmd>lua Swap_right()<cr>")
+
+-- tab
+map("n", "<c-,>", ":BufferPrevious<CR>")
+map("n", "<c-.>", ":BufferNext<CR>")
+-- Re-order to previous/next
+map("n", "<c-<>", ":BufferMovePrevious<CR>")
+map("n", "<c->>", ":BufferMoveNext<CR>")
+-- close
+map("n", "<c-w>", ":BufferClose<CR>")
+map("n", "<a-w>", ":BufferCloseAllButCurrent<CR>")
+map("n", "<a-<>", ":BufferCloseBuffersLeft<CR>")
+map("n", "<a->>", ":BufferCloseBuffersRight<CR>")
+map("n", "<a-W>", ":BufferWipeout<CR>")
 
 -- zig related
 map("n", "<leader>mm", "<cmd>!zig-doc %<cr><cr>")
