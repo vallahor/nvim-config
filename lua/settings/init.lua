@@ -43,6 +43,7 @@ config_global.backup = false
 config_global.guicursor = "i:block-iCursor"
 config_global.laststatus = 0
 config_global.showtabline = 2
+config_global.gdefault = true
 
 config_window.signcolumn = "no"
 config_window.relativenumber = true
@@ -62,4 +63,6 @@ set nohlsearch
 au BufEnter *.scm set filetype=query
 au UiEnter * GuiFont! JetBrains Mono:h11
 au UiEnter * GuiTabline 0
+au UiEnter * GuiPopupmenu 0
+" au UiEnter * GuiRenderLigatures 0
 ]])
