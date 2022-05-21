@@ -34,6 +34,7 @@ hi VertSplit        guisp=NONE guifg=#382536  guibg=NONE    ctermfg=231 ctermbg=
 hi Folded           guisp=NONE guifg=#C0AEA0  guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi FoldColumn       guisp=NONE guifg=#C0AEA0  guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi SignColumn       guisp=NONE guifg=#C0AEA0  guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
+"hi IncSearch        guisp=NONE guifg=NONE  guibg=#43282f ctermfg=NONE ctermbg=236  gui=NONE cterm=NONE
 hi IncSearch        guisp=NONE guifg=NONE     guibg=#c64964 ctermfg=231 ctermbg=NONE  gui=NONE cterm=NONE
 hi LineNr           guisp=NONE guifg=#493441  guibg=NONE    ctermfg=95  ctermbg=NONE gui=NONE cterm=NONE
 hi LineNrAbove      guisp=NONE guifg=#493441  guibg=NONE    ctermfg=95  ctermbg=NONE gui=NONE cterm=NONE
@@ -50,7 +51,8 @@ hi PmenuSbar        guisp=NONE guifg=#C0AEA0  guibg=#382536 ctermfg=145 ctermbg=
 hi PmenuThumb       guisp=NONE guifg=#C0AEA0  guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi Question         guisp=NONE guifg=#C0AEA0  guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi QuickFixLine     guisp=NONE guifg=#b1314c  guibg=NONE    ctermfg=131 ctermbg=NONE gui=NONE cterm=NONE
-hi Search           guisp=NONE guifg=#c64964  guibg=NONE ctermfg=167 ctermbg=NONE  gui=NONE cterm=NONE
+hi Search           guisp=NONE guifg=NONE  guibg=#43282f ctermfg=NONE ctermbg=236  gui=NONE cterm=NONE
+"hi Search           guisp=NONE guifg=#c64964  guibg=NONE ctermfg=167 ctermbg=NONE  gui=NONE cterm=NONE
 hi SpecialKey       guisp=NONE guifg=#d16d8a  guibg=NONE    ctermfg=231 ctermbg=NONE  gui=NONE cterm=NONE
 "hi SpellBad         guisp=NONE guifg=#b1314c  guibg=NONE    ctermfg=131 ctermbg=NONE gui=NONE cterm=NONE
 hi SpellBad         guisp=#a1495c guifg=NONE guibg=NONE ctermfg=NONE ctermbg=NONE gui=undercurl cterm=underline
@@ -204,3 +206,9 @@ hi BufferInactiveTarget guisp=NONE guifg=NONE  guibg=#222022    ctermfg=NONE cte
 
 hi BufferTabpages       guisp=NONE guifg=NONE  guibg=#222022    ctermfg=NONE ctermbg=235 gui=NONE cterm=NONE
 hi BufferTabpagesFill   guisp=NONE guifg=NONE  guibg=#222022    ctermfg=NONE ctermbg=235 gui=NONE cterm=NONE
+
+hi Sneak guisp=NONE guifg=NONE  guibg=#43282f ctermfg=NONE ctermbg=236  gui=NONE cterm=NONE
+hi SneakScope guisp=NONE guifg=NONE  guibg=#43282f ctermfg=NONE ctermbg=236  gui=NONE cterm=NONE
+hi SneakLabel guisp=NONE guifg=NONE  guibg=#43282f ctermfg=NONE ctermbg=236  gui=NONE cterm=NONE
+"hi link Sneak None
+"hi IncSearch        guisp=NONE guifg=NONE  guibg=#43282f ctermfg=NONE ctermbg=236  gui=NONE cterm=NONE

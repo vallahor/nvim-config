@@ -72,6 +72,9 @@ map({ "n", "v" }, "F", "<Plug>Sneak_F")
 map({ "n", "v" }, "t", "<Plug>Sneak_t")
 map({ "n", "v" }, "T", "<Plug>Sneak_T")
 
+map("v", "z", "<Plug>Sneak_s")
+map("v", "Z", "<Plug>Sneak_S")
+
 map({ "n", "v" }, "<c-h>", "<c-w>h")
 map({ "n", "v" }, "<c-j>", "<c-w>j")
 map({ "n", "v" }, "<c-k>", "<c-w>k")
@@ -120,10 +123,6 @@ map("n", "<leader>md", "<cmd>!zig-doc-build<cr>")
 vim.cmd([[
 let g:sneak#use_ic_scs = 1 
 
-highlight Sneak guifg=none guibg=none ctermfg=none ctermbg=none
-highlight SneakScope guifg=none guibg=none ctermfg=none ctermbg=none
-highlight SneakLabel guifg=none guibg=none ctermfg=none ctermbg=none
-highlight link Sneak None
 ]])
 
 vim.cmd([[
