@@ -39,7 +39,8 @@ hi LineNr           guisp=NONE guifg=#493441  guibg=NONE    ctermfg=95  ctermbg=
 hi LineNrAbove      guisp=NONE guifg=#493441  guibg=NONE    ctermfg=95  ctermbg=NONE gui=NONE cterm=NONE
 hi LineNrBelow      guisp=NONE guifg=#493441  guibg=NONE    ctermfg=95  ctermbg=NONE gui=NONE cterm=NONE
 hi CursorLineNr     guisp=NONE guifg=#a1495c  guibg=#382536 ctermfg=95  ctermbg=236 gui=NONE cterm=NONE
-hi MatchParen       guisp=NONE guifg=#ff8080  guibg=#040004 ctermfg=210 ctermbg=NONE gui=NONE cterm=NONE
+hi MatchParen       guisp=NONE guifg=#ff8080  guibg=NONE ctermfg=210 ctermbg=NONE gui=NONE cterm=NONE
+"hi MatchParen       guisp=NONE guifg=#ff8080  guibg=#040004 ctermfg=210 ctermbg=NONE gui=NONE cterm=NONE
 hi ModeMsg          guisp=NONE guifg=#C0AEA0  guibg=#382536 ctermfg=145 ctermbg=236 gui=NONE cterm=NONE
 hi MoreMsg          guisp=NONE guifg=#C0AEA0  guibg=#382536 ctermfg=145 ctermbg=236 gui=NONE cterm=NONE
 hi NonText          guisp=NONE guifg=NONE     guibg=NONE    ctermfg=NONE ctermbg=NONE  gui=NONE cterm=NONE
@@ -157,8 +158,10 @@ hi TSFunction            guisp=NONE guifg=#c58d5d guibg=NONE    ctermfg=173 cter
  hi TSFunctionMacro       guisp=NONE guifg=#c58d5d guibg=NONE    ctermfg=173 ctermbg=NONE gui=NONE cterm=NONE
 hi TSMethod              guisp=NONE guifg=#c58d5d guibg=NONE    ctermfg=173 ctermbg=NONE gui=NONE cterm=NONE
 hi TSConstructor         guisp=NONE guifg=#806292 guibg=NONE    ctermfg=96  ctermbg=NONE gui=NONE cterm=NONE
-hi TSField               guisp=NONE guifg=#A8899C guibg=NONE    ctermfg=139 ctermbg=NONE gui=NONE cterm=NONE
-hi TSProperty            guisp=NONE guifg=#A8899C guibg=NONE    ctermfg=139 ctermbg=NONE gui=NONE cterm=NONE
+hi TSField               guisp=NONE guifg=#926C83 guibg=NONE    ctermfg=96 ctermbg=NONE gui=NONE cterm=NONE
+"hi TSField               guisp=NONE guifg=#A8899C guibg=NONE    ctermfg=139 ctermbg=NONE gui=NONE cterm=NONE
+hi TSProperty            guisp=NONE guifg=#926C83 guibg=NONE    ctermfg=96 ctermbg=NONE gui=NONE cterm=NONE
+"hi TSProperty            guisp=NONE guifg=#A8899C guibg=NONE    ctermfg=139 ctermbg=NONE gui=NONE cterm=NONE
 hi TSParameter           guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi TSParameterReference  guisp=NONE guifg=#9F8D8C guibg=NONE    ctermfg=246 ctermbg=NONE gui=NONE cterm=NONE
 hi TSNumber              guisp=NONE guifg=#d16d8a guibg=NONE    ctermfg=168 ctermbg=NONE gui=NONE cterm=NONE
