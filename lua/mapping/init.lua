@@ -122,6 +122,8 @@ let g:sneak#use_ic_scs = 1
 
 highlight Sneak guifg=none guibg=none ctermfg=none ctermbg=none
 highlight SneakScope guifg=none guibg=none ctermfg=none ctermbg=none
+highlight SneakLabel guifg=none guibg=none ctermfg=none ctermbg=none
+highlight link Sneak None
 ]])
 
 vim.cmd([[
