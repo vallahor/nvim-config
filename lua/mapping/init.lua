@@ -14,7 +14,7 @@ global["wordmotion_spaces"] = { "\\w\\@<=-\\w\\@=", "\\." }
 -- map({ "n", "v" }, "<leader>b", "<Plug>WordMotion_b")
 -- map({ "n", "v" }, "<leader>e", "<Plug>WordMotion_e")
 
-map("n", "<leader>gg", "<cmd>LazyGit<cr>")
+map("n", "<leader>lg", "<cmd>LazyGit<cr>")
 
 map("c", "<c-v>", '<c-r>"')
 
@@ -63,6 +63,9 @@ map("n", "<leader>i", "<cmd>lua vim.lsp.buf.implementation()<CR>")
 map("n", "<Leader>d", "<cmd>lua vim.lsp.buf.declaration()<CR>")
 map("n", "K", "<cmd>lua vim.lsp.buf.hover()<CR>")
 map("n", "<leader>r", "<cmd>lua vim.lsp.buf.rename()<CR>")
+
+map("n", "<a-k>", "<cmd>lprev<cr>")
+map("n", "<a-j>", "<cmd>lnext<cr>")
 
 map({ "n", "v" }, "f", "<Plug>Sneak_f")
 map({ "n", "v" }, "F", "<Plug>Sneak_F")
