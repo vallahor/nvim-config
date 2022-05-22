@@ -52,8 +52,8 @@ map({ "n", "v" }, "<s-enter>", "<cmd>w!<CR>")
 map("n", "<leader><enter>", "<cmd>so %<CR>")
 
 map("n", "<c-f>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
-map("n", "<tab>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
-map("n", "<c-s>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
+-- map("n", "<tab>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
+map("n", "<c-/>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
 
 -- map("n", "|", "<cmd>bp<cr><cmd>bd #<cr>")
 -- map("n", "<c-w>", "<cmd>bp<cr><cmd>bd #<cr>")
@@ -106,8 +106,8 @@ map("n", "<leader>l", "<cmd>lua Swap_right()<cr>")
 map("n", "<c-,>", ":BufferPrevious<CR>")
 map("n", "<c-.>", ":BufferNext<CR>")
 -- Re-order to previous/next
-map("n", "<c-<>", ":BufferMovePrevious<CR>")
-map("n", "<c->>", ":BufferMoveNext<CR>")
+map("n", "<a-,>", ":BufferMovePrevious<CR>")
+map("n", "<a-.>", ":BufferMoveNext<CR>")
 -- close
 map("n", "<c-w>", ":BufferClose<CR>")
 map("n", "<a-w>", ":BufferCloseAllButCurrent<CR>")
