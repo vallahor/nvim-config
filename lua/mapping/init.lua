@@ -14,6 +14,8 @@ global["wordmotion_spaces"] = { "\\w\\@<=-\\w\\@=", "\\." }
 -- map({ "n", "v" }, "<leader>b", "<Plug>WordMotion_b")
 -- map({ "n", "v" }, "<leader>e", "<Plug>WordMotion_e")
 
+map("n", "<esc>", "<cmd>nohl<cr>")
+
 map("n", "<leader>lg", "<cmd>LazyGit<cr>")
 
 map("c", "<c-v>", '<c-r>"')
@@ -88,9 +90,6 @@ map({ "n", "v" }, "gk", "gg")
 
 map({ "n", "v" }, "<c-p>", "{")
 map({ "n", "v" }, "<c-n>", "}")
-
-map("n", ")", "<c-w>o")
-map("n", "(", "<c-w>r")
 
 map("n", "<c-=>", "<cmd>vs<cr>")
 map("n", "<c-->", "<cmd>sp<cr>")
