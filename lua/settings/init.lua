@@ -44,6 +44,7 @@ config_global.guicursor = "i:block-iCursor"
 config_global.laststatus = 0
 config_global.showtabline = 2
 config_global.gdefault = true
+config_global.winbar = "%f %m%=%l"
 
 config_window.signcolumn = "no"
 config_window.relativenumber = true
@@ -53,9 +54,11 @@ config_buffer.copyindent = true
 config_buffer.grepprg = "rg"
 config_buffer.swapfile = false
 
+-- vim.g.global["wordmotion_spaces"] = { "\\w\\@<=-\\w\\@=", "\\." }
+
 vim.cmd([[ 
 language en
-set iskeyword-=_
+" set iskeyword-=_
 set cindent
 set cino+=L0,g0,N-s,(0,l1
 " set nohlsearch 

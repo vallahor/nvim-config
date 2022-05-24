@@ -1,14 +1,10 @@
 local map = vim.keymap.set
 
-local global = vim.g
-
 map("n", "<space>", "<nop>")
 map("n", "<c-]>", "<nop>")
 map("n", "<c-[>", "<nop>")
 
 vim.g.mapleader = " "
-
-global["wordmotion_spaces"] = { "\\w\\@<=-\\w\\@=", "\\." }
 
 -- map({ "n", "v" }, "<leader>w", "<Plug>WordMotion_w")
 -- map({ "n", "v" }, "<leader>b", "<Plug>WordMotion_b")
@@ -43,7 +39,7 @@ map("v", "v", "V")
 
 map({ "n", "v" }, "-", "$")
 map({ "n", "v" }, "_", "0")
-map({ "n", "v" }, "0", "^")
+-- map({ "n", "v" }, "0", "^")
 
 map("n", "H", "<c-u>")
 map("n", "L", "<c-d>")
@@ -54,7 +50,6 @@ map({ "n", "v" }, "<s-enter>", "<cmd>w!<CR>")
 map("n", "<leader><enter>", "<cmd>so %<CR>")
 
 map("n", "<c-f>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
--- map("n", "<tab>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
 map("n", "<c-/>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
 
 -- map("n", "|", "<cmd>bp<cr><cmd>bd #<cr>")
@@ -81,9 +76,6 @@ map({ "n", "v" }, "<c-h>", "<c-w>h")
 map({ "n", "v" }, "<c-j>", "<c-w>j")
 map({ "n", "v" }, "<c-k>", "<c-w>k")
 map({ "n", "v" }, "<c-l>", "<c-w>l")
-
--- map({ "n", "v" }, "<c-,>", "<cmd>bp<cr>")
--- map({ "n", "v" }, "<c-.>", "<cmd>bn<cr>")
 
 map({ "n", "v" }, "gj", "G")
 map({ "n", "v" }, "gk", "gg")
