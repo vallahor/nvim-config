@@ -39,7 +39,6 @@ map("v", "v", "V")
 
 map({ "n", "v" }, "-", "$")
 map({ "n", "v" }, "_", "0")
--- map({ "n", "v" }, "0", "^")
 
 map("n", "H", "<c-u>")
 map("n", "L", "<c-d>")
@@ -94,21 +93,18 @@ map("n", "<leader>k", "<cmd>lua Swap_up()<cr>")
 map("n", "<leader>l", "<cmd>lua Swap_right()<cr>")
 
 -- tab
-map("n", "<c-,>", ":BufferPrevious<CR>")
-map("n", "<c-.>", ":BufferNext<CR>")
+map("n", "<c-,>", "<cmd>BufferPrevious<CR>")
+map("n", "<c-.>", "<cmd>BufferNext<CR>")
 -- Re-order to previous/next
-map("n", "<a-,>", ":BufferMovePrevious<CR>")
-map("n", "<a-.>", ":BufferMoveNext<CR>")
+map("n", "<a-,>", "<cmd>BufferMovePrevious<CR>")
+map("n", "<a-.>", "<cmd>BufferMoveNext<CR>")
 -- close
-map("n", "<c-w>", ":BufferClose<CR>")
-map("n", "<a-w>", ":BufferCloseAllButCurrent<CR>")
-map("n", "<a-<>", ":BufferCloseBuffersLeft<CR>")
-map("n", "<a->>", ":BufferCloseBuffersRight<CR>")
-map("n", "<a-W>", ":BufferWipeout<CR>")
-
--- zig related
-map("n", "<leader>mm", "<cmd>!zig-doc %<cr><cr>")
-map("n", "<leader>md", "<cmd>!zig-doc-build<cr>")
+-- map("n", "<c-w>", "<cmd>BufferClose<CR>")
+map("n", "<c-w>", "<cmd>BufDel<CR>")
+map("n", "<a-w>", "<cmd>BufferCloseAllButCurrent<CR>")
+map("n", "<a-<>", "<cmd>BufferCloseBuffersLeft<CR>")
+map("n", "<a->>", "<cmd>BufferCloseBuffersRight<CR>")
+map("n", "<a-W>", "<cmd>BufferWipeout<CR>")
 
 -- sneak
 vim.cmd([[

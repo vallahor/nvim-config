@@ -50,6 +50,7 @@ require("packer").startup(function(use)
 
 	use({ "ziglang/zig.vim" })
 	use({ "romgrk/barbar.nvim" })
+	use({ "ojroques/nvim-bufdel" })
 
 	if packer_bootstrap then
 		require("packer").sync()
