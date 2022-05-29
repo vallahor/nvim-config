@@ -12,6 +12,9 @@ cmp.setup({
 		{ name = "git" },
 	},
 
+	completion = {
+		autocomplete = false,
+	},
 	mapping = {
 		["<C-Space>"] = cmp.mapping.complete(),
 		["<C-q>"] = cmp.mapping.close(),

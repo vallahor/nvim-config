@@ -23,7 +23,7 @@ require("packer").startup(function(use)
 
 	use({ "tpope/vim-surround" })
 	use({ "tpope/vim-repeat" })
-	use({ "justinmk/vim-sneak" })
+	-- use({ "justinmk/vim-sneak" })
 
 	use({ "numToStr/Comment.nvim" })
 
@@ -51,7 +51,9 @@ require("packer").startup(function(use)
 	use({ "ziglang/zig.vim" })
 	use({ "romgrk/barbar.nvim" })
 	use({ "ojroques/nvim-bufdel" })
-
+	use({ "ggandor/lightspeed.nvim" })
+	use({ "chentoast/marks.nvim" })
+	use({ "karb94/neoscroll.nvim" })
 	if packer_bootstrap then
 		require("packer").sync()
 	end

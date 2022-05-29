@@ -44,7 +44,7 @@ config_global.guicursor = "i:block-iCursor"
 config_global.laststatus = 0
 config_global.showtabline = 2
 config_global.gdefault = true
-config_global.winbar = "%f %m%=%l"
+-- config_global.winbar = "%f %m%=%l"
 
 config_window.signcolumn = "no"
 config_window.relativenumber = true

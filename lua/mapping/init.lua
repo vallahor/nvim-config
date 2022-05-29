@@ -6,10 +6,6 @@ map("n", "<c-[>", "<nop>")
 
 vim.g.mapleader = " "
 
--- map({ "n", "v" }, "<leader>w", "<Plug>WordMotion_w")
--- map({ "n", "v" }, "<leader>b", "<Plug>WordMotion_b")
--- map({ "n", "v" }, "<leader>e", "<Plug>WordMotion_e")
-
 map("n", "<esc>", "<cmd>nohl<cr>")
 
 map("n", "<leader>lg", "<cmd>LazyGit<cr>")
@@ -38,7 +34,10 @@ map("v", "*", '"sy/\\V<c-r>s<cr>``')
 map("v", "v", "V")
 
 map({ "n", "v" }, "-", "$")
-map({ "n", "v" }, "_", "0")
+map({ "n", "v" }, "<leader>0", "0")
+map({ "n", "v" }, "0", "^")
+
+map("n", "<leader>c", "<cmd>lua print(vim.fn.winline())<cr>")
 
 map("n", "H", "<c-u>")
 map("n", "L", "<c-d>")
@@ -63,13 +62,13 @@ map("n", "<leader>r", "<cmd>lua vim.lsp.buf.rename()<CR>")
 map("n", "<a-k>", "<cmd>lprev<cr>")
 map("n", "<a-j>", "<cmd>lnext<cr>")
 
-map({ "n", "v" }, "f", "<Plug>Sneak_f")
-map({ "n", "v" }, "F", "<Plug>Sneak_F")
-map({ "n", "v" }, "t", "<Plug>Sneak_t")
-map({ "n", "v" }, "T", "<Plug>Sneak_T")
-
-map("v", "z", "<Plug>Sneak_s")
-map("v", "Z", "<Plug>Sneak_S")
+-- map({ "n", "v" }, "f", "<Plug>Sneak_f")
+-- map({ "n", "v" }, "F", "<Plug>Sneak_F")
+-- map({ "n", "v" }, "t", "<Plug>Sneak_t")
+-- map({ "n", "v" }, "T", "<Plug>Sneak_T")
+--
+-- map("v", "z", "<Plug>Sneak_s")
+-- map("v", "Z", "<Plug>Sneak_S")
 
 map({ "n", "v" }, "<c-h>", "<c-w>h")
 map({ "n", "v" }, "<c-j>", "<c-w>j")
@@ -86,6 +85,7 @@ map("n", "<c-=>", "<cmd>vs<cr>")
 map("n", "<c-->", "<cmd>sp<cr>")
 map("n", "<c-]>", "<cmd>clo<cr>")
 map("n", "<c-0>", "<c-w>o")
+map("n", "<c-9>", "<c-w>r")
 
 map("n", "<leader>h", "<cmd>lua Swap_left()<cr>")
 map("n", "<leader>j", "<cmd>lua Swap_down()<cr>")
@@ -106,11 +106,14 @@ map("n", "<a-<>", "<cmd>BufferCloseBuffersLeft<CR>")
 map("n", "<a->>", "<cmd>BufferCloseBuffersRight<CR>")
 map("n", "<a-W>", "<cmd>BufferWipeout<CR>")
 
--- sneak
-vim.cmd([[
-let g:sneak#use_ic_scs = 1 
+map("v", "z", "<Plug>Lightspeed_s")
+map("v", "Z", "<Plug>Lightspeed_S")
 
-]])
+-- sneak
+-- vim.cmd([[
+-- let g:sneak#use_ic_scs = 1
+--
+-- ]])
 
 vim.cmd([[
 vnoremap J :m '>+1<CR>gv=gv
