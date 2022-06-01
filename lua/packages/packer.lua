@@ -53,7 +53,9 @@ require("packer").startup(function(use)
 	use({ "ojroques/nvim-bufdel" })
 	use({ "ggandor/lightspeed.nvim" })
 	use({ "chentoast/marks.nvim" })
-	use({ "karb94/neoscroll.nvim" })
+	-- use({ "karb94/neoscroll.nvim" })
+	use({ "declancm/cinnamon.nvim" })
+
 	if packer_bootstrap then
 		require("packer").sync()
 	end

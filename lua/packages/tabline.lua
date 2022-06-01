@@ -18,9 +18,9 @@ bufferline.setup({
 
 	icon_separator_active = "▎",
 	icon_separator_inactive = "▎",
-	icon_close_tab = "",
-	icon_close_tab_modified = "[+]",
-	icon_pinned = "車",
+	-- icon_close_tab = "",
+	-- icon_close_tab_modified = "[+]",
+	-- icon_pinned = "車",
 	insert_at_end = false,
 	insert_at_start = false,
 	maximum_padding = 1,

@@ -4,12 +4,12 @@ if not ok then
 end
 
 local ignored_list = {
-	".git",
+	".git/",
 	"%.o",
 	"%.obj",
 	"%.exe",
 	"%.pdb",
-	"zig-cache/",
+	".zig-cache/",
 }
 
 telescope.setup({
