@@ -16,14 +16,13 @@ require("packer").startup(function(use)
 
 	use({ "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" })
 	use({ "nvim-treesitter/nvim-treesitter-textobjects" })
-	use({ "nvim-treesitter/playground" })
+	-- use({ "nvim-treesitter/playground" })
 
 	use({ "chaoren/vim-wordmotion" })
 	use({ "neovim/nvim-lspconfig" })
 
 	use({ "tpope/vim-surround" })
 	use({ "tpope/vim-repeat" })
-	-- use({ "justinmk/vim-sneak" })
 
 	use({ "numToStr/Comment.nvim" })
 
@@ -32,12 +31,12 @@ require("packer").startup(function(use)
 
 	use({ "sbdchd/neoformat" })
 
-	use({ "L3MON4D3/LuaSnip" })
-	use({ "hrsh7th/nvim-cmp" })
-	use({ "hrsh7th/cmp-nvim-lsp" })
-	use({ "hrsh7th/cmp-buffer" })
-	use({ "hrsh7th/cmp-path" })
-	use({ "petertriho/cmp-git" })
+	-- use({ "L3MON4D3/LuaSnip" })
+	-- use({ "hrsh7th/nvim-cmp" })
+	-- use({ "hrsh7th/cmp-nvim-lsp" })
+	-- use({ "hrsh7th/cmp-buffer" })
+	-- use({ "hrsh7th/cmp-path" })
+	-- use({ "petertriho/cmp-git" })
 
 	-- use({ "windwp/nvim-autopairs" })
 	-- use({ "windwp/nvim-ts-autotag" })
@@ -49,12 +48,10 @@ require("packer").startup(function(use)
 	use({ "kyazdani42/nvim-tree.lua" })
 
 	use({ "ziglang/zig.vim" })
-	use({ "romgrk/barbar.nvim" })
+	-- use({ "romgrk/barbar.nvim" }) -- @check if it's used
 	use({ "ojroques/nvim-bufdel" })
 	use({ "ggandor/lightspeed.nvim" })
 	use({ "chentoast/marks.nvim" })
-	-- use({ "karb94/neoscroll.nvim" })
-	use({ "declancm/cinnamon.nvim" })
 
 	if packer_bootstrap then
 		require("packer").sync()

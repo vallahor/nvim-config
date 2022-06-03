@@ -48,7 +48,8 @@ config_global.gdefault = true
 
 config_window.signcolumn = "no"
 config_window.relativenumber = true
-config_window.wrap = false
+-- config_window.wrap = false
+config_window.wrap = true
 config_buffer.autoread = true
 config_buffer.copyindent = true
 config_buffer.grepprg = "rg"

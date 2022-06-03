@@ -31,6 +31,9 @@ map({ "n", "v" }, "-", "$")
 map({ "n", "v" }, "<leader>0", "0")
 map({ "n", "v" }, "0", "^")
 
+map({ "n", "v" }, "j", "gj")
+map({ "n", "v" }, "k", "gk")
+
 map("n", "<leader>c", "<cmd>lua print(vim.fn.winline())<cr>")
 
 map({ "n", "v" }, "<c-enter>", "<cmd>w!<CR>")
