@@ -42,7 +42,7 @@ require("packer").startup(function(use)
 	-- use({ "windwp/nvim-ts-autotag" })
 	-- use({ "JoosepAlviste/nvim-ts-context-commentstring" })
 
-	use({ "kdheepak/lazygit.nvim" })
+	-- use({ "kdheepak/lazygit.nvim" })
 
 	-- use({ "rafcamlet/tabline-framework.nvim" })
 	use({ "kyazdani42/nvim-tree.lua" })
