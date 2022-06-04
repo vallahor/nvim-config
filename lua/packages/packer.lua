@@ -44,14 +44,15 @@ require("packer").startup(function(use)
 
 	use({ "kdheepak/lazygit.nvim" })
 
-	use({ "rafcamlet/tabline-framework.nvim" })
+	-- use({ "rafcamlet/tabline-framework.nvim" })
 	use({ "kyazdani42/nvim-tree.lua" })
 
 	use({ "ziglang/zig.vim" })
-	-- use({ "romgrk/barbar.nvim" }) -- @check if it's used
+	use({ "romgrk/barbar.nvim" })
 	use({ "ojroques/nvim-bufdel" })
 	use({ "ggandor/lightspeed.nvim" })
 	use({ "chentoast/marks.nvim" })
+	use({ "TimUntersberger/neogit" })
 
 	if packer_bootstrap then
 		require("packer").sync()
