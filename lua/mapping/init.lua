@@ -26,6 +26,8 @@ map("v", "p", '"_c<C-r>*<Esc> ')
 
 map("v", "s", "<Plug>VSurround")
 
+map("v", "v", "V")
+
 map("n", "*", "*``")
 map("v", "*", '"sy/\\V<c-r>s<cr>``')
 
@@ -85,6 +87,9 @@ map("n", "<a-W>", "<cmd>BufferWipeout<CR>")
 
 map("v", "z", "<Plug>Lightspeed_s")
 map("v", "Z", "<Plug>Lightspeed_S")
+
+map("n", "<c-;>", "<Plug>(Marks-prev)")
+map("n", "<c-'>", "<Plug>(Marks-next)")
 
 vim.cmd([[
 vnoremap J :m '>+1<CR>gv=gv

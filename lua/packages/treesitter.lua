@@ -6,16 +6,14 @@ nvim_treesitter.setup({
 	ensure_installed = {
 		"lua",
 		"c",
-		-- "cpp",
+		"cpp",
 		"javascript",
 		"typescript",
-		-- "tsx",
 		"zig",
 		"jsonc",
-		-- "css",
-		-- "scss",
 		"query",
-		-- "rust",
+		"python",
+		"rust",
 	},
 	highlight = {
 		enable = true,
@@ -29,9 +27,9 @@ nvim_treesitter.setup({
 	incremental_selection = {
 		enable = true,
 		keymaps = {
-			-- init_selection = "v",
-			node_incremental = "v",
-			node_decremental = "V",
+			init_selection = "m",
+			node_incremental = "m",
+			node_decremental = "M",
 			-- scope_incremental = "<c-/>",
 		},
 	},
