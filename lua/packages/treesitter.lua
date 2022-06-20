@@ -27,9 +27,9 @@ nvim_treesitter.setup({
 	incremental_selection = {
 		enable = true,
 		keymaps = {
-			init_selection = "m",
-			node_incremental = "m",
-			node_decremental = "M",
+			-- init_selection = "m",
+			node_incremental = "v",
+			node_decremental = "V",
 			-- scope_incremental = "<c-/>",
 		},
 	},

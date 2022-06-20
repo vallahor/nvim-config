@@ -6,9 +6,7 @@ vim.g.mapleader = " "
 
 map("n", "<esc>", "<cmd>nohl<cr>")
 
--- map("n", "<leader>lg", "<cmd>LazyGit<cr>")
--- map("n", "<leader>g", "<cmd>Neogit<cr>")
-map("n", "<c-g>", "<cmd>Neogit<cr>")
+map("n", "<c-g>", "<cmd>LazyGit<cr>")
 
 map("c", "<c-v>", '<c-r>"')
 
@@ -25,8 +23,6 @@ map({ "n", "v" }, "c", '"_c')
 map("v", "p", '"_c<C-r>*<Esc> ')
 
 map("v", "s", "<Plug>VSurround")
-
-map("v", "v", "V")
 
 map("n", "*", "*``")
 map("v", "*", '"sy/\\V<c-r>s<cr>``')
@@ -48,9 +44,11 @@ map("n", "<leader><enter>", "<cmd>so %<CR>")
 map("n", "<c-f>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
 map("n", "<c-/>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
 map("n", "<c-\\>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
+map("n", "<c-space>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
 
 map("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>")
 map("n", "K", "<cmd>lua vim.lsp.buf.hover()<CR>")
+map("n", "<leader>r", "<cmd>lua vim.lsp.buf.rename()<CR>")
 
 map({ "n", "v" }, "<c-h>", "<c-w>h")
 map({ "n", "v" }, "<c-j>", "<c-w>j")
