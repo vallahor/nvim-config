@@ -49,6 +49,7 @@ require("packer").startup(function(use)
 	use({ "ziglang/zig.vim" })
 	use({ "ojroques/nvim-bufdel" })
 	use({ "ggandor/lightspeed.nvim" })
+	use({ "terryma/vim-expand-region" })
 
 	if packer_bootstrap then
 		require("packer").sync()

@@ -4,7 +4,7 @@ local config_window = vim.wo
 
 -- config_global.guifont = { "JetBrains Mono:h11" }
 
-local indent = 2
+local indent = 4
 config_global.shiftwidth = indent
 config_global.tabstop = indent
 config_global.softtabstop = indent

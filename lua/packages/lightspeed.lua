@@ -3,7 +3,7 @@ if not ok then
 	return
 end
 
-vim.g.lightspeed_no_default_keymaps = true
+-- vim.g.lightspeed_no_default_keymaps = true
 
 lightspeed.setup({
 	exit_after_idle_msecs = { unlabeled = 300, labeled = nil },

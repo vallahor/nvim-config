@@ -6,3 +6,5 @@ end
 lsp.zls.setup({})
 lsp.sumneko_lua.setup({})
 lsp.pylsp.setup({})
+lsp.gopls.setup({})
+lsp.csharp_ls.setup({})

@@ -14,6 +14,7 @@ nvim_treesitter.setup({
 		"query",
 		"python",
 		"rust",
+		"c_sharp",
 	},
 	highlight = {
 		enable = true,
@@ -24,15 +25,15 @@ nvim_treesitter.setup({
 	indent = {
 		enable = false,
 	},
-	incremental_selection = {
-		enable = true,
-		keymaps = {
-			-- init_selection = "m",
-			node_incremental = "v",
-			node_decremental = "V",
-			-- scope_incremental = "<c-/>",
-		},
-	},
+	-- incremental_selection = {
+	-- 	enable = true,
+	-- 	keymaps = {
+	-- 		-- init_selection = "m",
+	-- 		-- node_incremental = "v",
+	-- 		-- node_decremental = "V",
+	-- 		-- scope_incremental = "<c-/>",
+	-- 	},
+	-- },
 	textobjects = {
 		select = {
 			enable = true,

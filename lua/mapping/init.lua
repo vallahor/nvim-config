@@ -24,6 +24,9 @@ map("v", "p", '"_c<C-r>*<Esc> ')
 
 map("v", "s", "<Plug>VSurround")
 
+map("v", "v", "<Plug>(expand_region_expand)")
+map("v", "V", "<Plug>(expand_region_shrink)")
+
 map("n", "*", "*``")
 map("v", "*", '"sy/\\V<c-r>s<cr>``')
 
@@ -38,6 +41,7 @@ map("n", "<leader>c", "<cmd>lua print(vim.fn.winline())<cr>")
 
 map({ "n", "v" }, "<c-enter>", "<cmd>w!<CR>")
 map({ "n", "v" }, "<s-enter>", "<cmd>w!<CR>")
+map({ "n", "v" }, "<s-enter>", "<Plug>(omnisharp_code_format)")
 
 map("n", "<leader><enter>", "<cmd>so %<CR>")
 
@@ -71,8 +75,10 @@ map("n", "<c-0>", "<c-w>o")
 map("n", "<c-9>", "<c-w>r")
 
 -- tab
-map("n", "<c-,>", "<cmd>BufferPrevious<CR>")
-map("n", "<c-.>", "<cmd>BufferNext<CR>")
+-- map("n", "<c-,>", "<cmd>BufferPrevious<CR>")
+-- map("n", "<c-.>", "<cmd>BufferNext<CR>")
+map("n", "<c-,>", "<cmd>bp<CR>")
+map("n", "<c-.>", "<cmd>bn<CR>")
 -- Re-order to previous/next
 map("n", "<a-,>", "<cmd>BufferMovePrevious<CR>")
 map("n", "<a-.>", "<cmd>BufferMoveNext<CR>")
@@ -88,6 +94,11 @@ map("v", "Z", "<Plug>Lightspeed_S")
 
 map("n", "<c-;>", "<Plug>(Marks-prev)")
 map("n", "<c-'>", "<Plug>(Marks-next)")
+
+map("n", "<leader>h", "<cmd>lua Swap_left()<CR>")
+map("n", "<leader>j", "<cmd>lua Swap_down()<CR>")
+map("n", "<leader>k", "<cmd>lua Swap_up()<CR>")
+map("n", "<leader>l", "<cmd>lua Swap_right()<CR>")
 
 vim.cmd([[
 vnoremap J :m '>+1<CR>gv=gv
