@@ -222,3 +222,5 @@ hi NeogitDiffAdd          guisp=NONE guifg=#b9e0d3 guibg=#1e4839 ctermfg=231 cte
 hi NeogitDiffChange       guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi NeogitDiffDelete       guisp=NONE guifg=#e8b9b8 guibg=#4c232d ctermfg=231 ctermbg=NONE  gui=NONE cterm=NONE
 hi NeogitDiffText         guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
+
+hi cppTSConstructor      guisp=NONE guifg=#c58d5d guibg=NONE    ctermfg=173 ctermbg=NONE gui=NONE cterm=NONE

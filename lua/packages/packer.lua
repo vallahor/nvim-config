@@ -15,8 +15,7 @@ require("packer").startup(function(use)
 	use({ "wbthomason/packer.nvim" })
 
 	use({ "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" })
-	use({ "nvim-treesitter/nvim-treesitter-textobjects" })
-	-- use({ "nvim-treesitter/playground" })
+	use({ "nvim-treesitter/playground" })
 
 	use({ "chaoren/vim-wordmotion" })
 	use({ "neovim/nvim-lspconfig" })
@@ -49,7 +48,12 @@ require("packer").startup(function(use)
 	use({ "ziglang/zig.vim" })
 	use({ "ojroques/nvim-bufdel" })
 	use({ "ggandor/lightspeed.nvim" })
-	use({ "terryma/vim-expand-region" })
+	use({ "ray-x/go.nvim" })
+	use({ "rebelot/heirline.nvim" })
+	use({
+		"lewis6991/gitsigns.nvim",
+		tag = "release", -- To use the latest release
+	})
 
 	if packer_bootstrap then
 		require("packer").sync()

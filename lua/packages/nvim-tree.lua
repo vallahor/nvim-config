@@ -2,8 +2,8 @@ local ok, nvim_tree = pcall(require, "nvim-tree")
 if not ok then
 	return
 end
-vim.g.nvim_tree_special_files = {}
-vim.g.nvim_tree_add_trailing = 1
+-- vim.g.nvim_tree_special_files = {}
+-- vim.g.nvim_tree_add_trailing = 0
 -- vim.g.nvim_tree_show_icons = {
 -- 	git = 1,
 -- 	folders = 1,
@@ -23,7 +23,7 @@ nvim_tree.setup({ -- BEGIN_DEFAULT_OPTS
 	sort_by = "name",
 	update_cwd = false,
 	view = {
-		width = 35,
+		width = 30,
 		height = 30,
 		hide_root_folder = true,
 		side = "left",
@@ -37,7 +37,7 @@ nvim_tree.setup({ -- BEGIN_DEFAULT_OPTS
 	},
 	renderer = {
 		indent_markers = {
-			enable = true,
+			enable = false,
 			icons = {
 				corner = "└ ",
 				edge = "│ ",
@@ -65,12 +65,6 @@ nvim_tree.setup({ -- BEGIN_DEFAULT_OPTS
 	diagnostics = {
 		enable = false,
 		show_on_dirs = false,
-		icons = {
-			hint = "",
-			info = "",
-			warning = "",
-			error = "",
-		},
 	},
 	filters = {
 		dotfiles = false,
@@ -78,7 +72,7 @@ nvim_tree.setup({ -- BEGIN_DEFAULT_OPTS
 		exclude = {},
 	},
 	git = {
-		enable = true,
+		enable = false,
 		ignore = false,
 		timeout = 400,
 	},

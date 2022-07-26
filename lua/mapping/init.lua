@@ -10,7 +10,7 @@ map("n", "<c-g>", "<cmd>LazyGit<cr>")
 
 map("c", "<c-v>", '<c-r>"')
 
-map("n", "<leader>f", "<cmd>NvimTreeToggle<cr>")
+map("n", "<c-s>", "<cmd>NvimTreeToggle<cr>")
 
 map("n", "<leader><bs>", "<cmd>TSHighlightCapturesUnderCursor<cr>")
 
@@ -41,7 +41,6 @@ map("n", "<leader>c", "<cmd>lua print(vim.fn.winline())<cr>")
 
 map({ "n", "v" }, "<c-enter>", "<cmd>w!<CR>")
 map({ "n", "v" }, "<s-enter>", "<cmd>w!<CR>")
-map({ "n", "v" }, "<s-enter>", "<Plug>(omnisharp_code_format)")
 
 map("n", "<leader><enter>", "<cmd>so %<CR>")
 
@@ -65,8 +64,8 @@ map({ "n", "v" }, "<c-n>", "}")
 map("n", "H", "<c-u>zz")
 map("n", "L", "<c-d>zz")
 
-map("n", "<c-t>", "zt")
-map("n", "<c-b>", "zb")
+-- map("n", "<c-t>", "zt")
+-- map("n", "<c-b>", "zb")
 
 map("n", "<c-=>", "<cmd>vs<cr>")
 map("n", "<c-->", "<cmd>sp<cr>")

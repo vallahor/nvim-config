@@ -69,4 +69,12 @@ au UiEnter * GuiFont! JetBrains Mono:h11
 au UiEnter * GuiTabline 0
 au UiEnter * GuiPopupmenu 0
 " au UiEnter * GuiRenderLigatures 0
+
+autocmd FileType python setlocal shiftwidth=2 softtabstop=2 expandtab
+autocmd FileType javascript setlocal shiftwidth=2 softtabstop=2 expandtab
+autocmd FileType typescript setlocal shiftwidth=2 softtabstop=2 expandtab
+autocmd FileType json setlocal shiftwidth=2 softtabstop=2 expandtab
 ]])
+
+-- Run gofmt + goimport on save
+vim.api.nvim_exec([[ autocmd BufWritePre *.go :silent! lua require('go.format').goimport() ]], false)

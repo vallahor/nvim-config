@@ -25,34 +25,13 @@ nvim_treesitter.setup({
 	indent = {
 		enable = false,
 	},
-	-- incremental_selection = {
-	-- 	enable = true,
-	-- 	keymaps = {
-	-- 		-- init_selection = "m",
-	-- 		-- node_incremental = "v",
-	-- 		-- node_decremental = "V",
-	-- 		-- scope_incremental = "<c-/>",
-	-- 	},
-	-- },
-	textobjects = {
-		select = {
-			enable = true,
-			lookahead = true,
-			keymaps = {
-				["af"] = "@function.outer",
-				["if"] = "@function.inner",
-				["ac"] = "@class.outer",
-				["ic"] = "@class.inner",
-			},
-		},
-		swap = {
-			enable = true,
-			swap_next = {
-				["<c-5>"] = "@parameter.inner",
-			},
-			swap_previous = {
-				["<c-4>"] = "@parameter.inner",
-			},
+	incremental_selection = {
+		enable = true,
+		keymaps = {
+			-- init_selection = "m",
+			node_incremental = "v",
+			node_decremental = "V",
+			scope_incremental = "<c-/>",
 		},
 	},
 	playground = {
