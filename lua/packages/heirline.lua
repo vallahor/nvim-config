@@ -52,6 +52,13 @@ local FileType = {
 	end,
 }
 
+local FileFormat = {
+	provider = function()
+		local fmt = vim.bo.fileformat
+		return "[" .. fmt:upper() .. "]"
+	end,
+}
+
 FileNameBlock = utils.insert(
 	FileNameBlock,
 	utils.insert(FileName), -- a new table where FileName is a child of FileNameModifier
@@ -146,6 +153,8 @@ local statusline = {
 	Ruler,
 	Space,
 	FileType,
+	Space,
+	FileFormat,
 	Space,
 }
 
