@@ -14,46 +14,35 @@ end
 require("packer").startup(function(use)
 	use({ "wbthomason/packer.nvim" })
 
+	-- @languages
 	use({ "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" })
-	use({ "nvim-treesitter/playground" })
+	use({ "ziglang/zig.vim" })
+	use({ "ray-x/go.nvim" })
 
+	-- @motion
 	use({ "chaoren/vim-wordmotion" })
-	use({ "neovim/nvim-lspconfig" })
-
+	use({ "ggandor/lightspeed.nvim" })
 	use({ "tpope/vim-surround" })
 	use({ "tpope/vim-repeat" })
 
-	use({ "numToStr/Comment.nvim" })
-
-	use({ "nvim-lua/plenary.nvim" })
-	use({ "nvim-telescope/telescope.nvim" })
-
-	use({ "sbdchd/neoformat" })
-
-	-- use({ "L3MON4D3/LuaSnip" })
-	-- use({ "hrsh7th/nvim-cmp" })
-	-- use({ "hrsh7th/cmp-nvim-lsp" })
-	-- use({ "hrsh7th/cmp-buffer" })
-	-- use({ "hrsh7th/cmp-path" })
-	-- use({ "petertriho/cmp-git" })
-
-	use({ "windwp/nvim-autopairs" })
-	-- use({ "windwp/nvim-ts-autotag" })
-	-- use({ "JoosepAlviste/nvim-ts-context-commentstring" })
-
-	use({ "kdheepak/lazygit.nvim" })
-
+	-- @ui
+	use({ "romgrk/barbar.nvim" })
+	use({ "ojroques/nvim-bufdel" })
+	use({ "rebelot/heirline.nvim" })
+	use({ "lewis6991/gitsigns.nvim", tag = "release" })
 	use({ "kyazdani42/nvim-tree.lua" })
 
-	use({ "ziglang/zig.vim" })
-	use({ "ojroques/nvim-bufdel" })
-	use({ "ggandor/lightspeed.nvim" })
-	use({ "ray-x/go.nvim" })
-	use({ "rebelot/heirline.nvim" })
-	use({
-		"lewis6991/gitsigns.nvim",
-		tag = "release", -- To use the latest release
-	})
+	use({ "sbdchd/neoformat" })
+	use({ "TimUntersberger/neogit", requires = "nvim-lua/plenary.nvim" })
+
+	-- @check
+	-- use({ "nvim-lua/plenary.nvim" })
+	-- use({ "nvim-telescope/telescope.nvim" })
+	-- use({ "windwp/nvim-autopairs" })
+	-- use({ "kdheepak/lazygit.nvim" })
+	-- use({ "neovim/nvim-lspconfig" })
+	-- use({ "nvim-treesitter/playground" })
+	-- use({ "numToStr/Comment.nvim" })
 
 	if packer_bootstrap then
 		require("packer").sync()

@@ -31,7 +31,8 @@ config_global.lazyredraw = true
 config_global.smartcase = true
 config_global.inccommand = "nosplit"
 config_global.backspace = "indent,eol,start"
-config_global.timeoutlen = 2000
+config_global.timeoutlen = 0
+-- config_global.timeoutlen = 2000
 config_global.shortmess = "aoOtTIc"
 config_global.mouse = "a"
 config_global.mousefocus = true
@@ -59,8 +60,8 @@ vim.cmd([[
 language en
 " set iskeyword-=_
 set cindent
-set cino+=L0,g0,N-s,(0,l1
-" set nohlsearch 
+"set cino+=L0,g0,N-s,(0,l1
+"set nohlsearch 
 
 let g:wordmotion_spaces = [ "\\w\\@<=-\\w\\@=", "\\." ]
 
@@ -68,7 +69,6 @@ au BufEnter *.scm set filetype=query
 au UiEnter * GuiFont! JetBrains Mono:h11
 au UiEnter * GuiTabline 0
 au UiEnter * GuiPopupmenu 0
-" au UiEnter * GuiRenderLigatures 0
 
 autocmd FileType python setlocal shiftwidth=2 softtabstop=2 expandtab
 autocmd FileType javascript setlocal shiftwidth=2 softtabstop=2 expandtab

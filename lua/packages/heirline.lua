@@ -48,19 +48,20 @@ local FileFlags = {
 
 local FileType = {
 	provider = function()
-		return "[" .. string.upper(vim.bo.filetype) .. "]"
+		return " [" .. string.upper(vim.bo.filetype) .. "]"
 	end,
 }
 
 local FileFormat = {
 	provider = function()
 		local fmt = vim.bo.fileformat
-		return "[" .. fmt:upper() .. "]"
+		return " [" .. fmt:upper() .. "]"
 	end,
 }
 
 FileNameBlock = utils.insert(
 	FileNameBlock,
+	Space,
 	utils.insert(FileName), -- a new table where FileName is a child of FileNameModifier
 	Space,
 	{ provider = "%<" }
@@ -76,7 +77,7 @@ local Git = {
 
 	{ -- git branch name
 		provider = function(self)
-			return "[" .. self.status_dict.head .. "]"
+			return " [" .. self.status_dict.head .. "]"
 		end,
 	},
 }
@@ -139,23 +140,19 @@ local viMode = {
 local Ruler = {
 	-- %l = current line number
 	-- %L = number of lines in the buffer
-	provider = "%7(%l/%3L%)",
+	-- provider = "%7(%l/%3L%)",
+	provider = "%7(%l/%L%)",
 }
 
 local statusline = {
 	viMode,
-	Space,
 	Git,
-	Space,
 	FileNameBlock,
 	FileFlags,
 	{ provider = "%=" },
 	Ruler,
-	Space,
 	FileType,
-	Space,
 	FileFormat,
-	Space,
 }
 
 heirline.setup(statusline)
