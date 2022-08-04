@@ -6,8 +6,8 @@ vim.g.mapleader = " "
 
 map("n", "<esc>", "<cmd>nohl<cr>")
 
--- map("n", "<c-g>", "<cmd>LazyGit<cr>")
-map("n", "<c-g>", "<cmd>Neogit<cr>")
+map("n", "<c-g>", "<cmd>LazyGit<cr>")
+-- map("n", "<c-g>", "<cmd>Neogit<cr>")
 
 map("c", "<c-v>", '<c-r>"')
 

@@ -33,13 +33,13 @@ require("packer").startup(function(use)
 	use({ "kyazdani42/nvim-tree.lua" })
 
 	use({ "sbdchd/neoformat" })
-	use({ "TimUntersberger/neogit", requires = "nvim-lua/plenary.nvim" })
+	use({ "kdheepak/lazygit.nvim" })
+	-- use({ "TimUntersberger/neogit", requires = "nvim-lua/plenary.nvim" })
 
 	-- @check
 	-- use({ "nvim-lua/plenary.nvim" })
 	-- use({ "nvim-telescope/telescope.nvim" })
 	-- use({ "windwp/nvim-autopairs" })
-	-- use({ "kdheepak/lazygit.nvim" })
 	-- use({ "neovim/nvim-lspconfig" })
 	-- use({ "nvim-treesitter/playground" })
 	-- use({ "numToStr/Comment.nvim" })

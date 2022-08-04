@@ -41,7 +41,7 @@ config_global.magic = true
 config_global.cursorline = true
 config_global.scrolloff = 3
 config_global.backup = false
-config_global.guicursor = "i:block-iCursor"
+-- config_global.guicursor = "i:block-iCursor"
 -- config_global.showtabline = 2
 config_global.gdefault = true
 -- config_global.laststatus = 0
@@ -49,7 +49,8 @@ config_global.gdefault = true
 -- config_global.winbar = " %f %m%=%l "
 
 config_window.signcolumn = "no"
-config_window.relativenumber = true
+config_window.number = true
+-- config_window.relativenumber = true
 config_window.wrap = true
 config_buffer.autoread = true
 config_buffer.copyindent = true
@@ -57,7 +58,7 @@ config_buffer.grepprg = "rg"
 config_buffer.swapfile = false
 
 vim.cmd([[ 
-language en
+"language en
 " set iskeyword-=_
 set cindent
 "set cino+=L0,g0,N-s,(0,l1
@@ -65,10 +66,10 @@ set cindent
 
 let g:wordmotion_spaces = [ "\\w\\@<=-\\w\\@=", "\\." ]
 
-au BufEnter *.scm set filetype=query
-au UiEnter * GuiFont! JetBrains Mono:h11
-au UiEnter * GuiTabline 0
-au UiEnter * GuiPopupmenu 0
+" au BufEnter *.scm set filetype=query
+" au UiEnter * GuiFont! JetBrains Mono:h11
+" au UiEnter * GuiTabline 0
+" au UiEnter * GuiPopupmenu 0
 
 autocmd FileType python setlocal shiftwidth=2 softtabstop=2 expandtab
 autocmd FileType javascript setlocal shiftwidth=2 softtabstop=2 expandtab

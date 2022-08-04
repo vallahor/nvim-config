@@ -14,7 +14,7 @@ nvim_treesitter.setup({
 		"query",
 		"python",
 		"rust",
-		"c_sharp",
+		"nix",
 	},
 	highlight = {
 		enable = true,

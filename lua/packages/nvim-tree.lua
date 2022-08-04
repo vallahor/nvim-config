@@ -46,6 +46,11 @@ nvim_tree.setup({ -- BEGIN_DEFAULT_OPTS
 		},
 		icons = {
 			webdev_colors = false,
+			show = {
+			    folder = false,
+			    file = false,
+			    folder_arrow = true,
+            },
 		},
 	},
 	hijack_directories = {
