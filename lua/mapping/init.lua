@@ -7,7 +7,6 @@ vim.g.mapleader = " "
 map("n", "<esc>", "<cmd>nohl<cr>")
 
 map("n", "<c-g>", "<cmd>LazyGit<cr>")
--- map("n", "<c-g>", "<cmd>Neogit<cr>")
 
 map("c", "<c-v>", '<c-r>"')
 
@@ -87,10 +86,10 @@ map("n", "<c-0>", "<c-w>o")
 map("n", "<c-9>", "<c-w>r")
 
 -- tab
--- map("n", "<c-,>", "<cmd>BufferPrevious<CR>")
--- map("n", "<c-.>", "<cmd>BufferNext<CR>")
-map("n", "<c-,>", "<cmd>bp<CR>")
-map("n", "<c-.>", "<cmd>bn<CR>")
+map("n", "<c-,>", "<cmd>BufferPrevious<CR>")
+map("n", "<c-.>", "<cmd>BufferNext<CR>")
+-- map("n", "<c-,>", "<cmd>bp<CR>")
+-- map("n", "<c-.>", "<cmd>bn<CR>")
 -- Re-order to previous/next
 map("n", "<a-,>", "<cmd>BufferMovePrevious<CR>")
 map("n", "<a-.>", "<cmd>BufferMoveNext<CR>")

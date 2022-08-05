@@ -2,9 +2,11 @@ local ok, nvim_treesitter = pcall(require, "nvim-treesitter.configs")
 if not ok then
 	return
 end
+require 'nvim-treesitter.install'.compilers = { 'clang++'} 
 nvim_treesitter.setup({
 	ensure_installed = {
 		"lua",
+		"bash",
 		"c",
 		"cpp",
 		"javascript",

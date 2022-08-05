@@ -34,7 +34,6 @@ require("packer").startup(function(use)
 
 	use({ "sbdchd/neoformat" })
 	use({ "kdheepak/lazygit.nvim" })
-	-- use({ "TimUntersberger/neogit", requires = "nvim-lua/plenary.nvim" })
 
 	-- @check
 	-- use({ "nvim-lua/plenary.nvim" })
