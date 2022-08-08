@@ -17,6 +17,7 @@ nvim_treesitter.setup({
 		"python",
 		"rust",
 		"nix",
+        "go",
 	},
 	highlight = {
 		enable = true,

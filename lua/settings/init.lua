@@ -57,12 +57,10 @@ config_buffer.copyindent = true
 config_buffer.grepprg = "rg"
 config_buffer.swapfile = false
 
-vim.cmd([[ 
-"language en
+vim.cmd([[
 set iskeyword-=_
 set cindent
 "set cino+=L0,g0,N-s,(0,l1
-"set nohlsearch 
 
 let g:wordmotion_spaces = [ "\\w\\@<=-\\w\\@=", "\\." ]
 
@@ -75,7 +73,15 @@ autocmd FileType python setlocal shiftwidth=2 softtabstop=2 expandtab
 autocmd FileType javascript setlocal shiftwidth=2 softtabstop=2 expandtab
 autocmd FileType typescript setlocal shiftwidth=2 softtabstop=2 expandtab
 autocmd FileType json setlocal shiftwidth=2 softtabstop=2 expandtab
+autocmd FileType nix setlocal shiftwidth=2 softtabstop=2 expandtab
+
+" Highlight extra whitespace.
+" http://vim.wikia.com/wiki/Highlight_unwanted_spaces
+highlight ExtraWhitespace ctermbg=lightred guibg=lightred
+" Show trailing whitespace and spaces before a tab:
+match ExtraWhitespace /\s\+$\| \+\ze\t/
 ]])
 
 -- Run gofmt + goimport on save
 vim.api.nvim_exec([[ autocmd BufWritePre *.go :silent! lua require('go.format').goimport() ]], false)
+
