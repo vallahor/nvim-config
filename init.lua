@@ -17,7 +17,6 @@ require("packer").startup(function(use)
     -- @languages
     use({ "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" })
     -- use({ "ziglang/zig.vim" })
-    -- use({ "ray-x/go.nvim" })
 
     use({ "ggandor/lightspeed.nvim" })
     use({ "kdheepak/lazygit.nvim" })
@@ -43,7 +42,6 @@ config_global.smartindent = true
 config_global.autoindent = true
 config_global.hidden = true
 config_global.ignorecase = true
-config_global.joinspaces = false
 config_global.shiftround = true
 config_global.splitright = true
 config_global.splitbelow = true
@@ -51,7 +49,6 @@ config_global.termguicolors = true
 config_global.wildmode = "longest,list:longest,full"
 config_global.clipboard = "unnamedplus"
 config_global.encoding = "utf8"
-config_global.updatetime = 100
 config_global.pumheight = 10
 config_global.switchbuf = "useopen,split"
 config_global.magic = true
@@ -70,7 +67,7 @@ config_global.scrolloff = 3
 config_global.backup = false
 -- config_global.guicursor = "i:block-iCursor"
 config_global.gdefault = true
-config_global.cmdheight = 0
+-- config_global.cmdheight = 1
 
 config_window.signcolumn = "no"
 config_window.number = true
@@ -82,7 +79,6 @@ config_buffer.swapfile = false
 
 
 local ok, nvim_treesitter = pcall(require, "nvim-treesitter.configs")
---require 'nvim-treesitter.install'.compilers = { 'clang++'} 
 nvim_treesitter.setup({
     ensure_installed = {
         "lua",
@@ -161,8 +157,7 @@ map({ "i", "c" }, "<c-bs>", "<c-w>")
 map("n", "x", '"_x')
 map("v", "x", '"_d')
 map({ "n", "v" }, "c", '"_c')
--- map("v", "p", '"_c<C-r>*<Esc> ')
--- map("v", "p", 'xP')
+map("v", "p", '"_dP')
 
 map("n", "*", "*``")
 map("v", "*", '"sy/\\V<c-r>s<cr>``')
@@ -212,7 +207,6 @@ map("n", "<c-9>", "<c-w>r")
 map("v", "s", "<Plug>Lightspeed_s")
 map("v", "S", "<Plug>Lightspeed_S")
 
-
 vim.cmd([[
 vnoremap J :m '>+1<CR>gv=gv
 vnoremap K :m '<-2<CR>gv=gv
@@ -240,7 +234,4 @@ autocmd FileType javascript setlocal shiftwidth=2 softtabstop=2 expandtab
 autocmd FileType typescript setlocal shiftwidth=2 softtabstop=2 expandtab
 autocmd FileType json setlocal shiftwidth=2 softtabstop=2 expandtab
 
-autocmd BufWritePre *.go :silent! lua require('go.format').goimport() 
 ]])
--- Run gofmt + goimport on save
---vim.api.nvim_exec([[ autocmd BufWritePre *.go :silent! lua require('go.format').goimport() ]], false)
