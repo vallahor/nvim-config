@@ -3,15 +3,6 @@ if not ok then
 	return
 end
 
-local ignored_list = {
-	".git/",
-	"%.o",
-	"%.obj",
-	"%.exe",
-	"%.pdb",
-	".zig-cache/",
-}
-
 telescope.setup({
 	defaults = {
 		mappings = {
@@ -31,6 +22,5 @@ telescope.setup({
 		selection_strategy = "reset",
 		path_display = { "absolute" },
 		borderchars = { "─", "│", "─", "│", "┌", "┐", "┘", "└" },
-		file_ignore_patterns = ignored_list,
 	},
 })

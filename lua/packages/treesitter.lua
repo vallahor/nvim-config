@@ -2,7 +2,7 @@ local ok, nvim_treesitter = pcall(require, "nvim-treesitter.configs")
 if not ok then
 	return
 end
-require 'nvim-treesitter.install'.compilers = { 'clang++'} 
+require 'nvim-treesitter.install'.compilers = { 'clang++'}
 nvim_treesitter.setup({
 	ensure_installed = {
 		"lua",
@@ -31,9 +31,9 @@ nvim_treesitter.setup({
 	incremental_selection = {
 		enable = true,
 		keymaps = {
-			-- init_selection = "m",
-			node_incremental = "v",
-			node_decremental = "V",
+			init_selection = "m",
+			node_incremental = "m",
+			node_decremental = "M",
 			scope_incremental = "<c-/>",
 		},
 	},
@@ -55,6 +55,9 @@ nvim_treesitter.setup({
 			show_help = "?",
 		},
 	},
+    context_commentstring = {
+        enable = true
+    }
 })
 
 require("nvim-treesitter.highlight").set_custom_captures({

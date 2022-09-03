@@ -1,31 +1,29 @@
+-- MAPPING --
+
 local map = vim.keymap.set
 
 map("n", "<space>", "<nop>")
 
 vim.g.mapleader = " "
 
-map("n", "<esc>", "<cmd>nohl<cr>")
+map("n", "<c-w>", "<cmd>BufDel<CR>")
+
+map("n", "<esc>", "<cmd>nohl<cr><esc>")
 
 map("n", "<c-g>", "<cmd>LazyGit<cr>")
+map("n", "<c-s>", "<cmd>NvimTreeToggle<cr>")
+map("n", "<c-e>", "<cmd>NvimTreeFocus<cr>")
 
 map("c", "<c-v>", '<c-r>"')
 
-map("n", "<c-s>", "<cmd>NvimTreeToggle<cr>")
-
-map("n", "<leader><bs>", "<cmd>TSHighlightCapturesUnderCursor<cr>")
+map("v", "v", "V")
 
 map({ "i", "c" }, "<c-bs>", "<c-w>")
 
--- map("n", "<Leader><Leader>", "<c-^>")
 map("n", "x", '"_x')
 map("v", "x", '"_d')
 map({ "n", "v" }, "c", '"_c')
-map("v", "p", '"_c<C-r>*<Esc> ')
-
-map("v", "s", "<Plug>VSurround")
-
-map("v", "v", "<Plug>(expand_region_expand)")
-map("v", "V", "<Plug>(expand_region_shrink)")
+map("v", "p", '"_dP')
 
 map("n", "*", "*``")
 map("v", "*", '"sy/\\V<c-r>s<cr>``')
@@ -40,38 +38,28 @@ map({ "n", "v" }, "k", "gk")
 map({ "n", "v" }, "<c-enter>", "<cmd>w!<CR>")
 map({ "n", "v" }, "<s-enter>", "<cmd>w!<CR>")
 
+map("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
 map("n", "<f5>", "<cmd>so %<CR>")
 
 map("n", "<c-f>", ":e ")
+map("n", "<c-space>", ":b ")
 
--- map("n", "<c-f>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
--- map("n", "<c-/>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
--- map("n", "<c-\\>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
--- map("n", "<c-space>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
-
--- map("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>")
--- map("n", "K", "<cmd>lua vim.lsp.buf.hover()<CR>")
--- map("n", "<leader>r", "<cmd>lua vim.lsp.buf.rename()<CR>")
+-- map("n", "<c-c>", "<cmd>!kind %:p<cr>")
+map("n", "<c-c>", "<cmd>!kind2 run %:p<cr>")
 
 map({ "n", "v" }, "<c-h>", "<c-w>h")
 map({ "n", "v" }, "<c-j>", "<c-w>j")
 map({ "n", "v" }, "<c-k>", "<c-w>k")
 map({ "n", "v" }, "<c-l>", "<c-w>l")
 
-map({ "n", "v" }, "<a-=>", "<cmd>vertical resize +5<cr>")
-map({ "n", "v" }, "<a-->", "<cmd>vertical resize -5<cr>")
-
-map({ "n", "v" }, "+", "<cmd>resize +5<cr>")
-map({ "n", "v" }, "_", "<cmd>resize -5<cr>")
-
-map({ "n", "v" }, "[", "{")
-map({ "n", "v" }, "]", "}")
+-- map({ "n", "v" }, "[", "{")
+-- map({ "n", "v" }, "]", "}")
 
 -- map({ "n", "v" }, "<c-n>", "}")
 -- map({ "n", "v" }, "<c-p>", "{")
 --
-map({ "n", "v" }, "{", "<c-u>")
-map({ "n", "v" }, "}", "<c-d>")
+-- map({ "n", "v" }, "{", "<c-u>")
+-- map({ "n", "v" }, "}", "<c-d>")
 
 -- map("n", "H", "<c-u>zz")
 -- map("n", "L", "<c-d>zz")
@@ -84,6 +72,26 @@ map("n", "<c-->", "<cmd>sp<cr>")
 map("n", "<c-]>", "<cmd>clo<cr>")
 map("n", "<c-0>", "<c-w>o")
 map("n", "<c-9>", "<c-w>r")
+
+map("v", "z", "<Plug>Lightspeed_s")
+map("v", "Z", "<Plug>Lightspeed_S")
+
+map("v", "s", "<Plug>VSurround")
+
+map("n", "<c-p>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
+map("n", "<c-/>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
+map("n", "<c-\\>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
+map("n", "<c-space>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
+
+map("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>")
+map("n", "K", "<cmd>lua vim.lsp.buf.hover()<CR>")
+map("n", "<leader>r", "<cmd>lua vim.lsp.buf.rename()<CR>")
+
+map({ "n", "v" }, "<a-=>", "<cmd>vertical resize +5<cr>")
+map({ "n", "v" }, "<a-->", "<cmd>vertical resize -5<cr>")
+
+map({ "n", "v" }, "+", "<cmd>resize +5<cr>")
+map({ "n", "v" }, "_", "<cmd>resize -5<cr>")
 
 -- tab
 map("n", "<c-,>", "<cmd>BufferPrevious<CR>")
@@ -100,9 +108,6 @@ map("n", "<a-<>", "<cmd>BufferCloseBuffersLeft<CR>")
 map("n", "<a->>", "<cmd>BufferCloseBuffersRight<CR>")
 map("n", "<a-W>", "<cmd>BufferWipeout<CR>")
 
-map("v", "z", "<Plug>Lightspeed_s")
-map("v", "Z", "<Plug>Lightspeed_S")
-
 map("n", "<leader>h", "<cmd>lua Swap_left()<CR>")
 map("n", "<leader>j", "<cmd>lua Swap_down()<CR>")
 map("n", "<leader>k", "<cmd>lua Swap_up()<CR>")
@@ -111,8 +116,6 @@ map("n", "<leader>l", "<cmd>lua Swap_right()<CR>")
 vim.cmd([[
 vnoremap J :m '>+1<CR>gv=gv
 vnoremap K :m '<-2<CR>gv=gv
-
-
 let g:lightspeed_last_motion = ''
 augroup lightspeed_last_motion
 autocmd!
@@ -121,4 +124,26 @@ autocmd User LightspeedFtEnter let g:lightspeed_last_motion = 'ft'
 augroup end
 map <expr> ; g:lightspeed_last_motion == 'sx' ? "<Plug>Lightspeed_;_sx" : "<Plug>Lightspeed_;_ft"
 map <expr> , g:lightspeed_last_motion == 'sx' ? "<Plug>Lightspeed_,_sx" : "<Plug>Lightspeed_,_ft"
+"" Highlight extra whitespace.
+"" http://vim.wikia.com/wiki/Highlight_unwanted_spaces
+"highlight ExtraWhitespace ctermbg=lightred guibg=lightred
+"" Show trailing whitespace and spaces before a tab:
+"match ExtraWhitespace /\s\+$\| \+\ze\t/
+" au BufEnter *.scm set filetype=query
+autocmd FileType python setlocal shiftwidth=2 softtabstop=2 expandtab
+autocmd FileType javascript setlocal shiftwidth=2 softtabstop=2 expandtab
+autocmd FileType typescript setlocal shiftwidth=2 softtabstop=2 expandtab
+autocmd FileType json setlocal shiftwidth=2 softtabstop=2 expandtab
+autocmd FileType kind setlocal shiftwidth=2 softtabstop=2 expandtab
+autocmd FileType kind setlocal syntax=on
+autocmd BufEnter *.kind2 set ft=kind
+ autocmd BufEnter *.kind2 setlocal shiftwidth=2 softtabstop=2 expandtab
+"autocmd FileType kind2 setlocal shiftwidth=2 softtabstop=2 expandtab
+" autocmd FileType kind2 setlocal syntax=on
+fun! TrimWhitespace()
+	let l:save = winsaveview()
+	keeppatterns %s/\s\+$//e
+	call winrestview(l:save)
+endfun
+autocmd BufWritePre * :call TrimWhitespace()
 ]])

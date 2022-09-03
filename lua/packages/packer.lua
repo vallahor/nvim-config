@@ -16,8 +16,7 @@ require("packer").startup(function(use)
 
 	-- @languages
 	use({ "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" })
-	use({ "ziglang/zig.vim" })
-	use({ "ray-x/go.nvim" })
+	-- use({ "ziglang/zig.vim" })
 
 	-- @motion
 	use({ "chaoren/vim-wordmotion" })
@@ -36,12 +35,14 @@ require("packer").startup(function(use)
 	use({ "kdheepak/lazygit.nvim" })
 
 	-- @check
-	-- use({ "nvim-lua/plenary.nvim" })
-	-- use({ "nvim-telescope/telescope.nvim" })
-	-- use({ "windwp/nvim-autopairs" })
-	-- use({ "neovim/nvim-lspconfig" })
-	-- use({ "nvim-treesitter/playground" })
-	-- use({ "numToStr/Comment.nvim" })
+	use({ "nvim-lua/plenary.nvim" })
+	use({ "nvim-telescope/telescope.nvim" })
+	use({ "windwp/nvim-autopairs" })
+	use({ "neovim/nvim-lspconfig" })
+	use({ "nvim-treesitter/playground" })
+	use({ "numToStr/Comment.nvim" })
+	use({ "JoosepAlviste/nvim-ts-context-commentstring" })
+	use({ "mg979/vim-visual-multi" })
 
 	if packer_bootstrap then
 		require("packer").sync()
