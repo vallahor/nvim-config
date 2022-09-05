@@ -5,8 +5,8 @@ vim.g.VM_maps = {
 	["Find Under"] = "<c-u>",
 	["Find Subword Under"] = "<c-u>",
 	["Select All"] = "<c-s-u>",
-	["Add Cursor Down"] = "<C-'>",
-	["Add Cursor Up"] = "<C-;>",
+	["Add Cursor Down"] = "<m-j>",
+	["Add Cursor Up"] = "<m-k>",
 	["Switch Mode"] = "<Tab>",
 	["Align"] = "<c-a>",
 	["Find Next"] = "]",
@@ -15,5 +15,5 @@ vim.g.VM_maps = {
 	["Goto Prev"] = "{",
 	["Skip Region"] = "=",
 	["Remove Region"] = "+",
-	["I BS"] = "",
+	-- ["I BS"] = "",
 }

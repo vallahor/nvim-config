@@ -42,7 +42,7 @@ map("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
 map("n", "<f5>", "<cmd>so %<CR>")
 
 map("n", "<c-f>", ":e ")
-map("n", "<c-space>", ":b ")
+-- map("n", "<c-space>", ":b ")
 
 -- map("n", "<c-c>", "<cmd>!kind %:p<cr>")
 map("n", "<c-c>", "<cmd>!kind2 run %:p<cr>")
@@ -79,19 +79,21 @@ map("v", "Z", "<Plug>Lightspeed_S")
 map("v", "s", "<Plug>VSurround")
 
 map("n", "<c-p>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
-map("n", "<c-/>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
+map("n", "<c-f>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
 map("n", "<c-\\>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
-map("n", "<c-space>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
+-- map("n", "<c-space>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
 
 map("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>")
 map("n", "K", "<cmd>lua vim.lsp.buf.hover()<CR>")
 map("n", "<leader>r", "<cmd>lua vim.lsp.buf.rename()<CR>")
 
-map({ "n", "v" }, "<a-=>", "<cmd>vertical resize +5<cr>")
-map({ "n", "v" }, "<a-->", "<cmd>vertical resize -5<cr>")
+map({ "n", "v" }, "<a-H>", "<cmd>vertical resize +5<cr>")
+map({ "n", "v" }, "<a-L>", "<cmd>vertical resize -5<cr>")
 
-map({ "n", "v" }, "+", "<cmd>resize +5<cr>")
-map({ "n", "v" }, "_", "<cmd>resize -5<cr>")
+map({ "n", "v" }, "<a-J>", "<cmd>resize +5<cr>")
+map({ "n", "v" }, "<a-K>", "<cmd>resize -5<cr>")
+
+map({ "n", "v" }, "<leader>=", "<c-w>=")
 
 -- tab
 map("n", "<c-,>", "<cmd>BufferPrevious<CR>")
@@ -113,6 +115,14 @@ map("n", "<leader>j", "<cmd>lua Swap_down()<CR>")
 map("n", "<leader>k", "<cmd>lua Swap_up()<CR>")
 map("n", "<leader>l", "<cmd>lua Swap_right()<CR>")
 
+map("n", "ci_", '<cmd>set iskeyword-=_<cr>"_diw<cmd>set iskeyword+=_<cr>i')
+map("n", "di_", '<cmd>set iskeyword-=_<cr>"_diw<cmd>set iskeyword+=_<cr>i')
+map("n", "vi_", "<cmd>set iskeyword-=_<cr>viw<cmd>set iskeyword+=_<cr>")
+
+map("n", "ca_", '<cmd>set iskeyword-=_<cr>"_daw<cmd>set iskeyword+=_<cr>i')
+map("n", "da_", '<cmd>set iskeyword-=_<cr>"_daw<cmd>set iskeyword+=_<cr>i')
+map("n", "va_", "<cmd>set iskeyword-=_<cr>vaw<cmd>set iskeyword+=_<cr>")
+
 vim.cmd([[
 vnoremap J :m '>+1<CR>gv=gv
 vnoremap K :m '<-2<CR>gv=gv
@@ -124,26 +134,4 @@ autocmd User LightspeedFtEnter let g:lightspeed_last_motion = 'ft'
 augroup end
 map <expr> ; g:lightspeed_last_motion == 'sx' ? "<Plug>Lightspeed_;_sx" : "<Plug>Lightspeed_;_ft"
 map <expr> , g:lightspeed_last_motion == 'sx' ? "<Plug>Lightspeed_,_sx" : "<Plug>Lightspeed_,_ft"
-"" Highlight extra whitespace.
-"" http://vim.wikia.com/wiki/Highlight_unwanted_spaces
-"highlight ExtraWhitespace ctermbg=lightred guibg=lightred
-"" Show trailing whitespace and spaces before a tab:
-"match ExtraWhitespace /\s\+$\| \+\ze\t/
-" au BufEnter *.scm set filetype=query
-autocmd FileType python setlocal shiftwidth=2 softtabstop=2 expandtab
-autocmd FileType javascript setlocal shiftwidth=2 softtabstop=2 expandtab
-autocmd FileType typescript setlocal shiftwidth=2 softtabstop=2 expandtab
-autocmd FileType json setlocal shiftwidth=2 softtabstop=2 expandtab
-autocmd FileType kind setlocal shiftwidth=2 softtabstop=2 expandtab
-autocmd FileType kind setlocal syntax=on
-autocmd BufEnter *.kind2 set ft=kind
- autocmd BufEnter *.kind2 setlocal shiftwidth=2 softtabstop=2 expandtab
-"autocmd FileType kind2 setlocal shiftwidth=2 softtabstop=2 expandtab
-" autocmd FileType kind2 setlocal syntax=on
-fun! TrimWhitespace()
-	let l:save = winsaveview()
-	keeppatterns %s/\s\+$//e
-	call winrestview(l:save)
-endfun
-autocmd BufWritePre * :call TrimWhitespace()
 ]])

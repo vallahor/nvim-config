@@ -12,7 +12,8 @@ config_global.softtabstop = indent
 config_global.expandtab = true
 config_global.smartindent = true
 config_global.autoindent = true
-config_global.completeopt = { "menu", "noinsert", "menuone", "noselect" }
+config_global.completeopt = { "menu", "menuone", "noselect" }
+-- config_global.completeopt = { "menu", "noinsert", "menuone", "noselect" }
 config_global.hidden = true
 config_global.ignorecase = true
 config_global.joinspaces = false
@@ -49,8 +50,8 @@ config_global.gdefault = true
 -- config_global.winbar = " %f %m%=%l "
 
 config_window.signcolumn = "no"
-config_window.number = true
--- config_window.relativenumber = true
+-- config_window.number = true
+config_window.relativenumber = true
 config_window.wrap = true
 config_buffer.autoread = true
 config_buffer.copyindent = true
@@ -58,30 +59,30 @@ config_buffer.grepprg = "rg"
 config_buffer.swapfile = false
 
 vim.cmd([[
-set iskeyword-=_
+"set iskeyword-=_
 set cindent
 "set cino+=L0,g0,N-s,(0,l1
 
 let g:wordmotion_spaces = [ "\\w\\@<=-\\w\\@=", "\\." ]
 
-" au BufEnter *.scm set filetype=query
-" au UiEnter * GuiFont! JetBrains Mono:h11
-" au UiEnter * GuiTabline 0
-" au UiEnter * GuiPopupmenu 0
-
-autocmd FileType python setlocal shiftwidth=2 softtabstop=2 expandtab
 autocmd FileType javascript setlocal shiftwidth=2 softtabstop=2 expandtab
+autocmd FileType javascriptreact setlocal shiftwidth=2 softtabstop=2 expandtab
 autocmd FileType typescript setlocal shiftwidth=2 softtabstop=2 expandtab
+autocmd FileType typescriptreact setlocal shiftwidth=2 softtabstop=2 expandtab
 autocmd FileType json setlocal shiftwidth=2 softtabstop=2 expandtab
-autocmd FileType nix setlocal shiftwidth=2 softtabstop=2 expandtab
 
-" Highlight extra whitespace.
-" http://vim.wikia.com/wiki/Highlight_unwanted_spaces
-highlight ExtraWhitespace ctermbg=lightred guibg=lightred
-" Show trailing whitespace and spaces before a tab:
-match ExtraWhitespace /\s\+$\| \+\ze\t/
+autocmd FileType kind setlocal shiftwidth=2 softtabstop=2 expandtab
+autocmd FileType kind setlocal syntax=on
+autocmd BufEnter *.kind2 set ft=kind
+ autocmd BufEnter *.kind2 setlocal shiftwidth=2 softtabstop=2 expandtab
+"autocmd FileType kind2 setlocal shiftwidth=2 softtabstop=2 expandtab
+" autocmd FileType kind2 setlocal syntax=on
+
+fun! TrimWhitespace()
+	let l:save = winsaveview()
+	keeppatterns %s/\s\+$//e
+	call winrestview(l:save)
+endfun
+
+autocmd BufWritePre * :call TrimWhitespace()
 ]])
-
--- Run gofmt + goimport on save
-vim.api.nvim_exec([[ autocmd BufWritePre *.go :silent! lua require('go.format').goimport() ]], false)
-

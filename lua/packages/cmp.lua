@@ -3,6 +3,8 @@ if not ok then
 	return
 end
 
+require("cmp_git").setup()
+
 cmp.setup({
 	sources = {
 		{ name = "nvim_lsp" },
@@ -11,10 +13,14 @@ cmp.setup({
 		{ name = "luasnip" },
 		{ name = "git" },
 	},
-
-	completion = {
-		autocomplete = false,
+	window = {
+		completion = cmp.config.window.bordered(),
+		documentation = cmp.config.window.bordered(),
 	},
+
+	-- completion = {
+	-- 	autocomplete = true,
+	-- },
 	mapping = {
 		["<C-Space>"] = cmp.mapping.complete(),
 		["<C-q>"] = cmp.mapping.close(),

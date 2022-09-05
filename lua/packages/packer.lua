@@ -19,7 +19,7 @@ require("packer").startup(function(use)
 	-- use({ "ziglang/zig.vim" })
 
 	-- @motion
-	use({ "chaoren/vim-wordmotion" })
+	-- use({ "chaoren/vim-wordmotion" })
 	use({ "ggandor/lightspeed.nvim" })
 	use({ "tpope/vim-surround" })
 	use({ "tpope/vim-repeat" })
@@ -42,7 +42,15 @@ require("packer").startup(function(use)
 	use({ "nvim-treesitter/playground" })
 	use({ "numToStr/Comment.nvim" })
 	use({ "JoosepAlviste/nvim-ts-context-commentstring" })
-	use({ "mg979/vim-visual-multi" })
+	-- use({ "mg979/vim-visual-multi", branch = "master" })
+
+	use({ "windwp/nvim-ts-autotag" })
+
+	use({ "hrsh7th/cmp-nvim-lsp" })
+	use({ "hrsh7th/cmp-buffer" })
+	use({ "hrsh7th/cmp-path" })
+	use({ "hrsh7th/nvim-cmp" })
+	use({ "petertriho/cmp-git" })
 
 	if packer_bootstrap then
 		require("packer").sync()

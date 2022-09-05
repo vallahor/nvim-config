@@ -5,3 +5,5 @@ end
 
 -- lsp.sumneko_lua.setup({})
 lsp.tsserver.setup({})
+lsp.html.setup({})
+lsp.eslint.setup({})

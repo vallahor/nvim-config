@@ -2,7 +2,7 @@ local ok, nvim_treesitter = pcall(require, "nvim-treesitter.configs")
 if not ok then
 	return
 end
-require 'nvim-treesitter.install'.compilers = { 'clang++'}
+require("nvim-treesitter.install").compilers = { "clang++" }
 nvim_treesitter.setup({
 	ensure_installed = {
 		"lua",
@@ -16,17 +16,13 @@ nvim_treesitter.setup({
 		"query",
 		"python",
 		"rust",
-		"nix",
-        "go",
+		"ocaml",
 	},
 	highlight = {
 		enable = true,
 	},
-	autotag = {
-		enable = true,
-	},
 	indent = {
-		enable = false,
+		enable = true,
 	},
 	incremental_selection = {
 		enable = true,
@@ -55,9 +51,16 @@ nvim_treesitter.setup({
 			show_help = "?",
 		},
 	},
-    context_commentstring = {
-        enable = true
-    }
+})
+
+require("nvim-treesitter.configs").setup({
+	autotag = {
+		enable = true,
+	},
+	context_commentstring = {
+		enable = true,
+		enable_autocmd = false,
+	},
 })
 
 require("nvim-treesitter.highlight").set_custom_captures({
