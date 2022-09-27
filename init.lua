@@ -219,9 +219,6 @@ if ok then
             "c",
             "cpp",
             "zig",
-            "javascript",
-            "typescript",
-            "tsx",
             "query",
             "python",
             "rust",
@@ -229,11 +226,6 @@ if ok then
         highlight = {
             enable = true,
             additional_vim_regex_highlighting = false,
-            queries = {
-                lua = {
-                    (vim.fn.stdpath("config") .. ("\\queries\\tsx\\highlight.scm"))
-                }
-            }
         },
         indent = {
             enable = false,
@@ -264,7 +256,7 @@ if ok then
         ["zig.assignop"] = "TSOperator",
     })
 
-    require "nvim-treesitter.configs".setup {
+    require "nvim-treesitter.configs".setup({
         playground = {
             enable = true,
             disable = {},
@@ -283,7 +275,7 @@ if ok then
                 show_help = '?',
             },
         },
-    }
+    })
 
 end
 
