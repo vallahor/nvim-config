@@ -32,20 +32,8 @@ require("packer").startup(function(use)
 	use({ "tpope/vim-repeat" })
 
     use({ "mg979/vim-visual-multi" })
-    use({ "sbdchd/neoformat" })
 
     use({ "chaoren/vim-wordmotion" })
-
-    use({ "windwp/nvim-ts-autotag" })
-    use({ "JoosepAlviste/nvim-ts-context-commentstring" })
-
-    use({ "hrsh7th/cmp-nvim-lsp" })
-    use({ "hrsh7th/cmp-buffer" })
-    use({ "hrsh7th/cmp-path" })
-    use({ "hrsh7th/nvim-cmp" })
-
-    use({ "windwp/nvim-autopairs" })
-	use({ "neovim/nvim-lspconfig" })
 
     if packer_bootstrap then
         require("packer").sync()
@@ -98,36 +86,12 @@ config_global.completeopt = { "menu", "menuone", "noselect" }
 
 config_window.signcolumn = "no"
 config_window.relativenumber = true
--- config_window.number = true
+config_window.number = true
 config_window.wrap = true
 config_buffer.autoread = true
 config_buffer.copyindent = true
 config_buffer.grepprg = "rg"
 config_buffer.swapfile = false
-
-local ok, autopairs = pcall(require, "nvim-autopairs")
-if ok then
-    autopairs.setup({})
-end
-
-local ok, lsp = pcall(require, "lspconfig")
-if ok then
-    -- lsp.sumneko_lua.setup({})
-    lsp.tsserver.setup({})
-    lsp.html.setup({})
-    lsp.eslint.setup({})
-end
-
-local ok, neoformat = pcall(require, "neoformat")
-if ok then
-    -- vim.api.nvim_create_autocmd("BufWritePre", { pattern = "*.lua", command = ":Neoformat stylua" })
-    vim.api.nvim_create_autocmd("BufWritePre", {
-        pattern = { "*.ts", "*.tsx", "*.js", "*.jsx", "*.html", "*.css", "*.scss", "*.json" },
-        command = ":Neoformat prettier",
-    })
-
-    vim.g.neoformat_only_msg_on_error = 1
-end
 
 vim.g.VM_theme = "iceblue"
 vim.g.VM_default_mappings = 0
@@ -138,7 +102,8 @@ vim.g.VM_maps = {
 	["Select All"] = "<c-s-u>",
 	["Add Cursor Down"] = "<m-j>",
 	["Add Cursor Up"] = "<m-k>",
-	["Switch Mode"] = "<Tab>",
+	["Switch Mode"] = "v",
+	-- ["Switch Mode"] = "<Tab>",
 	["Align"] = "<c-a>",
 	["Find Next"] = "]",
 	["Find Prev"] = "[",
@@ -210,12 +175,6 @@ if ok then
             basic = true,
             extra = true,
         },
-        pre_hook = function()
-            local ok, ts_context = pcall(require, "ts_context_commentstring.integrations.comment_nvim")
-            if ok then
-                ts_context.create_pre_hook()
-            end
-        end,
     })
 end
 
@@ -248,54 +207,6 @@ if ok then
             selection_strategy = "reset",
             path_display = { "absolute" },
             borderchars = { "─", "│", "─", "│", "┌", "┐", "┘", "└" },
-        },
-    })
-end
-
-local ok, cmp = pcall(require, "cmp")
-if ok then
-    cmp.setup({
-        sources = {
-            { name = "nvim_lsp" },
-            { name = "path" },
-            { name = "buffer" },
-            { name = "luasnip" },
-        },
-        window = {
-            -- completion = cmp.config.window.bordered(),
-            -- documentation = cmp.config.window.bordered(),
-        },
-
-        -- completion = {
-        --     autocomplete = true,
-        -- },
-        mapping = {
-            ["<C-Space>"] = cmp.mapping.complete(),
-            ["<C-q>"] = cmp.mapping.close(),
-            ["<c-j>"] = cmp.mapping(function()
-                if cmp.visible() then
-                    cmp.select_next_item({ behavior = cmp.SelectBehavior.Insert, select = false })
-                end
-            end, { "i", "s" }),
-
-            ["<c-k>"] = cmp.mapping(function()
-                if cmp.visible() then
-                    cmp.select_prev_item({ behavior = cmp.SelectBehavior.Insert, select = false })
-                end
-            end, { "i", "s" }),
-            ["<tab>"] = cmp.mapping.confirm({
-                select = true,
-                behavior = cmp.ConfirmBehavior.Replace,
-            }),
-            ["<CR>"] = cmp.mapping.confirm({
-                select = true,
-            }),
-            ["<c-e>"] = cmp.mapping.abort(),
-        },
-        snippet = {
-            expand = function(args)
-                require("luasnip").lsp_expand(args.body)
-            end,
         },
     })
 end
@@ -374,23 +285,6 @@ if ok then
         },
     }
 
-end
-
--- local function get_ft_query(ft, type)
---   local path = (vim.fn.stdpath("config") .. ("\\queries\\" .. ft .. "\\" .. type .. ".scm"))
---   return vim.fn.join(vim.fn.readfile(path), "\n")
--- end
---
--- local vim_ts_queries = require("vim.treesitter.query")
--- vim_ts_queries.set_query("tsx", "highlights", get_ft_query("tsx", "highlights"))
-
-local ok, nvim_context_comment = pcall(require, "nvim-treesitter.configs")
-if ok then
-    nvim_context_comment.setup({
-        context_commentstring = {
-            enable = true,
-        },
-    })
 end
 
 -- MAPPING --
@@ -474,9 +368,7 @@ map("v", "s", "<Plug>VSurround")
 
 map('n', '<F3>', '<cmd>TSHighlightCapturesUnderCursor<cr>', {})
 
-map("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>")
-map("n", "K", "<cmd>lua vim.lsp.buf.hover()<CR>")
-map("n", "<leader>r", "<cmd>lua vim.lsp.buf.rename()<CR>")
+map("n", "<C-6>", "C-^")
 
 vim.cmd([[
 
