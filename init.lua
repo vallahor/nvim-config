@@ -39,6 +39,14 @@ require("packer").startup(function(use)
     use({ "windwp/nvim-ts-autotag" })
     use({ "JoosepAlviste/nvim-ts-context-commentstring" })
 
+    use({ "hrsh7th/cmp-nvim-lsp" })
+    use({ "hrsh7th/cmp-buffer" })
+    use({ "hrsh7th/cmp-path" })
+    use({ "hrsh7th/nvim-cmp" })
+
+    use({ "windwp/nvim-autopairs" })
+	use({ "neovim/nvim-lspconfig" })
+
     if packer_bootstrap then
         require("packer").sync()
     end
@@ -85,6 +93,9 @@ config_global.backup = false
 config_global.guicursor = "i:block-iCursor"
 config_global.gdefault = true
 
+config_global.completeopt = { "menu", "menuone", "noselect" }
+-- config_global.completeopt = { "menu", "noinsert", "menuone", "noselect" }
+
 config_window.signcolumn = "no"
 config_window.relativenumber = true
 -- config_window.number = true
@@ -94,83 +105,17 @@ config_buffer.copyindent = true
 config_buffer.grepprg = "rg"
 config_buffer.swapfile = false
 
-local ok, nvim_treesitter = pcall(require, "nvim-treesitter.configs")
+local ok, autopairs = pcall(require, "nvim-autopairs")
 if ok then
-    nvim_treesitter.setup({
-        ensure_installed = {
-            "lua",
-            "c",
-            "cpp",
-            "zig",
-            "javascript",
-            "typescript",
-            "tsx",
-            "query",
-            "python",
-            "rust",
-        },
-        highlight = {
-            enable = true,
-        },
-        indent = {
-            enable = false,
-        },
-        incremental_selection = {
-            enable = true,
-
-            keymaps = {
-                init_selection = "m",
-                node_incremental = "m",
-                node_decremental = "M",
-                scope_incremental = "<c-/>",
-            },
-        },
-
-
-    })
-
-    require("nvim-treesitter.highlight").set_custom_captures({
-        ["js.named_import"] = "TSLiteral",
-        ["js.import"] = "TSLiteral",
-        ["js.keyword"] = "TSOperator",
-        ["js.keyword_bold"] = "TSInclude",
-        ["js.arrow_func"] = "TSKeyword",
-        ["js.opening_element"] = "TSElement",
-        ["js.closing_element"] = "TSElement",
-        ["js.self_closing_element"] = "TSElement",
-        ["zig.assignop"] = "TSOperator",
-    })
-
-    require "nvim-treesitter.configs".setup {
-        playground = {
-            enable = true,
-            disable = {},
-            updatetime = 25, -- Debounced time for highlighting nodes in the playground from source code
-            persist_queries = false, -- Whether the query persists across vim sessions
-            keybindings = {
-                toggle_query_editor = 'o',
-                toggle_hl_groups = 'i',
-                toggle_injected_languages = 't',
-                toggle_anonymous_nodes = 'a',
-                toggle_language_display = 'I',
-                focus_language = 'f',
-                unfocus_language = 'F',
-                update = 'R',
-                goto_node = '<cr>',
-                show_help = '?',
-            },
-        },
-    }
-
+    autopairs.setup({})
 end
 
-local ok, nvim_context_comment = pcall(require, "nvim-treesitter.configs")
+local ok, lsp = pcall(require, "lspconfig")
 if ok then
-    nvim_context_comment.setup({
-        context_commentstring = {
-            enable = true,
-        },
-    })
+    -- lsp.sumneko_lua.setup({})
+    lsp.tsserver.setup({})
+    lsp.html.setup({})
+    lsp.eslint.setup({})
 end
 
 local ok, neoformat = pcall(require, "neoformat")
@@ -307,6 +252,147 @@ if ok then
     })
 end
 
+local ok, cmp = pcall(require, "cmp")
+if ok then
+    cmp.setup({
+        sources = {
+            { name = "nvim_lsp" },
+            { name = "path" },
+            { name = "buffer" },
+            { name = "luasnip" },
+        },
+        window = {
+            -- completion = cmp.config.window.bordered(),
+            -- documentation = cmp.config.window.bordered(),
+        },
+
+        -- completion = {
+        --     autocomplete = true,
+        -- },
+        mapping = {
+            ["<C-Space>"] = cmp.mapping.complete(),
+            ["<C-q>"] = cmp.mapping.close(),
+            ["<c-j>"] = cmp.mapping(function()
+                if cmp.visible() then
+                    cmp.select_next_item({ behavior = cmp.SelectBehavior.Insert, select = false })
+                end
+            end, { "i", "s" }),
+
+            ["<c-k>"] = cmp.mapping(function()
+                if cmp.visible() then
+                    cmp.select_prev_item({ behavior = cmp.SelectBehavior.Insert, select = false })
+                end
+            end, { "i", "s" }),
+            ["<tab>"] = cmp.mapping.confirm({
+                select = true,
+                behavior = cmp.ConfirmBehavior.Replace,
+            }),
+            ["<CR>"] = cmp.mapping.confirm({
+                select = true,
+            }),
+            ["<c-e>"] = cmp.mapping.abort(),
+        },
+        snippet = {
+            expand = function(args)
+                require("luasnip").lsp_expand(args.body)
+            end,
+        },
+    })
+end
+
+local ok, nvim_treesitter = pcall(require, "nvim-treesitter.configs")
+if ok then
+    nvim_treesitter.setup({
+        ensure_installed = {
+            "lua",
+            "c",
+            "cpp",
+            "zig",
+            "javascript",
+            "typescript",
+            "tsx",
+            "query",
+            "python",
+            "rust",
+        },
+        highlight = {
+            enable = true,
+            additional_vim_regex_highlighting = false,
+            queries = {
+                lua = {
+                    (vim.fn.stdpath("config") .. ("\\queries\\tsx\\highlight.scm"))
+                }
+            }
+        },
+        indent = {
+            enable = false,
+        },
+        incremental_selection = {
+            enable = true,
+
+            keymaps = {
+                init_selection = "m",
+                node_incremental = "m",
+                node_decremental = "M",
+                scope_incremental = "<c-/>",
+            },
+        },
+
+
+    })
+
+    require("nvim-treesitter.highlight").set_custom_captures({
+        ["js.named_import"] = "TSLiteral",
+        ["js.import"] = "TSLiteral",
+        ["js.keyword"] = "TSOperator",
+        ["js.keyword_bold"] = "TSInclude",
+        ["js.arrow_func"] = "TSKeyword",
+        ["js.opening_element"] = "TSElement",
+        ["js.closing_element"] = "TSElement",
+        ["js.self_closing_element"] = "TSElement",
+        ["zig.assignop"] = "TSOperator",
+    })
+
+    require "nvim-treesitter.configs".setup {
+        playground = {
+            enable = true,
+            disable = {},
+            updatetime = 25, -- Debounced time for highlighting nodes in the playground from source code
+            persist_queries = false, -- Whether the query persists across vim sessions
+            keybindings = {
+                toggle_query_editor = 'o',
+                toggle_hl_groups = 'i',
+                toggle_injected_languages = 't',
+                toggle_anonymous_nodes = 'a',
+                toggle_language_display = 'I',
+                focus_language = 'f',
+                unfocus_language = 'F',
+                update = 'R',
+                goto_node = '<cr>',
+                show_help = '?',
+            },
+        },
+    }
+
+end
+
+-- local function get_ft_query(ft, type)
+--   local path = (vim.fn.stdpath("config") .. ("\\queries\\" .. ft .. "\\" .. type .. ".scm"))
+--   return vim.fn.join(vim.fn.readfile(path), "\n")
+-- end
+--
+-- local vim_ts_queries = require("vim.treesitter.query")
+-- vim_ts_queries.set_query("tsx", "highlights", get_ft_query("tsx", "highlights"))
+
+local ok, nvim_context_comment = pcall(require, "nvim-treesitter.configs")
+if ok then
+    nvim_context_comment.setup({
+        context_commentstring = {
+            enable = true,
+        },
+    })
+end
+
 -- MAPPING --
 
 local map = vim.keymap.set
@@ -351,7 +437,7 @@ map({ "n", "v" }, "k", "gk")
 map({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>")
 map({ "n", "v" }, "<s-enter>", "<cmd>w!<CR><esc>")
 
-map("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
+-- map("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
 map("n", "<f2>", "<cmd>:e $MYVIMRC<CR>")
 map("n", "<f5>", "<cmd>so %<CR>")
 
@@ -387,6 +473,10 @@ map("v", "Z", "<Plug>Lightspeed_S")
 map("v", "s", "<Plug>VSurround")
 
 map('n', '<F3>', '<cmd>TSHighlightCapturesUnderCursor<cr>', {})
+
+map("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>")
+map("n", "K", "<cmd>lua vim.lsp.buf.hover()<CR>")
+map("n", "<leader>r", "<cmd>lua vim.lsp.buf.rename()<CR>")
 
 vim.cmd([[
 
