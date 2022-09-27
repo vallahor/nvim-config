@@ -15,6 +15,7 @@ require("packer").startup(function(use)
     use({ "wbthomason/packer.nvim" })
 
     -- @languages
+    use { 'nvim-treesitter/playground' }
     use({ "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" })
     use({ "vim-kind/vim-kind" })
     -- use({ "ziglang/zig.vim" })
@@ -29,6 +30,8 @@ require("packer").startup(function(use)
 
     use({ "tpope/vim-surround" })
 	use({ "tpope/vim-repeat" })
+
+    use({ "sbdchd/neoformat" })
 
 
     if packer_bootstrap then
@@ -87,6 +90,14 @@ config_buffer.copyindent = true
 config_buffer.grepprg = "rg"
 config_buffer.swapfile = false
 
+vim.api.nvim_create_autocmd("BufWritePre", { pattern = "*.lua", command = ":Neoformat stylua" })
+vim.api.nvim_create_autocmd("BufWritePre", { pattern = "*.ml", command = ":Neoformat ocamlformat" })
+vim.api.nvim_create_autocmd("BufWritePre", {
+	pattern = { "*.ts", "*.tsx", "*.js", "*.jsx", "*.html", "*.css", "*.scss", "*.json" },
+	command = ":Neoformat prettier",
+})
+
+vim.g.neoformat_only_msg_on_error = 1
 
 local ok, nvim_treesitter = pcall(require, "nvim-treesitter.configs")
 if ok then
@@ -103,7 +114,7 @@ if ok then
             "query",
             "python",
             "rust",
-            "go",
+            "ocaml",
         },
         highlight = {
             enable = true,
@@ -120,26 +131,50 @@ if ok then
                 scope_incremental = "<c-/>",
             },
         },
+
+
     })
 end
 
 require("nvim-treesitter.highlight").set_custom_captures({
-   ["js.named_import"] = "TSLiteral",
-   ["js.import"] = "TSLiteral",
-   ["js.keyword"] = "TSOperator",
-   ["js.keyword_bold"] = "TSInclude",
-   ["js.arrow_func"] = "TSKeyword",
-   ["js.opening_element"] = "TSElement",
-   ["js.closing_element"] = "TSElement",
-   ["js.self_closing_element"] = "TSElement",
-   ["zig.assignop"] = "TSOperator",
+  ["js.named_import"] = "TSLiteral",
+  ["js.import"] = "TSLiteral",
+  ["js.keyword"] = "TSOperator",
+  ["js.keyword_bold"] = "TSInclude",
+  ["js.arrow_func"] = "TSKeyword",
+  ["js.opening_element"] = "TSElement",
+  ["js.closing_element"] = "TSElement",
+  ["js.self_closing_element"] = "TSElement",
+  ["zig.assignop"] = "TSOperator",
 })
+
+require "nvim-treesitter.configs".setup {
+  playground = {
+    enable = true,
+    disable = {},
+    updatetime = 25, -- Debounced time for highlighting nodes in the playground from source code
+    persist_queries = false, -- Whether the query persists across vim sessions
+    keybindings = {
+      toggle_query_editor = 'o',
+      toggle_hl_groups = 'i',
+      toggle_injected_languages = 't',
+      toggle_anonymous_nodes = 'a',
+      toggle_language_display = 'I',
+      focus_language = 'f',
+      unfocus_language = 'F',
+      update = 'R',
+      goto_node = '<cr>',
+      show_help = '?',
+    },
+  }
+}
 
 vim.cmd [[colorscheme gruvball]]
 
 local ok, lightspeed = pcall(require, "lightspeed")
 -- vim.g.lightspeed_no_default_keymaps = true
 
+if ok then
 lightspeed.setup({
     exit_after_idle_msecs = { unlabeled = 300, labeled = nil },
     --- s/x ---
@@ -147,6 +182,7 @@ lightspeed.setup({
     ignore_case = true,
     repeat_ft_with_target_char = true,
 })
+end
 
 local ok, nvim_tree = pcall(require, "nvim-tree")
 if  ok then
@@ -232,6 +268,7 @@ map({ "n", "v" }, "<c-enter>", "<cmd>w!<CR>")
 map({ "n", "v" }, "<s-enter>", "<cmd>w!<CR>")
 
 map("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
+map("n", "<f2>", "<cmd>:e $MYVIMRC<CR>")
 map("n", "<f5>", "<cmd>so %<CR>")
 
 map("n", "<c-f>", ":e ")
@@ -274,7 +311,16 @@ map("v", "Z", "<Plug>Lightspeed_S")
 
 map("v", "s", "<Plug>VSurround")
 
+map('n', '<F3>', '<cmd>TSHighlightCapturesUnderCursor<cr>', {})
+
+-- vim.opt.guifont = { "JetBrains Mono:h12" }
+
 vim.cmd([[
+
+set guifont=JetBrains\ Mono:h12
+
+" call GuiWindowMaximized(1)
+
 vnoremap J :m '>+1<CR>gv=gv
 vnoremap K :m '<-2<CR>gv=gv
 
