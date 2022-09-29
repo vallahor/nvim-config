@@ -1,6 +1,6 @@
 
 """
-" Name: gruvball.vim
+" Name: gruvball-ish.vim
 """
 
 set background=dark
@@ -10,7 +10,7 @@ if exists('syntax on')
     syntax reset
 endif
 
-let g:colors_name='gruvball'
+let g:colors_name='gruvball-ish'
 set t_Co=256
 
 " misc
@@ -101,7 +101,8 @@ hi Number         guisp=NONE guifg=#d16d8a guibg=NONE    ctermfg=168 ctermbg=NON
 hi Boolean        guisp=NONE guifg=#d16d8a guibg=NONE    ctermfg=168 ctermbg=NONE gui=NONE cterm=NONE
 hi Float          guisp=NONE guifg=#d16d8a guibg=NONE    ctermfg=168 ctermbg=NONE gui=NONE cterm=NONE
 hi Function       guisp=NONE guifg=#c58d5d guibg=NONE    ctermfg=173 ctermbg=NONE gui=NONE cterm=NONE
-hi Conditional    guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold cterm=bold
+" hi Conditional    guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=italic,bold cterm=italic,bold
+hi Conditional    guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=italic cterm=italic
 hi Repeat         guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold cterm=bold
 hi Label          guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold cterm=bold
 hi Operator       guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold cterm=bold
@@ -188,9 +189,10 @@ hi TSPunctDelimiter        guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ct
 " hi TSPunctDelimiter      guisp=NONE guifg=#A8899C guibg=NONE    ctermfg=139 ctermbg=NONE gui=NONE cterm=NONE
 hi TSPunctBracket        guisp=NONE guifg=#A8899C guibg=NONE    ctermfg=139 ctermbg=NONE gui=NONE cterm=NONE
 hi TSPunctSpecial        guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold cterm=bold
-"hi TSOperator            guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=NONE cterm=NONE
-hi TSOperator            guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold cterm=bold
-hi TSConditional         guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold,italic cterm=bold,italic
+hi TSOperator            guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=NONE cterm=NONE
+" hi TSOperator            guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold cterm=bold
+" hi TSConditional         guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold,italic cterm=bold,italic
+hi TSConditional         guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=italic cterm=italic
 hi TSRepeat              guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold,italic cterm=bold,italic
 " hi TSFuncMacro           guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold,italic cterm=bold,italic
 hi TSException           guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold,italic cterm=bold,italic

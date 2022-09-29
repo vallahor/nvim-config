@@ -93,6 +93,8 @@ config_buffer.copyindent = true
 config_buffer.grepprg = "rg"
 config_buffer.swapfile = false
 
+vim.g.wordmotion_spaces = { '\\w\\@<=-\\w\\@=', '\\.' }
+
 vim.g.VM_theme = "iceblue"
 vim.g.VM_default_mappings = 0
 vim.g.VM_custom_remaps = { ["-"] = "$" }
@@ -114,7 +116,6 @@ vim.g.VM_maps = {
 	-- ["I BS"] = "",
 }
 
-vim.cmd [[colorscheme gruvball]]
 
 local ok, lightspeed = pcall(require, "lightspeed")
 if ok then
@@ -364,6 +365,13 @@ map("n", "<C-6>", "C-^")
 
 vim.cmd([[
 
+colorscheme gruvball-ish
+
+autocmd FocusGained * silent! checktime
+
+set cindent
+set cino+=L0,g0,N-s,(0,l1
+
 set guifont=JetBrains\ Mono:h12
 
 vnoremap J :m '>+1<CR>gv=gv
@@ -394,3 +402,5 @@ autocmd BufWritePre * :call TrimWhitespace()
 
 ]])
 
+-- method decl cpp
+-- (function_definition (function_declarator (qualified_identifier (identifier) @cpp.method_decl)))
