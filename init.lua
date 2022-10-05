@@ -33,7 +33,8 @@ require("packer").startup(function(use)
 
     use({ "mg979/vim-visual-multi" })
 
-    use({ "chaoren/vim-wordmotion" })
+    use({ "terryma/vim-expand-region" })
+    use({ "romgrk/barbar.nvim" })
 
     if packer_bootstrap then
         require("packer").sync()
@@ -80,6 +81,8 @@ config_global.scrolloff = 3
 config_global.backup = false
 config_global.guicursor = "i:block-iCursor"
 config_global.gdefault = true
+config_global.ls = 0
+config_global.ch = 0
 
 config_global.completeopt = { "menu", "menuone", "noselect" }
 -- config_global.completeopt = { "menu", "noinsert", "menuone", "noselect" }
@@ -92,8 +95,6 @@ config_buffer.autoread = true
 config_buffer.copyindent = true
 config_buffer.grepprg = "rg"
 config_buffer.swapfile = false
-
-vim.g.wordmotion_spaces = { '\\w\\@<=-\\w\\@=', '\\.' }
 
 vim.g.VM_theme = "iceblue"
 vim.g.VM_default_mappings = 0
@@ -189,6 +190,7 @@ end
 
 local ok, telescope = pcall(require, "telescope")
 if ok then
+    local actions = require("telescope.actions")
     telescope.setup({
         defaults = {
             mappings = {
@@ -202,6 +204,7 @@ if ok then
                     end,
                     ["<c-j>"] = "move_selection_next",
                     ["<c-k>"] = "move_selection_previous",
+                    ["<esc>"] = actions.close
                 },
             },
             initial_mode = "insert",
@@ -231,16 +234,16 @@ if ok then
         indent = {
             enable = false,
         },
-        incremental_selection = {
-            enable = true,
-
-            keymaps = {
-                init_selection = "m",
-                node_incremental = "m",
-                node_decremental = "M",
-                scope_incremental = "<c-/>",
-            },
-        },
+        -- incremental_selection = {
+        --     enable = true,
+        --
+        --     keymaps = {
+        --         init_selection = "m",
+        --         node_incremental = "m",
+        --         node_decremental = "M",
+        --         scope_incremental = "<c-/>",
+        --     },
+        -- },
 
 
     })
@@ -280,6 +283,34 @@ if ok then
 
 end
 
+local ok, bufferline = pcall(require, "bufferline")
+if ok then
+    bufferline.setup({
+        icons = false,
+        animation = true,
+        auto_hide = false,
+        tabpages = true,
+        closable = true,
+        clickable = true,
+        icon_custom_colors = false,
+
+        icon_separator_active = '▎',
+        icon_separator_inactive = '▎',
+        icon_close_tab = '',
+        icon_close_tab_modified = '',
+
+        insert_at_end = false,
+        insert_at_start = false,
+
+        maximum_padding = 1,
+        maximum_length = 30,
+
+        semantic_letters = true,
+        letters = 'asdfjkl;ghnmxcvbziowerutyqpASDFJKLGHNMXCVBZIOWERUTYQP',
+        no_name_title = nil,
+    })
+end
+
 -- MAPPING --
 
 local map = vim.keymap.set
@@ -288,17 +319,15 @@ map("n", "<space>", "<nop>")
 
 vim.g.mapleader = " "
 
-map("n", "<c-w>", "<cmd>BufDel<CR>")
-
 map("n", "<esc>", "<cmd>nohl<cr><esc>")
 
 map("n", "<c-g>", "<cmd>LazyGit<cr>")
-map("n", "<c-space>", "<cmd>NvimTreeToggle<cr>")
+map("n", "<c-f>", "<cmd>NvimTreeToggle<cr>")
 map("n", "<c-;>", "<cmd>NvimTreeFocus<cr>")
 
-map("n", "<c-f>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
+map("n", "<c-p>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
 map("n", "<c-/>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
-map("n", "<tab>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
+map("n", "<c-space>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
 
 map("c", "<c-v>", '<c-r>"')
 
@@ -333,14 +362,14 @@ map({ "n", "v" }, "<c-j>", "<c-w>j")
 map({ "n", "v" }, "<c-k>", "<c-w>k")
 map({ "n", "v" }, "<c-l>", "<c-w>l")
 
-map({ "n", "v" }, "<c-p>", "{")
-map({ "n", "v" }, "<c-n>", "}")
+-- map({ "n", "v" }, "<c-p>", "{")
+-- map({ "n", "v" }, "<c-n>", "}")
 
-map({ "n", "v" }, "[", "{")
-map({ "n", "v" }, "]", "}")
+-- map({ "n", "v" }, "[", "{")
+-- map({ "n", "v" }, "]", "}")
 
-map({ "n", "v" }, "<c-n>", "}")
-map({ "n", "v" }, "<c-p>", "{")
+-- map({ "n", "v" }, "<c-n>", "}")
+-- map({ "n", "v" }, "<c-p>", "{")
 
 map("n", "H", "<c-u>zz")
 map("n", "L", "<c-d>zz")
@@ -363,14 +392,30 @@ map('n', '<F3>', '<cmd>TSHighlightCapturesUnderCursor<cr>', {})
 
 map("n", "<C-6>", "C-^")
 
+map("n", "<c-,>", "<cmd>BufferPrevious<CR>")
+map("n", "<c-.>", "<cmd>BufferNext<CR>")
+-- Re-order to previous/next
+map("n", "<a-,>", "<cmd>BufferMovePrevious<CR>")
+map("n", "<a-.>", "<cmd>BufferMoveNext<CR>")
+-- close
+map("n", "<c-w>", "<cmd>BufDel<CR>")
+map("n", "<a-w>", "<cmd>BufferCloseAllButCurrent<CR>")
+map("n", "<a-<>", "<cmd>BufferCloseBuffersLeft<CR>")
+map("n", "<a->>", "<cmd>BufferCloseBuffersRight<CR>")
+map("n", "<a-W>", "<cmd>BufferWipeout<CR>")
+
 vim.cmd([[
+
+language en_US
 
 colorscheme gruvball-ish
 
 autocmd FocusGained * silent! checktime
 
 set cindent
-set cino+=L0,g0,N-s,(0,l1
+" set cino+=L0,g0,N-s,(0,l1
+set cino+=+0,L0,g0,N-s,(0,l1,t0
+" set cino+=+0,L0,g0,l1,t0
 
 set guifont=JetBrains\ Mono:h12
 
@@ -400,7 +445,7 @@ fun! TrimWhitespace()
 endfun
 autocmd BufWritePre * :call TrimWhitespace()
 
-]])
+map m <Plug>(expand_region_expand)
+map M <Plug>(expand_region_shrink)
 
--- method decl cpp
--- (function_definition (function_declarator (qualified_identifier (identifier) @cpp.method_decl)))
+]])
