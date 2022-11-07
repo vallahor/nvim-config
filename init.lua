@@ -33,8 +33,7 @@ require("packer").startup(function(use)
 
     use({ "mg979/vim-visual-multi" })
 
-    use({ "terryma/vim-expand-region" })
-    use({ "romgrk/barbar.nvim" })
+    -- use({ "romgrk/barbar.nvim" })
 
     if packer_bootstrap then
         require("packer").sync()
@@ -79,16 +78,16 @@ config_global.magic = true
 config_global.cursorline = true
 config_global.scrolloff = 3
 config_global.backup = false
-config_global.guicursor = "i:block-iCursor"
 config_global.gdefault = true
-config_global.ls = 0
 config_global.ch = 0
+-- config_global.guicursor = "i:block-iCursor"
+config_global.guicursor = "i-ci:block-iCursor"
 
 config_global.completeopt = { "menu", "menuone", "noselect" }
 -- config_global.completeopt = { "menu", "noinsert", "menuone", "noselect" }
 
 config_window.signcolumn = "no"
-config_window.relativenumber = true
+-- config_window.relativenumber = true
 config_window.number = true
 config_window.wrap = true
 config_buffer.autoread = true
@@ -100,6 +99,7 @@ vim.g.VM_theme = "iceblue"
 vim.g.VM_default_mappings = 0
 vim.g.VM_custom_remaps = { ["-"] = "$" }
 vim.g.VM_maps = {
+    ["Reselect Last"] = "<c-s>",
 	["Find Under"] = "<c-u>",
 	["Find Subword Under"] = "<c-u>",
 	["Select All"] = "<c-s-u>",
@@ -114,6 +114,7 @@ vim.g.VM_maps = {
 	["Goto Prev"] = "{",
 	["Skip Region"] = "=",
 	["Remove Region"] = "+",
+    ["Add Cursor At Pos"] = "<enter>",
 	-- ["I BS"] = "",
 }
 
@@ -197,6 +198,8 @@ if ok then
                 n = {
                     ["<c-j>"] = "move_selection_next",
                     ["<c-k>"] = "move_selection_previous",
+                    -- ["<c-n>"] = "move_selection_next",
+                    -- ["<c-p>"] = "move_selection_previous",
                 },
                 i = {
                     ["<C-bs>"] = function()
@@ -204,7 +207,10 @@ if ok then
                     end,
                     ["<c-j>"] = "move_selection_next",
                     ["<c-k>"] = "move_selection_previous",
-                    ["<esc>"] = actions.close
+                    -- ["<c-n>"] = "move_selection_next",
+                    -- ["<c-p>"] = "move_selection_previous",
+                    ["<esc>"] = actions.close,
+                    -- ["<c-j>"] = actions.close
                 },
             },
             initial_mode = "insert",
@@ -234,18 +240,16 @@ if ok then
         indent = {
             enable = false,
         },
-        -- incremental_selection = {
-        --     enable = true,
-        --
-        --     keymaps = {
-        --         init_selection = "m",
-        --         node_incremental = "m",
-        --         node_decremental = "M",
-        --         scope_incremental = "<c-/>",
-        --     },
-        -- },
+        incremental_selection = {
+            enable = true,
 
-
+            keymaps = {
+                init_selection = "m",
+                node_incremental = "m",
+                node_decremental = "M",
+                scope_incremental = "<c-/>",
+            },
+        },
     })
 
     require("nvim-treesitter.highlight").set_custom_captures({
@@ -320,6 +324,8 @@ map("n", "<space>", "<nop>")
 vim.g.mapleader = " "
 
 map("n", "<esc>", "<cmd>nohl<cr><esc>")
+-- map({"i", "c"}, "<c-j>", "<esc>")
+-- map({"n", "i", "v", "c"}, "<c-j>", "<cmd>nohl<cr><esc>")
 
 map("n", "<c-g>", "<cmd>LazyGit<cr>")
 map("n", "<c-f>", "<cmd>NvimTreeToggle<cr>")
@@ -362,14 +368,10 @@ map({ "n", "v" }, "<c-j>", "<c-w>j")
 map({ "n", "v" }, "<c-k>", "<c-w>k")
 map({ "n", "v" }, "<c-l>", "<c-w>l")
 
--- map({ "n", "v" }, "<c-p>", "{")
--- map({ "n", "v" }, "<c-n>", "}")
-
--- map({ "n", "v" }, "[", "{")
--- map({ "n", "v" }, "]", "}")
-
--- map({ "n", "v" }, "<c-n>", "}")
--- map({ "n", "v" }, "<c-p>", "{")
+-- map({ "n", "v" }, "<leader>h", "<c-w>h")
+-- map({ "n", "v" }, "<leader>j", "<c-w>j")
+-- map({ "n", "v" }, "<leader>k", "<c-w>k")
+-- map({ "n", "v" }, "<leader>l", "<c-w>l")
 
 map("n", "H", "<c-u>zz")
 map("n", "L", "<c-d>zz")
@@ -392,21 +394,21 @@ map('n', '<F3>', '<cmd>TSHighlightCapturesUnderCursor<cr>', {})
 
 map("n", "<C-6>", "C-^")
 
-map("n", "<c-,>", "<cmd>BufferPrevious<CR>")
-map("n", "<c-.>", "<cmd>BufferNext<CR>")
--- Re-order to previous/next
-map("n", "<a-,>", "<cmd>BufferMovePrevious<CR>")
-map("n", "<a-.>", "<cmd>BufferMoveNext<CR>")
--- close
 map("n", "<c-w>", "<cmd>BufDel<CR>")
-map("n", "<a-w>", "<cmd>BufferCloseAllButCurrent<CR>")
-map("n", "<a-<>", "<cmd>BufferCloseBuffersLeft<CR>")
-map("n", "<a->>", "<cmd>BufferCloseBuffersRight<CR>")
-map("n", "<a-W>", "<cmd>BufferWipeout<CR>")
+
+map("n", "ci_", '<cmd>set iskeyword-=_<cr>"_ciw<cmd>set iskeyword+=_<cr>')
+map("n", "di_", '<cmd>set iskeyword-=_<cr>"_diw<cmd>set iskeyword+=_<cr>')
+map("n", "vi_", "<cmd>set iskeyword-=_<cr>viw<cmd>set iskeyword+=_<cr>")
+
+map("n", "ca_", '<cmd>set iskeyword-=_<cr>"_caw<cmd>set iskeyword+=_<cr>')
+map("n", "da_", '<cmd>set iskeyword-=_<cr>"_daw<cmd>set iskeyword+=_<cr>')
+map("n", "va_", "<cmd>set iskeyword-=_<cr>vaw<cmd>set iskeyword+=_<cr>")
 
 vim.cmd([[
 
 language en_US
+
+" hi TSElement guisp=NONE guifg=#c58d5d guibg=NONE    ctermfg=173 ctermbg=NONE gui=italic cterm=italic
 
 colorscheme gruvball-ish
 
@@ -415,9 +417,11 @@ autocmd FocusGained * silent! checktime
 set cindent
 " set cino+=L0,g0,N-s,(0,l1
 set cino+=+0,L0,g0,N-s,(0,l1,t0
+" set cino+=+0,L0,g0,(0,l1,t0
 " set cino+=+0,L0,g0,l1,t0
 
-set guifont=JetBrains\ Mono:h12
+" set guifont=JetBrains\ Mono\ NL:h11
+autocmd VimEnter * GuiFont! JetBrains\ Mono\ NL:h11
 
 vnoremap J :m '>+1<CR>gv=gv
 vnoremap K :m '<-2<CR>gv=gv
@@ -433,7 +437,7 @@ map <expr> , g:lightspeed_last_motion == 'sx' ? "<Plug>Lightspeed_,_sx" : "<Plug
 
 autocmd BufEnter *.scm set filetype=query
 
-autocmd FileType python setlocal shiftwidth=2 softtabstop=2 expandtab
+autocmd FileType python setlocal shiftwidth=4 softtabstop=4 expandtab
 autocmd FileType javascript setlocal shiftwidth=2 softtabstop=2 expandtab
 autocmd FileType typescript setlocal shiftwidth=2 softtabstop=2 expandtab
 autocmd FileType json setlocal shiftwidth=2 softtabstop=2 expandtab
@@ -445,7 +449,19 @@ fun! TrimWhitespace()
 endfun
 autocmd BufWritePre * :call TrimWhitespace()
 
-map m <Plug>(expand_region_expand)
-map M <Plug>(expand_region_shrink)
 
+nnoremap <silent> <c-s> <Plug>(VM-Reselect-Last)
+
+" nnoremap <C-j> <Esc>:noh<cr>
+" inoremap <C-j> <Esc>:noh<cr>
+" vnoremap <C-j> <Esc>:noh<cr>
+" snoremap <C-j> <Esc>:noh<cr>
+" xnoremap <C-j> <Esc>:noh<cr>
+" cnoremap <C-j> <C-c>:noh<cr>
+" onoremap <C-j> <Esc>:noh<cr>
+" lnoremap <C-j> <Esc>:noh<cr>
+" tnoremap <C-j> <Esc>:noh<cr>
+" map <c-j> <esc>:noh<cr>
+
+nnoremap <leader><leader> <c-^>
 ]])
