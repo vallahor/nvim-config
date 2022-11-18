@@ -26,14 +26,13 @@ require("packer").startup(function(use)
     use({ "kyazdani42/nvim-tree.lua" })
     use({ 'numToStr/Comment.nvim' })
 
-    use({ "ojroques/nvim-bufdel" })
-
     use({ "tpope/vim-surround" })
 	use({ "tpope/vim-repeat" })
 
     use({ "mg979/vim-visual-multi" })
 
-    -- use({ "romgrk/barbar.nvim" })
+    use({ "noib3/nvim-cokeline" })
+	use({ "ojroques/nvim-bufdel" })
 
     if packer_bootstrap then
         require("packer").sync()
@@ -80,8 +79,7 @@ config_global.scrolloff = 3
 config_global.backup = false
 config_global.gdefault = true
 config_global.ch = 0
--- config_global.guicursor = "i:block-iCursor"
-config_global.guicursor = "i-ci:block-iCursor"
+-- config_global.guicursor = "i-ci:block-iCursor" -- comment when using nvim-qt (new version)
 
 config_global.completeopt = { "menu", "menuone", "noselect" }
 -- config_global.completeopt = { "menu", "noinsert", "menuone", "noselect" }
@@ -231,6 +229,8 @@ if ok then
             "zig",
             "query",
             "python",
+            "typescript",
+            "javascript",
             "rust",
         },
         highlight = {
@@ -252,17 +252,17 @@ if ok then
         },
     })
 
-    require("nvim-treesitter.highlight").set_custom_captures({
-        ["js.named_import"] = "TSLiteral",
-        ["js.import"] = "TSLiteral",
-        ["js.keyword"] = "TSOperator",
-        ["js.keyword_bold"] = "TSInclude",
-        ["js.arrow_func"] = "TSKeyword",
-        ["js.opening_element"] = "TSElement",
-        ["js.closing_element"] = "TSElement",
-        ["js.self_closing_element"] = "TSElement",
-        ["zig.assignop"] = "TSOperator",
-    })
+   -- require("nvim-treesitter.highlight").set_custom_captures({
+   --     ["js.named_import"] = "TSLiteral",
+   --     ["js.import"] = "TSLiteral",
+   --     ["js.keyword"] = "TSOperator",
+   --     ["js.keyword_bold"] = "TSInclude",
+   --     ["js.arrow_func"] = "TSKeyword",
+   --     ["js.opening_element"] = "TSElement",
+   --     ["js.closing_element"] = "TSElement",
+   --     ["js.self_closing_element"] = "TSElement",
+   --     ["zig.assignop"] = "TSOperator",
+   -- })
 
     require "nvim-treesitter.configs".setup({
         playground = {
@@ -312,6 +312,37 @@ if ok then
         semantic_letters = true,
         letters = 'asdfjkl;ghnmxcvbziowerutyqpASDFJKLGHNMXCVBZIOWERUTYQP',
         no_name_title = nil,
+    })
+end
+
+local ok, cokeline = pcall(require, "cokeline")
+if ok then
+    cokeline.setup({
+        components = {
+            {
+                text = "   ",
+            },
+            {
+                text = function(buffer)
+                    return buffer.filename .. " "
+                end,
+                style = function(buffer)
+                    return buffer.is_focused and "bold" or nil
+                end,
+            },
+            {
+                text = function(buffer)
+                    if buffer.is_modified then
+                        return "●"
+                    end
+                    return " "
+                end,
+
+            },
+            {
+                text = " ",
+            },
+        },
     })
 end
 
@@ -368,11 +399,6 @@ map({ "n", "v" }, "<c-j>", "<c-w>j")
 map({ "n", "v" }, "<c-k>", "<c-w>k")
 map({ "n", "v" }, "<c-l>", "<c-w>l")
 
--- map({ "n", "v" }, "<leader>h", "<c-w>h")
--- map({ "n", "v" }, "<leader>j", "<c-w>j")
--- map({ "n", "v" }, "<leader>k", "<c-w>k")
--- map({ "n", "v" }, "<leader>l", "<c-w>l")
-
 map("n", "H", "<c-u>zz")
 map("n", "L", "<c-d>zz")
 
@@ -404,6 +430,15 @@ map("n", "ca_", '<cmd>set iskeyword-=_<cr>"_caw<cmd>set iskeyword+=_<cr>')
 map("n", "da_", '<cmd>set iskeyword-=_<cr>"_daw<cmd>set iskeyword+=_<cr>')
 map("n", "va_", "<cmd>set iskeyword-=_<cr>vaw<cmd>set iskeyword+=_<cr>")
 
+-- tab
+map("n", "<a-,>", "<Plug>(cokeline-switch-prev)")
+map("n", "<a-.>", "<Plug>(cokeline-switch-next)")
+-- Re-order to previous/next
+map("n", "<c-,>", "<Plug>(cokeline-focus-prev)")
+map("n", "<c-.>", "<Plug>(cokeline-focus-next)")
+-- close
+map("n", "<c-w>", "<cmd>BufDel<CR>")
+
 vim.cmd([[
 
 language en_US
@@ -422,6 +457,7 @@ set cino+=+0,L0,g0,N-s,(0,l1,t0
 
 " set guifont=JetBrains\ Mono\ NL:h11
 autocmd VimEnter * GuiFont! JetBrains\ Mono\ NL:h11
+" autocmd VimEnter * GuiFont! Cascadia\ Mono:h12
 
 vnoremap J :m '>+1<CR>gv=gv
 vnoremap K :m '<-2<CR>gv=gv
@@ -443,25 +479,14 @@ autocmd FileType typescript setlocal shiftwidth=2 softtabstop=2 expandtab
 autocmd FileType json setlocal shiftwidth=2 softtabstop=2 expandtab
 
 fun! TrimWhitespace()
-	let l:save = winsaveview()
-	keeppatterns %s/\s\+$//e
-	call winrestview(l:save)
+let l:save = winsaveview()
+keeppatterns %s/\s\+$//e
+call winrestview(l:save)
 endfun
 autocmd BufWritePre * :call TrimWhitespace()
 
 
 nnoremap <silent> <c-s> <Plug>(VM-Reselect-Last)
-
-" nnoremap <C-j> <Esc>:noh<cr>
-" inoremap <C-j> <Esc>:noh<cr>
-" vnoremap <C-j> <Esc>:noh<cr>
-" snoremap <C-j> <Esc>:noh<cr>
-" xnoremap <C-j> <Esc>:noh<cr>
-" cnoremap <C-j> <C-c>:noh<cr>
-" onoremap <C-j> <Esc>:noh<cr>
-" lnoremap <C-j> <Esc>:noh<cr>
-" tnoremap <C-j> <Esc>:noh<cr>
-" map <c-j> <esc>:noh<cr>
 
 nnoremap <leader><leader> <c-^>
 ]])
