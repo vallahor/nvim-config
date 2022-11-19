@@ -287,34 +287,6 @@ if ok then
 
 end
 
-local ok, bufferline = pcall(require, "bufferline")
-if ok then
-    bufferline.setup({
-        icons = false,
-        animation = true,
-        auto_hide = false,
-        tabpages = true,
-        closable = true,
-        clickable = true,
-        icon_custom_colors = false,
-
-        icon_separator_active = '▎',
-        icon_separator_inactive = '▎',
-        icon_close_tab = '',
-        icon_close_tab_modified = '',
-
-        insert_at_end = false,
-        insert_at_start = false,
-
-        maximum_padding = 1,
-        maximum_length = 30,
-
-        semantic_letters = true,
-        letters = 'asdfjkl;ghnmxcvbziowerutyqpASDFJKLGHNMXCVBZIOWERUTYQP',
-        no_name_title = nil,
-    })
-end
-
 local ok, cokeline = pcall(require, "cokeline")
 if ok then
     cokeline.setup({
@@ -355,8 +327,6 @@ map("n", "<space>", "<nop>")
 vim.g.mapleader = " "
 
 map("n", "<esc>", "<cmd>nohl<cr><esc>")
--- map({"i", "c"}, "<c-j>", "<esc>")
--- map({"n", "i", "v", "c"}, "<c-j>", "<cmd>nohl<cr><esc>")
 
 map("n", "<c-g>", "<cmd>LazyGit<cr>")
 map("n", "<c-f>", "<cmd>NvimTreeToggle<cr>")
@@ -416,11 +386,9 @@ map("v", "Z", "<Plug>Lightspeed_S")
 
 map("v", "s", "<Plug>VSurround")
 
-map('n', '<F3>', '<cmd>TSHighlightCapturesUnderCursor<cr>', {})
+map('n', '<F3>', '<cmd>TSHighlightCapturesUnderCursor<cr>')
 
 map("n", "<C-6>", "C-^")
-
-map("n", "<c-w>", "<cmd>BufDel<CR>")
 
 map("n", "ci_", '<cmd>set iskeyword-=_<cr>"_ciw<cmd>set iskeyword+=_<cr>')
 map("n", "di_", '<cmd>set iskeyword-=_<cr>"_diw<cmd>set iskeyword+=_<cr>')
@@ -439,25 +407,19 @@ map("n", "<c-.>", "<Plug>(cokeline-focus-next)")
 -- close
 map("n", "<c-w>", "<cmd>BufDel<CR>")
 
+
 vim.cmd([[
-
 language en_US
-
-" hi TSElement guisp=NONE guifg=#c58d5d guibg=NONE    ctermfg=173 ctermbg=NONE gui=italic cterm=italic
 
 colorscheme gruvball-ish
 
 autocmd FocusGained * silent! checktime
 
 set cindent
-" set cino+=L0,g0,N-s,(0,l1
 set cino+=+0,L0,g0,N-s,(0,l1,t0
-" set cino+=+0,L0,g0,(0,l1,t0
-" set cino+=+0,L0,g0,l1,t0
 
 " set guifont=JetBrains\ Mono\ NL:h11
 autocmd VimEnter * GuiFont! JetBrains\ Mono\ NL:h11
-" autocmd VimEnter * GuiFont! Cascadia\ Mono:h12
 
 vnoremap J :m '>+1<CR>gv=gv
 vnoremap K :m '<-2<CR>gv=gv
@@ -485,8 +447,5 @@ call winrestview(l:save)
 endfun
 autocmd BufWritePre * :call TrimWhitespace()
 
-
 nnoremap <silent> <c-s> <Plug>(VM-Reselect-Last)
-
-nnoremap <leader><leader> <c-^>
 ]])
