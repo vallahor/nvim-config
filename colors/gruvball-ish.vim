@@ -129,7 +129,7 @@ hi @variable            guisp=NONE guifg=#A98D92 guibg=NONE    ctermfg=138 cterm
 hi @variable.builtin     guisp=NONE guifg=#806292 guibg=NONE    ctermfg=145 ctermbg=NONE gui=italic cterm=italic
 hi @tag                 guisp=NONE guifg=#a1495c guibg=NONE    ctermfg=131 ctermbg=NONE gui=NONE cterm=NONE
 hi @tag.delimiter        guisp=NONE guifg=#9F8D8C guibg=NONE    ctermfg=246 ctermbg=NONE gui=NONE cterm=NONE
-hi @tab.attribute        guisp=NONE guifg=#A8899C guibg=NONE    ctermfg=139 ctermbg=NONE gui=NONE cterm=NONE
+hi @tag.attribute        guisp=NONE guifg=#A8899C guibg=NONE    ctermfg=139 ctermbg=NONE gui=NONE cterm=NONE
 hi @attribute        guisp=NONE guifg=#794966 guibg=NONE    ctermfg=95  ctermbg=NONE gui=bold,italic cterm=bold,italic
 hi @text                guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
 hi @text.strong              guisp=NONE guifg=#C0AEA0 guibg=NONE    ctermfg=145 ctermbg=NONE gui=NONE cterm=NONE
