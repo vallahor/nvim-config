@@ -85,7 +85,7 @@ config_global.completeopt = { "menu", "menuone", "noselect" }
 -- config_global.completeopt = { "menu", "noinsert", "menuone", "noselect" }
 
 config_window.signcolumn = "no"
--- config_window.relativenumber = true
+config_window.relativenumber = true
 config_window.number = true
 config_window.wrap = true
 config_buffer.autoread = true
@@ -104,7 +104,6 @@ vim.g.VM_maps = {
 	["Add Cursor Down"] = "<m-j>",
 	["Add Cursor Up"] = "<m-k>",
 	["Switch Mode"] = "v",
-	-- ["Switch Mode"] = "<Tab>",
 	["Align"] = "<c-a>",
 	["Find Next"] = "]",
 	["Find Prev"] = "[",
@@ -113,9 +112,7 @@ vim.g.VM_maps = {
 	["Skip Region"] = "=",
 	["Remove Region"] = "+",
     ["Add Cursor At Pos"] = "<enter>",
-	-- ["I BS"] = "",
 }
-
 
 local ok, lightspeed = pcall(require, "lightspeed")
 if ok then
@@ -182,7 +179,7 @@ end
 local ok, bufdel = pcall(require, "bufdel")
 if ok then
     bufdel.setup({
-        next = "cycle", -- or 'alternate'
+        next = "cycle",
         quit = false,
     })
 end
@@ -196,8 +193,6 @@ if ok then
                 n = {
                     ["<c-j>"] = "move_selection_next",
                     ["<c-k>"] = "move_selection_previous",
-                    -- ["<c-n>"] = "move_selection_next",
-                    -- ["<c-p>"] = "move_selection_previous",
                 },
                 i = {
                     ["<C-bs>"] = function()
@@ -205,10 +200,7 @@ if ok then
                     end,
                     ["<c-j>"] = "move_selection_next",
                     ["<c-k>"] = "move_selection_previous",
-                    -- ["<c-n>"] = "move_selection_next",
-                    -- ["<c-p>"] = "move_selection_previous",
                     ["<esc>"] = actions.close,
-                    -- ["<c-j>"] = actions.close
                 },
             },
             initial_mode = "insert",
@@ -252,24 +244,12 @@ if ok then
         },
     })
 
-   -- require("nvim-treesitter.highlight").set_custom_captures({
-   --     ["js.named_import"] = "TSLiteral",
-   --     ["js.import"] = "TSLiteral",
-   --     ["js.keyword"] = "TSOperator",
-   --     ["js.keyword_bold"] = "TSInclude",
-   --     ["js.arrow_func"] = "TSKeyword",
-   --     ["js.opening_element"] = "TSElement",
-   --     ["js.closing_element"] = "TSElement",
-   --     ["js.self_closing_element"] = "TSElement",
-   --     ["zig.assignop"] = "TSOperator",
-   -- })
-
     require "nvim-treesitter.configs".setup({
         playground = {
             enable = true,
             disable = {},
-            updatetime = 25, -- Debounced time for highlighting nodes in the playground from source code
-            persist_queries = false, -- Whether the query persists across vim sessions
+            updatetime = 25,
+            persist_queries = false,
             keybindings = {
                 toggle_query_editor = 'o',
                 toggle_hl_groups = 'i',
@@ -399,11 +379,11 @@ map("n", "da_", '<cmd>set iskeyword-=_<cr>"_daw<cmd>set iskeyword+=_<cr>')
 map("n", "va_", "<cmd>set iskeyword-=_<cr>vaw<cmd>set iskeyword+=_<cr>")
 
 -- tab
-map("n", "<a-,>", "<Plug>(cokeline-switch-prev)")
-map("n", "<a-.>", "<Plug>(cokeline-switch-next)")
--- Re-order to previous/next
 map("n", "<c-,>", "<Plug>(cokeline-focus-prev)")
 map("n", "<c-.>", "<Plug>(cokeline-focus-next)")
+-- Re-order to previous/next
+map("n", "<a-,>", "<Plug>(cokeline-switch-prev)")
+map("n", "<a-.>", "<Plug>(cokeline-switch-next)")
 -- close
 map("n", "<c-w>", "<cmd>BufDel<CR>")
 
