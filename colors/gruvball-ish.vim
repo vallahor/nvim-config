@@ -162,8 +162,8 @@ hi @constant.builtin      guisp=none guifg=#9B668F guibg=none ctermfg=132 ctermb
 " hi @constant.macro        guisp=none guifg=#B66D8A guibg=none ctermfg=168 ctermbg=none gui=none   cterm=none
 hi @constant.macro        guisp=none guifg=#c58d5d guibg=none ctermfg=173 ctermbg=none gui=none   cterm=none
 hi @punctuation.delimiter guisp=none guifg=#794966 guibg=none ctermfg=95  ctermbg=none gui=none   cterm=none
-" hi @punctuation.bracket   guisp=none guifg=#95667C guibg=none ctermfg=96  ctermbg=none gui=none   cterm=none
-hi @punctuation.bracket   guisp=none guifg=#B66D8A guibg=none ctermfg=168 ctermbg=none gui=none   cterm=none
+hi @punctuation.bracket   guisp=none guifg=#95667C guibg=none ctermfg=96  ctermbg=none gui=none   cterm=none
+" hi @punctuation.bracket   guisp=none guifg=#B66D8A guibg=none ctermfg=168 ctermbg=none gui=none   cterm=none
 hi @punctuation.special   guisp=none guifg=#794966 guibg=none ctermfg=95  ctermbg=none gui=bold   cterm=bold
 hi @operator              guisp=none guifg=#794966 guibg=none ctermfg=95  ctermbg=none gui=none   cterm=none
 hi @conditional           guisp=none guifg=#794966 guibg=none ctermfg=95  ctermbg=none gui=italic cterm=italic
@@ -177,6 +177,9 @@ hi @debug                 guisp=none guifg=#794966 guibg=none ctermfg=95  ctermb
 
 hi @storageclass          guisp=none guifg=#a1495c guibg=none ctermfg=131 ctermbg=none gui=italic   cterm=italic
 hi @storageclass.lifetime guisp=none guifg=#9B668F guibg=none ctermfg=132 ctermbg=none gui=italic cterm=italic
+
+hi @comment    guisp=none guifg=#887878 guibg=none ctermfg=244 ctermbg=none gui=none cterm=none
+hi @spell      guisp=none guifg=#887878 guibg=none ctermfg=244 ctermbg=none gui=none cterm=none
 
 hi BufferCurrent       guisp=none guifg=none    guibg=#3d3339 ctermfg=none ctermbg=237 gui=none cterm=none
 hi BufferCurrentIndex  guisp=none guifg=none    guibg=#3d3339 ctermfg=none ctermbg=237 gui=none cterm=none
