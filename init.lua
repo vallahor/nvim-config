@@ -1,42 +1,42 @@
 local fn = vim.fn
 local install_path = fn.stdpath("data") .. "/site/pack/packer/start/packer.nvim"
 if fn.empty(fn.glob(install_path)) > 0 then
-    packer_bootstrap = fn.system({
-        "git",
-        "clone",
-        "--depth",
-        "1",
-        "https://github.com/wbthomason/packer.nvim",
-        install_path,
-    })
+  packer_bootstrap = fn.system({
+    "git",
+    "clone",
+    "--depth",
+    "1",
+    "https://github.com/wbthomason/packer.nvim",
+    install_path,
+  })
 end
 
 require("packer").startup(function(use)
-    use({ "wbthomason/packer.nvim" })
+  use({ "wbthomason/packer.nvim" })
 
-    use({ "nvim-lua/plenary.nvim" })
-	use({ "nvim-telescope/telescope.nvim" })
+  use({ "nvim-lua/plenary.nvim" })
+  use({ "nvim-telescope/telescope.nvim" })
 
-    use { 'nvim-treesitter/playground' }
-    use({ "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" })
+  use { 'nvim-treesitter/playground' }
+  use({ "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" })
 
-    use({ "ggandor/lightspeed.nvim" })
-    use({ "kdheepak/lazygit.nvim" })
+  use({ "ggandor/lightspeed.nvim" })
+  use({ "kdheepak/lazygit.nvim" })
 
-    use({ "kyazdani42/nvim-tree.lua" })
-    use({ 'numToStr/Comment.nvim' })
+  use({ "kyazdani42/nvim-tree.lua" })
+  use({ 'numToStr/Comment.nvim' })
 
-    use({ "tpope/vim-surround" })
-	use({ "tpope/vim-repeat" })
+  use({ "tpope/vim-surround" })
+  use({ "tpope/vim-repeat" })
 
-    use({ "mg979/vim-visual-multi" })
+  use({ "mg979/vim-visual-multi" })
 
-    use({ "noib3/nvim-cokeline" })
-	use({ "ojroques/nvim-bufdel" })
+  use({ "noib3/nvim-cokeline" })
+  use({ "ojroques/nvim-bufdel" })
 
-    if packer_bootstrap then
-        require("packer").sync()
-    end
+  if packer_bootstrap then
+    require("packer").sync()
+  end
 end)
 
 -- SETTINGS --
@@ -86,7 +86,7 @@ config_global.completeopt = { "menu", "menuone", "noselect" }
 
 config_window.signcolumn = "no"
 config_window.relativenumber = true
-config_window.number = true
+-- config_window.number = true
 config_window.wrap = true
 config_buffer.autoread = true
 config_buffer.copyindent = true
@@ -97,205 +97,205 @@ vim.g.VM_theme = "iceblue"
 vim.g.VM_default_mappings = 0
 vim.g.VM_custom_remaps = { ["-"] = "$" }
 vim.g.VM_maps = {
-    ["Reselect Last"] = "<c-s>",
-	["Find Under"] = "<c-u>",
-	["Find Subword Under"] = "<c-u>",
-	["Select All"] = "<c-s-u>",
-	["Add Cursor Down"] = "<m-j>",
-	["Add Cursor Up"] = "<m-k>",
-	["Switch Mode"] = "v",
-	["Align"] = "<c-a>",
-	["Find Next"] = "]",
-	["Find Prev"] = "[",
-	["Goto Next"] = "}",
-	["Goto Prev"] = "{",
-	["Skip Region"] = "=",
-	["Remove Region"] = "+",
-    ["Add Cursor At Pos"] = "<enter>",
+  ["Reselect Last"] = "<c-s>",
+  ["Find Under"] = "<c-u>",
+  ["Find Subword Under"] = "<c-u>",
+  ["Select All"] = "<c-s-u>",
+  ["Add Cursor Down"] = "<m-j>",
+  ["Add Cursor Up"] = "<m-k>",
+  ["Switch Mode"] = "v",
+  ["Align"] = "<c-a>",
+  ["Find Next"] = "]",
+  ["Find Prev"] = "[",
+  ["Goto Next"] = "}",
+  ["Goto Prev"] = "{",
+  ["Skip Region"] = "=",
+  ["Remove Region"] = "+",
+  ["Add Cursor At Pos"] = "<enter>",
 }
 
 local ok, lightspeed = pcall(require, "lightspeed")
 if ok then
-    -- vim.g.lightspeed_no_default_keymaps = true
-    lightspeed.setup({
-        exit_after_idle_msecs = { unlabeled = 300, labeled = nil },
-        --- s/x ---
-        jump_to_unique_chars = { safety_timeout = 300 },
-        ignore_case = true,
-        repeat_ft_with_target_char = true,
-    })
+  -- vim.g.lightspeed_no_default_keymaps = true
+  lightspeed.setup({
+    exit_after_idle_msecs = { unlabeled = 300, labeled = nil },
+    --- s/x ---
+    jump_to_unique_chars = { safety_timeout = 300 },
+    ignore_case = true,
+    repeat_ft_with_target_char = true,
+  })
 end
 
 local ok, nvim_tree = pcall(require, "nvim-tree")
 if  ok then
-    nvim_tree.setup({
+  nvim_tree.setup({
     renderer = {
-        indent_markers = {
-            enable = true,
-            icons = {
-                corner = "└ ",
-                edge = "│ ",
-                none = "  ",
-            },
-        },
+      indent_markers = {
+        enable = true,
         icons = {
-            webdev_colors = false,
-            show = {
-                folder = true,
-                file = false,
-                folder_arrow = false,
-            },
+          corner = "└ ",
+          edge = "│ ",
+          none = "  ",
         },
+      },
+      icons = {
+        webdev_colors = false,
+        show = {
+          folder = true,
+          file = false,
+          folder_arrow = false,
+        },
+      },
     },
     git = {
-        enable = false,
-        ignore = false,
-        timeout = 400,
+      enable = false,
+      ignore = false,
+      timeout = 400,
     },
-})
+  })
 end
 
 local ok, nvim_comment = pcall(require, "Comment")
 if ok then
-    nvim_comment.setup({
-        padding = true,
-        sticky = true,
-        ignore = nil,
-        toggler = {
-            line = "gcc",
-            block = "gbc",
-        },
-        opleader = {
-            line = "gc",
-            block = "gb",
-        },
-        mappings = {
-            basic = true,
-            extra = true,
-        },
-    })
+  nvim_comment.setup({
+    padding = true,
+    sticky = true,
+    ignore = nil,
+    toggler = {
+      line = "gcc",
+      block = "gbc",
+    },
+    opleader = {
+      line = "gc",
+      block = "gb",
+    },
+    mappings = {
+      basic = true,
+      extra = true,
+    },
+  })
 end
 
 local ok, bufdel = pcall(require, "bufdel")
 if ok then
-    bufdel.setup({
-        next = "cycle",
-        quit = false,
-    })
+  bufdel.setup({
+    next = "cycle",
+    quit = false,
+  })
 end
 
 local ok, telescope = pcall(require, "telescope")
 if ok then
-    local actions = require("telescope.actions")
-    telescope.setup({
-        defaults = {
-            mappings = {
-                n = {
-                    ["<c-j>"] = "move_selection_next",
-                    ["<c-k>"] = "move_selection_previous",
-                },
-                i = {
-                    ["<C-bs>"] = function()
-                        vim.api.nvim_input("<c-s-w>")
-                    end,
-                    ["<c-j>"] = "move_selection_next",
-                    ["<c-k>"] = "move_selection_previous",
-                    ["<esc>"] = actions.close,
-                },
-            },
-            initial_mode = "insert",
-            selection_strategy = "reset",
-            path_display = { "absolute" },
-            borderchars = { "─", "│", "─", "│", "┌", "┐", "┘", "└" },
+  local actions = require("telescope.actions")
+  telescope.setup({
+    defaults = {
+      mappings = {
+        n = {
+          ["<c-j>"] = "move_selection_next",
+          ["<c-k>"] = "move_selection_previous",
         },
-    })
+        i = {
+          ["<C-bs>"] = function()
+            vim.api.nvim_input("<c-s-w>")
+          end,
+          ["<c-j>"] = "move_selection_next",
+          ["<c-k>"] = "move_selection_previous",
+          ["<esc>"] = actions.close,
+        },
+      },
+      initial_mode = "insert",
+      selection_strategy = "reset",
+      path_display = { "absolute" },
+      borderchars = { "─", "│", "─", "│", "┌", "┐", "┘", "└" },
+    },
+  })
 end
 
 local ok, nvim_treesitter = pcall(require, "nvim-treesitter.configs")
 if ok then
-    nvim_treesitter.setup({
-        ensure_installed = {
-            "lua",
-            "c",
-            "cpp",
-            "zig",
-            "query",
-            "python",
-            "typescript",
-            "javascript",
-            "rust",
-        },
-        highlight = {
-            enable = true,
-            additional_vim_regex_highlighting = false,
-        },
-        indent = {
-            enable = false,
-        },
-        incremental_selection = {
-            enable = true,
+  nvim_treesitter.setup({
+    ensure_installed = {
+      "lua",
+      "c",
+      "cpp",
+      "zig",
+      "query",
+      "python",
+      "typescript",
+      "javascript",
+      "rust",
+    },
+    highlight = {
+      enable = true,
+      additional_vim_regex_highlighting = false,
+    },
+    indent = {
+      enable = false,
+    },
+    incremental_selection = {
+      enable = true,
 
-            keymaps = {
-                init_selection = "m",
-                node_incremental = "m",
-                node_decremental = "M",
-                scope_incremental = "<c-/>",
-            },
-        },
-    })
+      keymaps = {
+        init_selection = "m",
+        node_incremental = "m",
+        node_decremental = "M",
+        scope_incremental = "<c-/>",
+      },
+    },
+  })
 
-    require "nvim-treesitter.configs".setup({
-        playground = {
-            enable = true,
-            disable = {},
-            updatetime = 25,
-            persist_queries = false,
-            keybindings = {
-                toggle_query_editor = 'o',
-                toggle_hl_groups = 'i',
-                toggle_injected_languages = 't',
-                toggle_anonymous_nodes = 'a',
-                toggle_language_display = 'I',
-                focus_language = 'f',
-                unfocus_language = 'F',
-                update = 'R',
-                goto_node = '<cr>',
-                show_help = '?',
-            },
-        },
-    })
+  require "nvim-treesitter.configs".setup({
+    playground = {
+      enable = true,
+      disable = {},
+      updatetime = 25,
+      persist_queries = false,
+      keybindings = {
+        toggle_query_editor = 'o',
+        toggle_hl_groups = 'i',
+        toggle_injected_languages = 't',
+        toggle_anonymous_nodes = 'a',
+        toggle_language_display = 'I',
+        focus_language = 'f',
+        unfocus_language = 'F',
+        update = 'R',
+        goto_node = '<cr>',
+        show_help = '?',
+      },
+    },
+  })
 
 end
 
 local ok, cokeline = pcall(require, "cokeline")
 if ok then
-    cokeline.setup({
-        components = {
-            {
-                text = "   ",
-            },
-            {
-                text = function(buffer)
-                    return buffer.filename .. " "
-                end,
-                style = function(buffer)
-                    return buffer.is_focused and "bold" or nil
-                end,
-            },
-            {
-                text = function(buffer)
-                    if buffer.is_modified then
-                        return "●"
-                    end
-                    return " "
-                end,
+  cokeline.setup({
+    components = {
+      {
+        text = "   ",
+      },
+      {
+        text = function(buffer)
+          return buffer.filename .. " "
+        end,
+        style = function(buffer)
+          return buffer.is_focused and "bold" or nil
+        end,
+      },
+      {
+        text = function(buffer)
+          if buffer.is_modified then
+            return "●"
+          end
+          return " "
+        end,
 
-            },
-            {
-                text = " ",
-            },
-        },
-    })
+      },
+      {
+        text = " ",
+      },
+    },
+  })
 end
 
 -- MAPPING --
@@ -387,16 +387,14 @@ map("n", "<a-.>", "<Plug>(cokeline-switch-next)")
 -- close
 map("n", "<c-w>", "<cmd>BufDel<CR>")
 
-
 vim.cmd([[
 language en_US
+
+filetype on
 
 colorscheme gruvball-ish
 
 autocmd FocusGained * silent! checktime
-
-set cindent
-set cino+=+0,L0,g0,N-s,(0,l1,t0
 
 " set guifont=JetBrains\ Mono\ NL:h11
 autocmd VimEnter * GuiFont! JetBrains\ Mono\ NL:h11
@@ -415,11 +413,6 @@ map <expr> , g:lightspeed_last_motion == 'sx' ? "<Plug>Lightspeed_,_sx" : "<Plug
 
 autocmd BufEnter *.scm set filetype=query
 
-autocmd FileType python setlocal shiftwidth=4 softtabstop=4 expandtab
-autocmd FileType javascript setlocal shiftwidth=2 softtabstop=2 expandtab
-autocmd FileType typescript setlocal shiftwidth=2 softtabstop=2 expandtab
-autocmd FileType json setlocal shiftwidth=2 softtabstop=2 expandtab
-
 fun! TrimWhitespace()
 let l:save = winsaveview()
 keeppatterns %s/\s\+$//e
@@ -428,4 +421,17 @@ endfun
 autocmd BufWritePre * :call TrimWhitespace()
 
 nnoremap <silent> <c-s> <Plug>(VM-Reselect-Last)
+
+set cindent
+" set cino+=L0,g0,N-s,(0,l1,t0
+set cino+=L0,g0,l1,t0,(0,w1,w4,(s,m1
+" set cino+=L0,g0,l1,t0,w1,w4,(s,m1
 ]])
+
+vim.api.nvim_create_autocmd("BufEnter", {
+  pattern = {"*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.lua", "*.html"},
+  callback = function()
+    vim.opt_local.shiftwidth = 2
+    vim.opt_local.tabstop = 2
+  end
+})
