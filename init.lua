@@ -34,6 +34,8 @@ require("packer").startup(function(use)
   use({ "noib3/nvim-cokeline" })
   use({ "ojroques/nvim-bufdel" })
 
+  use({ 'norcalli/nvim-colorizer.lua' })
+
   if packer_bootstrap then
     require("packer").sync()
   end
@@ -98,9 +100,9 @@ vim.g.VM_default_mappings = 0
 vim.g.VM_custom_remaps = { ["-"] = "$" }
 vim.g.VM_maps = {
   ["Reselect Last"] = "<c-s>",
-  ["Find Under"] = "<c-u>",
-  ["Find Subword Under"] = "<c-u>",
-  ["Select All"] = "<c-s-u>",
+  ["Find Under"] = "H",
+  ["Find Subword Under"] = "H",
+  ["Select All"] = "<m-h>",
   ["Add Cursor Down"] = "<m-j>",
   ["Add Cursor Up"] = "<m-k>",
   ["Switch Mode"] = "v",
@@ -288,6 +290,8 @@ if ok then
   })
 end
 
+require'colorizer'.setup()
+
 -- MAPPING --
 
 local map = vim.keymap.set
@@ -324,8 +328,11 @@ map({ "n", "v" }, "-", "$")
 map({ "n", "v" }, "<leader>0", "0")
 map({ "n", "v" }, "0", "^")
 
-map({ "n", "v" }, "j", "gj")
-map({ "n", "v" }, "k", "gk")
+-- map({ "n", "v" }, "j", "gj")
+-- map({ "n", "v" }, "k", "gk")
+
+map("n", "j", "v:count ? 'j^' : 'gj'", { expr = true })
+map("n", "k", "v:count ? 'k^' : 'gk'", { expr = true })
 
 map({ "n", "v" }, "<leader>fs", "<cmd>w!<CR><esc>")
 
@@ -389,7 +396,7 @@ language en_US
 
 filetype on
 
-colorscheme gruvball-ish
+" colorscheme gruvball-ish
 
 autocmd FocusGained * silent! checktime
 
@@ -432,6 +439,7 @@ sunmap '
 sunmap m
 
 autocmd VimEnter * delmarks 0-9
+
 ]])
 
 vim.api.nvim_create_autocmd("BufEnter", {
@@ -442,3 +450,7 @@ vim.api.nvim_create_autocmd("BufEnter", {
   end
 })
 
+local ok, theme = pcall(require, "theme")
+if ok then
+    theme.colorscheme()
+end
