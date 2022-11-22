@@ -5,23 +5,21 @@
  "await"
  "typeof"
  "keyof"
-] @js.keyword
-
-[
-  "declare"
-  "extends"
-] @js.keyword_bold
-
-[
+ "declare"
+ "extends"
  "=>"
-] @js.arrow_func
+] @keyword
 
-(import_statement
-  (import_clause
-    (named_imports
-      (import_specifier
-        (identifier) @js.named_import))))
+[
+ "as"
+] @operator
 
-(import_statement
-  (import_clause
-    (identifier) @js.import))
+; (import_statement
+;   (import_clause
+;     (named_imports
+;       (import_specifier
+;         (identifier) @literal))))
+;
+; (import_statement
+;   (import_clause
+;     (identifier) @literal))

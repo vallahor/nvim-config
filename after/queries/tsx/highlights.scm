@@ -5,27 +5,25 @@
  "await"
  "typeof"
  "keyof"
-] @js.keyword
-
-[
-  "declare"
-  "extends"
-] @js.keyword_bold
-
-[
+ "declare"
+ "extends"
  "=>"
-] @js.arrow_func
+] @keyword
 
-(jsx_opening_element (identifier) @js.opening_element)
-(jsx_closing_element (identifier) @js.closing_element)
-(jsx_self_closing_element (identifier) @js.self_closing_element)
+[
+ "as"
+] @operator
 
-(import_statement
-  (import_clause
-    (named_imports
-      (import_specifier
-        (identifier) @js.named_import))))
+(jsx_opening_element (identifier) @tag)
+(jsx_closing_element (identifier) @tag)
+(jsx_self_closing_element (identifier) @tag)
 
-(import_statement
-  (import_clause
-    (identifier) @js.import))
+; (import_statement
+;   (import_clause
+;     (named_imports
+;       (import_specifier
+;         (identifier) @literal))))
+;
+; (import_statement
+;   (import_clause
+;     (identifier) @literal))

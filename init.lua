@@ -78,7 +78,7 @@ config_global.cursorline = true
 config_global.scrolloff = 3
 config_global.backup = false
 config_global.gdefault = true
-config_global.ch = 0
+-- config_global.ch = 0
 -- config_global.guicursor = "i-ci:block-iCursor" -- comment when using nvim-qt (new version)
 
 config_global.completeopt = { "menu", "menuone", "noselect" }
@@ -200,7 +200,7 @@ if ok then
           end,
           ["<c-j>"] = "move_selection_next",
           ["<c-k>"] = "move_selection_previous",
-          ["<esc>"] = actions.close,
+          -- ["<esc>"] = actions.close,
         },
       },
       initial_mode = "insert",
@@ -231,16 +231,6 @@ if ok then
     },
     indent = {
       enable = false,
-    },
-    incremental_selection = {
-      enable = true,
-
-      keymaps = {
-        init_selection = "m",
-        node_incremental = "m",
-        node_decremental = "M",
-        scope_incremental = "<c-/>",
-      },
     },
   })
 
@@ -308,19 +298,20 @@ vim.g.mapleader = " "
 
 map("n", "<esc>", "<cmd>nohl<cr><esc>")
 
-map("n", "<c-g>", "<cmd>LazyGit<cr>")
-map("n", "<c-f>", "<cmd>NvimTreeToggle<cr>")
+map("n", "<leader>g", "<cmd>LazyGit<cr>")
+map("n", "<leader>ft", "<cmd>NvimTreeToggle<cr>")
 map("n", "<c-;>", "<cmd>NvimTreeFocus<cr>")
 
-map("n", "<c-p>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
-map("n", "<c-/>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
-map("n", "<c-space>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
+map("n", "<leader>ff", "<cmd>lua require('telescope.builtin').find_files()<cr>")
+map("n", "<leader>ps", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
 
 map("c", "<c-v>", '<c-r>"')
 
 map("v", "v", 'V')
+map("n", "L", '<c-v>')
 
 map({ "i", "c" }, "<c-bs>", "<c-w>")
+map({ "i", "c" }, "<a-bs>", "<c-w>")
 
 map("n", "x", '"_x')
 map("v", "x", '"_d')
@@ -337,29 +328,25 @@ map({ "n", "v" }, "0", "^")
 map({ "n", "v" }, "j", "gj")
 map({ "n", "v" }, "k", "gk")
 
-map({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>")
-map({ "n", "v" }, "<s-enter>", "<cmd>w!<CR><esc>")
+map({ "n", "v" }, "<leader>fs", "<cmd>w!<CR><esc>")
 
 -- map("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
 map("n", "<f2>", "<cmd>:e $MYVIMRC<CR>")
 map("n", "<f5>", "<cmd>so %<CR>")
 
-map({ "n", "v" }, "<c-h>", "<c-w>h")
-map({ "n", "v" }, "<c-j>", "<c-w>j")
-map({ "n", "v" }, "<c-k>", "<c-w>k")
-map({ "n", "v" }, "<c-l>", "<c-w>l")
+map({ "n", "v" }, "<leader>h", "<c-w>h")
+map({ "n", "v" }, "<leader>j", "<c-w>j")
+map({ "n", "v" }, "<leader>k", "<c-w>k")
+map({ "n", "v" }, "<leader>l", "<c-w>l")
 
-map("n", "H", "<c-u>zz")
-map("n", "L", "<c-d>zz")
+map("n", "<c-k>", "<c-u>zz")
+map("n", "<c-j>", "<c-d>zz")
 
-map("n", "<c-t>", "zt")
-map("n", "<c-b>", "zb")
-
-map("n", "<c-=>", "<cmd>vs<cr>")
-map("n", "<c-->", "<cmd>sp<cr>")
-map("n", "<c-\\>", "<cmd>clo<cr>")
-map("n", "<c-0>", "<c-w>o")
-map("n", "<c-9>", "<c-w>r")
+map("n", "+", "<cmd>vs<cr>")
+map("n", "_", "<cmd>sp<cr>")
+map("n", "|", "<cmd>clo<cr>")
+map("n", "<leader>do", "<c-w>o")
+map("n", "<leader>wr", "<c-w>r")
 
 map("v", "z", "<Plug>Lightspeed_s")
 map("v", "Z", "<Plug>Lightspeed_S")
@@ -368,7 +355,7 @@ map("v", "s", "<Plug>VSurround")
 
 map('n', '<F3>', '<cmd>TSHighlightCapturesUnderCursor<cr>')
 
-map("n", "<C-6>", "C-^")
+map("n", "^", "<C-^>")
 
 map("n", "ci_", '<cmd>set iskeyword-=_<cr>"_ciw<cmd>set iskeyword+=_<cr>')
 map("n", "di_", '<cmd>set iskeyword-=_<cr>"_diw<cmd>set iskeyword+=_<cr>')
@@ -378,14 +365,25 @@ map("n", "ca_", '<cmd>set iskeyword-=_<cr>"_caw<cmd>set iskeyword+=_<cr>')
 map("n", "da_", '<cmd>set iskeyword-=_<cr>"_daw<cmd>set iskeyword+=_<cr>')
 map("n", "va_", "<cmd>set iskeyword-=_<cr>vaw<cmd>set iskeyword+=_<cr>")
 
+map("n", "<c-,>", "<<")
+map("n", "<c-.>", ">>")
+
 -- tab
-map("n", "<c-,>", "<Plug>(cokeline-focus-prev)")
-map("n", "<c-.>", "<Plug>(cokeline-focus-next)")
+map("n", "<", "<Plug>(cokeline-focus-prev)")
+map("n", ">", "<Plug>(cokeline-focus-next)")
 -- Re-order to previous/next
 map("n", "<a-,>", "<Plug>(cokeline-switch-prev)")
 map("n", "<a-.>", "<Plug>(cokeline-switch-next)")
 -- close
 map("n", "<c-w>", "<cmd>BufDel<CR>")
+map("n", "<leader>dd", "<cmd>BufDel<CR>")
+
+map("n", "<leader>,", "<c-i>")
+map("n", "<leader>.", "<c-o>")
+
+map("n", "<leader>dm", ":delmarks ")
+
+map("n", "U", "<c-r>")
 
 vim.cmd([[
 language en_US
@@ -396,8 +394,10 @@ colorscheme gruvball-ish
 
 autocmd FocusGained * silent! checktime
 
-" set guifont=JetBrains\ Mono\ NL:h11
-autocmd VimEnter * GuiFont! JetBrains\ Mono\ NL:h11
+" set guifont=JetBrains\ Mono\ NL:h13
+if has("gui_running")
+  autocmd VimEnter * GuiFont! JetBrains\ Mono\ NL:h13
+endif
 
 vnoremap J :m '>+1<CR>gv=gv
 vnoremap K :m '<-2<CR>gv=gv
@@ -426,6 +426,13 @@ set cindent
 " set cino+=L0,g0,N-s,(0,l1,t0
 set cino+=L0,g0,l1,t0,(0,w1,w4,(s,m1
 " set cino+=L0,g0,l1,t0,w1,w4,(s,m1
+
+noremap <silent> <expr> ' "'".toupper(nr2char(getchar()))
+noremap <silent> <expr> m "m".toupper(nr2char(getchar()))
+sunmap '
+sunmap m
+
+autocmd VimEnter * delmarks 0-9
 ]])
 
 vim.api.nvim_create_autocmd("BufEnter", {
@@ -435,3 +442,4 @@ vim.api.nvim_create_autocmd("BufEnter", {
     vim.opt_local.tabstop = 2
   end
 })
+
