@@ -309,8 +309,8 @@ map("n", "<c-g>", "<cmd>LazyGit<cr>")
 map("n", "<leader>ft", "<cmd>NvimTreeToggle<cr>")
 map("n", "<c-;>", "<cmd>NvimTreeFocus<cr>")
 
-map("n", "<leader>ff", "<cmd>lua require('telescope.builtin').find_files()<cr>")
-map("n", "<leader>ps", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
+map("n", "<c-f>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
+map("n", "<leader>/", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
 
 map("c", "<c-v>", '<c-r>*')
 
@@ -344,8 +344,11 @@ map({ "n", "v" }, "<leader>j", "<c-w>j")
 map({ "n", "v" }, "<leader>k", "<c-w>k")
 map({ "n", "v" }, "<leader>l", "<c-w>l")
 
-map("n", "<c-p>", "<c-u>zz")
-map("n", "<c-n>", "<c-d>zz")
+map("n", "<c-p>", "{")
+map("n", "<c-n>", "}")
+
+map("n", "{", "<c-u>zz")
+map("n", "}", "<c-d>zz")
 
 map("n", "<c-=>", "<cmd>vs<cr>")
 map("n", "<c-->", "<cmd>sp<cr>")
