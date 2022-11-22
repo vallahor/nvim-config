@@ -305,13 +305,12 @@ map("n", "<c-;>", "<cmd>NvimTreeFocus<cr>")
 map("n", "<leader>ff", "<cmd>lua require('telescope.builtin').find_files()<cr>")
 map("n", "<leader>ps", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
 
-map("c", "<c-v>", '<c-r>"')
+map("c", "<c-v>", '<c-r>*')
 
 map("v", "v", 'V')
 map("n", "L", '<c-v>')
 
 map({ "i", "c" }, "<c-bs>", "<c-w>")
-map({ "i", "c" }, "<a-bs>", "<c-w>")
 
 map("n", "x", '"_x')
 map("v", "x", '"_d')
