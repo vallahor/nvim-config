@@ -193,16 +193,17 @@ if ok then
     defaults = {
       mappings = {
         n = {
-          ["<c-j>"] = "move_selection_next",
-          ["<c-k>"] = "move_selection_previous",
+          ["<c-p>"] = "move_selection_previous",
+          ["<c-n>"] = "move_selection_next",
         },
         i = {
           ["<C-bs>"] = function()
             vim.api.nvim_input("<c-s-w>")
           end,
-          ["<c-j>"] = "move_selection_next",
-          ["<c-k>"] = "move_selection_previous",
+          ["<c-p>"] = "move_selection_previous",
+          ["<c-n>"] = "move_selection_next",
           -- ["<esc>"] = actions.close,
+          ["<c-j>"] = actions.close,
         },
       },
       initial_mode = "insert",
@@ -290,6 +291,7 @@ if ok then
   })
 end
 
+--- check if we really need
 require'colorizer'.setup()
 
 -- MAPPING --
@@ -301,8 +303,9 @@ map("n", "<space>", "<nop>")
 vim.g.mapleader = " "
 
 map("n", "<esc>", "<cmd>nohl<cr><esc>")
+map({"n", "i", "v", "c"}, "<c-j>", "<cmd>nohl<cr><esc>")
 
-map("n", "<leader>g", "<cmd>LazyGit<cr>")
+map("n", "<c-g>", "<cmd>LazyGit<cr>")
 map("n", "<leader>ft", "<cmd>NvimTreeToggle<cr>")
 map("n", "<c-;>", "<cmd>NvimTreeFocus<cr>")
 
@@ -312,7 +315,6 @@ map("n", "<leader>ps", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
 map("c", "<c-v>", '<c-r>*')
 
 map("v", "v", 'V')
-map("n", "L", '<c-v>')
 
 map({ "i", "c" }, "<c-bs>", "<c-w>")
 
@@ -328,13 +330,10 @@ map({ "n", "v" }, "-", "$")
 map({ "n", "v" }, "<leader>0", "0")
 map({ "n", "v" }, "0", "^")
 
--- map({ "n", "v" }, "j", "gj")
--- map({ "n", "v" }, "k", "gk")
-
 map("n", "j", "v:count ? 'j^' : 'gj'", { expr = true })
 map("n", "k", "v:count ? 'k^' : 'gk'", { expr = true })
 
-map({ "n", "v" }, "<leader>fs", "<cmd>w!<CR><esc>")
+map({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>")
 
 -- map("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
 map("n", "<f2>", "<cmd>:e $MYVIMRC<CR>")
@@ -345,14 +344,14 @@ map({ "n", "v" }, "<leader>j", "<c-w>j")
 map({ "n", "v" }, "<leader>k", "<c-w>k")
 map({ "n", "v" }, "<leader>l", "<c-w>l")
 
-map("n", "<c-k>", "<c-u>zz")
-map("n", "<c-j>", "<c-d>zz")
+map("n", "<c-p>", "<c-u>zz")
+map("n", "<c-n>", "<c-d>zz")
 
-map("n", "+", "<cmd>vs<cr>")
-map("n", "_", "<cmd>sp<cr>")
-map("n", "|", "<cmd>clo<cr>")
-map("n", "<leader>do", "<c-w>o")
-map("n", "<leader>wr", "<c-w>r")
+map("n", "<c-=>", "<cmd>vs<cr>")
+map("n", "<c-->", "<cmd>sp<cr>")
+map("n", "<c-\\>", "<cmd>clo<cr>")
+map("n", "<c-0>", "<c-w>o")
+map("n", "<c-9>", "<c-w>r")
 
 map("v", "z", "<Plug>Lightspeed_s")
 map("v", "Z", "<Plug>Lightspeed_S")
@@ -361,7 +360,7 @@ map("v", "s", "<Plug>VSurround")
 
 map('n', '<F3>', '<cmd>TSHighlightCapturesUnderCursor<cr>')
 
-map("n", "^", "<C-^>")
+map("n", "<c-6>", "<C-^>")
 
 map("n", "ci_", '<cmd>set iskeyword-=_<cr>"_ciw<cmd>set iskeyword+=_<cr>')
 map("n", "di_", '<cmd>set iskeyword-=_<cr>"_diw<cmd>set iskeyword+=_<cr>')
@@ -371,21 +370,14 @@ map("n", "ca_", '<cmd>set iskeyword-=_<cr>"_caw<cmd>set iskeyword+=_<cr>')
 map("n", "da_", '<cmd>set iskeyword-=_<cr>"_daw<cmd>set iskeyword+=_<cr>')
 map("n", "va_", "<cmd>set iskeyword-=_<cr>vaw<cmd>set iskeyword+=_<cr>")
 
-map("n", "<c-,>", "<<")
-map("n", "<c-.>", ">>")
-
 -- tab
-map("n", "<", "<Plug>(cokeline-focus-prev)")
-map("n", ">", "<Plug>(cokeline-focus-next)")
+map("n", "<c-,>", "<Plug>(cokeline-focus-prev)")
+map("n", "<c-.>", "<Plug>(cokeline-focus-next)")
 -- Re-order to previous/next
 map("n", "<a-,>", "<Plug>(cokeline-switch-prev)")
 map("n", "<a-.>", "<Plug>(cokeline-switch-next)")
 -- close
 map("n", "<c-w>", "<cmd>BufDel<CR>")
-map("n", "<leader>dd", "<cmd>BufDel<CR>")
-
-map("n", "<leader>,", "<c-i>")
-map("n", "<leader>.", "<c-o>")
 
 map("n", "<leader>dm", ":delmarks ")
 
