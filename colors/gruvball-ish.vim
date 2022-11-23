@@ -33,7 +33,7 @@ hi LineNrAbove      guisp=none    guifg=#493441 guibg=none    gui=none
 hi LineNrBelow      guisp=none    guifg=#493441 guibg=none    gui=none
 hi CursorLineNr     guisp=none    guifg=#a1495c guibg=#382536 gui=none
 hi MatchParen       guisp=none    guifg=#ff8080 guibg=none    gui=none
-" hi MatchParen       guisp=none guifg=#ff8080  guibg=#040004 gui=none
+" hi MatchParen       guisp=none guifg=#ff8080  guibg=#040004   gui=none
 hi ModeMsg          guisp=none    guifg=#C0AEA0 guibg=#382536 gui=none
 hi MoreMsg          guisp=none    guifg=#C0AEA0 guibg=#382536 gui=none
 hi NonText          guisp=none    guifg=none    guibg=none    gui=none
