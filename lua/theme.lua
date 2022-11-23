@@ -1,6 +1,6 @@
 local M = {}
 
-local italic_active = "none"
+local italic_active = "italic"
 
 local p = {
   fg1 = "#A98D92",
@@ -27,7 +27,7 @@ local p = {
   pastel2 = "#887878",
   pink_pastel = "#A8899C",
   pink_pastel2 = "#926C83",
-  excpetion = "#96516E",
+  exception = "#96516E",
   pink_half_dark = "#9B668F",
   color1 = "#f4ddcc",
   color2 = "#b9e0d3",
@@ -190,7 +190,7 @@ local t = {
     ["@operator"] = {fg = p.purple_dark},
     ["@conditional"] = {fg = p.purple_dark, effect = italic_active},
     ["@repeat"] = {fg = p.purple_dark, effect = italic_active},
-    ["@exception"] = {fg = p.purple_dark},
+    -- ["@exception"] = {fg = p.purple_dark},
     ["@exception"] = {fg = p.exception},
     ["@label"] = {fg = p.pink_pastel},
     ["@macro"] = {fg = p.pink_pastel2},
