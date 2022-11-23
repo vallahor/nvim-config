@@ -388,7 +388,6 @@ map("n", "U", "<c-r>")
 
 vim.cmd([[
 language en_US
-
 filetype on
 
 " colorscheme gruvball-ish
@@ -435,6 +434,7 @@ sunmap m
 
 autocmd VimEnter * delmarks 0-9
 
+let g:VM_maps["Exit"]               = '<C-j>'   " quit VM
 ]])
 
 vim.api.nvim_create_autocmd("BufEnter", {
