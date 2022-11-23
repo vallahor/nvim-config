@@ -23,7 +23,7 @@ require("packer").startup(function(use)
   use({ "ggandor/lightspeed.nvim" })
   use({ "kdheepak/lazygit.nvim" })
 
-  use({ "kyazdani42/nvim-tree.lua" })
+  use({ "kyazdani42/nvim-tree.lua", tag = "nightly" })
   use({ 'numToStr/Comment.nvim' })
 
   use({ "tpope/vim-surround" })
@@ -80,7 +80,8 @@ config_global.cursorline = true
 config_global.scrolloff = 3
 config_global.backup = false
 config_global.gdefault = true
--- config_global.ch = 0
+config_global.colorcolumn = "80"
+-- config_global.cmdheight = 0
 -- config_global.guicursor = "i-ci:block-iCursor" -- comment when using nvim-qt (new version)
 
 config_global.completeopt = { "menu", "menuone", "noselect" }
@@ -332,8 +333,8 @@ map("v", "p", '"_dP')
 map("n", "*", "*``")
 map("v", "*", '"sy/\\V<c-r>s<cr>``')
 
-map({ "n", "v" }, "-", "$")
 map({ "n", "v" }, "<leader>0", "0")
+map({ "n", "v" }, "-", "$")
 map({ "n", "v" }, "0", "^")
 
 map("n", "j", "v:count ? 'j^' : 'gj'", { expr = true })
@@ -417,7 +418,7 @@ augroup end
 map <expr> ; g:lightspeed_last_motion == 'sx' ? "<Plug>Lightspeed_;_sx" : "<Plug>Lightspeed_;_ft"
 map <expr> , g:lightspeed_last_motion == 'sx' ? "<Plug>Lightspeed_,_sx" : "<Plug>Lightspeed_,_ft"
 
-autocmd BufEnter *.scm set filetype=query
+autocmd BufRead *.scm set filetype=query
 
 fun! TrimWhitespace()
 let l:save = winsaveview()
