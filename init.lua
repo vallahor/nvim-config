@@ -82,7 +82,7 @@ config_global.backup = false
 config_global.gdefault = true
 config_global.colorcolumn = "80"
 -- config_global.cmdheight = 0
--- config_global.guicursor = "i-ci:block-iCursor" -- comment when using nvim-qt (new version)
+config_global.guicursor = "i-ci:block-iCursor" -- comment when using nvim-qt (new version)
 
 config_global.completeopt = { "menu", "menuone", "noselect" }
 -- config_global.completeopt = { "menu", "noinsert", "menuone", "noselect" }
@@ -381,8 +381,8 @@ map("n", "da_", '<cmd>set iskeyword-=_<cr>"_daw<cmd>set iskeyword+=_<cr>')
 map("n", "va_", "<cmd>set iskeyword-=_<cr>vaw<cmd>set iskeyword+=_<cr>")
 
 -- tab
-map("n", "<c-,>", "<Plug>(cokeline-focus-prev)")
-map("n", "<c-.>", "<Plug>(cokeline-focus-next)")
+map("n", "<c-h>", "<Plug>(cokeline-focus-prev)")
+map("n", "<c-l>", "<Plug>(cokeline-focus-next)")
 -- Re-order to previous/next
 map("n", "<a-,>", "<Plug>(cokeline-switch-prev)")
 map("n", "<a-.>", "<Plug>(cokeline-switch-next)")
@@ -398,10 +398,15 @@ filetype on
 " colorscheme gruvball-ish
 
 autocmd FocusGained * silent! checktime
+if exists("g:neovide")
+    " Put anything you want to happen only in Neovide here
+    set guifont=JetBrains\ Mono\ NL:h13
+    let g:neovide_refresh_rate = 60
+    let g:neovide_cursor_animation_length=0
+endif
 
-" set guifont=JetBrains\ Mono\ NL:h13
-if has("gui_running")
-  autocmd VimEnter * GuiFont! JetBrains\ Mono\ NL:h13
+if has("gui_running") && !exists("g:neovide")
+    autocmd VimEnter * GuiFont! JetBrains\ Mono\ NL:h13
 endif
 
 vnoremap J :m '>+1<CR>gv=gv
@@ -440,7 +445,6 @@ sunmap m
 autocmd VimEnter * delmarks 0-9
 
 let g:VM_maps["Exit"] = '<C-j>'
-" let g:VM_maps["Exit"] = '<C-k>'
 ]])
 
 vim.api.nvim_create_autocmd("BufEnter", {
