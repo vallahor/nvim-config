@@ -101,9 +101,9 @@ vim.g.VM_default_mappings = 0
 vim.g.VM_custom_remaps = { ["-"] = "$" }
 vim.g.VM_maps = {
   ["Reselect Last"] = "<c-s>",
-  ["Find Under"] = "H",
-  ["Find Subword Under"] = "H",
-  ["Select All"] = "<m-h>",
+  ["Find Under"] = "<c-u>",
+  ["Find Subword Under"] = "<c-u>",
+  ["Select All"] = "<c-s-u>",
   ["Add Cursor Down"] = "<m-j>",
   ["Add Cursor Up"] = "<m-k>",
   ["Switch Mode"] = "v",
@@ -343,8 +343,8 @@ map("n", "k", "v:count ? 'k^' : 'gk'", { expr = true })
 map({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>")
 
 -- map("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
-map("n", "<f2>", "<cmd>:e $MYVIMRC<CR>")
-map("n", "<f5>", "<cmd>so %<CR>")
+map("n", "<leader>fs", "<cmd>:e $MYVIMRC<CR>")
+map("n", "<leader>fl", "<cmd>so %<CR>")
 
 map({ "n", "v" }, "<leader>h", "<c-w>h")
 map({ "n", "v" }, "<leader>j", "<c-w>j")
@@ -363,10 +363,10 @@ map("n", "<c-\\>", "<cmd>clo<cr>")
 map("n", "<c-0>", "<c-w>o")
 map("n", "<c-9>", "<c-w>r")
 
-map("v", "z", "<Plug>Lightspeed_s")
-map("v", "Z", "<Plug>Lightspeed_S")
+map("v", "s", "<Plug>Lightspeed_s")
+map("v", "S", "<Plug>Lightspeed_S")
 
-map("v", "s", "<Plug>VSurround")
+map("v", "z", "<Plug>VSurround")
 
 map('n', '<F3>', '<cmd>TSHighlightCapturesUnderCursor<cr>')
 
@@ -390,8 +390,6 @@ map("n", "<a-.>", "<Plug>(cokeline-switch-next)")
 map("n", "<c-w>", "<cmd>BufDel<CR>")
 
 map("n", "<leader>dm", ":delmarks ")
-
-map("n", "U", "<c-r>")
 
 vim.cmd([[
 language en_US
@@ -441,11 +439,12 @@ sunmap m
 
 autocmd VimEnter * delmarks 0-9
 
-let g:VM_maps["Exit"]               = '<C-j>'   " quit VM
+let g:VM_maps["Exit"] = '<C-j>'
+" let g:VM_maps["Exit"] = '<C-k>'
 ]])
 
 vim.api.nvim_create_autocmd("BufEnter", {
-  pattern = {"*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.lua", "*.html"},
+  pattern = { "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.lua", "*.html" },
   callback = function()
     vim.opt_local.shiftwidth = 2
     vim.opt_local.tabstop = 2
