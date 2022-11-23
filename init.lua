@@ -303,7 +303,13 @@ map("n", "<space>", "<nop>")
 vim.g.mapleader = " "
 
 map("n", "<esc>", "<cmd>nohl<cr><esc>")
-map({"n", "i", "v", "c"}, "<c-j>", "<cmd>nohl<cr><esc>")
+map("n", "<c-j>", "<cmd>nohl<cr><esc>")
+map("c", "<c-j>", "<c-c>")
+map({"i", "v", "s", "x", "o", "l", "t"}, "<c-j>", "<esc>")
+
+map("n", "<c-k>", "<cmd>nohl<cr><esc>")
+map("c", "<c-k>", "<c-c>")
+map({"i", "v", "s", "x", "o", "l", "t"}, "<c-k>", "<esc>")
 
 map("n", "<c-g>", "<cmd>LazyGit<cr>")
 map("n", "<leader>ft", "<cmd>NvimTreeToggle<cr>")
