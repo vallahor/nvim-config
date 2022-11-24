@@ -43,58 +43,56 @@ end)
 
 -- SETTINGS --
 
-local config_global = vim.opt
-local config_buffer = vim.bo
-local config_window = vim.wo
-
 local indent = 4
-config_global.shiftwidth = indent
-config_global.tabstop = indent
-config_global.softtabstop = indent
 
-config_global.expandtab = true
-config_global.smartindent = true
-config_global.autoindent = true
-config_global.hidden = true
-config_global.ignorecase = true
-config_global.shiftround = true
-config_global.splitright = true
-config_global.splitbelow = true
-config_global.termguicolors = true
-config_global.wildmode = "longest,list:longest,full"
-config_global.clipboard = "unnamedplus"
-config_global.encoding = "utf8"
-config_global.pumheight = 10
-config_global.switchbuf = "useopen,split"
-config_global.magic = true
-config_global.lazyredraw = true
-config_global.smartcase = true
-config_global.inccommand = "nosplit"
-config_global.backspace = "indent,eol,start"
-config_global.shortmess = "aoOtTIc"
-config_global.mouse = "a"
-config_global.mousefocus = true
-config_global.fsync = true
-config_global.magic = true
-config_global.cursorline = true
-config_global.scrolloff = 3
-config_global.backup = false
-config_global.gdefault = true
-config_global.colorcolumn = "80"
--- config_global.cmdheight = 0
-config_global.guicursor = "i-ci:block-iCursor" -- comment when using nvim-qt (new version)
+vim.opt.shiftwidth = indent
+vim.opt.tabstop = indent
+vim.opt.softtabstop = indent
+vim.opt.expandtab = true
+vim.opt.smartindent = true
+vim.opt.autoindent = true
+vim.opt.hidden = true
+vim.opt.ignorecase = true
+vim.opt.shiftround = true
+vim.opt.splitright = true
+vim.opt.splitbelow = true
+vim.opt.termguicolors = true
+vim.opt.wildmode = "longest,list:longest,full"
+vim.opt.clipboard = "unnamedplus"
+vim.opt.encoding = "utf8"
+vim.opt.pumheight = 10
+vim.opt.switchbuf = "useopen,split"
+vim.opt.magic = true
+vim.opt.lazyredraw = true
+vim.opt.smartcase = true
+vim.opt.inccommand = "nosplit"
+vim.opt.backspace = "indent,eol,start"
+vim.opt.shortmess = "aoOtTIc"
+vim.opt.mouse = "a"
+vim.opt.mousefocus = true
+vim.opt.fsync = true
+vim.opt.magic = true
+vim.opt.cursorline = true
+vim.opt.scrolloff = 3
+vim.opt.backup = false
+vim.opt.gdefault = true
+vim.opt.colorcolumn = "80"
+-- vim.opt.cmdheight = 0
+vim.opt.guicursor = "i-ci:block-iCursor" -- comment when using nvim-qt (new version)
+vim.opt.completeopt = { "menu", "menuone", "noselect" }
+-- vim.opt.completeopt = { "menu", "noinsert", "menuone", "noselect" }
+vim.opt.cindent = true
+vim.opt.cino:append("L0,g0,l1,t0,w1,w4,(s,m1")
 
-config_global.completeopt = { "menu", "menuone", "noselect" }
--- config_global.completeopt = { "menu", "noinsert", "menuone", "noselect" }
+vim.wo.signcolumn = "no"
+vim.wo.relativenumber = true
+-- vim.wo.number = true
+vim.wo.wrap = true
 
-config_window.signcolumn = "no"
-config_window.relativenumber = true
--- config_window.number = true
-config_window.wrap = true
-config_buffer.autoread = true
-config_buffer.copyindent = true
-config_buffer.grepprg = "rg"
-config_buffer.swapfile = false
+vim.bo.autoread = true
+vim.bo.copyindent = true
+vim.bo.grepprg = "rg"
+vim.bo.swapfile = false
 
 vim.g.VM_theme = "iceblue"
 vim.g.VM_default_mappings = 0
@@ -354,8 +352,10 @@ map({ "n", "v" }, "<leader>l", "<c-w>l")
 map("n", "<c-p>", "{")
 map("n", "<c-n>", "}")
 
-map("n", "{", "<c-u>zz")
-map("n", "}", "<c-d>zz")
+map("n", "{", "<c-u>")
+map("n", "}", "<c-d>")
+-- map("n", "{", "<c-u>zz")
+-- map("n", "}", "<c-d>zz")
 
 map("n", "<c-=>", "<cmd>vs<cr>")
 map("n", "<c-->", "<cmd>sp<cr>")
@@ -365,6 +365,8 @@ map("n", "<c-9>", "<c-w>r")
 
 map("v", "s", "<Plug>Lightspeed_s")
 map("v", "S", "<Plug>Lightspeed_S")
+
+map("v", "<c-s>", "<Plug>(VM-Reselect-Last)")
 
 map("v", "z", "<Plug>VSurround")
 
@@ -391,23 +393,43 @@ map("n", "<c-w>", "<cmd>BufDel<CR>")
 
 map("n", "<leader>dm", ":delmarks ")
 
+if vim.g.neovide then
+    vim.opt.guifont= "JetBrains Mono:h12"
+    vim.g.neovide_refresh_rate = 60
+    vim.g.neovide_cursor_animation_length=0
+    vim.g.neovide_remember_window_size = true
+end
+
+if (vim.fn.has("gui_running") and not vim.g.neovide) then
+    vim.api.nvim_create_autocmd("VimEnter", {
+        pattern = "*",
+        command = "GuiFont! JetBrains Mono NL:h13"
+    })
+end
+
+vim.api.nvim_create_autocmd("FocusGained", {
+    pattern = "*",
+    command = "silent! checktime"
+})
+
+vim.api.nvim_create_autocmd("VimEnter", {
+    pattern = "*",
+    command = "delmarks 0-9"
+})
+
+vim.api.nvim_create_autocmd("BufEnter", {
+  pattern = { "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.lua", "*.html" },
+  callback = function()
+    vim.opt_local.shiftwidth = 2
+    vim.opt_local.tabstop = 2
+  end
+})
+
 vim.cmd([[
 language en_US
 filetype on
 
 " colorscheme gruvball-ish
-
-autocmd FocusGained * silent! checktime
-if exists("g:neovide")
-    " Put anything you want to happen only in Neovide here
-    set guifont=JetBrains\ Mono\ NL:h13
-    let g:neovide_refresh_rate = 60
-    let g:neovide_cursor_animation_length=0
-endif
-
-if has("gui_running") && !exists("g:neovide")
-    autocmd VimEnter * GuiFont! JetBrains\ Mono\ NL:h13
-endif
 
 vnoremap J :m '>+1<CR>gv=gv
 vnoremap K :m '<-2<CR>gv=gv
@@ -430,30 +452,13 @@ call winrestview(l:save)
 endfun
 autocmd BufWritePre * :call TrimWhitespace()
 
-nnoremap <silent> <c-s> <Plug>(VM-Reselect-Last)
-
-set cindent
-" set cino+=L0,g0,N-s,(0,l1,t0
-set cino+=L0,g0,l1,t0,(0,w1,w4,(s,m1
-" set cino+=L0,g0,l1,t0,w1,w4,(s,m1
-
 noremap <silent> <expr> ' "'".toupper(nr2char(getchar()))
 noremap <silent> <expr> m "m".toupper(nr2char(getchar()))
 sunmap '
 sunmap m
 
-autocmd VimEnter * delmarks 0-9
-
 let g:VM_maps["Exit"] = '<C-j>'
 ]])
-
-vim.api.nvim_create_autocmd("BufEnter", {
-  pattern = { "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.lua", "*.html" },
-  callback = function()
-    vim.opt_local.shiftwidth = 2
-    vim.opt_local.tabstop = 2
-  end
-})
 
 local ok, theme = pcall(require, "theme")
 if ok then

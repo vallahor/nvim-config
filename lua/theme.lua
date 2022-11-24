@@ -1,6 +1,6 @@
 local M = {}
 
-local italic_active = "italic"
+local italic_active = "none"
 
 local p = {
   fg1 = "#A98D92",
