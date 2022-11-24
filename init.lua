@@ -35,6 +35,7 @@ require("packer").startup(function(use)
   use({ "ojroques/nvim-bufdel" })
 
   use({ 'norcalli/nvim-colorizer.lua' })
+  use({ 'max397574/better-escape.nvim' })
 
   if packer_bootstrap then
     require("packer").sync()
@@ -83,6 +84,10 @@ vim.opt.completeopt = { "menu", "menuone", "noselect" }
 -- vim.opt.completeopt = { "menu", "noinsert", "menuone", "noselect" }
 vim.opt.cindent = true
 vim.opt.cino:append("L0,g0,l1,t0,w1,w4,(s,m1")
+
+--
+vim.o.timeoutlen = 100
+vim.o.ttimeoutlen = 100
 
 vim.wo.signcolumn = "no"
 vim.wo.relativenumber = true
@@ -163,13 +168,13 @@ if ok then
     sticky = true,
     ignore = nil,
     toggler = {
-      line = "gcc",
-      block = "gbc",
-    },
-    opleader = {
       line = "gc",
       block = "gb",
     },
+    -- opleader = {
+    --   line = "gc",
+    --   block = "gb",
+    -- },
     mappings = {
       basic = true,
       extra = true,
@@ -194,6 +199,8 @@ if ok then
         n = {
           ["<c-p>"] = "move_selection_previous",
           ["<c-n>"] = "move_selection_next",
+          ["jk"] = actions.close,
+          ["kj"] = actions.close,
         },
         i = {
           ["<C-bs>"] = function()
@@ -202,7 +209,8 @@ if ok then
           ["<c-p>"] = "move_selection_previous",
           ["<c-n>"] = "move_selection_next",
           -- ["<esc>"] = actions.close,
-          ["<c-j>"] = actions.close,
+          ["jk"] = actions.close,
+          ["kj"] = actions.close,
         },
       },
       initial_mode = "insert",
@@ -290,6 +298,19 @@ if ok then
   })
 end
 
+-- -- lua, default settings
+local ok, better_escape = pcall(require, "better_escape")
+if ok then
+    better_escape.setup {
+        mapping = {"jk", "kj"}, -- a table with mappings to use
+        timeout = vim.o.timeoutlen, -- the time in which the keys must be hit in ms. Use option timeoutlen by default
+        clear_empty_lines = false, -- clear line after escaping if there is only whitespace
+        keys = "<Esc>`^", -- keys used for escaping, if it is a function will use the result everytime
+        -- keys = function()
+        --   return vim.api.nvim_win_get_cursor(0)[2] > 1 and '<esc>l' or '<esc>'
+        -- end,
+        }
+end
 --- check if we really need
 require'colorizer'.setup()
 
@@ -302,9 +323,18 @@ map("n", "<space>", "<nop>")
 vim.g.mapleader = " "
 
 map("n", "<esc>", "<cmd>nohl<cr><esc>")
-map("n", "<c-j>", "<cmd>nohl<cr><esc>")
-map("c", "<c-j>", "<c-c>")
-map({"i", "v", "s", "x", "o", "l", "t"}, "<c-j>", "<esc>")
+map("n", "<c-m>", "<cmd>nohl<cr><esc>")
+map("n", "<leader><leader>", "<cmd>nohl<cr><esc>")
+map("c", "jk", "<c-c>")
+map("c", "kj", "<c-c>")
+map("v", "jk", "<esc>")
+map("v", "kj", "<esc>")
+-- map({"i", "v", "s", "x", "o", "l", "t"}, "<c-j>", "<esc>")
+-- map({"i", "v", "s", "x", "o", "l", "t"}, "jk", "<esc>")
+-- map({"i", "v", "s", "x", "o", "l", "t"}, "kj", "<esc>")
+
+-- map({"i", "x", "o", "l", "t"}, "jk", "<esc>")
+-- map({"i", "x", "o", "l", "t"}, "kj", "<esc>")
 
 map("n", "<c-k>", "<cmd>nohl<cr><esc>")
 map("c", "<c-k>", "<c-c>")
@@ -312,10 +342,10 @@ map({"i", "v", "s", "x", "o", "l", "t"}, "<c-k>", "<esc>")
 
 map("n", "<c-g>", "<cmd>LazyGit<cr>")
 map("n", "<leader>ft", "<cmd>NvimTreeToggle<cr>")
-map("n", "<c-;>", "<cmd>NvimTreeFocus<cr>")
+-- map("n", "<c-;>", "<cmd>NvimTreeFocus<cr>")
 
 map("n", "<c-f>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
-map("n", "<leader>/", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
+map("n", "<c-/>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
 
 map("c", "<c-v>", '<c-r>*')
 
@@ -341,8 +371,8 @@ map("n", "k", "v:count ? 'k^' : 'gk'", { expr = true })
 map({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>")
 
 -- map("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
-map("n", "<leader>fs", "<cmd>:e $MYVIMRC<CR>")
-map("n", "<leader>fl", "<cmd>so %<CR>")
+map("n", "f4", "<cmd>:e $MYVIMRC<CR>")
+map("n", "f5", "<cmd>so %<CR>")
 
 map({ "n", "v" }, "<leader>h", "<c-w>h")
 map({ "n", "v" }, "<leader>j", "<c-w>j")
@@ -357,11 +387,11 @@ map("n", "}", "<c-d>")
 -- map("n", "{", "<c-u>zz")
 -- map("n", "}", "<c-d>zz")
 
-map("n", "<c-=>", "<cmd>vs<cr>")
-map("n", "<c-->", "<cmd>sp<cr>")
 map("n", "<c-\\>", "<cmd>clo<cr>")
-map("n", "<c-0>", "<c-w>o")
-map("n", "<c-9>", "<c-w>r")
+map("n", "+", "<cmd>vs<cr>")
+map("n", "_", "<cmd>sp<cr>")
+map("n", ")", "<c-w>o")
+map("n", "(", "<c-w>r")
 
 map("v", "s", "<Plug>Lightspeed_s")
 map("v", "S", "<Plug>Lightspeed_S")
@@ -385,6 +415,8 @@ map("n", "va_", "<cmd>set iskeyword-=_<cr>vaw<cmd>set iskeyword+=_<cr>")
 -- tab
 map("n", "<c-h>", "<Plug>(cokeline-focus-prev)")
 map("n", "<c-l>", "<Plug>(cokeline-focus-next)")
+map("n", "<c-,>", "<Plug>(cokeline-focus-prev)")
+map("n", "<c-.>", "<Plug>(cokeline-focus-next)")
 -- Re-order to previous/next
 map("n", "<a-,>", "<Plug>(cokeline-switch-prev)")
 map("n", "<a-.>", "<Plug>(cokeline-switch-next)")
@@ -394,7 +426,7 @@ map("n", "<c-w>", "<cmd>BufDel<CR>")
 map("n", "<leader>dm", ":delmarks ")
 
 if vim.g.neovide then
-    vim.opt.guifont= "JetBrains Mono:h12"
+    vim.opt.guifont= "JetBrains Mono NL:h12"
     vim.g.neovide_refresh_rate = 60
     vim.g.neovide_cursor_animation_length=0
     vim.g.neovide_remember_window_size = true
@@ -457,7 +489,7 @@ noremap <silent> <expr> m "m".toupper(nr2char(getchar()))
 sunmap '
 sunmap m
 
-let g:VM_maps["Exit"] = '<C-j>'
+" let g:VM_maps["Exit"] = '<C-j>'
 ]])
 
 local ok, theme = pcall(require, "theme")
