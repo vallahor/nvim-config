@@ -35,7 +35,8 @@ require("packer").startup(function(use)
   use({ "ojroques/nvim-bufdel" })
 
   use({ 'norcalli/nvim-colorizer.lua' })
-  use({ 'max397574/better-escape.nvim' })
+
+  use({ 'kana/vim-arpeggio' })
 
   if packer_bootstrap then
     require("packer").sync()
@@ -79,7 +80,7 @@ vim.opt.backup = false
 vim.opt.gdefault = true
 vim.opt.colorcolumn = "80"
 -- vim.opt.cmdheight = 0
-vim.opt.guicursor = "i-ci:block-iCursor" -- comment when using nvim-qt (new version)
+-- vim.opt.guicursor = "i-ci:block-iCursor" -- comment when using nvim-qt (new version)
 vim.opt.completeopt = { "menu", "menuone", "noselect" }
 -- vim.opt.completeopt = { "menu", "noinsert", "menuone", "noselect" }
 vim.opt.cindent = true
@@ -298,20 +299,6 @@ if ok then
   })
 end
 
--- -- lua, default settings
-local ok, better_escape = pcall(require, "better_escape")
-if ok then
-    better_escape.setup {
-        mapping = {"jk", "kj"}, -- a table with mappings to use
-        timeout = vim.o.timeoutlen, -- the time in which the keys must be hit in ms. Use option timeoutlen by default
-        clear_empty_lines = false, -- clear line after escaping if there is only whitespace
-        keys = "<Esc>`^", -- keys used for escaping, if it is a function will use the result everytime
-        -- keys = function()
-        --   return vim.api.nvim_win_get_cursor(0)[2] > 1 and '<esc>l' or '<esc>'
-        -- end,
-        }
-end
---- check if we really need
 require'colorizer'.setup()
 
 -- MAPPING --
@@ -323,9 +310,10 @@ local map = vim.keymap.set
 vim.g.mapleader = " "
 
 map("n", "<esc>", "<cmd>nohl<cr><esc>")
+map("n", "<c-j>", "<cmd>nohl<cr><esc>")
 map("n", "<leader><leader>", "<cmd>nohl<cr><esc>")
-map("c", "jk", "<c-c>")
-map("c", "kj", "<c-c>")
+-- map("c", "jk", "<c-c>")
+-- map("c", "kj", "<c-c>")
 map({"i", "v", "s", "x", "o", "l", "t"}, "<c-j>", "<esc>")
 map({"i", "v", "s", "x", "o", "l", "t"}, "<c-k>", "<esc>")
 
@@ -338,8 +326,7 @@ map("n", "<c-s>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
 
 map("c", "<c-v>", '<c-r>*')
 
-map("n", "<c-l>", "V")
-map("v", "<c-l>", "<esc>")
+map("v", "v", "V")
 
 map({ "i", "c" }, "<c-bs>", "<c-w>")
 
@@ -369,13 +356,8 @@ map({ "n", "v" }, "<leader>j", "<c-w>j")
 map({ "n", "v" }, "<leader>k", "<c-w>k")
 map({ "n", "v" }, "<leader>l", "<c-w>l")
 
-map("n", "<c-p>", "{")
-map("n", "<c-n>", "}")
-
-map("n", "{", "<c-u>")
-map("n", "}", "<c-d>")
--- map("n", "{", "<c-u>zz")
--- map("n", "}", "<c-d>zz")
+map("n", "<c-p>", "<c-u>zz")
+map("n", "<c-n>", "<c-d>zz")
 
 map("n", "<c-\\>", "<cmd>clo<cr>")
 map("n", "<c-=>", "<cmd>vs<cr>")
@@ -479,9 +461,31 @@ sunmap m
 
 " Still need to escape in default way
 " let g:VM_maps["Exit"] = '<C-j>'
+
 ]])
 
 local ok, theme = pcall(require, "theme")
 if ok then
     theme.colorscheme()
+end
+
+if not (vim.g.arpeggio_timeoutlen ~= nil) then
+    vim.cmd[[
+    call arpeggio#map('i', '', 0, 'jk', '<Esc>')
+    call arpeggio#map('i', '', 0, 'kj', '<Esc>')
+    call arpeggio#map('v', '', 0, 'jk', '<Esc>')
+    call arpeggio#map('v', '', 0, 'kj', '<Esc>')
+    call arpeggio#map('s', '', 0, 'jk', '<Esc>')
+    call arpeggio#map('s', '', 0, 'kj', '<Esc>')
+    call arpeggio#map('x', '', 0, 'jk', '<Esc>')
+    call arpeggio#map('x', '', 0, 'kj', '<Esc>')
+    call arpeggio#map('c', '', 0, 'jk', '<c-c>')
+    call arpeggio#map('c', '', 0, 'kj', '<c-c>')
+    call arpeggio#map('o', '', 0, 'jk', '<Esc>')
+    call arpeggio#map('o', '', 0, 'kj', '<Esc>')
+    call arpeggio#map('l', '', 0, 'jk', '<Esc>')
+    call arpeggio#map('l', '', 0, 'kj', '<Esc>')
+    call arpeggio#map('t', '', 0, 'kj', '<Esc>')
+    call arpeggio#map('t', '', 0, 'kj', '<Esc>')
+    ]]
 end
