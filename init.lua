@@ -169,12 +169,12 @@ if ok then
     sticky = true,
     ignore = nil,
     toggler = {
-      line = "<c-;>",
-      block = "<c-/>",
+      line = "gcc",
+      block = "gcb",
     },
     opleader = {
-      line = "<c-;>",
-      block = "<c-/>",
+      line = "gc",
+      block = "gb",
     },
     mappings = {
       basic = true,
