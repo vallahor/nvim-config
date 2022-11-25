@@ -36,7 +36,14 @@ require("packer").startup(function(use)
 	use({ "norcalli/nvim-colorizer.lua" })
 
 	use({ "kana/vim-arpeggio" })
-	use({ "TimUntersberger/neogit" })
+
+	use({
+		"TimUntersberger/neogit",
+		requires = {
+			{ "nvim-lua/plenary.nvim" },
+			{ "sindrets/diffview.nvim" },
+		},
+	})
 
 	use({ "sbdchd/neoformat" })
 	use({ "rebelot/heirline.nvim" })
@@ -310,7 +317,7 @@ if ok then
 		auto_refresh = true,
 		disable_builtin_notifications = false,
 		use_magit_keybindings = true,
-		kind = "tab",
+		kind = "replace",
 		commit_popup = {
 			kind = "split",
 		},
@@ -622,7 +629,7 @@ if vim.g.neovide then
 	vim.g.neovide_remember_window_size = true
 end
 
-if vim.fn.has("gui_running") and not vim.g.neovide then
+if not vim.fn.has("gui_running") and not vim.g.neovide then
 	vim.api.nvim_create_autocmd("VimEnter", {
 		pattern = "*",
 		command = "GuiFont! JetBrains Mono NL:h13",
@@ -640,7 +647,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
 })
 
 vim.api.nvim_create_autocmd("BufEnter", {
-	pattern = { "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.lua", "*.html" },
+	pattern = { "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.html" },
 	callback = function()
 		vim.opt_local.shiftwidth = 2
 		vim.opt_local.tabstop = 2
