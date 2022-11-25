@@ -86,8 +86,8 @@ vim.opt.cindent = true
 vim.opt.cino:append("L0,g0,l1,t0,w1,w4,(s,m1")
 
 --
-vim.o.timeoutlen = 100
-vim.o.ttimeoutlen = 100
+vim.o.timeoutlen = 250
+-- vim.o.ttimeoutlen = 100
 
 vim.wo.signcolumn = "no"
 vim.wo.relativenumber = true
@@ -168,13 +168,13 @@ if ok then
     sticky = true,
     ignore = nil,
     toggler = {
-      line = "gc",
-      block = "gb",
+      line = "<c-;>",
+      block = "<c-/>",
     },
-    -- opleader = {
-    --   line = "gc",
-    --   block = "gb",
-    -- },
+    opleader = {
+      line = "<c-;>",
+      block = "<c-/>",
+    },
     mappings = {
       basic = true,
       extra = true,
@@ -318,26 +318,15 @@ require'colorizer'.setup()
 
 local map = vim.keymap.set
 
-map("n", "<space>", "<nop>")
+-- map("n", "<space>", "<nop>")
 
 vim.g.mapleader = " "
 
 map("n", "<esc>", "<cmd>nohl<cr><esc>")
-map("n", "<c-m>", "<cmd>nohl<cr><esc>")
 map("n", "<leader><leader>", "<cmd>nohl<cr><esc>")
 map("c", "jk", "<c-c>")
 map("c", "kj", "<c-c>")
-map("v", "jk", "<esc>")
-map("v", "kj", "<esc>")
--- map({"i", "v", "s", "x", "o", "l", "t"}, "<c-j>", "<esc>")
--- map({"i", "v", "s", "x", "o", "l", "t"}, "jk", "<esc>")
--- map({"i", "v", "s", "x", "o", "l", "t"}, "kj", "<esc>")
-
--- map({"i", "x", "o", "l", "t"}, "jk", "<esc>")
--- map({"i", "x", "o", "l", "t"}, "kj", "<esc>")
-
-map("n", "<c-k>", "<cmd>nohl<cr><esc>")
-map("c", "<c-k>", "<c-c>")
+map({"i", "v", "s", "x", "o", "l", "t"}, "<c-j>", "<esc>")
 map({"i", "v", "s", "x", "o", "l", "t"}, "<c-k>", "<esc>")
 
 map("n", "<c-g>", "<cmd>LazyGit<cr>")
@@ -345,11 +334,12 @@ map("n", "<leader>ft", "<cmd>NvimTreeToggle<cr>")
 -- map("n", "<c-;>", "<cmd>NvimTreeFocus<cr>")
 
 map("n", "<c-f>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
-map("n", "<c-/>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
+map("n", "<c-s>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
 
 map("c", "<c-v>", '<c-r>*')
 
-map("v", "v", 'V')
+map("n", "<c-l>", "V")
+map("v", "<c-l>", "<esc>")
 
 map({ "i", "c" }, "<c-bs>", "<c-w>")
 
@@ -371,8 +361,8 @@ map("n", "k", "v:count ? 'k^' : 'gk'", { expr = true })
 map({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>")
 
 -- map("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
-map("n", "f4", "<cmd>:e $MYVIMRC<CR>")
-map("n", "f5", "<cmd>so %<CR>")
+map("n", "<f4>", "<cmd>:e $MYVIMRC<CR>")
+map("n", "<f5>", "<cmd>so %<CR>")
 
 map({ "n", "v" }, "<leader>h", "<c-w>h")
 map({ "n", "v" }, "<leader>j", "<c-w>j")
@@ -388,10 +378,10 @@ map("n", "}", "<c-d>")
 -- map("n", "}", "<c-d>zz")
 
 map("n", "<c-\\>", "<cmd>clo<cr>")
-map("n", "+", "<cmd>vs<cr>")
-map("n", "_", "<cmd>sp<cr>")
-map("n", ")", "<c-w>o")
-map("n", "(", "<c-w>r")
+map("n", "<c-=>", "<cmd>vs<cr>")
+map("n", "<c-->", "<cmd>sp<cr>")
+map("n", "<c-0>", "<c-w>o")
+map("n", "<c-9>", "<c-w>r")
 
 map("v", "s", "<Plug>Lightspeed_s")
 map("v", "S", "<Plug>Lightspeed_S")
@@ -413,8 +403,6 @@ map("n", "da_", '<cmd>set iskeyword-=_<cr>"_daw<cmd>set iskeyword+=_<cr>')
 map("n", "va_", "<cmd>set iskeyword-=_<cr>vaw<cmd>set iskeyword+=_<cr>")
 
 -- tab
-map("n", "<c-h>", "<Plug>(cokeline-focus-prev)")
-map("n", "<c-l>", "<Plug>(cokeline-focus-next)")
 map("n", "<c-,>", "<Plug>(cokeline-focus-prev)")
 map("n", "<c-.>", "<Plug>(cokeline-focus-next)")
 -- Re-order to previous/next
@@ -489,6 +477,7 @@ noremap <silent> <expr> m "m".toupper(nr2char(getchar()))
 sunmap '
 sunmap m
 
+" Still need to escape in default way
 " let g:VM_maps["Exit"] = '<C-j>'
 ]])
 
