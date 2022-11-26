@@ -225,6 +225,11 @@ if ok then
 			selection_strategy = "reset",
 			path_display = { "absolute" },
 			borderchars = { "─", "│", "─", "│", "┌", "┐", "┘", "└" },
+			layout_strategy = "bottom_pane",
+			layout_config = {
+				height = 10,
+			},
+			preview = false,
 		},
 	})
 end
@@ -452,7 +457,11 @@ local Git = {
 
 	{ -- git branch name
 		provider = function(self)
-			return " [" .. self.status_dict.head .. "]"
+			if self.status_dict.head == nil then
+				return " [" .. self.status_dict.head .. "]"
+			else
+				return ""
+			end
 		end,
 	},
 }
