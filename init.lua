@@ -132,6 +132,8 @@ vim.g.VM_maps = {
 	["Add Cursor At Pos"] = "<enter>",
 }
 
+-- PLUGINS
+
 local ok, lightspeed = pcall(require, "lightspeed")
 if ok then
 	-- vim.g.lightspeed_no_default_keymaps = true
@@ -208,18 +210,12 @@ if ok then
 	telescope.setup({
 		defaults = {
 			mappings = {
-				n = {
-					["<c-p>"] = "move_selection_previous",
-					["<c-n>"] = "move_selection_next",
-					["jk"] = actions.close,
-					["kj"] = actions.close,
-				},
 				i = {
 					["<C-bs>"] = function()
 						vim.api.nvim_input("<c-s-w>")
 					end,
-					["<c-p>"] = "move_selection_previous",
-					["<c-n>"] = "move_selection_next",
+					["<c-k>"] = "move_selection_previous",
+					["<c-j>"] = "move_selection_next",
 					-- ["<esc>"] = actions.close,
 					["jk"] = actions.close,
 					["kj"] = actions.close,
@@ -245,6 +241,7 @@ if ok then
 			"python",
 			"typescript",
 			"javascript",
+			"tsx",
 			"rust",
 		},
 		highlight = {
@@ -564,12 +561,7 @@ local map = vim.keymap.set
 vim.g.mapleader = " "
 
 map("n", "<esc>", "<cmd>nohl<cr><esc>")
-map("n", "<c-j>", "<cmd>nohl<cr><esc>")
 map("n", "<leader><leader>", "<cmd>nohl<cr><esc>")
--- map("c", "jk", "<c-c>")
--- map("c", "kj", "<c-c>")
-map({ "i", "v", "s", "x", "o", "l", "t" }, "<c-j>", "<esc>")
-map({ "i", "v", "s", "x", "o", "l", "t" }, "<c-k>", "<esc>")
 
 map("n", "<c-g>", "<cmd>Neogit<cr>")
 map("n", "<leader>ft", "<cmd>NvimTreeToggle<cr>")
@@ -600,6 +592,7 @@ map("n", "j", "v:count ? 'j^' : 'gj'", { expr = true })
 map("n", "k", "v:count ? 'k^' : 'gk'", { expr = true })
 
 map({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>")
+map({ "n", "v" }, "<leader>fs", "<cmd>w!<CR><esc>")
 
 -- map("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
 map("n", "<f4>", "<cmd>:e $MYVIMRC<CR>")
@@ -635,6 +628,7 @@ map("v", "z", "<Plug>VSurround")
 map("n", "<F3>", "<cmd>TSHighlightCapturesUnderCursor<cr>")
 
 map("n", "<c-6>", "<C-^>")
+map("n", "^", "<C-^>")
 
 map("n", "ci_", '<cmd>set iskeyword-=_<cr>"_ciw<cmd>set iskeyword+=_<cr>')
 map("n", "di_", '<cmd>set iskeyword-=_<cr>"_diw<cmd>set iskeyword+=_<cr>')
@@ -723,10 +717,6 @@ noremap <silent> <expr> ' "'".toupper(nr2char(getchar()))
 noremap <silent> <expr> m "m".toupper(nr2char(getchar()))
 sunmap '
 sunmap m
-
-" Still need to escape in default way
-" let g:VM_maps["Exit"] = '<C-j>'
-
 ]])
 
 local ok, theme = pcall(require, "theme")
