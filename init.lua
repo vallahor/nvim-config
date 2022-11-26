@@ -47,6 +47,7 @@ require("packer").startup(function(use)
 
 	use({ "sbdchd/neoformat" })
 	use({ "rebelot/heirline.nvim" })
+	use({ "lewis6991/gitsigns.nvim", tag = "release" })
 
 	if packer_bootstrap then
 		require("packer").sync()
@@ -90,7 +91,7 @@ vim.opt.backup = false
 vim.opt.gdefault = true
 vim.opt.colorcolumn = "80"
 -- vim.opt.cmdheight = 0
--- vim.opt.guicursor = "i-ci:block-iCursor" -- comment when using nvim-qt (new version)
+vim.opt.guicursor = "i-ci:block-iCursor" -- comment when using nvim-qt (new version)
 vim.opt.completeopt = { "menu", "menuone", "noselect" }
 -- vim.opt.completeopt = { "menu", "noinsert", "menuone", "noselect" }
 vim.opt.cindent = true
@@ -370,6 +371,11 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 
 vim.g.neoformat_only_msg_on_error = 1
 
+local ok, gitsigns = pcall(require, "gitsigns")
+if ok then
+	gitsigns.setup()
+end
+
 local ok, heirline = pcall(require, "heirline")
 if not ok then
 	return
@@ -526,6 +532,27 @@ local statusline = {
 
 heirline.setup(statusline)
 
+if not (vim.g.arpeggio_timeoutlen ~= nil) then
+	vim.cmd([[
+  call arpeggio#map('i', '', 0, 'jk', '<Esc>')
+  call arpeggio#map('i', '', 0, 'kj', '<Esc>')
+  call arpeggio#map('v', '', 0, 'jk', '<Esc>')
+  call arpeggio#map('v', '', 0, 'kj', '<Esc>')
+  call arpeggio#map('s', '', 0, 'jk', '<Esc>')
+  call arpeggio#map('s', '', 0, 'kj', '<Esc>')
+  call arpeggio#map('x', '', 0, 'jk', '<Esc>')
+  call arpeggio#map('x', '', 0, 'kj', '<Esc>')
+  call arpeggio#map('c', '', 0, 'jk', '<c-c>')
+  call arpeggio#map('c', '', 0, 'kj', '<c-c>')
+  call arpeggio#map('o', '', 0, 'jk', '<Esc>')
+  call arpeggio#map('o', '', 0, 'kj', '<Esc>')
+  call arpeggio#map('l', '', 0, 'jk', '<Esc>')
+  call arpeggio#map('l', '', 0, 'kj', '<Esc>')
+  call arpeggio#map('t', '', 0, 'kj', '<Esc>')
+  call arpeggio#map('t', '', 0, 'kj', '<Esc>')
+  ]])
+end
+
 require("colorizer").setup()
 
 -- MAPPING --
@@ -586,12 +613,18 @@ map({ "n", "v" }, "<leader>l", "<c-w>l")
 map("n", "<c-p>", "<c-u>zz")
 map("n", "<c-n>", "<c-d>zz")
 
-map("n", "<c-\\>", "<cmd>clo<cr>")
-map("n", "<c-=>", "<cmd>vs<cr>")
-map("n", "<c-->", "<cmd>sp<cr>")
-map("n", "<c-0>", "<c-w>o")
-map("n", "<c-9>", "<c-w>r")
+map("n", "|", "<cmd>clo<cr>")
+map("n", "+", "<cmd>vs<cr>")
+map("n", "_", "<cmd>sp<cr>")
+map("n", ")", "<c-w>o")
+map("n", "(", "<c-w>r")
 
+-- map("n", "<c-\\>", "<cmd>clo<cr>")
+-- map("n", "<c-=>", "<cmd>vs<cr>")
+-- map("n", "<c-->", "<cmd>sp<cr>")
+-- map("n", "<c-0>", "<c-w>o")
+-- map("n", "<c-9>", "<c-w>r")
+--
 map("v", "s", "<Plug>Lightspeed_s")
 map("v", "S", "<Plug>Lightspeed_S")
 
@@ -614,6 +647,11 @@ map("n", "va_", "<cmd>set iskeyword-=_<cr>vaw<cmd>set iskeyword+=_<cr>")
 -- tab
 map("n", "<c-,>", "<Plug>(cokeline-focus-prev)")
 map("n", "<c-.>", "<Plug>(cokeline-focus-next)")
+
+-- neovide not recognize the other keybindings
+map("n", "<leader>,", "<Plug>(cokeline-focus-prev)")
+map("n", "<leader>.", "<Plug>(cokeline-focus-next)")
+
 -- Re-order to previous/next
 map("n", "<a-,>", "<Plug>(cokeline-switch-prev)")
 map("n", "<a-.>", "<Plug>(cokeline-switch-next)")
@@ -694,25 +732,4 @@ sunmap m
 local ok, theme = pcall(require, "theme")
 if ok then
 	theme.colorscheme()
-end
-
-if not (vim.g.arpeggio_timeoutlen ~= nil) then
-	vim.cmd([[
-  call arpeggio#map('i', '', 0, 'jk', '<Esc>')
-  call arpeggio#map('i', '', 0, 'kj', '<Esc>')
-  call arpeggio#map('v', '', 0, 'jk', '<Esc>')
-  call arpeggio#map('v', '', 0, 'kj', '<Esc>')
-  call arpeggio#map('s', '', 0, 'jk', '<Esc>')
-  call arpeggio#map('s', '', 0, 'kj', '<Esc>')
-  call arpeggio#map('x', '', 0, 'jk', '<Esc>')
-  call arpeggio#map('x', '', 0, 'kj', '<Esc>')
-  call arpeggio#map('c', '', 0, 'jk', '<c-c>')
-  call arpeggio#map('c', '', 0, 'kj', '<c-c>')
-  call arpeggio#map('o', '', 0, 'jk', '<Esc>')
-  call arpeggio#map('o', '', 0, 'kj', '<Esc>')
-  call arpeggio#map('l', '', 0, 'jk', '<Esc>')
-  call arpeggio#map('l', '', 0, 'kj', '<Esc>')
-  call arpeggio#map('t', '', 0, 'kj', '<Esc>')
-  call arpeggio#map('t', '', 0, 'kj', '<Esc>')
-  ]])
 end

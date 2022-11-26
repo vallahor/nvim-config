@@ -1,6 +1,9 @@
 local M = {}
 
 local italic_active = "italic"
+local bold_active = "bold"
+local undercurl_active = "undercurl"
+local undercurl_bold_active = "undercurl,bold"
 
 local p = {
 	fg1 = "#A98D92",
@@ -74,10 +77,10 @@ local t = {
 	QuickFixLine = { fg = p.red2 },
 	Search = { bg = p.search },
 	SpecialKey = { fg = p.pink2 },
-	SpellBad = { sp = p.red, effect = "undercurl" },
-	SpellCap = { sp = p.red, effect = "undercurl" },
-	SpellLocal = { sp = p.red, effect = "undercurl" },
-	SpellRare = { sp = p.red, effect = "undercurl" },
+	SpellBad = { sp = p.red, effect = undercurl_active },
+	SpellCap = { sp = p.red, effect = undercurl_active },
+	SpellLocal = { sp = p.red, effect = undercurl_active },
+	SpellRare = { sp = p.red, effect = undercurl_active },
 	StatusLineNC = { bg = p.status_line_nc },
 	StatusLine = { bg = p.status_line },
 	StatusLineTerm = { fg = p.fg2, bg = p.bg3 },
@@ -115,7 +118,7 @@ local t = {
 	Operator = { fg = p.purple_dark },
 	Keyword = { fg = p.red },
 	Exception = { fg = p.exception },
-	Include = { fg = p.yellow, effect = "bold" },
+	Include = { fg = p.yellow, effect = bold_active },
 	Define = { fg = p.fg2 },
 	["@define"] = { fg = p.fg2 },
 	Macro = { fg = p.pink_pastel2 },
@@ -133,13 +136,13 @@ local t = {
 	DiagnosticWarn = { fg = p.purple_dark, effect = italic_active },
 	DiagnosticInfo = { fg = p.purple_dark, effect = italic_active },
 	DiagnosticHint = { fg = p.purple_dark, effect = italic_active },
-	DiagnosticUnderlineError = { sp = p.red, fg = p.purple_dark, effect = "undercurl,bold" },
-	DiagnosticUnderlineWarn = { sp = p.red, fg = p.purple_dark, effect = "undercurl,bold" },
+	DiagnosticUnderlineError = { sp = p.red, fg = p.purple_dark, effect = undercurl_bold_active },
+	DiagnosticUnderlineWarn = { sp = p.red, fg = p.purple_dark, effect = undercurl_bold_active },
 	DiagnosticUnderlineInfo = { sp = p.red, fg = p.purple_dark, effect = italic_active },
-	DiagnosticUnderlineHint = { sp = p.red, fg = p.purple_dark, effect = "undercurl,bold" },
+	DiagnosticUnderlineHint = { sp = p.red, fg = p.purple_dark, effect = undercurl_bold_active },
 
 	--- treesitter ---
-	["@include"] = { fg = p.yellow, effect = "bold" },
+	["@include"] = { fg = p.yellow, effect = bold_active },
 	["@character"] = { fg = p.pink1 },
 	["@string"] = { fg = p.pink1 },
 	["@string.regex"] = { fg = p.pink1 },
