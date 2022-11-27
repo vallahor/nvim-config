@@ -1,6 +1,6 @@
 local M = {}
 
-local italic_active = "italic"
+local italic_active = "none"
 local bold_active = "bold"
 local undercurl_active = "undercurl"
 local undercurl_bold_active = "undercurl,bold"
@@ -13,6 +13,7 @@ local p = {
 	bg1 = "#121112",
 	bg2 = "#c64964",
 	bg3 = "#382536",
+	bg4 = "#291C28",
 	match = "#ff8080",
 	cursor = "#f4ddcc",
 	yellow = "#c58d5d",
@@ -50,7 +51,7 @@ local t = {
 	CursorIM = { bg = p.bg3 },
 	CursorColumn = { bg = p.bg3 },
 	-- CursorLine = { bg = p.bg3 },
-	CursorLine = { bg = p.status_line },
+	CursorLine = { bg = p.bg4 },
 	Directory = { fg = p.fg2 },
 	DiffAdd = { fg = p.color2, bg = p.green },
 	DiffChange = { fg = p.fg2 },
@@ -66,7 +67,8 @@ local t = {
 	LineNr = { fg = p.fg4 },
 	LineNrAbove = { fg = p.fg4 },
 	LineNrBelow = { fg = p.fg4 },
-	CursorLineNr = { fg = p.red, bg = p.bg3 },
+	-- CursorLineNr = { fg = p.red, bg = p.bg3 },
+	CursorLineNr = { fg = p.red, bg = p.bg4 },
 	MatchParen = { fg = p.match },
 	ModeMsg = { fg = p.fg2, bg = p.bg3 },
 	MoreMsg = { fg = p.fg2, bg = p.bg3 },
