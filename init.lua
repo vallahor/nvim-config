@@ -222,12 +222,13 @@ if ok then
 				},
 			},
 			initial_mode = "insert",
-			selection_strategy = "reset",
-			path_display = { "absolute" },
+			path_display = { "smart" },
 			borderchars = { "─", "│", "─", "│", "┌", "┐", "┘", "└" },
+			border = false,
 			layout_strategy = "bottom_pane",
 			layout_config = {
 				height = 10,
+				prompt_position = "bottom",
 			},
 			preview = false,
 		},
@@ -601,7 +602,6 @@ map("n", "j", "v:count ? 'j^' : 'gj'", { expr = true })
 map("n", "k", "v:count ? 'k^' : 'gk'", { expr = true })
 
 map({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>")
-map({ "n", "v" }, "<leader>fs", "<cmd>w!<CR><esc>")
 
 -- map("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
 map("n", "<f4>", "<cmd>:e $MYVIMRC<CR>")
@@ -668,6 +668,8 @@ if vim.g.neovide then
 	vim.g.neovide_refresh_rate = 60
 	vim.g.neovide_cursor_animation_length = 0
 	vim.g.neovide_remember_window_size = true
+	vim.g.neovide_remember_window_position = true
+	vim.g.neovide_cursor_antialiasing = true
 end
 
 if not vim.fn.has("gui_running") and not vim.g.neovide then
