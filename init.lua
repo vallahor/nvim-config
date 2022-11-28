@@ -85,7 +85,7 @@ vim.opt.backup = false
 vim.opt.gdefault = true
 vim.opt.colorcolumn = "80"
 -- vim.opt.cmdheight = 0
-vim.opt.guicursor = "i-ci:block-iCursor" -- comment when using nvim-qt (new version)
+-- vim.opt.guicursor = "i-ci:block-iCursor" -- comment when using nvim-qt (new version)
 vim.opt.completeopt = { "menu", "menuone", "noselect" }
 -- vim.opt.completeopt = { "menu", "noinsert", "menuone", "noselect" }
 vim.opt.cindent = true
@@ -277,6 +277,7 @@ end
 
 local ok, cokeline = pcall(require, "cokeline")
 if ok then
+	local utils = require("cokeline/utils")
 	cokeline.setup({
 		components = {
 			{
@@ -287,7 +288,7 @@ if ok then
 					return buffer.filename .. " "
 				end,
 				style = function(buffer)
-					return buffer.is_focused and "bold" or nil
+					return buffer.is_focused and nil
 				end,
 			},
 			{
@@ -537,7 +538,7 @@ map("n", "<leader>ft", "<cmd>NvimTreeToggle<cr>")
 -- map("n", "<c-;>", "<cmd>NvimTreeFocus<cr>")
 
 map("n", "<c-f>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
-map("n", "<c-s>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
+map("n", "<c-t>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
 
 map("c", "<c-v>", "<c-r>*")
 
@@ -566,26 +567,19 @@ map({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>")
 map("n", "<f4>", "<cmd>:e $MYVIMRC<CR>")
 map("n", "<f5>", "<cmd>so %<CR>")
 
-map({ "n", "v" }, "<leader>h", "<c-w>h")
-map({ "n", "v" }, "<leader>j", "<c-w>j")
-map({ "n", "v" }, "<leader>k", "<c-w>k")
-map({ "n", "v" }, "<leader>l", "<c-w>l")
+-- map({ "n", "v" }, "<leader>h", "<c-w>h")
+-- map({ "n", "v" }, "<leader>j", "<c-w>j")
+-- map({ "n", "v" }, "<leader>k", "<c-w>k")
+-- map({ "n", "v" }, "<leader>l", "<c-w>l")
+
+map({ "n", "v" }, "<c-h>", "<c-w>h")
+map({ "n", "v" }, "<c-j>", "<c-w>j")
+map({ "n", "v" }, "<c-k>", "<c-w>k")
+map({ "n", "v" }, "<c-l>", "<c-w>l")
 
 map("n", "<c-p>", "<c-u>zz")
 map("n", "<c-n>", "<c-d>zz")
 
-map("n", "|", "<cmd>clo<cr>")
-map("n", "+", "<cmd>vs<cr>")
-map("n", "_", "<cmd>sp<cr>")
-map("n", ")", "<c-w>o")
-map("n", "(", "<c-w>r")
-
--- map("n", "<c-\\>", "<cmd>clo<cr>")
--- map("n", "<c-=>", "<cmd>vs<cr>")
--- map("n", "<c-->", "<cmd>sp<cr>")
--- map("n", "<c-0>", "<c-w>o")
--- map("n", "<c-9>", "<c-w>r")
---
 map("v", "s", "<Plug>Lightspeed_s")
 map("v", "S", "<Plug>Lightspeed_S")
 
@@ -607,12 +601,6 @@ map("n", "da_", '<cmd>set iskeyword-=_<cr>"_daw<cmd>set iskeyword+=_<cr>')
 map("n", "va_", "<cmd>set iskeyword-=_<cr>vaw<cmd>set iskeyword+=_<cr>")
 
 -- tab
-map("n", "<c-,>", "<Plug>(cokeline-focus-prev)")
-map("n", "<c-.>", "<Plug>(cokeline-focus-next)")
-
--- neovide not recognize the other keybindings
-map("n", "<leader>,", "<Plug>(cokeline-focus-prev)")
-map("n", "<leader>.", "<Plug>(cokeline-focus-next)")
 
 -- Re-order to previous/next
 map("n", "<a-,>", "<Plug>(cokeline-switch-prev)")
@@ -623,12 +611,22 @@ map("n", "<c-w>", "<cmd>BufDel<CR>")
 map("n", "<leader>dm", ":delmarks ")
 
 if vim.g.neovide then
+	vim.opt.guicursor = "i-ci:block-iCursor" -- comment when using nvim-qt (new version)
 	vim.opt.guifont = "JetBrains Mono NL:h12"
 	vim.g.neovide_refresh_rate = 60
 	vim.g.neovide_cursor_animation_length = 0
 	vim.g.neovide_remember_window_size = true
 	vim.g.neovide_remember_window_position = true
 	vim.g.neovide_cursor_antialiasing = true
+
+	map("n", "|", "<cmd>clo<cr>")
+	map("n", "+", "<cmd>vs<cr>")
+	map("n", "_", "<cmd>sp<cr>")
+	map("n", ")", "<c-w>o")
+	map("n", "(", "<c-w>r")
+
+	map("n", "<leader>,", "<Plug>(cokeline-focus-prev)")
+	map("n", "<leader>.", "<Plug>(cokeline-focus-next)")
 end
 
 if not vim.fn.has("gui_running") and not vim.g.neovide then
@@ -636,6 +634,15 @@ if not vim.fn.has("gui_running") and not vim.g.neovide then
 		pattern = "*",
 		command = "GuiFont! JetBrains Mono NL:h13",
 	})
+
+	map("n", "<c-\\>", "<cmd>clo<cr>")
+	map("n", "<c-=>", "<cmd>vs<cr>")
+	map("n", "<c-->", "<cmd>sp<cr>")
+	map("n", "<c-0>", "<c-w>o")
+	map("n", "<c-9>", "<c-w>r")
+
+	map("n", "<c-,>", "<Plug>(cokeline-focus-prev)")
+	map("n", "<c-.>", "<Plug>(cokeline-focus-next)")
 end
 
 vim.api.nvim_create_autocmd("FocusGained", {
