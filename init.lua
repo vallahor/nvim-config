@@ -37,13 +37,7 @@ require("packer").startup(function(use)
 
 	use({ "kana/vim-arpeggio" })
 
-	use({
-		"TimUntersberger/neogit",
-		requires = {
-			{ "nvim-lua/plenary.nvim" },
-			{ "sindrets/diffview.nvim" },
-		},
-	})
+	use({ "TimUntersberger/neogit" })
 
 	use({ "sbdchd/neoformat" })
 	use({ "rebelot/heirline.nvim" })
@@ -314,12 +308,6 @@ end
 local ok, neogit = pcall(require, "neogit")
 if ok then
 	neogit.setup({
-		disable_signs = false,
-		disable_hint = false,
-		disable_context_highlighting = false,
-		disable_commit_confirmation = false,
-		auto_refresh = true,
-		disable_builtin_notifications = false,
 		use_magit_keybindings = true,
 		kind = "replace",
 		commit_popup = {
@@ -327,11 +315,6 @@ if ok then
 		},
 		popup = {
 			kind = "split",
-		},
-		signs = {
-			section = { ">", "v" },
-			item = { ">", "v" },
-			hunk = { "", "" },
 		},
 	})
 end
