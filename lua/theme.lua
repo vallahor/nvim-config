@@ -101,7 +101,7 @@ local t = {
 	Normal = { fg = p.fg1, bg = p.bg1 },
 	Comment = { fg = p.pastel },
 	Constant = { fg = p.pink_pastel },
-	Identifier = { fg = p.fg1, bg = p.bg1 },
+	Identifier = { fg = p.fg1 },
 	Statement = { fg = p.purple_dark },
 	PreProc = { fg = p.yellow },
 	Type = { fg = p.purple_light },
@@ -124,7 +124,6 @@ local t = {
 	Exception = { fg = p.exception },
 	Include = { fg = p.yellow, effect = bold_active },
 	Define = { fg = p.fg2 },
-	["@define"] = { fg = p.fg2 },
 	Macro = { fg = p.pink_pastel2 },
 	PreCondit = { fg = p.yellow },
 	StorageClass = { fg = p.red },
@@ -148,6 +147,7 @@ local t = {
 	--- treesitter ---
 	["@include"] = { fg = p.yellow, effect = bold_active },
 	["@character"] = { fg = p.pink1 },
+	["@define"] = { fg = p.fg2 },
 	["@string"] = { fg = p.pink1 },
 	["@string.regex"] = { fg = p.pink1 },
 	["@string.escape"] = { fg = p.purple_dark },
@@ -223,7 +223,7 @@ local function highlight(group, style)
 	local effect = style.effect and "gui=" .. style.effect or "gui=NONE"
 	local fg = style.fg and "guifg=" .. style.fg or "guifg=NONE"
 	local bg = style.bg and "guibg=" .. style.bg or "guibg=NONE"
-	local sp = style.sp and "guisp=" .. style.sp or ""
+	local sp = style.sp and "guisp=" .. style.sp or "guisp=NONE"
 
 	vim.cmd(string.format("highlight %s %s %s %s %s", group, effect, fg, bg, sp))
 end

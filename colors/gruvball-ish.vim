@@ -15,7 +15,8 @@ hi iCursor          guisp=none    guifg=none    guibg=#b1314c gui=none
 hi lCursor          guisp=none    guifg=none    guibg=#382536 gui=none
 hi CursorIM         guisp=none    guifg=none    guibg=#382536 gui=none
 hi CursorColumn     guisp=none    guifg=none    guibg=#382536 gui=none
-hi CursorLine       guisp=none    guifg=none    guibg=#382536 gui=none
+" hi CursorLine       guisp=none    guifg=none    guibg=#382536 gui=none
+hi CursorLine       guisp=none    guifg=none    guibg=#291C28 gui=none
 hi Directory        guisp=none    guifg=#C0AEA0 guibg=none    gui=none
 hi DiffAdd          guisp=none    guifg=#b9e0d3 guibg=#1a563f gui=none
 hi DiffChange       guisp=none    guifg=#C0AEA0 guibg=none    gui=none
@@ -31,7 +32,8 @@ hi IncSearch        guisp=none    guifg=none    guibg=#c64964 gui=none
 hi LineNr           guisp=none    guifg=#493441 guibg=none    gui=none
 hi LineNrAbove      guisp=none    guifg=#493441 guibg=none    gui=none
 hi LineNrBelow      guisp=none    guifg=#493441 guibg=none    gui=none
-hi CursorLineNr     guisp=none    guifg=#a1495c guibg=#382536 gui=none
+" hi CursorLineNr     guisp=none    guifg=#a1495c guibg=#382536 gui=none
+hi CursorLineNr     guisp=none    guifg=#a1495c guibg=#291C28 gui=none
 hi MatchParen       guisp=none    guifg=#ff8080 guibg=none    gui=none
 " hi MatchParen       guisp=none guifg=#ff8080  guibg=#040004   gui=none
 hi ModeMsg          guisp=none    guifg=#C0AEA0 guibg=#382536 gui=none
@@ -50,7 +52,8 @@ hi SpellCap         guisp=#a1495c guifg=none    guibg=none    gui=undercurl
 hi SpellLocal       guisp=#a1495c guifg=none    guibg=none    gui=undercurl
 hi SpellRare        guisp=#a1495c guifg=none    guibg=none    gui=undercurl
 hi StatusLineNC     guisp=none    guifg=none    guibg=#191319 gui=none
-hi StatusLine       guisp=none    guifg=none    guibg=#291C28 gui=none
+" hi StatusLine       guisp=none    guifg=none    guibg=#291C28 gui=none
+hi StatusLine       guisp=none    guifg=none    guibg=#382536 gui=none
 hi StatusLineTerm   guisp=none    guifg=#C0AEA0 guibg=#382536 gui=none
 hi StatusLineTermNC guisp=none    guifg=none    guibg=#363436 gui=none
 hi TabLine          guisp=none    guifg=none    guibg=#3d3339 gui=none
@@ -67,7 +70,7 @@ hi WildMenu         guisp=none    guifg=none    guibg=#493441 gui=none
 hi Normal     guisp=none guifg=#A98D92 guibg=#121112 gui=none
 hi Comment    guisp=none guifg=#9f8d8c guibg=none    gui=none
 hi Constant   guisp=none guifg=#A8899C guibg=none    gui=none
-hi Identifier guisp=none guifg=#A98D92 guibg=#121112 gui=none
+hi Identifier guisp=none guifg=#A98D92 guibg=none    gui=none
 hi Statement  guisp=none guifg=#794966 guibg=none    gui=none
 hi PreProc    guisp=none guifg=#c58d5d guibg=none    gui=none
 hi Type       guisp=none guifg=#806292 guibg=none    gui=none
