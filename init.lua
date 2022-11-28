@@ -333,35 +333,6 @@ if ok then
 			item = { ">", "v" },
 			hunk = { "", "" },
 		},
-		integrations = {
-			diffview = false,
-		},
-		sections = {
-			untracked = {
-				folded = false,
-			},
-			unstaged = {
-				folded = false,
-			},
-			staged = {
-				folded = false,
-			},
-			stashes = {
-				folded = true,
-			},
-			unpulled = {
-				folded = true,
-			},
-			unmerged = {
-				folded = false,
-			},
-			recent = {
-				folded = true,
-			},
-		},
-		mappings = {
-			status = {},
-		},
 	})
 end
 
@@ -429,7 +400,12 @@ local FileFlags = {
 
 local FileType = {
 	provider = function()
-		return " [" .. string.upper(vim.bo.filetype) .. "]"
+		local filetype = vim.bo.filetype
+		if filetype ~= "" then
+			return " [" .. string.upper(vim.bo.filetype) .. "]"
+		else
+			return ""
+		end
 	end,
 }
 
