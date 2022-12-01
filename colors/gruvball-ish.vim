@@ -134,7 +134,8 @@ hi @keyword.return        guisp=none guifg=#794966 guibg=none gui=italic
 hi @keyword.return        guisp=none guifg=#794966 guibg=none gui=none
 hi @keyword.operator      guisp=none guifg=#794966 guibg=none gui=none
 hi @variable              guisp=none guifg=#A98D92 guibg=none gui=none
-hi @variable.builtin      guisp=none guifg=#806292 guibg=none gui=italic
+" hi @variable.builtin      guisp=none guifg=#806292 guibg=none gui=italic
+hi @variable.builtin      guisp=none guifg=#9B668F guibg=none gui=italic
 hi @tag                   guisp=none guifg=#a1495c guibg=none gui=none
 hi @tag                   guisp=none guifg=#c58d5d guibg=none gui=italic
 hi @tag.delimiter         guisp=none guifg=#9F8D8C guibg=none gui=none
