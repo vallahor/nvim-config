@@ -42,6 +42,7 @@ require("packer").startup(function(use)
 	use({ "sbdchd/neoformat" })
 	use({ "rebelot/heirline.nvim" })
 	use({ "lewis6991/gitsigns.nvim", tag = "release" })
+	use({ "neovim/nvim-lspconfig" })
 
 	if packer_bootstrap then
 		require("packer").sync()
@@ -92,7 +93,7 @@ vim.opt.cindent = true
 vim.opt.cino:append("L0,g0,l1,t0,w1,w4,(s,m1")
 
 --
-vim.o.timeoutlen = 250
+-- vim.o.timeoutlen = 250
 -- vim.o.ttimeoutlen = 100
 
 vim.wo.signcolumn = "no"
@@ -358,7 +359,7 @@ local FileName = {
 		if filename == "" then
 			return "[No Name]"
 		end
-		if not conditions.width_percent_below(#filename, 0.25) then
+		if not conditions.width_percent_below(#filename, 0.70) then
 			filename = vim.fn.pathshorten(filename)
 		end
 		return filename
@@ -520,95 +521,137 @@ if not (vim.g.arpeggio_timeoutlen ~= nil) then
   ]])
 end
 
+local ok, lspconfig = pcall(require, "lspconfig")
+if ok then
+	lspconfig.rust_analyzer.setup({
+		flags = {
+			debounce_text_changes = 150,
+		},
+		settings = {
+			["rust-analyzer"] = {
+				cargo = {
+					allFeatures = true,
+				},
+				checkOnSave = {
+					-- default: `cargo check`
+					command = "clippy",
+				},
+			},
+		},
+	})
+end
+
 require("colorizer").setup()
 
 -- MAPPING --
 
-local map = vim.keymap.set
-
--- map("n", "<space>", "<nop>")
-
 vim.g.mapleader = " "
 
-map("n", "<esc>", "<cmd>nohl<cr><esc>")
-map("n", "<leader><leader>", "<cmd>nohl<cr><esc>")
+vim.keymap.set("n", "<esc>", "<cmd>nohl<cr><esc>")
+vim.keymap.set("n", "<leader><leader>", "<cmd>nohl<cr><esc>")
 
-map("n", "<c-g>", "<cmd>Neogit<cr>")
-map("n", "<leader>ft", "<cmd>NvimTreeToggle<cr>")
--- map("n", "<c-;>", "<cmd>NvimTreeFocus<cr>")
+vim.keymap.set("n", "<c-g>", "<cmd>Neogit<cr>")
+vim.keymap.set("n", "<leader>ft", "<cmd>NvimTreeToggle<cr>")
+-- vim.keymap.set("n", "<c-;>", "<cmd>NvimTreeFocus<cr>")
 
-map("n", "<c-f>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
-map("n", "<c-t>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
+vim.keymap.set("n", "<c-f>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
+vim.keymap.set("n", "<c-t>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
 
-map("c", "<c-v>", "<c-r>*")
+vim.keymap.set("c", "<c-v>", "<c-r>*")
 
-map("v", "v", "V")
+vim.keymap.set("v", "v", "V")
 
-map({ "i", "c" }, "<c-bs>", "<c-w>")
+vim.keymap.set({ "i", "c" }, "<c-bs>", "<c-w>")
 
-map("n", "x", '"_x')
-map("v", "x", '"_d')
-map({ "n", "v" }, "c", '"_c')
-map("v", "p", '"_dP')
+vim.keymap.set("n", "x", '"_x')
+vim.keymap.set("v", "x", '"_d')
+vim.keymap.set({ "n", "v" }, "c", '"_c')
+vim.keymap.set("v", "p", '"_dP')
 
-map("n", "*", "*``")
-map("v", "*", '"sy/\\V<c-r>s<cr>``')
+vim.keymap.set("n", "*", "*``")
+vim.keymap.set("v", "*", '"sy/\\V<c-r>s<cr>``')
 
-map({ "n", "v" }, "<leader>0", "0")
-map({ "n", "v" }, "-", "$")
-map({ "n", "v" }, "0", "^")
+vim.keymap.set({ "n", "v" }, "<leader>0", "0")
+vim.keymap.set("n", "-", "$")
+vim.keymap.set("v", "-", "$h")
+vim.keymap.set({ "n", "v" }, "0", "^")
 
-map("n", "j", "v:count ? 'j^' : 'gj'", { expr = true })
-map("n", "k", "v:count ? 'k^' : 'gk'", { expr = true })
+vim.keymap.set("n", "j", "v:count ? 'j^' : 'gj'", { expr = true })
+vim.keymap.set("n", "k", "v:count ? 'k^' : 'gk'", { expr = true })
 
-map({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>")
+vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>")
 
--- map("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
-map("n", "<f4>", "<cmd>:e $MYVIMRC<CR>")
-map("n", "<f5>", "<cmd>so %<CR>")
+-- vim.keymap.set("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
+vim.keymap.set("n", "<f4>", "<cmd>:e $MYVIMRC<CR>")
+vim.keymap.set("n", "<f5>", "<cmd>so %<CR>")
 
--- map({ "n", "v" }, "<leader>h", "<c-w>h")
--- map({ "n", "v" }, "<leader>j", "<c-w>j")
--- map({ "n", "v" }, "<leader>k", "<c-w>k")
--- map({ "n", "v" }, "<leader>l", "<c-w>l")
+-- vim.keymap.set({ "n", "v" }, "<leader>h", "<c-w>h")
+-- vim.keymap.set({ "n", "v" }, "<leader>j", "<c-w>j")
+-- vim.keymap.set({ "n", "v" }, "<leader>k", "<c-w>k")
+-- vim.keymap.set({ "n", "v" }, "<leader>l", "<c-w>l")
 
-map({ "n", "v" }, "<c-h>", "<c-w>h")
-map({ "n", "v" }, "<c-j>", "<c-w>j")
-map({ "n", "v" }, "<c-k>", "<c-w>k")
-map({ "n", "v" }, "<c-l>", "<c-w>l")
+vim.keymap.set({ "n", "v" }, "<c-h>", "<c-w>h")
+vim.keymap.set({ "n", "v" }, "<c-j>", "<c-w>j")
+vim.keymap.set({ "n", "v" }, "<c-k>", "<c-w>k")
+vim.keymap.set({ "n", "v" }, "<c-l>", "<c-w>l")
 
-map("n", "<c-p>", "<c-u>zz")
-map("n", "<c-n>", "<c-d>zz")
+vim.keymap.set("n", "<c-p>", "<c-u>zz")
+vim.keymap.set("n", "<c-n>", "<c-d>zz")
 
-map("v", "s", "<Plug>Lightspeed_s")
-map("v", "S", "<Plug>Lightspeed_S")
+vim.keymap.set("v", "s", "<Plug>Lightspeed_s")
+vim.keymap.set("v", "S", "<Plug>Lightspeed_S")
 
-map("v", "<c-s>", "<Plug>(VM-Reselect-Last)")
+vim.keymap.set("v", "<c-s>", "<Plug>(VM-Reselect-Last)")
 
-map("v", "z", "<Plug>VSurround")
+vim.keymap.set("v", "z", "<Plug>VSurround")
 
-map("n", "<F3>", "<cmd>TSHighlightCapturesUnderCursor<cr>")
+vim.keymap.set("n", "<F3>", "<cmd>TSHighlightCapturesUnderCursor<cr>")
 
-map("n", "<c-6>", "<C-^>")
-map("n", "^", "<C-^>")
+vim.keymap.set("n", "<c-6>", "<C-^>")
+vim.keymap.set("n", "^", "<C-^>")
 
-map("n", "ci_", '<cmd>set iskeyword-=_<cr>"_ciw<cmd>set iskeyword+=_<cr>')
-map("n", "di_", '<cmd>set iskeyword-=_<cr>"_diw<cmd>set iskeyword+=_<cr>')
-map("n", "vi_", "<cmd>set iskeyword-=_<cr>viw<cmd>set iskeyword+=_<cr>")
+vim.keymap.set("n", "ci_", '<cmd>set iskeyword-=_<cr>"_ciw<cmd>set iskeyword+=_<cr>')
+vim.keymap.set("n", "di_", '<cmd>set iskeyword-=_<cr>"_diw<cmd>set iskeyword+=_<cr>')
+vim.keymap.set("n", "vi_", "<cmd>set iskeyword-=_<cr>viw<cmd>set iskeyword+=_<cr>")
 
-map("n", "ca_", '<cmd>set iskeyword-=_<cr>"_caw<cmd>set iskeyword+=_<cr>')
-map("n", "da_", '<cmd>set iskeyword-=_<cr>"_daw<cmd>set iskeyword+=_<cr>')
-map("n", "va_", "<cmd>set iskeyword-=_<cr>vaw<cmd>set iskeyword+=_<cr>")
+vim.keymap.set("n", "ca_", '<cmd>set iskeyword-=_<cr>"_caw<cmd>set iskeyword+=_<cr>')
+vim.keymap.set("n", "da_", '<cmd>set iskeyword-=_<cr>"_daw<cmd>set iskeyword+=_<cr>')
+vim.keymap.set("n", "va_", "<cmd>set iskeyword-=_<cr>vaw<cmd>set iskeyword+=_<cr>")
+
+vim.keymap.set("n", "<leader>,", "<Plug>(cokeline-focus-prev)")
+vim.keymap.set("n", "<leader>.", "<Plug>(cokeline-focus-next)")
+
+vim.keymap.set("n", "<c-,>", "<Plug>(cokeline-focus-prev)")
+vim.keymap.set("n", "<c-.>", "<Plug>(cokeline-focus-next)")
+
+vim.keymap.set("n", "|", "<cmd>clo<cr>")
+vim.keymap.set("n", "+", "<cmd>vs<cr>")
+vim.keymap.set("n", "_", "<cmd>sp<cr>")
+vim.keymap.set("n", ")", "<c-w>o")
+vim.keymap.set("n", "(", "<c-w>r")
+
+vim.keymap.set("n", "<c-\\>", "<cmd>clo<cr>")
+vim.keymap.set("n", "<c-=>", "<cmd>vs<cr>")
+vim.keymap.set("n", "<c-->", "<cmd>sp<cr>")
+vim.keymap.set("n", "<c-0>", "<c-w>o")
+vim.keymap.set("n", "<c-9>", "<c-w>r")
 
 -- tab
 
 -- Re-order to previous/next
-map("n", "<a-,>", "<Plug>(cokeline-switch-prev)")
-map("n", "<a-.>", "<Plug>(cokeline-switch-next)")
+vim.keymap.set("n", "<a-,>", "<Plug>(cokeline-switch-prev)")
+vim.keymap.set("n", "<a-.>", "<Plug>(cokeline-switch-next)")
 -- close
-map("n", "<c-w>", "<cmd>BufDel<CR>")
+vim.keymap.set("n", "<c-w>", "<cmd>BufDel<CR>")
+vim.keymap.set("n", "<a-w>", "<c-o><cmd>bdel #<CR>")
 
-map("n", "<leader>dm", ":delmarks ")
+vim.keymap.set("n", "<leader>dm", ":delmarks ")
+
+-- MAPPING LSP
+vim.keymap.set("n", "gd", vim.lsp.buf.definition)
+vim.keymap.set("n", "K", vim.lsp.buf.hover)
+vim.keymap.set("n", "<f2>", vim.lsp.buf.rename)
+vim.keymap.set("n", "<c-;>", vim.lsp.buf.code_action)
 
 if vim.g.neovide then
 	vim.opt.guicursor = "i-ci:block-iCursor" -- comment when using nvim-qt (new version)
@@ -618,15 +661,6 @@ if vim.g.neovide then
 	vim.g.neovide_remember_window_size = true
 	vim.g.neovide_remember_window_position = true
 	vim.g.neovide_cursor_antialiasing = true
-
-	map("n", "|", "<cmd>clo<cr>")
-	map("n", "+", "<cmd>vs<cr>")
-	map("n", "_", "<cmd>sp<cr>")
-	map("n", ")", "<c-w>o")
-	map("n", "(", "<c-w>r")
-
-	map("n", "<leader>,", "<Plug>(cokeline-focus-prev)")
-	map("n", "<leader>.", "<Plug>(cokeline-focus-next)")
 end
 
 if not vim.fn.has("gui_running") and not vim.g.neovide then
@@ -634,15 +668,6 @@ if not vim.fn.has("gui_running") and not vim.g.neovide then
 		pattern = "*",
 		command = "GuiFont! JetBrains Mono NL:h13",
 	})
-
-	map("n", "<c-\\>", "<cmd>clo<cr>")
-	map("n", "<c-=>", "<cmd>vs<cr>")
-	map("n", "<c-->", "<cmd>sp<cr>")
-	map("n", "<c-0>", "<c-w>o")
-	map("n", "<c-9>", "<c-w>r")
-
-	map("n", "<c-,>", "<Plug>(cokeline-focus-prev)")
-	map("n", "<c-.>", "<Plug>(cokeline-focus-next)")
 end
 
 vim.api.nvim_create_autocmd("FocusGained", {
