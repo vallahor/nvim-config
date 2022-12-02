@@ -38,11 +38,12 @@ local p = {
 	color2 = "#b9e0d3",
 	color3 = "#e8b9b8",
 	search = "#43282f",
-	-- visual = "#213737",
+	-- visual = "#213737", -- dark slate pallet
 	visual = "#182626",
 	status_line_nc = "#191319",
-	-- status_line = "#291C28",
-	status_line = "#1c212f",
+	status_line = "#291C28",
+	-- status_line_nc = "#091010",
+	-- status_line = "#1c212f",
 	bracket = "#95667C",
 }
 
