@@ -42,7 +42,7 @@ require("packer").startup(function(use)
 	use({ "sbdchd/neoformat" })
 	use({ "rebelot/heirline.nvim" })
 	use({ "lewis6991/gitsigns.nvim", tag = "release" })
-	use({ "neovim/nvim-lspconfig" })
+	-- use({ "neovim/nvim-lspconfig" })
 
 	if packer_bootstrap then
 		require("packer").sync()
@@ -521,25 +521,25 @@ if not (vim.g.arpeggio_timeoutlen ~= nil) then
   ]])
 end
 
-local ok, lspconfig = pcall(require, "lspconfig")
-if ok then
-	lspconfig.rust_analyzer.setup({
-		flags = {
-			debounce_text_changes = 150,
-		},
-		settings = {
-			["rust-analyzer"] = {
-				cargo = {
-					allFeatures = true,
-				},
-				checkOnSave = {
-					-- default: `cargo check`
-					command = "clippy",
-				},
-			},
-		},
-	})
-end
+-- local ok, lspconfig = pcall(require, "lspconfig")
+-- if ok then
+-- 	lspconfig.rust_analyzer.setup({
+-- 		flags = {
+-- 			debounce_text_changes = 150,
+-- 		},
+-- 		settings = {
+-- 			["rust-analyzer"] = {
+-- 				cargo = {
+-- 					allFeatures = true,
+-- 				},
+-- 				checkOnSave = {
+-- 					-- default: `cargo check`
+-- 					command = "clippy",
+-- 				},
+-- 			},
+-- 		},
+-- 	})
+-- end
 
 require("colorizer").setup()
 
