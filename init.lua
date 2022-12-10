@@ -42,8 +42,9 @@ require("packer").startup(function(use)
 	use({ "sbdchd/neoformat" })
 	use({ "rebelot/heirline.nvim" })
 	use({ "lewis6991/gitsigns.nvim", tag = "release" })
-	-- use({ "neovim/nvim-lspconfig" })
+	use({ "neovim/nvim-lspconfig" })
 
+	use({ "chaoren/vim-wordmotion" })
 	if packer_bootstrap then
 		require("packer").sync()
 	end
@@ -126,6 +127,8 @@ vim.g.VM_maps = {
 	["Remove Region"] = "+",
 	["Add Cursor At Pos"] = "<enter>",
 }
+
+vim.g.wordmotion_spaces = { "w@<=-w@=", ".", ",", ";", ":", "w@<(-w@)", "w@<{-w@}", "w@<[-w@]", "w@<<-w@>" }
 
 -- PLUGINS
 
@@ -251,6 +254,15 @@ if ok then
 		},
 		indent = {
 			enable = false,
+		},
+		incremental_selection = {
+			enable = true,
+			keymaps = {
+				init_selection = "m",
+				node_incremental = "m",
+				node_decremental = "M",
+				scope_incremental = "<c-/>",
+			},
 		},
 	})
 
@@ -516,29 +528,29 @@ if not (vim.g.arpeggio_timeoutlen ~= nil) then
   call arpeggio#map('o', '', 0, 'kj', '<Esc>')
   call arpeggio#map('l', '', 0, 'jk', '<Esc>')
   call arpeggio#map('l', '', 0, 'kj', '<Esc>')
-  call arpeggio#map('t', '', 0, 'kj', '<Esc>')
+  call arpeggio#map('t', '', 0, 'jk', '<Esc>')
   call arpeggio#map('t', '', 0, 'kj', '<Esc>')
   ]])
 end
 
 -- local ok, lspconfig = pcall(require, "lspconfig")
 -- if ok then
--- 	lspconfig.rust_analyzer.setup({
--- 		flags = {
--- 			debounce_text_changes = 150,
--- 		},
--- 		settings = {
--- 			["rust-analyzer"] = {
--- 				cargo = {
--- 					allFeatures = true,
--- 				},
--- 				checkOnSave = {
--- 					-- default: `cargo check`
--- 					command = "clippy",
--- 				},
+-- lspconfig.rust_analyzer.setup({
+-- 	flags = {
+-- 		debounce_text_changes = 150,
+-- 	},
+-- 	settings = {
+-- 		["rust-analyzer"] = {
+-- 			cargo = {
+-- 				allFeatures = true,
+-- 			},
+-- 			checkOnSave = {
+-- 				-- default: `cargo check`
+-- 				command = "clippy",
 -- 			},
 -- 		},
--- 	})
+-- 	},
+-- })
 -- end
 
 require("colorizer").setup()
@@ -556,6 +568,7 @@ vim.keymap.set("n", "<leader>ft", "<cmd>NvimTreeToggle<cr>")
 
 vim.keymap.set("n", "<c-f>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
 vim.keymap.set("n", "<c-t>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
+vim.keymap.set("n", "<c-space>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
 
 vim.keymap.set("c", "<c-v>", "<c-r>*")
 
@@ -653,6 +666,10 @@ vim.keymap.set("n", "K", vim.lsp.buf.hover)
 vim.keymap.set("n", "<f2>", vim.lsp.buf.rename)
 vim.keymap.set("n", "<c-;>", vim.lsp.buf.code_action)
 
+vim.keymap.set({ "n", "v" }, "w", "<Plug>WordMotion_w")
+vim.keymap.set({ "n", "v" }, "b", "<Plug>WordMotion_b")
+vim.keymap.set({ "n", "v" }, "e", "<Plug>WordMotion_e")
+
 if vim.g.neovide then
 	vim.opt.guicursor = "i-ci:block-iCursor" -- comment when using nvim-qt (new version)
 	vim.opt.guifont = "JetBrains Mono NL:h12"
@@ -667,6 +684,7 @@ if not vim.fn.has("gui_running") and not vim.g.neovide then
 	vim.api.nvim_create_autocmd("VimEnter", {
 		pattern = "*",
 		command = "GuiFont! JetBrains Mono NL:h13",
+		main,
 	})
 end
 
@@ -685,6 +703,14 @@ vim.api.nvim_create_autocmd("BufEnter", {
 	callback = function()
 		vim.opt_local.shiftwidth = 2
 		vim.opt_local.tabstop = 2
+	end,
+})
+
+vim.api.nvim_create_autocmd("BufEnter", {
+	pattern = "*.py",
+	callback = function()
+		vim.opt_local.shiftwidth = 4
+		vim.opt_local.tabstop = 4
 	end,
 })
 
@@ -715,10 +741,6 @@ call winrestview(l:save)
 endfun
 autocmd BufWritePre * :call TrimWhitespace()
 
-noremap <silent> <expr> ' "'".toupper(nr2char(getchar()))
-noremap <silent> <expr> m "m".toupper(nr2char(getchar()))
-sunmap '
-sunmap m
 ]])
 
 local ok, theme = pcall(require, "theme")
