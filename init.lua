@@ -247,6 +247,7 @@ if ok then
 			"javascript",
 			"tsx",
 			"rust",
+			"toml",
 		},
 		highlight = {
 			enable = true,
@@ -431,7 +432,7 @@ local Git = {
 
 	{ -- git branch name
 		provider = function(self)
-			if self.status_dict.head == nil then
+			if string.len(self.status_dict.head) ~= 0 then
 				return " [" .. self.status_dict.head .. "]"
 			else
 				return ""
@@ -442,7 +443,7 @@ local Git = {
 
 local viMode = {
 	init = function(self)
-		self.mode = vim.fn.mode(1) -- :h mode()
+		self.mode = vim.fn.mode(1)
 		if not self.once then
 			vim.api.nvim_create_autocmd("ModeChanged", { command = "redrawstatus" })
 			self.once = true
