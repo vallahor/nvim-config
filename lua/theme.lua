@@ -45,6 +45,7 @@ local p = {
 	status_line = "#291C28",
 	-- status_line_nc = "#091010",
 	-- status_line = "#1c212f",
+	menu_bg = "#1c212f",
 	bracket = "#95667C",
 }
 
@@ -79,7 +80,8 @@ local t = {
 	MatchParen = { fg = p.match },
 	ModeMsg = { fg = p.fg2, bg = p.bg3 },
 	MoreMsg = { fg = p.fg2, bg = p.bg3 },
-	Pmenu = { fg = p.fg2, bg = p.gray1 },
+	-- Pmenu = { fg = p.fg2, bg = p.gray1 },
+	Pmenu = { fg = p.fg2, bg = p.menu_bg },
 	PmenuSel = { bg = p.fg4 },
 	PmenuSbar = { fg = p.fg2, bg = p.bg3 },
 	PmenuThumb = { fg = p.fg2 },
@@ -175,7 +177,8 @@ local t = {
 	-- ["@variable.builtin"] = { fg = p.pink_half_dark, effect = italic_active },
 	["@tag"] = { fg = p.red },
 	["@tag"] = { fg = p.yellow, effect = italic_active },
-	["@tag.delimiter"] = { fg = p.pastel },
+	-- ["@tag.delimiter"] = { fg = p.pastel },
+	["@tag.delimiter"] = { fg = p.bracket },
 	["@tag.attribute"] = { fg = p.pink_pastel },
 	["@attribute"] = { fg = p.purple_dark, effect = italic_active },
 	["@text"] = { fg = p.fg2 },

@@ -33,18 +33,25 @@ require("packer").startup(function(use)
 	use({ "noib3/nvim-cokeline" })
 	use({ "ojroques/nvim-bufdel" })
 
-	use({ "norcalli/nvim-colorizer.lua" })
-
 	use({ "kana/vim-arpeggio" })
 
-	use({ "TimUntersberger/neogit" })
-
 	use({ "sbdchd/neoformat" })
+
 	use({ "rebelot/heirline.nvim" })
 	use({ "lewis6991/gitsigns.nvim", tag = "release" })
 	use({ "neovim/nvim-lspconfig" })
 
+	use({ "kdheepak/lazygit.nvim" })
+
+	use({ "hrsh7th/cmp-nvim-lsp" })
+	use({ "hrsh7th/cmp-buffer" })
+	use({ "hrsh7th/cmp-path" })
+	use({ "hrsh7th/nvim-cmp" })
+
 	use({ "chaoren/vim-wordmotion" })
+
+	use({ "windwp/nvim-ts-autotag" })
+
 	if packer_bootstrap then
 		require("packer").sync()
 	end
@@ -246,15 +253,17 @@ if ok then
 			"typescript",
 			"javascript",
 			"tsx",
-			"rust",
-			"toml",
+			"prisma",
 		},
 		highlight = {
 			enable = true,
 			additional_vim_regex_highlighting = false,
 		},
 		indent = {
-			enable = false,
+			enable = true,
+		},
+		autotag = {
+			enable = true,
 		},
 		incremental_selection = {
 			enable = true,
@@ -342,6 +351,11 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 })
 
 vim.g.neoformat_only_msg_on_error = 1
+
+local ok, autotag = pcall(require, "nvim-ts-autotag")
+if ok then
+	autotag.setup()
+end
 
 local ok, gitsigns = pcall(require, "gitsigns")
 if ok then
@@ -511,7 +525,7 @@ local statusline = {
 	FileFormat,
 }
 
-heirline.setup(statusline)
+heirline.setup({ statusline = statusline })
 
 if not (vim.g.arpeggio_timeoutlen ~= nil) then
 	vim.cmd([[
@@ -534,41 +548,90 @@ if not (vim.g.arpeggio_timeoutlen ~= nil) then
   ]])
 end
 
--- local ok, lspconfig = pcall(require, "lspconfig")
--- if ok then
--- lspconfig.rust_analyzer.setup({
--- 	flags = {
--- 		debounce_text_changes = 150,
--- 	},
--- 	settings = {
--- 		["rust-analyzer"] = {
--- 			cargo = {
--- 				allFeatures = true,
--- 			},
--- 			checkOnSave = {
--- 				-- default: `cargo check`
--- 				command = "clippy",
--- 			},
--- 		},
--- 	},
--- })
--- end
+local ok, lspconfig = pcall(require, "lspconfig")
+if ok then
+	lspconfig.rust_analyzer.setup({
+		flags = {
+			debounce_text_changes = 150,
+		},
+		settings = {
+			["rust-analyzer"] = {
+				cargo = {
+					allFeatures = true,
+				},
+				checkOnSave = {
+					-- default: `cargo check`
+					command = "clippy",
+				},
+			},
+		},
+	})
+	lspconfig.eslint.setup({})
+	lspconfig.tsserver.setup({})
+end
 
-require("colorizer").setup()
+local ok, cmp = pcall(require, "cmp")
+if ok then
+	cmp.setup({
+		sources = {
+			{ name = "nvim_lsp" },
+			{ name = "path" },
+			{ name = "buffer" },
+			{ name = "luasnip" },
+		},
+		-- window = {
+		-- 	completion = cmp.config.window.bordered(),
+		-- 	documentation = cmp.config.window.bordered(),
+		-- },
 
--- MAPPING --
+		-- completion = {
+		-- 	autocomplete = true,
+		-- },
+		mapping = {
+			["<C-Space>"] = cmp.mapping.complete(),
+			["<C-q>"] = cmp.mapping.close(),
+			["<c-j>"] = cmp.mapping(function()
+				if cmp.visible() then
+					cmp.select_next_item({ behavior = cmp.SelectBehavior.Insert, select = false })
+				end
+			end, { "i", "s" }),
+
+			["<c-k>"] = cmp.mapping(function()
+				if cmp.visible() then
+					cmp.select_prev_item({ behavior = cmp.SelectBehavior.Insert, select = false })
+				end
+			end, { "i", "s" }),
+			["<tab>"] = cmp.mapping.confirm({
+				select = true,
+				behavior = cmp.ConfirmBehavior.Replace,
+			}),
+			["<CR>"] = cmp.mapping.confirm({
+				select = true,
+			}),
+			["<c-e>"] = cmp.mapping.abort(),
+		},
+
+		snippet = {
+			expand = function(args)
+				require("luasnip").lsp_expand(args.body)
+			end,
+		},
+	})
+end
+
+-- BINDINGS --
 
 vim.g.mapleader = " "
 
 vim.keymap.set("n", "<esc>", "<cmd>nohl<cr><esc>")
 vim.keymap.set("n", "<leader><leader>", "<cmd>nohl<cr><esc>")
 
-vim.keymap.set("n", "<c-g>", "<cmd>Neogit<cr>")
-vim.keymap.set("n", "<leader>ft", "<cmd>NvimTreeToggle<cr>")
+vim.keymap.set("n", "<c-g>", "<cmd>LazyGit<cr>")
+vim.keymap.set("n", "<C-t>", "<cmd>NvimTreeToggle<cr>")
 -- vim.keymap.set("n", "<c-;>", "<cmd>NvimTreeFocus<cr>")
 
 vim.keymap.set("n", "<c-f>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
-vim.keymap.set("n", "<c-t>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
+vim.keymap.set("n", "<c-/>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
 vim.keymap.set("n", "<c-space>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
 
 vim.keymap.set("c", "<c-v>", "<c-r>*")
@@ -666,6 +729,9 @@ vim.keymap.set("n", "gd", vim.lsp.buf.definition)
 vim.keymap.set("n", "K", vim.lsp.buf.hover)
 vim.keymap.set("n", "<f2>", vim.lsp.buf.rename)
 vim.keymap.set("n", "<c-;>", vim.lsp.buf.code_action)
+vim.keymap.set("n", "<space>f", function()
+	vim.lsp.buf.format({ async = true })
+end, bufopts)
 
 vim.keymap.set({ "n", "v" }, "w", "<Plug>WordMotion_w")
 vim.keymap.set({ "n", "v" }, "b", "<Plug>WordMotion_b")
