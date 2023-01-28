@@ -1,5 +1,6 @@
 ; extends
 [
+ "default"
  "export"
  "async"
  "await"
@@ -8,7 +9,7 @@
  "declare"
  "extends"
  "=>"
-] @keyword
+] @keyword.js
 
 [
  "as"

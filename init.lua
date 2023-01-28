@@ -38,7 +38,8 @@ require("packer").startup(function(use)
 	use({ "sbdchd/neoformat" })
 
 	use({ "rebelot/heirline.nvim" })
-	use({ "lewis6991/gitsigns.nvim", tag = "release" })
+	use({ "lewis6991/gitsigns.nvim" })
+
 	use({ "neovim/nvim-lspconfig" })
 
 	use({ "kdheepak/lazygit.nvim" })
@@ -51,6 +52,10 @@ require("packer").startup(function(use)
 	use({ "chaoren/vim-wordmotion" })
 
 	use({ "windwp/nvim-ts-autotag" })
+
+	use({
+		"windwp/nvim-autopairs",
+	})
 
 	if packer_bootstrap then
 		require("packer").sync()
@@ -92,17 +97,13 @@ vim.opt.cursorline = true
 vim.opt.scrolloff = 3
 vim.opt.backup = false
 vim.opt.gdefault = true
-vim.opt.colorcolumn = "80"
+-- vim.opt.colorcolumn = "100"
 -- vim.opt.cmdheight = 0
 -- vim.opt.guicursor = "i-ci:block-iCursor" -- comment when using nvim-qt (new version)
 vim.opt.completeopt = { "menu", "menuone", "noselect" }
 -- vim.opt.completeopt = { "menu", "noinsert", "menuone", "noselect" }
 vim.opt.cindent = true
 vim.opt.cino:append("L0,g0,l1,t0,w1,w4,(s,m1")
-
---
--- vim.o.timeoutlen = 250
--- vim.o.ttimeoutlen = 100
 
 vim.wo.signcolumn = "no"
 vim.wo.relativenumber = true
@@ -329,20 +330,6 @@ if ok then
 	})
 end
 
-local ok, neogit = pcall(require, "neogit")
-if ok then
-	neogit.setup({
-		use_magit_keybindings = true,
-		kind = "replace",
-		commit_popup = {
-			kind = "split",
-		},
-		popup = {
-			kind = "split",
-		},
-	})
-end
-
 -- neoformat
 vim.api.nvim_create_autocmd("BufWritePre", { pattern = "*.lua", command = ":Neoformat stylua" })
 vim.api.nvim_create_autocmd("BufWritePre", {
@@ -362,6 +349,17 @@ if ok then
 	gitsigns.setup()
 end
 
+local ok, autopairs = pcall(require, "nvim-autopairs")
+if ok then
+	-- @check
+	vim.api.nvim_create_autocmd("BufEnter", {
+		pattern = { "*.ts", "*.tsx", "*.js", "*.jsx", "*.html", "*.css", "*.scss", "*.json" },
+		callback = function()
+			autopairs.setup()
+		end,
+	})
+end
+
 local ok, heirline = pcall(require, "heirline")
 if not ok then
 	return
@@ -374,7 +372,6 @@ local Align = { provider = "%=" }
 local Space = { provider = " " }
 
 local FileNameBlock = {
-	-- let's first set up some attributes needed by this component and it's children
 	init = function(self)
 		self.filename = vim.api.nvim_buf_get_name(0)
 	end,
@@ -414,7 +411,7 @@ local FileType = {
 	provider = function()
 		local filetype = vim.bo.filetype
 		if filetype ~= "" then
-			return " [" .. string.upper(vim.bo.filetype) .. "]"
+			return " [" .. vim.bo.filetype .. "]"
 		else
 			return ""
 		end
@@ -424,17 +421,11 @@ local FileType = {
 local FileFormat = {
 	provider = function()
 		local fmt = vim.bo.fileformat
-		return " [" .. fmt:upper() .. "]"
+		return " [" .. fmt .. "]"
 	end,
 }
 
-FileNameBlock = utils.insert(
-	FileNameBlock,
-	Space,
-	utils.insert(FileName), -- a new table where FileName is a child of FileNameModifier
-	Space,
-	{ provider = "%<" }
-)
+FileNameBlock = utils.insert(FileNameBlock, Space, utils.insert(FileName), Space, { provider = "%<" })
 
 local Git = {
 	condition = conditions.is_git_repo,
@@ -579,11 +570,6 @@ if ok then
 			{ name = "buffer" },
 			{ name = "luasnip" },
 		},
-		-- window = {
-		-- 	completion = cmp.config.window.bordered(),
-		-- 	documentation = cmp.config.window.bordered(),
-		-- },
-
 		-- completion = {
 		-- 	autocomplete = true,
 		-- },
@@ -606,7 +592,7 @@ if ok then
 				behavior = cmp.ConfirmBehavior.Replace,
 			}),
 			["<CR>"] = cmp.mapping.confirm({
-				select = true,
+				select = false,
 			}),
 			["<c-e>"] = cmp.mapping.abort(),
 		},
@@ -661,11 +647,6 @@ vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>")
 -- vim.keymap.set("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
 vim.keymap.set("n", "<f4>", "<cmd>:e $MYVIMRC<CR>")
 vim.keymap.set("n", "<f5>", "<cmd>so %<CR>")
-
--- vim.keymap.set({ "n", "v" }, "<leader>h", "<c-w>h")
--- vim.keymap.set({ "n", "v" }, "<leader>j", "<c-w>j")
--- vim.keymap.set({ "n", "v" }, "<leader>k", "<c-w>k")
--- vim.keymap.set({ "n", "v" }, "<leader>l", "<c-w>l")
 
 vim.keymap.set({ "n", "v" }, "<c-h>", "<c-w>h")
 vim.keymap.set({ "n", "v" }, "<c-j>", "<c-w>j")
@@ -722,8 +703,6 @@ vim.keymap.set("n", "<a-.>", "<Plug>(cokeline-switch-next)")
 vim.keymap.set("n", "<c-w>", "<cmd>BufDel<CR>")
 vim.keymap.set("n", "<a-w>", "<c-o><cmd>bdel #<CR>")
 
-vim.keymap.set("n", "<leader>dm", ":delmarks ")
-
 -- MAPPING LSP
 vim.keymap.set("n", "gd", vim.lsp.buf.definition)
 vim.keymap.set("n", "K", vim.lsp.buf.hover)
@@ -758,11 +737,6 @@ end
 vim.api.nvim_create_autocmd("FocusGained", {
 	pattern = "*",
 	command = "silent! checktime",
-})
-
-vim.api.nvim_create_autocmd("VimEnter", {
-	pattern = "*",
-	command = "delmarks 0-9",
 })
 
 vim.api.nvim_create_autocmd("BufEnter", {
