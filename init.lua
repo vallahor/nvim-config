@@ -53,15 +53,16 @@ require("packer").startup(function(use)
 
 	use({ "windwp/nvim-ts-autotag" })
 
-	use({
-		"windwp/nvim-autopairs",
-	})
+	use({ "windwp/nvim-autopairs" })
+
+	use({ "glepnir/lspsaga.nvim" })
+
+	use({ "echasnovski/mini.nvim" })
 
 	if packer_bootstrap then
 		require("packer").sync()
 	end
 end)
-
 -- SETTINGS --
 
 local indent = 4
@@ -100,6 +101,7 @@ vim.opt.gdefault = true
 -- vim.opt.colorcolumn = "100"
 -- vim.opt.cmdheight = 0
 -- vim.opt.guicursor = "i-ci:block-iCursor" -- comment when using nvim-qt (new version)
+-- vim.opt.guicursor = "a:blinkon100" -- comment when using nvim-qt (new version)
 vim.opt.completeopt = { "menu", "menuone", "noselect" }
 -- vim.opt.completeopt = { "menu", "noinsert", "menuone", "noselect" }
 vim.opt.cindent = true
@@ -183,23 +185,7 @@ end
 
 local ok, nvim_comment = pcall(require, "Comment")
 if ok then
-	nvim_comment.setup({
-		padding = true,
-		sticky = true,
-		ignore = nil,
-		toggler = {
-			line = "gcc",
-			block = "gcb",
-		},
-		opleader = {
-			line = "gc",
-			block = "gb",
-		},
-		mappings = {
-			basic = true,
-			extra = true,
-		},
-	})
+	nvim_comment.setup()
 end
 
 local ok, bufdel = pcall(require, "bufdel")
@@ -251,10 +237,14 @@ if ok then
 			"zig",
 			"query",
 			"python",
-			"typescript",
-			"javascript",
+			"json",
+			-- "typescript",
+			-- "javascript",
 			"tsx",
+			"css",
+			"html",
 			"prisma",
+			"markdown",
 		},
 		highlight = {
 			enable = true,
@@ -262,6 +252,7 @@ if ok then
 		},
 		indent = {
 			enable = true,
+			disable = { "python" },
 		},
 		autotag = {
 			enable = true,
@@ -297,6 +288,9 @@ if ok then
 			},
 		},
 	})
+
+	local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
+	parser_config.tsx.filetype_to_parsername = { "javascript", "typescript.tsx" }
 end
 
 local ok, cokeline = pcall(require, "cokeline")
@@ -349,14 +343,39 @@ if ok then
 	gitsigns.setup()
 end
 
+-- local ok, mini_completion = pcall(require, "mini.completion")
+-- if ok then
+-- mini_completion.setup()
+-- end
+
+local ok, mini_cursorword = pcall(require, "mini.cursorword")
+if ok then
+	mini_cursorword.setup()
+end
+
+local ok, mini_move = pcall(require, "mini.move")
+if ok then
+	mini_move.setup({
+		mappings = {
+			-- Move visual selection in Visual mode. Defaults are Alt (Meta) + hjkl.
+			left = "H",
+			right = "L",
+			down = "J",
+			up = "K",
+
+			-- Move current line in Normal mode
+			line_left = "",
+			line_right = "",
+			line_down = "",
+			line_up = "",
+		},
+	})
+end
+
 local ok, autopairs = pcall(require, "nvim-autopairs")
 if ok then
-	-- @check
-	vim.api.nvim_create_autocmd("BufEnter", {
-		pattern = { "*.ts", "*.tsx", "*.js", "*.jsx", "*.html", "*.css", "*.scss", "*.json" },
-		callback = function()
-			autopairs.setup()
-		end,
+	autopairs.setup({
+		disable_filetype = { "TelescopePrompt" },
 	})
 end
 
@@ -541,6 +560,21 @@ end
 
 local ok, lspconfig = pcall(require, "lspconfig")
 if ok then
+	local protocol = require("vim.lsp.protocol")
+
+	local on_attach = function(client, bufnr)
+		-- format on save
+		if client.server_capabilities.documentFormattingProvider then
+			vim.api.nvim_create_autocmd("BufWritePre", {
+				group = vim.api.nvim_create_augroup("Format", { clear = true }),
+				buffer = bufnr,
+				callback = function()
+					vim.lsp.buf.formatting_seq_sync()
+				end,
+			})
+		end
+	end
+
 	lspconfig.rust_analyzer.setup({
 		flags = {
 			debounce_text_changes = 150,
@@ -557,8 +591,26 @@ if ok then
 			},
 		},
 	})
+
 	lspconfig.eslint.setup({})
-	lspconfig.tsserver.setup({})
+	-- lspconfig.tsserver.setup({})
+	lspconfig.tsserver.setup({
+		on_attach = on_attach,
+	})
+	lspconfig.cssls.setup({})
+	lspconfig.tailwindcss.setup({})
+	lspconfig.pylsp.setup({
+		on_attach = on_attach,
+	})
+end
+
+local ok, lsp_saga = pcall(require, "lspsaga")
+if ok then
+	lsp_saga.setup({
+		symbol_in_winbar = {
+			enable = false,
+		},
+	})
 end
 
 local ok, cmp = pcall(require, "cmp")
@@ -568,7 +620,7 @@ if ok then
 			{ name = "nvim_lsp" },
 			{ name = "path" },
 			{ name = "buffer" },
-			{ name = "luasnip" },
+			-- { name = "luasnip" },
 		},
 		-- completion = {
 		-- 	autocomplete = true,
@@ -597,28 +649,95 @@ if ok then
 			["<c-e>"] = cmp.mapping.abort(),
 		},
 
-		snippet = {
-			expand = function(args)
-				require("luasnip").lsp_expand(args.body)
-			end,
-		},
+		-- snippet = {
+		-- 	expand = function(args)
+		-- 		require("luasnip").lsp_expand(args.body)
+		-- 	end,
+		-- },
 	})
 end
 
--- BINDINGS --
+local esc_as_caps = false
+
+-- MAPPING --
 
 vim.g.mapleader = " "
 
-vim.keymap.set("n", "<esc>", "<cmd>nohl<cr><esc>")
-vim.keymap.set("n", "<leader><leader>", "<cmd>nohl<cr><esc>")
+if not esc_as_caps then
+	vim.keymap.set("n", "<leader><leader>", "<cmd>nohl<cr><esc>")
+	vim.keymap.set("n", "<c-g>", "<cmd>LazyGit<cr>")
+	vim.keymap.set("n", "<C-t>", "<cmd>NvimTreeToggle<cr>")
+	-- vim.keymap.set("n", "<c-;>", "<cmd>NvimTreeFocus<cr>")
 
-vim.keymap.set("n", "<c-g>", "<cmd>LazyGit<cr>")
-vim.keymap.set("n", "<C-t>", "<cmd>NvimTreeToggle<cr>")
--- vim.keymap.set("n", "<c-;>", "<cmd>NvimTreeFocus<cr>")
+	vim.keymap.set("n", "<c-f>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
+	vim.keymap.set("n", "<c-/>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
+	vim.keymap.set("n", "<c-space>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
 
-vim.keymap.set("n", "<c-f>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
-vim.keymap.set("n", "<c-/>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
-vim.keymap.set("n", "<c-space>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
+	vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>")
+
+	vim.keymap.set({ "n", "v" }, "<c-h>", "<c-w>h")
+	vim.keymap.set({ "n", "v" }, "<c-j>", "<c-w>j")
+	vim.keymap.set({ "n", "v" }, "<c-k>", "<c-w>k")
+	vim.keymap.set({ "n", "v" }, "<c-l>", "<c-w>l")
+
+	vim.keymap.set("n", "<c-p>", "<c-u>zz")
+	vim.keymap.set("n", "<c-n>", "<c-d>zz")
+	vim.keymap.set("v", "<c-s>", "<Plug>(VM-Reselect-Last)")
+
+	vim.keymap.set("n", "<c-\\>", "<cmd>clo<cr>")
+	vim.keymap.set("n", "<c-=>", "<cmd>vs<cr>")
+	vim.keymap.set("n", "<c-->", "<cmd>sp<cr>")
+	vim.keymap.set("n", "<c-0>", "<c-w>o")
+	vim.keymap.set("n", "<c-9>", "<c-w>r")
+	vim.keymap.set("n", "<c-w>", "<cmd>BufDel<CR>")
+
+	vim.keymap.set("n", "<c-,>", "<Plug>(cokeline-focus-prev)")
+	vim.keymap.set("n", "<c-.>", "<Plug>(cokeline-focus-next)")
+	vim.keymap.set("n", "<c-;>", "<cmd>Lspsaga code_action<cr>")
+
+	vim.keymap.set("i", "<s-enter>", "<c-o>O")
+	vim.keymap.set("i", "<c-enter>", "<c-o>o")
+	vim.keymap.set("i", "<c-;>", "<cmd>call setline('.', getline('.') . nr2char(getchar()))<cr>")
+else
+	vim.keymap.set("n", "<esc>", "<cmd>nohl<cr><esc>")
+
+	vim.keymap.set("n", "V", "<c-v>")
+
+	vim.keymap.set("n", "<leader>g", "<cmd>LazyGit<cr>")
+	vim.keymap.set("n", "<leader>t", "<cmd>NvimTreeToggle<cr>")
+	-- vim.keymap.set("n", "<c-;>", "<cmd>NvimTreeFocus<cr>")
+
+	vim.keymap.set("n", "<leader>ff", "<cmd>lua require('telescope.builtin').find_files()<cr>")
+	-- vim.keymap.set("n", "<c-/>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
+	vim.keymap.set("n", "<leader>fb", "<cmd>lua require('telescope.builtin').buffers()<cr>")
+	vim.keymap.set("n", "<leader><leader>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
+
+	vim.keymap.set({ "n", "v" }, "<leader>fs", "<cmd>w!<CR><esc>")
+
+	vim.keymap.set({ "n", "v" }, "<leader>h", "<c-w>h")
+	vim.keymap.set({ "n", "v" }, "<leader>j", "<c-w>j")
+	vim.keymap.set({ "n", "v" }, "<leader>k", "<c-w>k")
+	vim.keymap.set({ "n", "v" }, "<leader>l", "<c-w>l")
+
+	vim.keymap.set("n", "<c-p>", "<c-u>zz")
+	vim.keymap.set("n", "<c-n>", "<c-d>zz")
+	vim.keymap.set("v", "<c-s>", "<Plug>(VM-Reselect-Last)")
+
+	vim.keymap.set("n", "|", "<cmd>clo<cr>")
+	vim.keymap.set("n", "+", "<cmd>vs<cr>")
+	vim.keymap.set("n", "_", "<cmd>sp<cr>")
+	vim.keymap.set("n", ")", "<c-w>o")
+	vim.keymap.set("n", "(", "<c-w>r")
+
+	vim.keymap.set("n", "<leader>bd", "<cmd>BufDel<CR>")
+
+	vim.keymap.set("n", "<leader>,", "<Plug>(cokeline-focus-prev)")
+	vim.keymap.set("n", "<leader>.", "<Plug>(cokeline-focus-next)")
+
+	vim.keymap.set("n", "<leader>ma", "<cmd>Lspsaga code_action<cr>")
+end
+
+vim.keymap.set({ "n", "v" }, "<leader>fs", "<cmd>w!<CR><esc>")
 
 vim.keymap.set("c", "<c-v>", "<c-r>*")
 
@@ -642,24 +761,12 @@ vim.keymap.set({ "n", "v" }, "0", "^")
 vim.keymap.set("n", "j", "v:count ? 'j^' : 'gj'", { expr = true })
 vim.keymap.set("n", "k", "v:count ? 'k^' : 'gk'", { expr = true })
 
-vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>")
-
 -- vim.keymap.set("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
 vim.keymap.set("n", "<f4>", "<cmd>:e $MYVIMRC<CR>")
 vim.keymap.set("n", "<f5>", "<cmd>so %<CR>")
 
-vim.keymap.set({ "n", "v" }, "<c-h>", "<c-w>h")
-vim.keymap.set({ "n", "v" }, "<c-j>", "<c-w>j")
-vim.keymap.set({ "n", "v" }, "<c-k>", "<c-w>k")
-vim.keymap.set({ "n", "v" }, "<c-l>", "<c-w>l")
-
-vim.keymap.set("n", "<c-p>", "<c-u>zz")
-vim.keymap.set("n", "<c-n>", "<c-d>zz")
-
 vim.keymap.set("v", "s", "<Plug>Lightspeed_s")
 vim.keymap.set("v", "S", "<Plug>Lightspeed_S")
-
-vim.keymap.set("v", "<c-s>", "<Plug>(VM-Reselect-Last)")
 
 vim.keymap.set("v", "z", "<Plug>VSurround")
 
@@ -679,38 +786,25 @@ vim.keymap.set("n", "va_", "<cmd>set iskeyword-=_<cr>vaw<cmd>set iskeyword+=_<cr
 vim.keymap.set("n", "<leader>,", "<Plug>(cokeline-focus-prev)")
 vim.keymap.set("n", "<leader>.", "<Plug>(cokeline-focus-next)")
 
-vim.keymap.set("n", "<c-,>", "<Plug>(cokeline-focus-prev)")
-vim.keymap.set("n", "<c-.>", "<Plug>(cokeline-focus-next)")
-
-vim.keymap.set("n", "|", "<cmd>clo<cr>")
-vim.keymap.set("n", "+", "<cmd>vs<cr>")
-vim.keymap.set("n", "_", "<cmd>sp<cr>")
-vim.keymap.set("n", ")", "<c-w>o")
-vim.keymap.set("n", "(", "<c-w>r")
-
-vim.keymap.set("n", "<c-\\>", "<cmd>clo<cr>")
-vim.keymap.set("n", "<c-=>", "<cmd>vs<cr>")
-vim.keymap.set("n", "<c-->", "<cmd>sp<cr>")
-vim.keymap.set("n", "<c-0>", "<c-w>o")
-vim.keymap.set("n", "<c-9>", "<c-w>r")
-
 -- tab
 
 -- Re-order to previous/next
 vim.keymap.set("n", "<a-,>", "<Plug>(cokeline-switch-prev)")
 vim.keymap.set("n", "<a-.>", "<Plug>(cokeline-switch-next)")
 -- close
-vim.keymap.set("n", "<c-w>", "<cmd>BufDel<CR>")
 vim.keymap.set("n", "<a-w>", "<c-o><cmd>bdel #<CR>")
 
 -- MAPPING LSP
 vim.keymap.set("n", "gd", vim.lsp.buf.definition)
-vim.keymap.set("n", "K", vim.lsp.buf.hover)
-vim.keymap.set("n", "<f2>", vim.lsp.buf.rename)
-vim.keymap.set("n", "<c-;>", vim.lsp.buf.code_action)
-vim.keymap.set("n", "<space>f", function()
-	vim.lsp.buf.format({ async = true })
-end, bufopts)
+-- vim.keymap.set("n", "K", vim.lsp.buf.hover)
+-- vim.keymap.set("n", "<f2>", vim.lsp.buf.rename)
+-- vim.keymap.set("n", "<c-;>", vim.lsp.buf.code_action)
+
+-- vim.keymap.set("n", "<C-j>", "<Cmd>Lspsaga diagnostic_jump_next<CR>")
+vim.keymap.set("n", "K", "<Cmd>Lspsaga hover_doc<CR>")
+vim.keymap.set("n", "gf", "<Cmd>Lspsaga lsp_finder<CR>")
+-- vim.keymap.set("n", "L", "<Cmd>Lspsaga signature_help<CR>")
+vim.keymap.set("n", "<leader>mr", "<Cmd>Lspsaga rename<CR>")
 
 vim.keymap.set({ "n", "v" }, "w", "<Plug>WordMotion_w")
 vim.keymap.set({ "n", "v" }, "b", "<Plug>WordMotion_b")
@@ -740,7 +834,7 @@ vim.api.nvim_create_autocmd("FocusGained", {
 })
 
 vim.api.nvim_create_autocmd("BufEnter", {
-	pattern = { "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.html" },
+	pattern = { "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.html", "*.css" },
 	callback = function()
 		vim.opt_local.shiftwidth = 2
 		vim.opt_local.tabstop = 2
@@ -761,8 +855,8 @@ filetype on
 
 " colorscheme gruvball-ish
 
-vnoremap J :m '>+1<CR>gv=gv
-vnoremap K :m '<-2<CR>gv=gv
+" vnoremap J :m '>+1<CR>gv=gv
+" vnoremap K :m '<-2<CR>gv=gv
 
 let g:lightspeed_last_motion = ''
 augroup lightspeed_last_motion
@@ -782,8 +876,11 @@ call winrestview(l:save)
 endfun
 autocmd BufWritePre * :call TrimWhitespace()
 
-]])
+"undercurl"
+hi MiniCursorword        guisp=none guifg=none guibg=#222022 gui=none
+hi MiniCursorwordCurrent guisp=none guifg=none guibg=none gui=none
 
+]])
 local ok, theme = pcall(require, "theme")
 if ok then
 	theme.colorscheme()
