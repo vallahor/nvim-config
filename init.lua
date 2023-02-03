@@ -379,12 +379,12 @@ end
 
 local ok, indent_blankline = pcall(require, "indent_blankline")
 if ok then
+	vim.opt.list = true
+	vim.opt.listchars:append("space:·")
+	vim.opt.listchars:append("tab:··")
 	indent_blankline.setup({
 		show_trailing_blankline_indent = false,
-		use_treesitter = true,
-		use_treesitter_scope = true,
-		filetype_exclude = { "help", "packer", "nvimtree", "dashboard", "neo-tree" },
-		buftype_exclude = { "terminal", "nofile", "quickfix" },
+		strict_tab = true,
 	})
 end
 
