@@ -59,10 +59,15 @@ require("packer").startup(function(use)
 
 	use({ "echasnovski/mini.nvim" })
 
+	use({ "lukas-reineke/indent-blankline.nvim" })
+
+	use({ "Vimjas/vim-python-pep8-indent" })
+
 	if packer_bootstrap then
 		require("packer").sync()
 	end
 end)
+
 -- SETTINGS --
 
 local indent = 4
@@ -99,7 +104,7 @@ vim.opt.scrolloff = 3
 vim.opt.backup = false
 vim.opt.gdefault = true
 -- vim.opt.colorcolumn = "100"
--- vim.opt.cmdheight = 0
+vim.opt.cmdheight = 0
 -- vim.opt.guicursor = "i-ci:block-iCursor" -- comment when using nvim-qt (new version)
 -- vim.opt.guicursor = "a:blinkon100" -- comment when using nvim-qt (new version)
 vim.opt.completeopt = { "menu", "menuone", "noselect" }
@@ -343,11 +348,6 @@ if ok then
 	gitsigns.setup()
 end
 
--- local ok, mini_completion = pcall(require, "mini.completion")
--- if ok then
--- mini_completion.setup()
--- end
-
 local ok, mini_cursorword = pcall(require, "mini.cursorword")
 if ok then
 	mini_cursorword.setup()
@@ -357,13 +357,11 @@ local ok, mini_move = pcall(require, "mini.move")
 if ok then
 	mini_move.setup({
 		mappings = {
-			-- Move visual selection in Visual mode. Defaults are Alt (Meta) + hjkl.
 			left = "H",
 			right = "L",
 			down = "J",
 			up = "K",
 
-			-- Move current line in Normal mode
 			line_left = "",
 			line_right = "",
 			line_down = "",
@@ -376,6 +374,17 @@ local ok, autopairs = pcall(require, "nvim-autopairs")
 if ok then
 	autopairs.setup({
 		disable_filetype = { "TelescopePrompt" },
+	})
+end
+
+local ok, indent_blankline = pcall(require, "indent_blankline")
+if ok then
+	indent_blankline.setup({
+		show_trailing_blankline_indent = false,
+		use_treesitter = true,
+		use_treesitter_scope = true,
+		filetype_exclude = { "help", "packer", "nvimtree", "dashboard", "neo-tree" },
+		buftype_exclude = { "terminal", "nofile", "quickfix" },
 	})
 end
 
@@ -593,12 +602,9 @@ if ok then
 	})
 
 	lspconfig.eslint.setup({})
-	-- lspconfig.tsserver.setup({})
 	lspconfig.tsserver.setup({
 		on_attach = on_attach,
 	})
-	lspconfig.cssls.setup({})
-	lspconfig.tailwindcss.setup({})
 	lspconfig.pylsp.setup({
 		on_attach = on_attach,
 	})
@@ -620,7 +626,6 @@ if ok then
 			{ name = "nvim_lsp" },
 			{ name = "path" },
 			{ name = "buffer" },
-			-- { name = "luasnip" },
 		},
 		-- completion = {
 		-- 	autocomplete = true,
@@ -648,94 +653,51 @@ if ok then
 			}),
 			["<c-e>"] = cmp.mapping.abort(),
 		},
-
-		-- snippet = {
-		-- 	expand = function(args)
-		-- 		require("luasnip").lsp_expand(args.body)
-		-- 	end,
-		-- },
 	})
 end
-
-local esc_as_caps = false
 
 -- MAPPING --
 
 vim.g.mapleader = " "
 
-if not esc_as_caps then
-	vim.keymap.set("n", "<leader><leader>", "<cmd>nohl<cr><esc>")
-	vim.keymap.set("n", "<c-g>", "<cmd>LazyGit<cr>")
-	vim.keymap.set("n", "<C-t>", "<cmd>NvimTreeToggle<cr>")
-	-- vim.keymap.set("n", "<c-;>", "<cmd>NvimTreeFocus<cr>")
+vim.keymap.set("n", "<leader><leader>", "<cmd>nohl<cr><esc>")
+vim.keymap.set("n", "<c-g>", "<cmd>LazyGit<cr>")
+vim.keymap.set("n", "<C-t>", "<cmd>NvimTreeToggle<cr>")
+-- vim.keymap.set("n", "<c-;>", "<cmd>NvimTreeFocus<cr>")
 
-	vim.keymap.set("n", "<c-f>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
-	vim.keymap.set("n", "<c-/>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
-	vim.keymap.set("n", "<c-space>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
+vim.keymap.set("n", "<c-p>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
+vim.keymap.set("n", "<c-/>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
+vim.keymap.set("n", "<c-space>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
 
-	vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>")
+vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>")
 
-	vim.keymap.set({ "n", "v" }, "<c-h>", "<c-w>h")
-	vim.keymap.set({ "n", "v" }, "<c-j>", "<c-w>j")
-	vim.keymap.set({ "n", "v" }, "<c-k>", "<c-w>k")
-	vim.keymap.set({ "n", "v" }, "<c-l>", "<c-w>l")
+vim.keymap.set("n", "<c-h>", "<c-u>zz")
+vim.keymap.set("n", "<c-l>", "<c-d>zz")
 
-	vim.keymap.set("n", "<c-p>", "<c-u>zz")
-	vim.keymap.set("n", "<c-n>", "<c-d>zz")
-	vim.keymap.set("v", "<c-s>", "<Plug>(VM-Reselect-Last)")
+vim.keymap.set("n", "<c-j>", "}")
+vim.keymap.set("n", "<c-k>", "{")
 
-	vim.keymap.set("n", "<c-\\>", "<cmd>clo<cr>")
-	vim.keymap.set("n", "<c-=>", "<cmd>vs<cr>")
-	vim.keymap.set("n", "<c-->", "<cmd>sp<cr>")
-	vim.keymap.set("n", "<c-0>", "<c-w>o")
-	vim.keymap.set("n", "<c-9>", "<c-w>r")
-	vim.keymap.set("n", "<c-w>", "<cmd>BufDel<CR>")
+vim.keymap.set("v", "<c-s>", "<Plug>(VM-Reselect-Last)")
 
-	vim.keymap.set("n", "<c-,>", "<Plug>(cokeline-focus-prev)")
-	vim.keymap.set("n", "<c-.>", "<Plug>(cokeline-focus-next)")
-	vim.keymap.set("n", "<c-;>", "<cmd>Lspsaga code_action<cr>")
+vim.keymap.set("n", "<c-\\>", "<cmd>clo<cr>")
+vim.keymap.set("n", "<c-=>", "<cmd>vs<cr>")
+vim.keymap.set("n", "<c-->", "<cmd>sp<cr>")
+vim.keymap.set("n", "<c-0>", "<c-w>o")
+vim.keymap.set("n", "<c-9>", "<c-w>r")
+vim.keymap.set("n", "<c-w>", "<cmd>BufDel<CR>")
 
-	vim.keymap.set("i", "<s-enter>", "<c-o>O")
-	vim.keymap.set("i", "<c-enter>", "<c-o>o")
-	vim.keymap.set("i", "<c-;>", "<cmd>call setline('.', getline('.') . nr2char(getchar()))<cr>")
-else
-	vim.keymap.set("n", "<esc>", "<cmd>nohl<cr><esc>")
+vim.keymap.set("n", "<c-,>", "<Plug>(cokeline-focus-prev)")
+vim.keymap.set("n", "<c-.>", "<Plug>(cokeline-focus-next)")
+vim.keymap.set("n", "<c-;>", "<cmd>Lspsaga code_action<cr>")
 
-	vim.keymap.set("n", "V", "<c-v>")
+vim.keymap.set("i", "<s-enter>", "<c-o>O")
+vim.keymap.set("i", "<c-enter>", "<c-o>o")
+vim.keymap.set("i", "<c-;>", "<cmd>call setline('.', getline('.') . nr2char(getchar()))<cr>")
 
-	vim.keymap.set("n", "<leader>g", "<cmd>LazyGit<cr>")
-	vim.keymap.set("n", "<leader>t", "<cmd>NvimTreeToggle<cr>")
-	-- vim.keymap.set("n", "<c-;>", "<cmd>NvimTreeFocus<cr>")
-
-	vim.keymap.set("n", "<leader>ff", "<cmd>lua require('telescope.builtin').find_files()<cr>")
-	-- vim.keymap.set("n", "<c-/>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
-	vim.keymap.set("n", "<leader>fb", "<cmd>lua require('telescope.builtin').buffers()<cr>")
-	vim.keymap.set("n", "<leader><leader>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
-
-	vim.keymap.set({ "n", "v" }, "<leader>fs", "<cmd>w!<CR><esc>")
-
-	vim.keymap.set({ "n", "v" }, "<leader>h", "<c-w>h")
-	vim.keymap.set({ "n", "v" }, "<leader>j", "<c-w>j")
-	vim.keymap.set({ "n", "v" }, "<leader>k", "<c-w>k")
-	vim.keymap.set({ "n", "v" }, "<leader>l", "<c-w>l")
-
-	vim.keymap.set("n", "<c-p>", "<c-u>zz")
-	vim.keymap.set("n", "<c-n>", "<c-d>zz")
-	vim.keymap.set("v", "<c-s>", "<Plug>(VM-Reselect-Last)")
-
-	vim.keymap.set("n", "|", "<cmd>clo<cr>")
-	vim.keymap.set("n", "+", "<cmd>vs<cr>")
-	vim.keymap.set("n", "_", "<cmd>sp<cr>")
-	vim.keymap.set("n", ")", "<c-w>o")
-	vim.keymap.set("n", "(", "<c-w>r")
-
-	vim.keymap.set("n", "<leader>bd", "<cmd>BufDel<CR>")
-
-	vim.keymap.set("n", "<leader>,", "<Plug>(cokeline-focus-prev)")
-	vim.keymap.set("n", "<leader>.", "<Plug>(cokeline-focus-next)")
-
-	vim.keymap.set("n", "<leader>ma", "<cmd>Lspsaga code_action<cr>")
-end
+vim.keymap.set({ "n", "v" }, "<leader>h", "<c-w>h")
+vim.keymap.set({ "n", "v" }, "<leader>j", "<c-w>j")
+vim.keymap.set({ "n", "v" }, "<leader>k", "<c-w>k")
+vim.keymap.set({ "n", "v" }, "<leader>l", "<c-w>l")
 
 vim.keymap.set({ "n", "v" }, "<leader>fs", "<cmd>w!<CR><esc>")
 
@@ -775,17 +737,6 @@ vim.keymap.set("n", "<F3>", "<cmd>TSHighlightCapturesUnderCursor<cr>")
 vim.keymap.set("n", "<c-6>", "<C-^>")
 vim.keymap.set("n", "^", "<C-^>")
 
-vim.keymap.set("n", "ci_", '<cmd>set iskeyword-=_<cr>"_ciw<cmd>set iskeyword+=_<cr>')
-vim.keymap.set("n", "di_", '<cmd>set iskeyword-=_<cr>"_diw<cmd>set iskeyword+=_<cr>')
-vim.keymap.set("n", "vi_", "<cmd>set iskeyword-=_<cr>viw<cmd>set iskeyword+=_<cr>")
-
-vim.keymap.set("n", "ca_", '<cmd>set iskeyword-=_<cr>"_caw<cmd>set iskeyword+=_<cr>')
-vim.keymap.set("n", "da_", '<cmd>set iskeyword-=_<cr>"_daw<cmd>set iskeyword+=_<cr>')
-vim.keymap.set("n", "va_", "<cmd>set iskeyword-=_<cr>vaw<cmd>set iskeyword+=_<cr>")
-
-vim.keymap.set("n", "<leader>,", "<Plug>(cokeline-focus-prev)")
-vim.keymap.set("n", "<leader>.", "<Plug>(cokeline-focus-next)")
-
 -- tab
 
 -- Re-order to previous/next
@@ -809,16 +760,6 @@ vim.keymap.set("n", "<leader>mr", "<Cmd>Lspsaga rename<CR>")
 vim.keymap.set({ "n", "v" }, "w", "<Plug>WordMotion_w")
 vim.keymap.set({ "n", "v" }, "b", "<Plug>WordMotion_b")
 vim.keymap.set({ "n", "v" }, "e", "<Plug>WordMotion_e")
-
-if vim.g.neovide then
-	vim.opt.guicursor = "i-ci:block-iCursor" -- comment when using nvim-qt (new version)
-	vim.opt.guifont = "JetBrains Mono NL:h12"
-	vim.g.neovide_refresh_rate = 60
-	vim.g.neovide_cursor_animation_length = 0
-	vim.g.neovide_remember_window_size = true
-	vim.g.neovide_remember_window_position = true
-	vim.g.neovide_cursor_antialiasing = true
-end
 
 if not vim.fn.has("gui_running") and not vim.g.neovide then
 	vim.api.nvim_create_autocmd("VimEnter", {
