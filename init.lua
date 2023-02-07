@@ -97,14 +97,14 @@ vim.opt.backspace = "indent,eol,start"
 vim.opt.shortmess = "aoOtTIc"
 vim.opt.mouse = "a"
 vim.opt.mousefocus = true
-vim.opt.fsync = true
+-- vim.opt.fsync = true
 vim.opt.magic = true
 vim.opt.cursorline = true
 vim.opt.scrolloff = 3
 vim.opt.backup = false
 vim.opt.gdefault = true
 -- vim.opt.colorcolumn = "100"
-vim.opt.cmdheight = 0
+-- vim.opt.cmdheight = 0
 -- vim.opt.guicursor = "i-ci:block-iCursor" -- comment when using nvim-qt (new version)
 -- vim.opt.guicursor = "a:blinkon100" -- comment when using nvim-qt (new version)
 vim.opt.completeopt = { "menu", "menuone", "noselect" }
@@ -140,7 +140,7 @@ vim.g.VM_maps = {
 	["Goto Prev"] = "{",
 	["Skip Region"] = "=",
 	["Remove Region"] = "+",
-	["Add Cursor At Pos"] = "<enter>",
+	-- ["Add Cursor At Pos"] = "<enter>",
 }
 
 vim.g.wordmotion_spaces = { "w@<=-w@=", ".", ",", ";", ":", "w@<(-w@)", "w@<{-w@}", "w@<[-w@]", "w@<<-w@>" }
@@ -157,6 +157,16 @@ if ok then
 		ignore_case = true,
 		repeat_ft_with_target_char = true,
 	})
+	vim.cmd([[
+        let g:lightspeed_last_motion = ''
+        augroup lightspeed_last_motion
+        autocmd!
+        autocmd User LightspeedSxEnter let g:lightspeed_last_motion = 'sx'
+        autocmd User LightspeedFtEnter let g:lightspeed_last_motion = 'ft'
+        augroup end
+        map <expr> ; g:lightspeed_last_motion == 'sx' ? "<Plug>Lightspeed_;_sx" : "<Plug>Lightspeed_;_ft"
+        map <expr> , g:lightspeed_last_motion == 'sx' ? "<Plug>Lightspeed_,_sx" : "<Plug>Lightspeed_,_ft"
+    ]])
 end
 
 local ok, nvim_tree = pcall(require, "nvim-tree")
@@ -245,9 +255,7 @@ if ok then
 			"json",
 			-- "typescript",
 			-- "javascript",
-			"tsx",
-			"css",
-			"html",
+			"glsl",
 			"prisma",
 			"markdown",
 		},
@@ -296,6 +304,10 @@ if ok then
 
 	local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
 	parser_config.tsx.filetype_to_parsername = { "javascript", "typescript.tsx" }
+
+	vim.cmd([[
+        autocmd BufRead *.scm set filetype=query
+    ]])
 end
 
 local ok, cokeline = pcall(require, "cokeline")
@@ -331,6 +343,7 @@ end
 
 -- neoformat
 vim.api.nvim_create_autocmd("BufWritePre", { pattern = "*.lua", command = ":Neoformat stylua" })
+-- vim.api.nvim_create_autocmd("BufWritePre", { pattern = "*.py", command = ":Neoformat black" })
 vim.api.nvim_create_autocmd("BufWritePre", {
 	pattern = { "*.ts", "*.tsx", "*.js", "*.jsx", "*.html", "*.css", "*.scss", "*.json" },
 	command = ":Neoformat prettier",
@@ -351,6 +364,11 @@ end
 local ok, mini_cursorword = pcall(require, "mini.cursorword")
 if ok then
 	mini_cursorword.setup()
+	vim.cmd([[
+        "undercurl"
+        hi MiniCursorword        guisp=none guifg=none guibg=#222022 gui=none
+        hi MiniCursorwordCurrent guisp=none guifg=none guibg=none gui=none
+    ]])
 end
 
 local ok, mini_move = pcall(require, "mini.move")
@@ -381,10 +399,10 @@ local ok, indent_blankline = pcall(require, "indent_blankline")
 if ok then
 	vim.opt.list = true
 	vim.opt.listchars:append("space:·")
+	vim.opt.listchars:append("trail:·")
 	vim.opt.listchars:append("tab:··")
 	indent_blankline.setup({
 		show_trailing_blankline_indent = false,
-		strict_tab = true,
 	})
 end
 
@@ -605,9 +623,7 @@ if ok then
 	lspconfig.tsserver.setup({
 		on_attach = on_attach,
 	})
-	lspconfig.pylsp.setup({
-		on_attach = on_attach,
-	})
+	lspconfig.pylsp.setup({})
 end
 
 local ok, lsp_saga = pcall(require, "lspsaga")
@@ -627,9 +643,6 @@ if ok then
 			{ name = "path" },
 			{ name = "buffer" },
 		},
-		-- completion = {
-		-- 	autocomplete = true,
-		-- },
 		mapping = {
 			["<C-Space>"] = cmp.mapping.complete(),
 			["<C-q>"] = cmp.mapping.close(),
@@ -674,8 +687,12 @@ vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>")
 vim.keymap.set("n", "<c-h>", "<c-u>zz")
 vim.keymap.set("n", "<c-l>", "<c-d>zz")
 
-vim.keymap.set("n", "<c-j>", "}")
-vim.keymap.set("n", "<c-k>", "{")
+vim.keymap.set({ "n", "v" }, "<c-j>", "}")
+vim.keymap.set({ "n", "v" }, "<c-k>", "{")
+
+vim.keymap.set({ "n", "v" }, "<c-h>", "^")
+-- vim.keymap.set("n", "<c-l>", "$")
+-- vim.keymap.set("v", "<c-l>", "$h")
 
 vim.keymap.set("v", "<c-s>", "<Plug>(VM-Reselect-Last)")
 
@@ -705,7 +722,7 @@ vim.keymap.set("c", "<c-v>", "<c-r>*")
 
 vim.keymap.set("v", "v", "V")
 
-vim.keymap.set({ "i", "c" }, "<c-bs>", "<c-w>")
+-- vim.keymap.set({ "i", "c" }, "<c-bs>", "<c-w>")
 
 vim.keymap.set("n", "x", '"_x')
 vim.keymap.set("v", "x", '"_d')
@@ -761,10 +778,14 @@ vim.keymap.set({ "n", "v" }, "w", "<Plug>WordMotion_w")
 vim.keymap.set({ "n", "v" }, "b", "<Plug>WordMotion_b")
 vim.keymap.set({ "n", "v" }, "e", "<Plug>WordMotion_e")
 
+vim.keymap.set("c", "<c-bs>", "<c-w>")
+vim.keymap.set("i", "<c-bs>", "<c-o>v<Plug>WordMotion_bx")
+
 if not vim.fn.has("gui_running") and not vim.g.neovide then
 	vim.api.nvim_create_autocmd("VimEnter", {
 		pattern = "*",
-		command = "GuiFont! JetBrains Mono NL:h13",
+		-- command = "GuiFont! JetBrains Mono NL:h13",
+		command = "GuiFont! JetBrains Mono NL:h11",
 		main,
 	})
 end
@@ -794,32 +815,16 @@ vim.cmd([[
 language en_US
 filetype on
 
-" colorscheme gruvball-ish
-
 " vnoremap J :m '>+1<CR>gv=gv
 " vnoremap K :m '<-2<CR>gv=gv
 
-let g:lightspeed_last_motion = ''
-augroup lightspeed_last_motion
-autocmd!
-autocmd User LightspeedSxEnter let g:lightspeed_last_motion = 'sx'
-autocmd User LightspeedFtEnter let g:lightspeed_last_motion = 'ft'
-augroup end
-map <expr> ; g:lightspeed_last_motion == 'sx' ? "<Plug>Lightspeed_;_sx" : "<Plug>Lightspeed_;_ft"
-map <expr> , g:lightspeed_last_motion == 'sx' ? "<Plug>Lightspeed_,_sx" : "<Plug>Lightspeed_,_ft"
-
-autocmd BufRead *.scm set filetype=query
 
 fun! TrimWhitespace()
-let l:save = winsaveview()
-keeppatterns %s/\s\+$//e
-call winrestview(l:save)
+    let l:save = winsaveview()
+    keeppatterns %s/\s\+$//e
+    call winrestview(l:save)
 endfun
 autocmd BufWritePre * :call TrimWhitespace()
-
-"undercurl"
-hi MiniCursorword        guisp=none guifg=none guibg=#222022 gui=none
-hi MiniCursorwordCurrent guisp=none guifg=none guibg=none gui=none
 
 ]])
 local ok, theme = pcall(require, "theme")
