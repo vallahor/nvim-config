@@ -23,6 +23,7 @@ require("packer").startup(function(use)
 	use({ "ggandor/lightspeed.nvim" })
 
 	use({ "kyazdani42/nvim-tree.lua", tag = "nightly" })
+	use({ "ms-jpq/chadtree", tag = "chad", run = ":CHADdeps" })
 	use({ "numToStr/Comment.nvim" })
 
 	use({ "tpope/vim-surround" })
@@ -52,6 +53,7 @@ require("packer").startup(function(use)
 	use({ "chaoren/vim-wordmotion" })
 
 	use({ "windwp/nvim-ts-autotag" })
+	use({ "RRethy/nvim-treesitter-endwise" })
 
 	use({ "windwp/nvim-autopairs" })
 
@@ -63,6 +65,8 @@ require("packer").startup(function(use)
 
 	use({ "Vimjas/vim-python-pep8-indent" })
 
+	use({ "s1n7ax/nvim-terminal" })
+
 	if packer_bootstrap then
 		require("packer").sync()
 	end
@@ -72,6 +76,7 @@ end)
 
 local indent = 4
 
+vim.opt.guifont = { "JetBrainsMonoNL NFM:h13" }
 vim.opt.shiftwidth = indent
 vim.opt.tabstop = indent
 vim.opt.softtabstop = indent
@@ -103,7 +108,7 @@ vim.opt.cursorline = true
 vim.opt.scrolloff = 3
 vim.opt.backup = false
 vim.opt.gdefault = true
--- vim.opt.colorcolumn = "100"
+vim.opt.colorcolumn = "80"
 -- vim.opt.cmdheight = 0
 -- vim.opt.guicursor = "i-ci:block-iCursor" -- comment when using nvim-qt (new version)
 -- vim.opt.guicursor = "a:blinkon100" -- comment when using nvim-qt (new version)
@@ -173,20 +178,20 @@ local ok, nvim_tree = pcall(require, "nvim-tree")
 if ok then
 	nvim_tree.setup({
 		renderer = {
-			indent_markers = {
-				enable = true,
-				icons = {
-					corner = "└ ",
-					edge = "│ ",
-					none = "  ",
-				},
-			},
+			-- indent_markers = {
+			-- 	enable = true,
+			-- 	icons = {
+			-- 		corner = "└ ",
+			-- 		edge = "│ ",
+			-- 		none = "  ",
+			-- 	},
+			-- },
 			icons = {
 				webdev_colors = false,
 				show = {
 					folder = true,
-					file = false,
-					folder_arrow = false,
+					file = true,
+					folder_arrow = true,
 				},
 			},
 		},
@@ -194,6 +199,59 @@ if ok then
 			enable = false,
 			ignore = false,
 			timeout = 400,
+		},
+	})
+end
+
+local ok, terminal = pcall(require, "nvim-terminal")
+if ok then
+	terminal.setup({
+		window = {
+			-- Do `:h :botright` for more information
+			-- NOTE: width or height may not be applied in some "pos"
+			position = "botright",
+
+			-- Do `:h split` for more information
+			split = "sp",
+
+			-- Width of the terminal
+			width = 50,
+
+			-- Height of the terminal
+			height = 15,
+		},
+
+		-- keymap to disable all the default keymaps
+		disable_default_keymaps = false,
+
+		-- keymap to toggle open and close terminal window
+		toggle_keymap = "<c-;>",
+
+		-- increase the window height by when you hit the keymap
+		window_height_change_amount = 2,
+
+		-- increase the window width by when you hit the keymap
+		window_width_change_amount = 2,
+
+		-- keymap to increase the window width
+		increase_width_keymap = "<m-=>",
+
+		-- keymap to decrease the window width
+		decrease_width_keymap = "<m-->",
+
+		-- keymap to increase the window height
+		increase_height_keymap = "<m-+>",
+
+		-- keymap to decrease the window height
+		decrease_height_keymap = "<m-_>",
+
+		terminals = {
+			-- keymaps to open nth terminal
+			{ keymap = "<c-1>" },
+			{ keymap = "<c-2>" },
+			{ keymap = "<c-3>" },
+			{ keymap = "<c-4>" },
+			{ keymap = "<c-5>" },
 		},
 	})
 end
@@ -253,10 +311,10 @@ if ok then
 			"query",
 			"python",
 			"json",
-			-- "typescript",
-			-- "javascript",
 			"glsl",
-			"prisma",
+			"tsx",
+			"javascript",
+			"go",
 			"markdown",
 		},
 		highlight = {
@@ -265,10 +323,13 @@ if ok then
 		},
 		indent = {
 			enable = true,
-			disable = { "python" },
+			disable = { "python", "rust" },
 		},
 		autotag = {
 			enable = true,
+			filetype = {
+				"htmldjango",
+			},
 		},
 		incremental_selection = {
 			enable = true,
@@ -282,6 +343,9 @@ if ok then
 	})
 
 	require("nvim-treesitter.configs").setup({
+		endwise = {
+			enable = true,
+		},
 		playground = {
 			enable = true,
 			disable = {},
@@ -348,12 +412,11 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 	pattern = { "*.ts", "*.tsx", "*.js", "*.jsx", "*.html", "*.css", "*.scss", "*.json" },
 	command = ":Neoformat prettier",
 })
-
 vim.g.neoformat_only_msg_on_error = 1
 
 local ok, autotag = pcall(require, "nvim-ts-autotag")
 if ok then
-	autotag.setup()
+	autotag.setup({})
 end
 
 local ok, gitsigns = pcall(require, "gitsigns")
@@ -371,29 +434,34 @@ if ok then
     ]])
 end
 
+-- local ok, mini_completion = pcall(require, "mini.completion")
+-- if ok then
+-- 	mini_completion.setup({})
+-- end
+
 local ok, mini_move = pcall(require, "mini.move")
 if ok then
 	mini_move.setup({
 		mappings = {
-			left = "H",
-			right = "L",
+			left = "<",
+			right = ">",
 			down = "J",
 			up = "K",
 
-			line_left = "",
-			line_right = "",
+			line_left = "<",
+			line_right = ">",
 			line_down = "",
 			line_up = "",
 		},
 	})
 end
 
-local ok, autopairs = pcall(require, "nvim-autopairs")
-if ok then
-	autopairs.setup({
-		disable_filetype = { "TelescopePrompt" },
-	})
-end
+-- local ok, autopairs = pcall(require, "nvim-autopairs")
+-- if ok then
+-- 	autopairs.setup({
+-- 		disable_filetype = { "TelescopePrompt" },
+-- 	})
+-- end
 
 local ok, indent_blankline = pcall(require, "indent_blankline")
 if ok then
@@ -406,224 +474,48 @@ if ok then
 	})
 end
 
-local ok, heirline = pcall(require, "heirline")
-if not ok then
-	return
-end
-
-local conditions = require("heirline.conditions")
-local utils = require("heirline.utils")
-
-local Align = { provider = "%=" }
-local Space = { provider = " " }
-
-local FileNameBlock = {
-	init = function(self)
-		self.filename = vim.api.nvim_buf_get_name(0)
-	end,
-}
-
-local FileName = {
-	provider = function(self)
-		local filename = vim.fn.fnamemodify(self.filename, ":.")
-		if filename == "" then
-			return "[No Name]"
-		end
-		if not conditions.width_percent_below(#filename, 0.70) then
-			filename = vim.fn.pathshorten(filename)
-		end
-		return filename
-	end,
-}
-
-local FileFlags = {
-	{
-		provider = function()
-			if vim.bo.modified then
-				return "[+]"
-			end
-		end,
-	},
-	{
-		provider = function()
-			if not vim.bo.modifiable or vim.bo.readonly then
-				return "[RO]"
-			end
-		end,
-	},
-}
-
-local FileType = {
-	provider = function()
-		local filetype = vim.bo.filetype
-		if filetype ~= "" then
-			return " [" .. vim.bo.filetype .. "]"
-		else
-			return ""
-		end
-	end,
-}
-
-local FileFormat = {
-	provider = function()
-		local fmt = vim.bo.fileformat
-		return " [" .. fmt .. "]"
-	end,
-}
-
-FileNameBlock = utils.insert(FileNameBlock, Space, utils.insert(FileName), Space, { provider = "%<" })
-
-local Git = {
-	condition = conditions.is_git_repo,
-
-	init = function(self)
-		self.status_dict = vim.b.gitsigns_status_dict
-		self.has_changes = self.status_dict.added ~= 0 or self.status_dict.removed ~= 0 or self.status_dict.changed ~= 0
-	end,
-
-	{ -- git branch name
-		provider = function(self)
-			if string.len(self.status_dict.head) ~= 0 then
-				return " [" .. self.status_dict.head .. "]"
-			else
-				return ""
-			end
-		end,
-	},
-}
-
-local viMode = {
-	init = function(self)
-		self.mode = vim.fn.mode(1)
-		if not self.once then
-			vim.api.nvim_create_autocmd("ModeChanged", { command = "redrawstatus" })
-			self.once = true
-		end
-	end,
-	static = {
-		mode_names = {
-			n = "N",
-			no = "N?",
-			nov = "N?",
-			noV = "N?",
-			["no\22"] = "N?",
-			niI = "Ni",
-			niR = "Nr",
-			niV = "Nv",
-			nt = "Nt",
-			v = "V",
-			vs = "Vs",
-			V = "V_",
-			Vs = "Vs",
-			["\22"] = "^V",
-			["\22s"] = "^V",
-			s = "S",
-			S = "S_",
-			["\19"] = "^S",
-			i = "I",
-			ic = "Ic",
-			ix = "Ix",
-			R = "R",
-			Rc = "Rc",
-			Rx = "Rx",
-			Rv = "Rv",
-			Rvc = "Rv",
-			Rvx = "Rv",
-			c = "C",
-			cv = "Ex",
-			r = "...",
-			rm = "M",
-			["r?"] = "?",
-			["!"] = "!",
-			t = "T",
-		},
-	},
-	provider = function(self)
-		return "[" .. self.mode_names[self.mode] .. "]"
-	end,
-	update = "ModeChanged",
-}
-
-local Ruler = {
-	-- %l = current line number
-	-- %L = number of lines in the buffer
-	-- provider = "%7(%l/%3L%)",
-	provider = "%7(%l/%L%)",
-}
-
-local statusline = {
-	viMode,
-	Git,
-	FileNameBlock,
-	FileFlags,
-	{ provider = "%=" },
-	Ruler,
-	FileType,
-	FileFormat,
-}
-
-heirline.setup({ statusline = statusline })
+-- require("heirline_config")
 
 if not (vim.g.arpeggio_timeoutlen ~= nil) then
 	vim.cmd([[
-  call arpeggio#map('i', '', 0, 'jk', '<Esc>')
-  call arpeggio#map('i', '', 0, 'kj', '<Esc>')
-  call arpeggio#map('v', '', 0, 'jk', '<Esc>')
-  call arpeggio#map('v', '', 0, 'kj', '<Esc>')
-  call arpeggio#map('s', '', 0, 'jk', '<Esc>')
-  call arpeggio#map('s', '', 0, 'kj', '<Esc>')
-  call arpeggio#map('x', '', 0, 'jk', '<Esc>')
-  call arpeggio#map('x', '', 0, 'kj', '<Esc>')
-  call arpeggio#map('c', '', 0, 'jk', '<c-c>')
-  call arpeggio#map('c', '', 0, 'kj', '<c-c>')
-  call arpeggio#map('o', '', 0, 'jk', '<Esc>')
-  call arpeggio#map('o', '', 0, 'kj', '<Esc>')
-  call arpeggio#map('l', '', 0, 'jk', '<Esc>')
-  call arpeggio#map('l', '', 0, 'kj', '<Esc>')
-  call arpeggio#map('t', '', 0, 'jk', '<Esc>')
-  call arpeggio#map('t', '', 0, 'kj', '<Esc>')
-  ]])
+        let g:arpeggio_timeoutlen = 80
+        call arpeggio#map('i', '', 0, 'jk', '<Esc>')
+        call arpeggio#map('i', '', 0, 'kj', '<Esc>')
+        call arpeggio#map('v', '', 0, 'jk', '<Esc>')
+        call arpeggio#map('v', '', 0, 'kj', '<Esc>')
+        call arpeggio#map('s', '', 0, 'jk', '<Esc>')
+        call arpeggio#map('s', '', 0, 'kj', '<Esc>')
+        call arpeggio#map('x', '', 0, 'jk', '<Esc>')
+        call arpeggio#map('x', '', 0, 'kj', '<Esc>')
+        call arpeggio#map('c', '', 0, 'jk', '<c-c>')
+        call arpeggio#map('c', '', 0, 'kj', '<c-c>')
+        call arpeggio#map('o', '', 0, 'jk', '<Esc>')
+        call arpeggio#map('o', '', 0, 'kj', '<Esc>')
+        call arpeggio#map('l', '', 0, 'jk', '<Esc>')
+        call arpeggio#map('l', '', 0, 'kj', '<Esc>')
+        call arpeggio#map('t', '', 0, 'jk', '<C-\><C-n>')
+        call arpeggio#map('t', '', 0, 'kj', '<C-\><C-n>')
+    ]])
 end
 
 local ok, lspconfig = pcall(require, "lspconfig")
 if ok then
-	local protocol = require("vim.lsp.protocol")
-
-	local on_attach = function(client, bufnr)
-		-- format on save
-		if client.server_capabilities.documentFormattingProvider then
-			vim.api.nvim_create_autocmd("BufWritePre", {
-				group = vim.api.nvim_create_augroup("Format", { clear = true }),
-				buffer = bufnr,
-				callback = function()
-					vim.lsp.buf.formatting_seq_sync()
-				end,
-			})
-		end
-	end
-
-	lspconfig.rust_analyzer.setup({
-		flags = {
-			debounce_text_changes = 150,
-		},
-		settings = {
-			["rust-analyzer"] = {
-				cargo = {
-					allFeatures = true,
-				},
-				checkOnSave = {
-					-- default: `cargo check`
-					command = "clippy",
-				},
-			},
-		},
-	})
-
 	lspconfig.eslint.setup({})
-	lspconfig.tsserver.setup({
-		on_attach = on_attach,
-	})
+	lspconfig.tsserver.setup({})
 	lspconfig.pylsp.setup({})
+	-- lspconfig.jedi_language_server.setup({})
+	-- lspconfig.pyright.setup({
+	-- 	settings = {
+	-- 		python = {
+	-- 			analysis = {
+	-- 				typeCheckingMode = "off",
+	-- 			},
+	-- 		},
+	-- 	},
+	-- })
+	lspconfig.gdscript.setup({})
+
+	vim.lsp.handlers["textDocument/publishDiagnostics"] = function() end
 end
 
 local ok, lsp_saga = pcall(require, "lspsaga")
@@ -635,60 +527,65 @@ if ok then
 	})
 end
 
-local ok, cmp = pcall(require, "cmp")
-if ok then
-	cmp.setup({
-		sources = {
-			{ name = "nvim_lsp" },
-			{ name = "path" },
-			{ name = "buffer" },
-		},
-		mapping = {
-			["<C-Space>"] = cmp.mapping.complete(),
-			["<C-q>"] = cmp.mapping.close(),
-			["<c-j>"] = cmp.mapping(function()
-				if cmp.visible() then
-					cmp.select_next_item({ behavior = cmp.SelectBehavior.Insert, select = false })
-				end
-			end, { "i", "s" }),
-
-			["<c-k>"] = cmp.mapping(function()
-				if cmp.visible() then
-					cmp.select_prev_item({ behavior = cmp.SelectBehavior.Insert, select = false })
-				end
-			end, { "i", "s" }),
-			["<tab>"] = cmp.mapping.confirm({
-				select = true,
-				behavior = cmp.ConfirmBehavior.Replace,
-			}),
-			["<CR>"] = cmp.mapping.confirm({
-				select = false,
-			}),
-			["<c-e>"] = cmp.mapping.abort(),
-		},
-	})
-end
+-- local ok, cmp = pcall(require, "cmp")
+-- if ok then
+-- 	cmp.setup({
+-- 		sources = {
+-- 			{ name = "nvim_lsp" },
+-- 			{ name = "path" },
+-- 			{ name = "buffer" },
+-- 		},
+-- 		mapping = {
+-- 			["<C-Space>"] = cmp.mapping.complete(),
+-- 			["<C-q>"] = cmp.mapping.close(),
+-- 			["<c-j>"] = cmp.mapping(function()
+-- 				if cmp.visible() then
+-- 					cmp.select_next_item({ behavior = cmp.SelectBehavior.Insert, select = false })
+-- 				end
+-- 			end, { "i", "s" }),
+--
+-- 			["<c-k>"] = cmp.mapping(function()
+-- 				if cmp.visible() then
+-- 					cmp.select_prev_item({ behavior = cmp.SelectBehavior.Insert, select = false })
+-- 				end
+-- 			end, { "i", "s" }),
+-- 			["<tab>"] = cmp.mapping.confirm({
+-- 				select = true,
+-- 				behavior = cmp.ConfirmBehavior.Replace,
+-- 			}),
+-- 			["<CR>"] = cmp.mapping.confirm({
+-- 				select = false,
+-- 			}),
+-- 			["<c-e>"] = cmp.mapping.abort(),
+-- 		},
+-- 	})
+-- end
 
 -- MAPPING --
 
 vim.g.mapleader = " "
 
 vim.keymap.set("n", "<leader><leader>", "<cmd>nohl<cr><esc>")
+vim.keymap.set("n", "<esc>", "<cmd>nohl<cr><esc>")
 vim.keymap.set("n", "<c-g>", "<cmd>LazyGit<cr>")
-vim.keymap.set("n", "<C-t>", "<cmd>NvimTreeToggle<cr>")
+-- vim.keymap.set("n", "<C-f>", "<cmd>CHADopen<cr>")
+vim.keymap.set("n", "<C-f>", "<cmd>NvimTreeToggle<cr>")
 -- vim.keymap.set("n", "<c-;>", "<cmd>NvimTreeFocus<cr>")
 
 vim.keymap.set("n", "<c-p>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
-vim.keymap.set("n", "<c-/>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
+-- vim.keymap.set("n", "<c-/>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
 vim.keymap.set("n", "<c-space>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
 
 vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>")
 
-vim.keymap.set("n", "<c-h>", "<c-u>zz")
-vim.keymap.set("n", "<c-l>", "<c-d>zz")
+vim.keymap.set("n", "H", "<c-u>zz")
+vim.keymap.set("n", "L", "<c-d>zz")
 
-vim.keymap.set({ "n", "v" }, "<c-j>", "}")
-vim.keymap.set({ "n", "v" }, "<c-k>", "{")
+-- vim.keymap.set({ "n", "v" }, "<c-j>", "}")
+-- vim.keymap.set({ "n", "v" }, "<c-k>", "{")
+
+-- vim.keymap.set("i", "<Tab>", 'pumvisible() ? "\\<C-n>" : "\\<Tab>"', { expr = true })
+-- vim.keymap.set("i", "<S-Tab>", 'pumvisible() ? "\\<C-p>" : "\\<Tab>"', { expr = true })
 
 vim.keymap.set({ "n", "v" }, "<c-h>", "^")
 -- vim.keymap.set("n", "<c-l>", "$")
@@ -705,16 +602,16 @@ vim.keymap.set("n", "<c-w>", "<cmd>BufDel<CR>")
 
 vim.keymap.set("n", "<c-,>", "<Plug>(cokeline-focus-prev)")
 vim.keymap.set("n", "<c-.>", "<Plug>(cokeline-focus-next)")
-vim.keymap.set("n", "<c-;>", "<cmd>Lspsaga code_action<cr>")
+-- vim.keymap.set("n", "<c-;>", "<cmd>Lspsaga code_action<cr>")
 
-vim.keymap.set("i", "<s-enter>", "<c-o>O")
+vim.keymap.set("i", "<c-s-enter>", "<c-o>O")
 vim.keymap.set("i", "<c-enter>", "<c-o>o")
 vim.keymap.set("i", "<c-;>", "<cmd>call setline('.', getline('.') . nr2char(getchar()))<cr>")
 
-vim.keymap.set({ "n", "v" }, "<leader>h", "<c-w>h")
-vim.keymap.set({ "n", "v" }, "<leader>j", "<c-w>j")
-vim.keymap.set({ "n", "v" }, "<leader>k", "<c-w>k")
-vim.keymap.set({ "n", "v" }, "<leader>l", "<c-w>l")
+vim.keymap.set({ "n", "v" }, "<c-h>", "<c-w>h")
+vim.keymap.set({ "n", "v" }, "<c-j>", "<c-w>j")
+vim.keymap.set({ "n", "v" }, "<c-k>", "<c-w>k")
+vim.keymap.set({ "n", "v" }, "<c-l>", "<c-w>l")
 
 vim.keymap.set({ "n", "v" }, "<leader>fs", "<cmd>w!<CR><esc>")
 
@@ -722,7 +619,7 @@ vim.keymap.set("c", "<c-v>", "<c-r>*")
 
 vim.keymap.set("v", "v", "V")
 
--- vim.keymap.set({ "i", "c" }, "<c-bs>", "<c-w>")
+vim.keymap.set({ "i", "c" }, "<c-bs>", "<c-w>")
 
 vim.keymap.set("n", "x", '"_x')
 vim.keymap.set("v", "x", '"_d')
@@ -764,31 +661,30 @@ vim.keymap.set("n", "<a-w>", "<c-o><cmd>bdel #<CR>")
 
 -- MAPPING LSP
 vim.keymap.set("n", "gd", vim.lsp.buf.definition)
--- vim.keymap.set("n", "K", vim.lsp.buf.hover)
--- vim.keymap.set("n", "<f2>", vim.lsp.buf.rename)
--- vim.keymap.set("n", "<c-;>", vim.lsp.buf.code_action)
-
--- vim.keymap.set("n", "<C-j>", "<Cmd>Lspsaga diagnostic_jump_next<CR>")
-vim.keymap.set("n", "K", "<Cmd>Lspsaga hover_doc<CR>")
-vim.keymap.set("n", "gf", "<Cmd>Lspsaga lsp_finder<CR>")
--- vim.keymap.set("n", "L", "<Cmd>Lspsaga signature_help<CR>")
-vim.keymap.set("n", "<leader>mr", "<Cmd>Lspsaga rename<CR>")
+vim.keymap.set("n", "K", vim.lsp.buf.hover)
+vim.keymap.set("n", "<f2>", vim.lsp.buf.rename)
+-- -- vim.keymap.set("n", "<c-;>", vim.lsp.buf.code_action)
+--
+-- -- vim.keymap.set("n", "<C-j>", "<Cmd>Lspsaga diagnostic_jump_next<CR>")
+-- vim.keymap.set("n", "K", "<Cmd>Lspsaga hover_doc<CR>")
+-- vim.keymap.set("n", "gf", "<Cmd>Lspsaga lsp_finder<CR>")
+-- -- vim.keymap.set("n", "L", "<Cmd>Lspsaga signature_help<CR>")
+vim.keymap.set("n", "<a-r>", "<Cmd>Lspsaga rename<CR>")
 
 vim.keymap.set({ "n", "v" }, "w", "<Plug>WordMotion_w")
 vim.keymap.set({ "n", "v" }, "b", "<Plug>WordMotion_b")
 vim.keymap.set({ "n", "v" }, "e", "<Plug>WordMotion_e")
 
-vim.keymap.set("c", "<c-bs>", "<c-w>")
-vim.keymap.set("i", "<c-bs>", "<c-o>v<Plug>WordMotion_bx")
+-- vim.keymap.set("c", "<c-bs>", "<c-w>")
+-- vim.keymap.set("i", "<c-bs>", "<c-o>v<Plug>WordMotion_bx")
 
-if not vim.fn.has("gui_running") and not vim.g.neovide then
-	vim.api.nvim_create_autocmd("VimEnter", {
-		pattern = "*",
-		-- command = "GuiFont! JetBrains Mono NL:h13",
-		command = "GuiFont! JetBrains Mono NL:h11",
-		main,
-	})
-end
+-- if not vim.fn.has("gui_running") then
+-- 	print("AEHO")
+-- 	vim.api.nvim_create_autocmd("VimEnter", {
+-- 		pattern = "*",
+-- 		command = "GuiFont! JetBrains Mono NFM:h11",
+-- 	})
+-- end
 
 vim.api.nvim_create_autocmd("FocusGained", {
 	pattern = "*",
@@ -817,7 +713,6 @@ filetype on
 
 " vnoremap J :m '>+1<CR>gv=gv
 " vnoremap K :m '<-2<CR>gv=gv
-
 
 fun! TrimWhitespace()
     let l:save = winsaveview()

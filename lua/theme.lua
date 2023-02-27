@@ -47,6 +47,7 @@ local p = {
 	status_line = "#291C28",
 	-- status_line_nc = "#091010",
 	-- status_line = "#1c212f",
+	-- status_line = "#222022",
 	menu_bg = "#1c212f",
 	bracket = "#95667C",
 }
@@ -63,6 +64,7 @@ local t = {
 	-- CursorLine = { bg = p.bg3 },
 	CursorLine = { bg = p.bg4 },
 	Directory = { fg = p.fg2 },
+	NonText = { fg = p.fg2 },
 	DiffAdd = { fg = p.color2, bg = p.green },
 	DiffChange = { fg = p.fg2 },
 	DiffDelete = { fg = p.color3, bg = p.red3 },
