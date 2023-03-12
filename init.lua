@@ -67,6 +67,14 @@ require("packer").startup(function(use)
 
 	use({ "s1n7ax/nvim-terminal" })
 
+	use({ "aca/emmet-ls" })
+
+	use({
+		"L3MON4D3/LuaSnip",
+		tag = "v<CurrentMajor>.*",
+		run = "make install_jsregexp",
+	})
+
 	if packer_bootstrap then
 		require("packer").sync()
 	end
@@ -108,19 +116,19 @@ vim.opt.cursorline = true
 vim.opt.scrolloff = 3
 vim.opt.backup = false
 vim.opt.gdefault = true
-vim.opt.colorcolumn = "80"
--- vim.opt.cmdheight = 0
+-- vim.opt.colorcolumn = "80"
+vim.opt.cmdheight = 0
 -- vim.opt.guicursor = "i-ci:block-iCursor" -- comment when using nvim-qt (new version)
 -- vim.opt.guicursor = "a:blinkon100" -- comment when using nvim-qt (new version)
-vim.opt.completeopt = { "menu", "menuone", "noselect" }
--- vim.opt.completeopt = { "menu", "noinsert", "menuone", "noselect" }
+-- vim.opt.completeopt = { "menu", "menuone", "noselect" }
+vim.opt.completeopt = { "menu", "noinsert", "menuone", "noselect" }
 vim.opt.cindent = true
-vim.opt.cino:append("L0,g0,l1,t0,w1,w4,(s,m1")
+vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
 
 vim.wo.signcolumn = "no"
 vim.wo.relativenumber = true
 -- vim.wo.number = true
-vim.wo.wrap = true
+vim.wo.wrap = false
 
 vim.bo.autoread = true
 vim.bo.copyindent = true
@@ -178,14 +186,6 @@ local ok, nvim_tree = pcall(require, "nvim-tree")
 if ok then
 	nvim_tree.setup({
 		renderer = {
-			-- indent_markers = {
-			-- 	enable = true,
-			-- 	icons = {
-			-- 		corner = "└ ",
-			-- 		edge = "│ ",
-			-- 		none = "  ",
-			-- 	},
-			-- },
 			icons = {
 				webdev_colors = false,
 				show = {
@@ -312,9 +312,11 @@ if ok then
 			"python",
 			"json",
 			"glsl",
-			"tsx",
+			"vue",
 			"javascript",
-			"go",
+			"typescript",
+			"html",
+			"css",
 			"markdown",
 		},
 		highlight = {
@@ -323,7 +325,7 @@ if ok then
 		},
 		indent = {
 			enable = true,
-			disable = { "python", "rust" },
+			disable = { "python", "rust", "cpp", "html" },
 		},
 		autotag = {
 			enable = true,
@@ -407,9 +409,8 @@ end
 
 -- neoformat
 vim.api.nvim_create_autocmd("BufWritePre", { pattern = "*.lua", command = ":Neoformat stylua" })
--- vim.api.nvim_create_autocmd("BufWritePre", { pattern = "*.py", command = ":Neoformat black" })
 vim.api.nvim_create_autocmd("BufWritePre", {
-	pattern = { "*.ts", "*.tsx", "*.js", "*.jsx", "*.html", "*.css", "*.scss", "*.json" },
+	pattern = { "*.vue", "*.ts", "*.tsx", "*.js", "*.jsx", "*.html", "*.css", "*.scss", "*.json" },
 	command = ":Neoformat prettier",
 })
 vim.g.neoformat_only_msg_on_error = 1
@@ -428,16 +429,10 @@ local ok, mini_cursorword = pcall(require, "mini.cursorword")
 if ok then
 	mini_cursorword.setup()
 	vim.cmd([[
-        "undercurl"
         hi MiniCursorword        guisp=none guifg=none guibg=#222022 gui=none
         hi MiniCursorwordCurrent guisp=none guifg=none guibg=none gui=none
     ]])
 end
-
--- local ok, mini_completion = pcall(require, "mini.completion")
--- if ok then
--- 	mini_completion.setup({})
--- end
 
 local ok, mini_move = pcall(require, "mini.move")
 if ok then
@@ -456,25 +451,25 @@ if ok then
 	})
 end
 
--- local ok, autopairs = pcall(require, "nvim-autopairs")
--- if ok then
--- 	autopairs.setup({
--- 		disable_filetype = { "TelescopePrompt" },
--- 	})
--- end
+local ok, autopairs = pcall(require, "nvim-autopairs")
+if ok then
+	autopairs.setup({
+		disable_filetype = { "TelescopePrompt" },
+	})
+end
 
 local ok, indent_blankline = pcall(require, "indent_blankline")
 if ok then
-	vim.opt.list = true
-	vim.opt.listchars:append("space:·")
-	vim.opt.listchars:append("trail:·")
-	vim.opt.listchars:append("tab:··")
+	-- vim.opt.list = true
+	-- vim.opt.listchars:append("space:·")
+	-- vim.opt.listchars:append("trail:·")
+	-- vim.opt.listchars:append("tab:··")
 	indent_blankline.setup({
 		show_trailing_blankline_indent = false,
 	})
 end
 
--- require("heirline_config")
+require("heirline_config")
 
 if not (vim.g.arpeggio_timeoutlen ~= nil) then
 	vim.cmd([[
@@ -495,71 +490,108 @@ if not (vim.g.arpeggio_timeoutlen ~= nil) then
         call arpeggio#map('l', '', 0, 'kj', '<Esc>')
         call arpeggio#map('t', '', 0, 'jk', '<C-\><C-n>')
         call arpeggio#map('t', '', 0, 'kj', '<C-\><C-n>')
+
+        call arpeggio#map('i', '', 0, 'fd', '<Esc>')
+        call arpeggio#map('i', '', 0, 'df', '<Esc>')
+        call arpeggio#map('v', '', 0, 'fd', '<Esc>')
+        call arpeggio#map('v', '', 0, 'df', '<Esc>')
+        call arpeggio#map('s', '', 0, 'fd', '<Esc>')
+        call arpeggio#map('s', '', 0, 'df', '<Esc>')
+        call arpeggio#map('x', '', 0, 'fd', '<Esc>')
+        call arpeggio#map('x', '', 0, 'df', '<Esc>')
+        call arpeggio#map('c', '', 0, 'fd', '<c-c>')
+        call arpeggio#map('c', '', 0, 'df', '<c-c>')
+        call arpeggio#map('o', '', 0, 'fd', '<Esc>')
+        call arpeggio#map('o', '', 0, 'df', '<Esc>')
+        call arpeggio#map('l', '', 0, 'fd', '<Esc>')
+        call arpeggio#map('l', '', 0, 'df', '<Esc>')
+        call arpeggio#map('t', '', 0, 'fd', '<C-\><C-n>')
+        call arpeggio#map('t', '', 0, 'df', '<C-\><C-n>')
+
+        call arpeggio#map('i', '', 0, 'JK', '<Esc>')
+        call arpeggio#map('i', '', 0, 'KJ', '<Esc>')
+        call arpeggio#map('c', '', 0, 'JK', '<c-c>')
+        call arpeggio#map('c', '', 0, 'KJ', '<c-c>')
+        call arpeggio#map('o', '', 0, 'JK', '<Esc>')
+        call arpeggio#map('o', '', 0, 'KJ', '<Esc>')
+        call arpeggio#map('l', '', 0, 'JK', '<Esc>')
+        call arpeggio#map('l', '', 0, 'KJ', '<Esc>')
+        call arpeggio#map('t', '', 0, 'JK', '<C-\><C-n>')
+        call arpeggio#map('t', '', 0, 'KJ', '<C-\><C-n>')
     ]])
 end
 
 local ok, lspconfig = pcall(require, "lspconfig")
 if ok then
 	lspconfig.eslint.setup({})
-	lspconfig.tsserver.setup({})
+	-- lspconfig.tsserver.setup({})
 	lspconfig.pylsp.setup({})
-	-- lspconfig.jedi_language_server.setup({})
-	-- lspconfig.pyright.setup({
-	-- 	settings = {
-	-- 		python = {
-	-- 			analysis = {
-	-- 				typeCheckingMode = "off",
-	-- 			},
-	-- 		},
-	-- 	},
-	-- })
-	lspconfig.gdscript.setup({})
+	require("lspconfig").volar.setup({
+		init_options = {
+			typescript = {
+				tsdk = "C:/Users/Vallahor/AppData/Roaming/npm",
+			},
+		},
+	})
+	local configs = require("lspconfig/configs")
+	local capabilities = vim.lsp.protocol.make_client_capabilities()
+	capabilities.textDocument.completion.completionItem.snippetSupport = true
 
-	vim.lsp.handlers["textDocument/publishDiagnostics"] = function() end
-end
-
-local ok, lsp_saga = pcall(require, "lspsaga")
-if ok then
-	lsp_saga.setup({
-		symbol_in_winbar = {
-			enable = false,
+	lspconfig.emmet_ls.setup({
+		capabilities = capabilities,
+		filetypes = { "vue", "html", "typescriptreact", "javascriptreact", "css", "sass", "scss", "less" },
+		init_options = {
+			html = {
+				options = {
+					-- For possible options, see: https://github.com/emmetio/emmet/blob/master/src/config.ts#L79-L267
+					["bem.enabled"] = true,
+				},
+			},
 		},
 	})
 end
 
--- local ok, cmp = pcall(require, "cmp")
--- if ok then
--- 	cmp.setup({
--- 		sources = {
--- 			{ name = "nvim_lsp" },
--- 			{ name = "path" },
--- 			{ name = "buffer" },
--- 		},
--- 		mapping = {
--- 			["<C-Space>"] = cmp.mapping.complete(),
--- 			["<C-q>"] = cmp.mapping.close(),
--- 			["<c-j>"] = cmp.mapping(function()
--- 				if cmp.visible() then
--- 					cmp.select_next_item({ behavior = cmp.SelectBehavior.Insert, select = false })
--- 				end
--- 			end, { "i", "s" }),
---
--- 			["<c-k>"] = cmp.mapping(function()
--- 				if cmp.visible() then
--- 					cmp.select_prev_item({ behavior = cmp.SelectBehavior.Insert, select = false })
--- 				end
--- 			end, { "i", "s" }),
--- 			["<tab>"] = cmp.mapping.confirm({
--- 				select = true,
--- 				behavior = cmp.ConfirmBehavior.Replace,
--- 			}),
--- 			["<CR>"] = cmp.mapping.confirm({
--- 				select = false,
--- 			}),
--- 			["<c-e>"] = cmp.mapping.abort(),
--- 		},
--- 	})
--- end
+local ok, cmp = pcall(require, "cmp")
+if ok then
+	cmp.setup({
+		sources = {
+			{ name = "nvim_lsp" },
+			{ name = "path" },
+			{ name = "buffer" },
+		},
+		snippet = {
+			expand = function(args)
+				local ok, luasnip = pcall(require, "luasnip")
+				if ok then
+					luasnip.lsp_expand(args.body) -- For `luasnip` users.
+				end
+			end,
+		},
+		mapping = {
+			["<C-Space>"] = cmp.mapping.complete(),
+			["<C-q>"] = cmp.mapping.close(),
+			["<c-j>"] = cmp.mapping(function()
+				if cmp.visible() then
+					cmp.select_next_item({ behavior = cmp.SelectBehavior.Insert, select = false })
+				end
+			end, { "i", "s" }),
+
+			["<c-k>"] = cmp.mapping(function()
+				if cmp.visible() then
+					cmp.select_prev_item({ behavior = cmp.SelectBehavior.Insert, select = false })
+				end
+			end, { "i", "s" }),
+			["<tab>"] = cmp.mapping.confirm({
+				select = true,
+				behavior = cmp.ConfirmBehavior.Replace,
+			}),
+			["<CR>"] = cmp.mapping.confirm({
+				select = false,
+			}),
+			["<c-e>"] = cmp.mapping.abort(),
+		},
+	})
+end
 
 -- MAPPING --
 
@@ -567,13 +599,17 @@ vim.g.mapleader = " "
 
 vim.keymap.set("n", "<leader><leader>", "<cmd>nohl<cr><esc>")
 vim.keymap.set("n", "<esc>", "<cmd>nohl<cr><esc>")
+
+vim.keymap.set({ "i", "c" }, "<c-j>", "<esc>")
+vim.keymap.set({ "i", "c" }, "<c-k>", "<esc>")
+
 vim.keymap.set("n", "<c-g>", "<cmd>LazyGit<cr>")
 -- vim.keymap.set("n", "<C-f>", "<cmd>CHADopen<cr>")
 vim.keymap.set("n", "<C-f>", "<cmd>NvimTreeToggle<cr>")
 -- vim.keymap.set("n", "<c-;>", "<cmd>NvimTreeFocus<cr>")
 
 vim.keymap.set("n", "<c-p>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
--- vim.keymap.set("n", "<c-/>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
+vim.keymap.set("n", "<c-/>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
 vim.keymap.set("n", "<c-space>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
 
 vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>")
@@ -584,13 +620,6 @@ vim.keymap.set("n", "L", "<c-d>zz")
 -- vim.keymap.set({ "n", "v" }, "<c-j>", "}")
 -- vim.keymap.set({ "n", "v" }, "<c-k>", "{")
 
--- vim.keymap.set("i", "<Tab>", 'pumvisible() ? "\\<C-n>" : "\\<Tab>"', { expr = true })
--- vim.keymap.set("i", "<S-Tab>", 'pumvisible() ? "\\<C-p>" : "\\<Tab>"', { expr = true })
-
-vim.keymap.set({ "n", "v" }, "<c-h>", "^")
--- vim.keymap.set("n", "<c-l>", "$")
--- vim.keymap.set("v", "<c-l>", "$h")
-
 vim.keymap.set("v", "<c-s>", "<Plug>(VM-Reselect-Last)")
 
 vim.keymap.set("n", "<c-\\>", "<cmd>clo<cr>")
@@ -599,10 +628,6 @@ vim.keymap.set("n", "<c-->", "<cmd>sp<cr>")
 vim.keymap.set("n", "<c-0>", "<c-w>o")
 vim.keymap.set("n", "<c-9>", "<c-w>r")
 vim.keymap.set("n", "<c-w>", "<cmd>BufDel<CR>")
-
-vim.keymap.set("n", "<c-,>", "<Plug>(cokeline-focus-prev)")
-vim.keymap.set("n", "<c-.>", "<Plug>(cokeline-focus-next)")
--- vim.keymap.set("n", "<c-;>", "<cmd>Lspsaga code_action<cr>")
 
 vim.keymap.set("i", "<c-s-enter>", "<c-o>O")
 vim.keymap.set("i", "<c-enter>", "<c-o>o")
@@ -613,13 +638,11 @@ vim.keymap.set({ "n", "v" }, "<c-j>", "<c-w>j")
 vim.keymap.set({ "n", "v" }, "<c-k>", "<c-w>k")
 vim.keymap.set({ "n", "v" }, "<c-l>", "<c-w>l")
 
-vim.keymap.set({ "n", "v" }, "<leader>fs", "<cmd>w!<CR><esc>")
-
 vim.keymap.set("c", "<c-v>", "<c-r>*")
 
 vim.keymap.set("v", "v", "V")
 
-vim.keymap.set({ "i", "c" }, "<c-bs>", "<c-w>")
+-- vim.keymap.set({ "i", "c" }, "<c-bs>", "<c-w>")
 
 vim.keymap.set("n", "x", '"_x')
 vim.keymap.set("v", "x", '"_d')
@@ -630,12 +653,13 @@ vim.keymap.set("n", "*", "*``")
 vim.keymap.set("v", "*", '"sy/\\V<c-r>s<cr>``')
 
 vim.keymap.set({ "n", "v" }, "<leader>0", "0")
+vim.keymap.set({ "n", "v" }, "<c-0>", "0")
 vim.keymap.set("n", "-", "$")
 vim.keymap.set("v", "-", "$h")
 vim.keymap.set({ "n", "v" }, "0", "^")
 
-vim.keymap.set("n", "j", "v:count ? 'j^' : 'gj'", { expr = true })
-vim.keymap.set("n", "k", "v:count ? 'k^' : 'gk'", { expr = true })
+-- vim.keymap.set("n", "j", "v:count ? 'j^' : 'gj'", { expr = true })
+-- vim.keymap.set("n", "k", "v:count ? 'k^' : 'gk'", { expr = true })
 
 -- vim.keymap.set("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
 vim.keymap.set("n", "<f4>", "<cmd>:e $MYVIMRC<CR>")
@@ -649,10 +673,11 @@ vim.keymap.set("v", "z", "<Plug>VSurround")
 vim.keymap.set("n", "<F3>", "<cmd>TSHighlightCapturesUnderCursor<cr>")
 
 vim.keymap.set("n", "<c-6>", "<C-^>")
-vim.keymap.set("n", "^", "<C-^>")
 
 -- tab
 
+vim.keymap.set("n", "<c-,>", "<Plug>(cokeline-focus-prev)")
+vim.keymap.set("n", "<c-.>", "<Plug>(cokeline-focus-next)")
 -- Re-order to previous/next
 vim.keymap.set("n", "<a-,>", "<Plug>(cokeline-switch-prev)")
 vim.keymap.set("n", "<a-.>", "<Plug>(cokeline-switch-next)")
@@ -665,26 +690,12 @@ vim.keymap.set("n", "K", vim.lsp.buf.hover)
 vim.keymap.set("n", "<f2>", vim.lsp.buf.rename)
 -- -- vim.keymap.set("n", "<c-;>", vim.lsp.buf.code_action)
 --
--- -- vim.keymap.set("n", "<C-j>", "<Cmd>Lspsaga diagnostic_jump_next<CR>")
--- vim.keymap.set("n", "K", "<Cmd>Lspsaga hover_doc<CR>")
--- vim.keymap.set("n", "gf", "<Cmd>Lspsaga lsp_finder<CR>")
--- -- vim.keymap.set("n", "L", "<Cmd>Lspsaga signature_help<CR>")
-vim.keymap.set("n", "<a-r>", "<Cmd>Lspsaga rename<CR>")
-
 vim.keymap.set({ "n", "v" }, "w", "<Plug>WordMotion_w")
 vim.keymap.set({ "n", "v" }, "b", "<Plug>WordMotion_b")
 vim.keymap.set({ "n", "v" }, "e", "<Plug>WordMotion_e")
 
 -- vim.keymap.set("c", "<c-bs>", "<c-w>")
--- vim.keymap.set("i", "<c-bs>", "<c-o>v<Plug>WordMotion_bx")
-
--- if not vim.fn.has("gui_running") then
--- 	print("AEHO")
--- 	vim.api.nvim_create_autocmd("VimEnter", {
--- 		pattern = "*",
--- 		command = "GuiFont! JetBrains Mono NFM:h11",
--- 	})
--- end
+vim.keymap.set("i", "<c-bs>", "<c-o>v<Plug>WordMotion_bx")
 
 vim.api.nvim_create_autocmd("FocusGained", {
 	pattern = "*",
@@ -692,7 +703,7 @@ vim.api.nvim_create_autocmd("FocusGained", {
 })
 
 vim.api.nvim_create_autocmd("BufEnter", {
-	pattern = { "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.html", "*.css" },
+	pattern = { "*.vue", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.html", "*.css" },
 	callback = function()
 		vim.opt_local.shiftwidth = 2
 		vim.opt_local.tabstop = 2
