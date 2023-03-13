@@ -167,6 +167,8 @@ local chadtree_settings = {
 		primary = { "o" },
 		open_sys = { "O" },
 	},
+	["theme.text_colour_set"] = "env",
+	-- ["theme.icon_glyph_set"] = "ascii_hollow",
 }
 
 vim.api.nvim_set_var("chadtree_settings", chadtree_settings)
@@ -378,7 +380,20 @@ end
 local ok, cokeline = pcall(require, "cokeline")
 if ok then
 	local utils = require("cokeline/utils")
+	local get_hex = require("cokeline/utils").get_hex
+	local yellow = vim.g.terminal_color_3
 	cokeline.setup({
+		sidebar = {
+			filetype = "CHADTree",
+			components = {
+				{
+					text = "  CHADTree",
+					fg = yellow,
+					bg = get_hex("Normal", "bg"),
+					style = "bold",
+				},
+			},
+		},
 		components = {
 			{
 				text = "   ",
@@ -763,6 +778,7 @@ fun! TrimWhitespace()
 endfun
 autocmd BufWritePre * :call TrimWhitespace()
 
+au BufEnter * if &ft ==# 'CHADTree' | set winhighlight=Normal:BufferTabpageFill | endif
 ]])
 local ok, theme = pcall(require, "theme")
 if ok then
