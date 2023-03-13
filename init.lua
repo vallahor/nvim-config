@@ -23,6 +23,7 @@ require("packer").startup(function(use)
 	use({ "ggandor/lightspeed.nvim" })
 
 	use({ "ms-jpq/chadtree", tag = "chad", run = ":CHADdeps" })
+
 	use({ "numToStr/Comment.nvim" })
 
 	use({ "tpope/vim-surround" })
@@ -49,6 +50,11 @@ require("packer").startup(function(use)
 	use({ "hrsh7th/cmp-path" })
 	use({ "hrsh7th/cmp-cmdline" })
 	use({ "hrsh7th/nvim-cmp" })
+	use({
+		"L3MON4D3/LuaSnip",
+		tag = "<CurrentMajor>.*",
+		run = "make install_jsregexp",
+	})
 
 	use({ "chaoren/vim-wordmotion" })
 
@@ -69,11 +75,7 @@ require("packer").startup(function(use)
 
 	use({ "aca/emmet-ls" })
 
-	use({
-		"L3MON4D3/LuaSnip",
-		tag = "<CurrentMajor>.*",
-		run = "make install_jsregexp",
-	})
+	-- use({ "kylechui/nvim-surround" })
 
 	if packer_bootstrap then
 		require("packer").sync()
@@ -125,6 +127,7 @@ vim.opt.completeopt = { "menu", "noinsert", "menuone", "noselect" }
 vim.opt.cindent = true
 vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
 vim.opt.timeoutlen = 200
+vim.opt.updatetime = 200
 
 vim.wo.signcolumn = "no"
 vim.wo.relativenumber = true
@@ -483,7 +486,18 @@ if ok then
 	})
 end
 
+-- local ok, nvim_surround = pcall(require, "nvim-surround")
+-- if ok then
+-- 	nvim_surround.setup({
+-- 		keymaps = {
+-- 			visual = "s",
+-- 			visual_line = "s",
+-- 		},
+-- 	})
+-- end
+
 require("heirline_config")
+require("swap_buffer")
 
 if not (vim.g.arpeggio_timeoutlen ~= nil) then
 	vim.cmd([[
@@ -537,17 +551,18 @@ end
 
 local ok, lspconfig = pcall(require, "lspconfig")
 if ok then
-	lspconfig.eslint.setup({})
-	lspconfig.tsserver.setup({})
 	lspconfig.pylsp.setup({})
-	-- lspconfig.vuels.setup({})
-	require("lspconfig").volar.setup({
+	-- lspconfig.eslint.setup({})
+	-- lspconfig.tsserver.setup({})
+	lspconfig.volar.setup({
+		filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue", "json" },
 		init_options = {
 			typescript = {
-				tsdk = "C:/Users/Vallahor/AppData/Roaming/npm",
+				tsdk = "C:/Users/Vallahor/AppData/Roaming/npm/node_modules/typescript/lib",
 			},
 		},
 	})
+
 	local configs = require("lspconfig/configs")
 	local capabilities = vim.lsp.protocol.make_client_capabilities()
 	capabilities.textDocument.completion.completionItem.snippetSupport = true
@@ -555,11 +570,6 @@ if ok then
 	lspconfig.emmet_ls.setup({
 		capabilities = capabilities,
 		filetypes = { "vue", "html", "typescriptreact", "javascriptreact", "css", "sass", "scss", "less" },
-		-- options = {
-		-- 	-- For possible options, see: https://github.com/emmetio/emmet/blob/master/src/config.ts#L79-L267
-		-- 	["bem.enabled"] = true,
-		-- 	["output.compactBoolean"] = true,
-		-- },
 		init_options = {
 			html = {
 				options = {
@@ -698,10 +708,13 @@ vim.keymap.set({ "n", "v" }, "0", "^")
 vim.keymap.set("n", "<f4>", "<cmd>:e $MYVIMRC<CR>")
 vim.keymap.set("n", "<f5>", "<cmd>so %<CR>")
 
-vim.keymap.set("v", "s", "<Plug>Lightspeed_s")
-vim.keymap.set("v", "S", "<Plug>Lightspeed_S")
+-- vim.keymap.set("v", "s", "<Plug>Lightspeed_s")
+-- vim.keymap.set("v", "S", "<Plug>Lightspeed_S")
 
-vim.keymap.set("v", "z", "<Plug>VSurround")
+vim.keymap.set("v", "n", "<Plug>Lightspeed_s")
+vim.keymap.set("v", "N", "<Plug>Lightspeed_S")
+
+vim.keymap.set("v", "s", "<Plug>VSurround")
 
 vim.keymap.set("v", "(", "<Plug>VSurround)")
 vim.keymap.set("v", ")", "<Plug>VSurround)")
@@ -736,12 +749,19 @@ vim.keymap.set("n", "<a-w>", "<c-o><cmd>bdel #<CR>")
 -- MAPPING LSP
 vim.keymap.set("n", "gd", vim.lsp.buf.definition)
 vim.keymap.set("n", "K", vim.lsp.buf.hover)
-vim.keymap.set("n", "<f2>", vim.lsp.buf.rename)
--- -- vim.keymap.set("n", "<c-;>", vim.lsp.buf.code_action)
+-- vim.keymap.set("n", "<f2>", vim.lsp.buf.rename)
+vim.keymap.set("n", "<a-d>", vim.lsp.buf.definition)
+vim.keymap.set("n", "<a-n>", vim.lsp.buf.rename)
+vim.keymap.set("n", "<a-a>", vim.lsp.buf.code_action)
 --
 vim.keymap.set({ "n", "v" }, "w", "<Plug>WordMotion_w")
 vim.keymap.set({ "n", "v" }, "b", "<Plug>WordMotion_b")
 vim.keymap.set({ "n", "v" }, "e", "<Plug>WordMotion_e")
+
+vim.keymap.set("n", "<leader>h", "<cmd>lua Swap_left()<CR>")
+vim.keymap.set("n", "<leader>j", "<cmd>lua Swap_down()<CR>")
+vim.keymap.set("n", "<leader>k", "<cmd>lua Swap_up()<CR>")
+vim.keymap.set("n", "<leader>l", "<cmd>lua Swap_right()<CR>")
 
 vim.api.nvim_create_autocmd("FocusGained", {
 	pattern = "*",
@@ -778,7 +798,6 @@ fun! TrimWhitespace()
 endfun
 autocmd BufWritePre * :call TrimWhitespace()
 
-au BufEnter * if &ft ==# 'CHADTree' | set winhighlight=Normal:BufferTabpageFill | endif
 ]])
 local ok, theme = pcall(require, "theme")
 if ok then
