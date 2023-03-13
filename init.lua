@@ -22,7 +22,6 @@ require("packer").startup(function(use)
 
 	use({ "ggandor/lightspeed.nvim" })
 
-	use({ "kyazdani42/nvim-tree.lua", tag = "nightly" })
 	use({ "ms-jpq/chadtree", tag = "chad", run = ":CHADdeps" })
 	use({ "numToStr/Comment.nvim" })
 
@@ -48,6 +47,7 @@ require("packer").startup(function(use)
 	use({ "hrsh7th/cmp-nvim-lsp" })
 	use({ "hrsh7th/cmp-buffer" })
 	use({ "hrsh7th/cmp-path" })
+	use({ "hrsh7th/cmp-cmdline" })
 	use({ "hrsh7th/nvim-cmp" })
 
 	use({ "chaoren/vim-wordmotion" })
@@ -71,7 +71,7 @@ require("packer").startup(function(use)
 
 	use({
 		"L3MON4D3/LuaSnip",
-		tag = "v<CurrentMajor>.*",
+		tag = "<CurrentMajor>.*",
 		run = "make install_jsregexp",
 	})
 
@@ -107,7 +107,7 @@ vim.opt.lazyredraw = true
 vim.opt.smartcase = true
 vim.opt.inccommand = "nosplit"
 vim.opt.backspace = "indent,eol,start"
-vim.opt.shortmess = "aoOtTIc"
+vim.opt.shortmess = "aoOtTIcF"
 vim.opt.mouse = "a"
 vim.opt.mousefocus = true
 -- vim.opt.fsync = true
@@ -117,13 +117,14 @@ vim.opt.scrolloff = 3
 vim.opt.backup = false
 vim.opt.gdefault = true
 -- vim.opt.colorcolumn = "80"
-vim.opt.cmdheight = 0
+-- vim.opt.cmdheight = 0
 -- vim.opt.guicursor = "i-ci:block-iCursor" -- comment when using nvim-qt (new version)
 -- vim.opt.guicursor = "a:blinkon100" -- comment when using nvim-qt (new version)
 -- vim.opt.completeopt = { "menu", "menuone", "noselect" }
 vim.opt.completeopt = { "menu", "noinsert", "menuone", "noselect" }
 vim.opt.cindent = true
 vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
+vim.opt.timeoutlen = 200
 
 vim.wo.signcolumn = "no"
 vim.wo.relativenumber = true
@@ -158,6 +159,18 @@ vim.g.VM_maps = {
 
 vim.g.wordmotion_spaces = { "w@<=-w@=", ".", ",", ";", ":", "w@<(-w@)", "w@<{-w@}", "w@<[-w@]", "w@<<-w@>" }
 
+local chadtree_settings = {
+	view = {
+		width = 30,
+	},
+	keymap = {
+		primary = { "o" },
+		open_sys = { "O" },
+	},
+}
+
+vim.api.nvim_set_var("chadtree_settings", chadtree_settings)
+
 -- PLUGINS
 
 local ok, lightspeed = pcall(require, "lightspeed")
@@ -180,27 +193,6 @@ if ok then
         map <expr> ; g:lightspeed_last_motion == 'sx' ? "<Plug>Lightspeed_;_sx" : "<Plug>Lightspeed_;_ft"
         map <expr> , g:lightspeed_last_motion == 'sx' ? "<Plug>Lightspeed_,_sx" : "<Plug>Lightspeed_,_ft"
     ]])
-end
-
-local ok, nvim_tree = pcall(require, "nvim-tree")
-if ok then
-	nvim_tree.setup({
-		renderer = {
-			icons = {
-				webdev_colors = false,
-				show = {
-					folder = true,
-					file = true,
-					folder_arrow = true,
-				},
-			},
-		},
-		git = {
-			enable = false,
-			ignore = false,
-			timeout = 400,
-		},
-	})
 end
 
 local ok, terminal = pcall(require, "nvim-terminal")
@@ -258,7 +250,14 @@ end
 
 local ok, nvim_comment = pcall(require, "Comment")
 if ok then
-	nvim_comment.setup()
+	nvim_comment.setup({
+		toggler = {
+			---Line-comment toggle keymap
+			line = "gc",
+			---Block-comment toggle keymap
+			block = "gb",
+		},
+	})
 end
 
 local ok, bufdel = pcall(require, "bufdel")
@@ -524,8 +523,9 @@ end
 local ok, lspconfig = pcall(require, "lspconfig")
 if ok then
 	lspconfig.eslint.setup({})
-	-- lspconfig.tsserver.setup({})
+	lspconfig.tsserver.setup({})
 	lspconfig.pylsp.setup({})
+	-- lspconfig.vuels.setup({})
 	require("lspconfig").volar.setup({
 		init_options = {
 			typescript = {
@@ -540,11 +540,17 @@ if ok then
 	lspconfig.emmet_ls.setup({
 		capabilities = capabilities,
 		filetypes = { "vue", "html", "typescriptreact", "javascriptreact", "css", "sass", "scss", "less" },
+		-- options = {
+		-- 	-- For possible options, see: https://github.com/emmetio/emmet/blob/master/src/config.ts#L79-L267
+		-- 	["bem.enabled"] = true,
+		-- 	["output.compactBoolean"] = true,
+		-- },
 		init_options = {
 			html = {
 				options = {
 					-- For possible options, see: https://github.com/emmetio/emmet/blob/master/src/config.ts#L79-L267
 					["bem.enabled"] = true,
+					["output.compactBoolean"] = true,
 				},
 			},
 		},
@@ -591,6 +597,15 @@ if ok then
 			["<c-e>"] = cmp.mapping.abort(),
 		},
 	})
+
+	cmp.setup.cmdline(":", {
+		mapping = cmp.mapping.preset.cmdline(),
+		sources = cmp.config.sources({
+			{ name = "path" },
+		}, {
+			{ name = "cmdline" },
+		}),
+	})
 end
 
 -- MAPPING --
@@ -604,11 +619,10 @@ vim.keymap.set({ "i", "c" }, "<c-j>", "<esc>")
 vim.keymap.set({ "i", "c" }, "<c-k>", "<esc>")
 
 vim.keymap.set("n", "<c-g>", "<cmd>LazyGit<cr>")
--- vim.keymap.set("n", "<C-f>", "<cmd>CHADopen<cr>")
-vim.keymap.set("n", "<C-f>", "<cmd>NvimTreeToggle<cr>")
--- vim.keymap.set("n", "<c-;>", "<cmd>NvimTreeFocus<cr>")
+vim.keymap.set("n", "<C-t>", "<cmd>CHADopen<cr>")
 
-vim.keymap.set("n", "<c-p>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
+-- vim.keymap.set("n", "<c-p>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
+vim.keymap.set("n", "<c-f>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
 vim.keymap.set("n", "<c-/>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
 vim.keymap.set("n", "<c-space>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
 
@@ -617,8 +631,8 @@ vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>")
 vim.keymap.set("n", "H", "<c-u>zz")
 vim.keymap.set("n", "L", "<c-d>zz")
 
--- vim.keymap.set({ "n", "v" }, "<c-j>", "}")
--- vim.keymap.set({ "n", "v" }, "<c-k>", "{")
+vim.keymap.set({ "n", "v" }, "<c-j>", "}")
+vim.keymap.set({ "n", "v" }, "<c-k>", "{")
 
 vim.keymap.set("v", "<c-s>", "<Plug>(VM-Reselect-Last)")
 
@@ -633,16 +647,20 @@ vim.keymap.set("i", "<c-s-enter>", "<c-o>O")
 vim.keymap.set("i", "<c-enter>", "<c-o>o")
 vim.keymap.set("i", "<c-;>", "<cmd>call setline('.', getline('.') . nr2char(getchar()))<cr>")
 
+-- vim.keymap.set({ "n", "v" }, "<c-j>", "<c-w>j")
+-- vim.keymap.set({ "n", "v" }, "<c-k>", "<c-w>k")
+
 vim.keymap.set({ "n", "v" }, "<c-h>", "<c-w>h")
-vim.keymap.set({ "n", "v" }, "<c-j>", "<c-w>j")
-vim.keymap.set({ "n", "v" }, "<c-k>", "<c-w>k")
+vim.keymap.set({ "n", "v" }, "<c-n>", "<c-w>j")
+vim.keymap.set({ "n", "v" }, "<c-p>", "<c-w>k")
 vim.keymap.set({ "n", "v" }, "<c-l>", "<c-w>l")
 
 vim.keymap.set("c", "<c-v>", "<c-r>*")
 
 vim.keymap.set("v", "v", "V")
 
--- vim.keymap.set({ "i", "c" }, "<c-bs>", "<c-w>")
+vim.keymap.set({ "i", "c" }, "<c-bs>", "<c-w>")
+-- vim.keymap.set("i", "<c-bs>", "<c-o>v<Plug>WordMotion_bx")
 
 vim.keymap.set("n", "x", '"_x')
 vim.keymap.set("v", "x", '"_d')
@@ -670,6 +688,22 @@ vim.keymap.set("v", "S", "<Plug>Lightspeed_S")
 
 vim.keymap.set("v", "z", "<Plug>VSurround")
 
+vim.keymap.set("v", "(", "<Plug>VSurround)")
+vim.keymap.set("v", ")", "<Plug>VSurround)")
+
+vim.keymap.set("v", "[", "<nop>")
+vim.keymap.set("v", "]", "<nop>")
+
+vim.keymap.set("v", "[", "<Plug>VSurround]")
+vim.keymap.set("v", "]", "<Plug>VSurround]")
+
+vim.keymap.set("v", "{", "<Plug>VSurround}")
+vim.keymap.set("v", "}", "<Plug>VSurround}")
+
+vim.keymap.set("v", "'", "<Plug>VSurround'")
+vim.keymap.set("v", "`", "<Plug>VSurround`")
+vim.keymap.set("v", '"', '<Plug>VSurround"')
+
 vim.keymap.set("n", "<F3>", "<cmd>TSHighlightCapturesUnderCursor<cr>")
 
 vim.keymap.set("n", "<c-6>", "<C-^>")
@@ -693,9 +727,6 @@ vim.keymap.set("n", "<f2>", vim.lsp.buf.rename)
 vim.keymap.set({ "n", "v" }, "w", "<Plug>WordMotion_w")
 vim.keymap.set({ "n", "v" }, "b", "<Plug>WordMotion_b")
 vim.keymap.set({ "n", "v" }, "e", "<Plug>WordMotion_e")
-
--- vim.keymap.set("c", "<c-bs>", "<c-w>")
-vim.keymap.set("i", "<c-bs>", "<c-o>v<Plug>WordMotion_bx")
 
 vim.api.nvim_create_autocmd("FocusGained", {
 	pattern = "*",
