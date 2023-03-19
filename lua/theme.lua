@@ -176,6 +176,11 @@ local t = {
 	BufferVisibleMod = { fg = p.pink2, bg = p.gray2 },
 	-- BufferVisibleSign = {             },
 	-- BufferVisibleTarget = {           },
+	IndentBlanklineSpaceChar = { fg = p.purple_dark },
+	IndentBlanklineSpaceCharBlankline = { fg = p.purple_dark },
+	IndentBlanklineContextSpaceChar = { fg = p.purple_dark },
+	IndentBlanklineContextChar = { fg = p.bg_original },
+	IndentBlanklineContextStart = { fg = p.bg_original },
 
 	--- treesitter ---
 	["@include"] = { fg = p.yellow, effect = bold_active },

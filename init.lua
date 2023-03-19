@@ -1,86 +1,599 @@
-local fn = vim.fn
-local install_path = fn.stdpath("data") .. "/site/pack/packer/start/packer.nvim"
-if fn.empty(fn.glob(install_path)) > 0 then
-	packer_bootstrap = fn.system({
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+	vim.fn.system({
 		"git",
 		"clone",
-		"--depth",
-		"1",
-		"https://github.com/wbthomason/packer.nvim",
-		install_path,
+		"--filter=blob:none",
+		"https://github.com/folke/lazy.nvim.git",
+		"--branch=stable", -- latest stable release
+		lazypath,
 	})
 end
+vim.opt.rtp:prepend(lazypath)
 
-require("packer").startup(function(use)
-	use({ "wbthomason/packer.nvim" })
+local plugins = {
+	{
+		dir = "./lua/theme.lua",
+		init = function()
+			local ok, theme = pcall(require, "theme")
+			if ok then
+				theme.colorscheme()
+			end
+		end,
+	},
 
-	use({ "nvim-lua/plenary.nvim" })
-	use({ "nvim-telescope/telescope.nvim" })
+	{
+		"nvim-telescope/telescope.nvim",
+		dependencies = {
+			{ "nvim-lua/plenary.nvim" },
+		},
+		config = function()
+			local ok, telescope = pcall(require, "telescope")
+			if ok then
+				local actions = require("telescope.actions")
+				telescope.setup({
+					defaults = {
+						mappings = {
+							i = {
+								["<C-bs>"] = function()
+									vim.api.nvim_input("<c-s-w>")
+								end,
+								["<c-k>"] = "move_selection_previous",
+								["<c-j>"] = "move_selection_next",
+								-- ["<esc>"] = actions.close,
+								["jk"] = actions.close,
+								["kj"] = actions.close,
+							},
+						},
+						initial_mode = "insert",
+						path_display = { "smart" },
+						-- borderchars = { "─", "│", "─", "│", "┌", "┐", "┘", "└" },
+						border = false,
+						layout_strategy = "bottom_pane",
+						layout_config = {
+							height = 10,
+							prompt_position = "bottom",
+						},
+						preview = false,
+					},
+				})
+			end
 
-	use({ "nvim-treesitter/playground" })
-	use({ "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" })
+			-- vim.keymap.set("n", "<c-p>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
+			vim.keymap.set("n", "<c-f>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
+			vim.keymap.set("n", "<c-/>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
+			vim.keymap.set("n", "<c-space>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
+		end,
+	},
 
-	use({ "ggandor/lightspeed.nvim" })
+	{
+		"nvim-treesitter/nvim-treesitter",
+		build = ":TSUpdate",
+		event = "BufRead",
+		dependencies = {
 
-	use({ "ms-jpq/chadtree", tag = "chad", run = ":CHADdeps" })
+			{
+				"windwp/nvim-ts-autotag",
+				config = function()
+					local ok, autotag = pcall(require, "nvim-ts-autotag")
+					if ok then
+						autotag.setup({})
+					end
+				end,
+			},
+			{ "RRethy/nvim-treesitter-endwise" },
+			{ "nvim-treesitter/playground" },
+		},
+		config = function()
+			local ok, nvim_treesitter = pcall(require, "nvim-treesitter.configs")
+			if ok then
+				require("nvim-treesitter.install").compilers = { "clang" }
+				nvim_treesitter.setup({
+					ensure_installed = {
+						"lua",
+						"c",
+						"cpp",
+						"zig",
+						"query",
+						"python",
+						"json",
+						"glsl",
+						"vue",
+						"javascript",
+						"typescript",
+						"prisma",
+						"html",
+						"css",
+						"markdown",
+					},
+					highlight = {
+						enable = true,
+					},
+					indent = {
+						enable = true,
+						disable = { "python", "rust", "cpp", "html" },
+					},
+					autotag = {
+						enable = true,
+					},
+					incremental_selection = {
+						enable = true,
+						keymaps = {
+							init_selection = "m",
+							node_incremental = "m",
+							node_decremental = "M",
+							scope_incremental = "<c-/>",
+						},
+					},
+					endwise = {
+						enable = true,
+					},
+					playground = {
+						enable = true,
+						disable = {},
+						updatetime = 25,
+						persist_queries = false,
+						keybindings = {
+							toggle_query_editor = "o",
+							toggle_hl_groups = "i",
+							toggle_injected_languages = "t",
+							toggle_anonymous_nodes = "a",
+							toggle_language_display = "I",
+							focus_language = "f",
+							unfocus_language = "F",
+							update = "R",
+							goto_node = "<cr>",
+							show_help = "?",
+						},
+					},
+				})
 
-	use({ "numToStr/Comment.nvim" })
+				vim.cmd([[
+                    autocmd BufRead *.scm set filetype=query
+                ]])
+			end
+		end,
+	},
 
-	use({ "tpope/vim-surround" })
-	use({ "tpope/vim-repeat" })
+	{
+		"ggandor/lightspeed.nvim",
+		config = function()
+			local ok, lightspeed = pcall(require, "lightspeed")
+			if ok then
+				-- vim.g.lightspeed_no_default_keymaps = true
+				lightspeed.setup({
+					exit_after_idle_msecs = { unlabeled = 300, labeled = nil },
+					--- s/x ---
+					jump_to_unique_chars = { safety_timeout = 300 },
+					ignore_case = true,
+					repeat_ft_with_target_char = true,
+				})
+				-- vim.keymap.set("v", "s", "<Plug>Lightspeed_s")
+				-- vim.keymap.set("v", "S", "<Plug>Lightspeed_S")
 
-	use({ "mg979/vim-visual-multi" })
+				vim.keymap.set("v", "n", "<Plug>Lightspeed_s")
+				vim.keymap.set("v", "N", "<Plug>Lightspeed_S")
+				vim.cmd([[
+                    let g:lightspeed_last_motion = ''
+                    augroup lightspeed_last_motion
+                    autocmd!
+                    autocmd User LightspeedSxEnter let g:lightspeed_last_motion = 'sx'
+                    autocmd User LightspeedFtEnter let g:lightspeed_last_motion = 'ft'
+                    augroup end
+                    map <expr> ; g:lightspeed_last_motion == 'sx' ? "<Plug>Lightspeed_;_sx" : "<Plug>Lightspeed_;_ft"
+                    map <expr> , g:lightspeed_last_motion == 'sx' ? "<Plug>Lightspeed_,_sx" : "<Plug>Lightspeed_,_ft"
+                ]])
+			end
+		end,
+	},
 
-	use({ "noib3/nvim-cokeline" })
-	use({ "ojroques/nvim-bufdel" })
+	{
+		"ms-jpq/chadtree",
+		branch = "chad",
+		build = ":CHADdeps",
+		config = function()
+			local chadtree_settings = {
+				view = {
+					width = 30,
+				},
+				keymap = {
+					primary = { "o" },
+					open_sys = { "O" },
+				},
+				["theme.text_colour_set"] = "env",
+				-- ["theme.icon_glyph_set"] = "ascii_hollow",
+			}
 
-	use({ "kana/vim-arpeggio" })
+			vim.api.nvim_set_var("chadtree_settings", chadtree_settings)
+			vim.keymap.set("n", "<C-t>", "<cmd>CHADopen<cr>")
+		end,
+	},
 
-	use({ "sbdchd/neoformat" })
+	{
+		"numToStr/Comment.nvim",
+		config = function()
+			local ok, nvim_comment = pcall(require, "Comment")
+			if ok then
+				nvim_comment.setup({
+					toggler = {
+						---Line-comment toggle keymap
+						line = "gc",
+						---Block-comment toggle keymap
+						block = "gb",
+					},
+				})
+			end
+		end,
+	},
 
-	use({ "rebelot/heirline.nvim" })
-	use({ "lewis6991/gitsigns.nvim" })
+	{
+		"tpope/vim-surround",
+		event = "VeryLazy",
+		config = function()
+			vim.keymap.set("v", "s", "<Plug>VSurround")
 
-	use({ "neovim/nvim-lspconfig" })
+			vim.keymap.set("v", "(", "<Plug>VSurround)")
+			vim.keymap.set("v", ")", "<Plug>VSurround)")
 
-	use({ "kdheepak/lazygit.nvim" })
+			vim.keymap.set("v", "[", "<nop>")
+			vim.keymap.set("v", "]", "<nop>")
 
-	use({ "hrsh7th/cmp-nvim-lsp" })
-	use({ "hrsh7th/cmp-buffer" })
-	use({ "hrsh7th/cmp-path" })
-	use({ "hrsh7th/cmp-cmdline" })
-	use({ "hrsh7th/nvim-cmp" })
-	use({
-		"L3MON4D3/LuaSnip",
-		tag = "<CurrentMajor>.*",
-		run = "make install_jsregexp",
-	})
+			vim.keymap.set("v", "[", "<Plug>VSurround]")
+			vim.keymap.set("v", "]", "<Plug>VSurround]")
 
-	use({ "chaoren/vim-wordmotion" })
+			vim.keymap.set("v", "{", "<Plug>VSurround}")
+			vim.keymap.set("v", "}", "<Plug>VSurround}")
 
-	use({ "windwp/nvim-ts-autotag" })
-	use({ "RRethy/nvim-treesitter-endwise" })
+			vim.keymap.set("v", "'", "<Plug>VSurround'")
+			vim.keymap.set("v", "`", "<Plug>VSurround`")
+			vim.keymap.set("v", '"', '<Plug>VSurround"')
+		end,
+	},
+	{ "tpope/vim-repeat", event = "VeryLazy" },
 
-	use({ "windwp/nvim-autopairs" })
+	{
+		"mg979/vim-visual-multi",
+		event = "VeryLazy",
+		config = function()
+			vim.keymap.set("v", "<c-s>", "<Plug>(VM-Reselect-Last)")
+		end,
+	},
 
-	use({ "glepnir/lspsaga.nvim" })
+	{
+		"noib3/nvim-cokeline",
+		config = function()
+			local ok, cokeline = pcall(require, "cokeline")
+			if ok then
+				local utils = require("cokeline/utils")
+				local get_hex = require("cokeline/utils").get_hex
+				local yellow = vim.g.terminal_color_3
+				cokeline.setup({
+					sidebar = {
+						filetype = "CHADTree",
+						components = {
+							{
+								text = "  CHADTree",
+								fg = yellow,
+								bg = get_hex("Normal", "bg"),
+								style = "bold",
+							},
+						},
+					},
+					components = {
+						{
+							text = "   ",
+						},
+						{
+							text = function(buffer)
+								return buffer.filename .. " "
+							end,
+							style = function(buffer)
+								return buffer.is_focused and nil
+							end,
+						},
+						{
+							text = function(buffer)
+								if buffer.is_modified then
+									return "●"
+								end
+								return " "
+							end,
+						},
+						{
+							text = " ",
+						},
+					},
+				})
+			end
 
-	use({ "echasnovski/mini.nvim" })
+			vim.keymap.set("n", "<c-,>", "<Plug>(cokeline-focus-prev)")
+			vim.keymap.set("n", "<c-.>", "<Plug>(cokeline-focus-next)")
+			-- Re-order to previous/next
+			vim.keymap.set("n", "<a-,>", "<Plug>(cokeline-switch-prev)")
+			vim.keymap.set("n", "<a-.>", "<Plug>(cokeline-switch-next)")
+		end,
+	},
+	{
+		"ojroques/nvim-bufdel",
+		event = "VeryLazy",
+		config = function()
+			local ok, bufdel = pcall(require, "bufdel")
+			if ok then
+				bufdel.setup({
+					next = "cycle",
+					quit = false,
+				})
+			end
+			vim.keymap.set("n", "|", "<cmd>BufDel<CR><cmd>clo<cr>")
+			vim.keymap.set("n", "<c-w>", "<cmd>BufDel<CR>")
+		end,
+	},
 
-	use({ "lukas-reineke/indent-blankline.nvim" })
+	{
+		"kana/vim-arpeggio",
+		config = function()
+			vim.cmd([[
+        let g:arpeggio_timeoutlen = 80
+        call arpeggio#map('i', '', 0, 'jk', '<Esc>')
+        call arpeggio#map('i', '', 0, 'kj', '<Esc>')
+        call arpeggio#map('v', '', 0, 'jk', '<Esc>')
+        call arpeggio#map('v', '', 0, 'kj', '<Esc>')
+        call arpeggio#map('s', '', 0, 'jk', '<Esc>')
+        call arpeggio#map('s', '', 0, 'kj', '<Esc>')
+        call arpeggio#map('x', '', 0, 'jk', '<Esc>')
+        call arpeggio#map('x', '', 0, 'kj', '<Esc>')
+        call arpeggio#map('c', '', 0, 'jk', '<c-c>')
+        call arpeggio#map('c', '', 0, 'kj', '<c-c>')
+        call arpeggio#map('o', '', 0, 'jk', '<Esc>')
+        call arpeggio#map('o', '', 0, 'kj', '<Esc>')
+        call arpeggio#map('l', '', 0, 'jk', '<Esc>')
+        call arpeggio#map('l', '', 0, 'kj', '<Esc>')
+        call arpeggio#map('t', '', 0, 'jk', '<C-\><C-n>')
+        call arpeggio#map('t', '', 0, 'kj', '<C-\><C-n>')
 
-	use({ "Vimjas/vim-python-pep8-indent" })
+        call arpeggio#map('i', '', 0, 'JK', '<Esc>')
+        call arpeggio#map('i', '', 0, 'KJ', '<Esc>')
+        call arpeggio#map('c', '', 0, 'JK', '<c-c>')
+        call arpeggio#map('c', '', 0, 'KJ', '<c-c>')
+        call arpeggio#map('o', '', 0, 'JK', '<Esc>')
+        call arpeggio#map('o', '', 0, 'KJ', '<Esc>')
+        call arpeggio#map('l', '', 0, 'JK', '<Esc>')
+        call arpeggio#map('l', '', 0, 'KJ', '<Esc>')
+        call arpeggio#map('t', '', 0, 'JK', '<C-\><C-n>')
+        call arpeggio#map('t', '', 0, 'KJ', '<C-\><C-n>')
+        ]])
+		end,
+	},
 
-	use({ "s1n7ax/nvim-terminal" })
+	{
+		"sbdchd/neoformat",
+		config = function()
+			vim.api.nvim_create_autocmd("BufWritePre", { pattern = "*.lua", command = ":Neoformat stylua" })
+			vim.api.nvim_create_autocmd("BufWritePre", {
+				pattern = { "*.vue", "*.ts", "*.tsx", "*.js", "*.jsx", "*.html", "*.css", "*.scss", "*.json" },
+				-- command = ":Neoformat prettier",
+				command = ":Neoformat prettierd",
+			})
+		end,
+	},
 
-	use({ "aca/emmet-ls" })
+	{
+		"neovim/nvim-lspconfig",
+		config = function()
+			local ok, lspconfig = pcall(require, "lspconfig")
+			if ok then
+				lspconfig.pylsp.setup({})
+				lspconfig.tsserver.setup({})
+				lspconfig.jsonls.setup({})
+				lspconfig.prismals.setup({})
+				lspconfig.tailwindcss.setup({})
+				-- lspconfig.tailwindcss.setup({
+				-- 	performance = {
+				-- 		trigger_debounce_time = 500,
+				-- 		throttle = 550,
+				-- 		fetching_timeout = 80,
+				-- 	},
+				-- })
 
-	-- use({ "kylechui/nvim-surround" })
+				local configs = require("lspconfig/configs")
+				local capabilities = vim.lsp.protocol.make_client_capabilities()
+				capabilities.textDocument.completion.completionItem.snippetSupport = true
 
-	if packer_bootstrap then
-		require("packer").sync()
-	end
-end)
+				lspconfig.emmet_ls.setup({
+					capabilities = capabilities,
+					filetypes = { "vue", "html", "typescriptreact", "javascriptreact", "css", "sass", "scss", "less" },
+					init_options = {
+						html = {
+							options = {
+								-- For possible options, see: https://github.com/emmetio/emmet/blob/master/src/config.ts#L79-L267
+								["bem.enabled"] = true,
+								["output.compactBoolean"] = true,
+							},
+						},
+					},
+				})
+
+				local util = require("lspconfig.util")
+				local function get_typescript_server_path(root_dir)
+					local global_ts = "C:/Users/Vallahor/AppData/Roaming/npm/node_modules/typescript/lib"
+					-- Alternative location if installed as root:
+					-- local global_ts = '/usr/local/lib/node_modules/typescript/lib'
+					local found_ts = ""
+					local function check_dir(path)
+						found_ts = util.path.join(path, "node_modules", "typescript", "lib")
+						if util.path.exists(found_ts) then
+							return path
+						end
+					end
+					if util.search_ancestors(root_dir, check_dir) then
+						return found_ts
+					else
+						return global_ts
+					end
+				end
+
+				lspconfig.volar.setup({
+					on_new_config = function(new_config, new_root_dir)
+						new_config.init_options.typescript.tsdk = get_typescript_server_path(new_root_dir)
+					end,
+				})
+				-- lspconfig.volar.setup({
+				-- 	-- filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue", "json" },
+				-- 	init_options = {
+				-- 		typescript = {
+				-- 			tsdk = "C:/Users/Vallahor/AppData/Roaming/npm/node_modules/typescript/lib",
+				-- 		},
+				-- 	},
+				-- })
+			end
+
+			-- close
+			vim.keymap.set("n", "<a-w>", "<c-o><cmd>bdel #<CR>")
+			vim.keymap.set("n", "gd", vim.lsp.buf.definition)
+			vim.keymap.set("n", "K", vim.lsp.buf.hover)
+			vim.keymap.set("n", "<a-n>", vim.lsp.buf.rename)
+			vim.keymap.set("n", "<a-a>", vim.lsp.buf.code_action)
+		end,
+	},
+
+	{ "kdheepak/lazygit.nvim", event = "VeryLazy" },
+
+	{
+		"hrsh7th/nvim-cmp",
+		event = "InsertEnter",
+		dependencies = {
+			{ "hrsh7th/cmp-nvim-lsp" },
+			{ "hrsh7th/cmp-buffer" },
+			{ "hrsh7th/cmp-path" },
+			{ "hrsh7th/cmp-cmdline" },
+			{ "L3MON4D3/LuaSnip" },
+		},
+		config = function()
+			local ok, cmp = pcall(require, "cmp")
+			if ok then
+				cmp.setup({
+					sources = {
+						{ name = "nvim_lsp", max_item_count = 200 },
+						{ name = "path" },
+						{ name = "buffer" },
+					},
+					snippet = {
+						expand = function(args)
+							local ok, luasnip = pcall(require, "luasnip")
+							if ok then
+								luasnip.lsp_expand(args.body) -- For `luasnip` users.
+							end
+						end,
+					},
+					mapping = {
+						["<C-Space>"] = cmp.mapping.complete(),
+						["<C-q>"] = cmp.mapping.close(),
+						["<c-j>"] = cmp.mapping(function()
+							if cmp.visible() then
+								cmp.select_next_item({ behavior = cmp.SelectBehavior.Insert, select = false })
+							end
+						end, { "i", "s", "c" }),
+
+						["<c-k>"] = cmp.mapping(function()
+							if cmp.visible() then
+								cmp.select_prev_item({ behavior = cmp.SelectBehavior.Insert, select = false })
+							end
+						end, { "i", "s", "c" }),
+						["<tab>"] = cmp.mapping.confirm({
+							select = true,
+							behavior = cmp.ConfirmBehavior.Replace,
+						}),
+						["<CR>"] = cmp.mapping.confirm({
+							select = false,
+						}),
+						["<c-e>"] = cmp.mapping.abort(),
+					},
+				})
+
+				cmp.setup.cmdline(":", {
+					mapping = cmp.mapping.preset.cmdline(),
+					sources = cmp.config.sources({
+						{ name = "path" },
+					}, {
+						{ name = "cmdline" },
+					}),
+				})
+			end
+		end,
+	},
+
+	{
+		"chaoren/vim-wordmotion",
+		event = "VeryLazy",
+		config = function()
+			vim.keymap.set({ "n", "v" }, "w", "<Plug>WordMotion_w")
+			vim.keymap.set({ "n", "v" }, "b", "<Plug>WordMotion_b")
+			vim.keymap.set({ "n", "v" }, "e", "<Plug>WordMotion_e")
+		end,
+	},
+
+	{
+		"windwp/nvim-autopairs",
+		event = "VeryLazy",
+		config = function()
+			local ok, autopairs = pcall(require, "nvim-autopairs")
+			if ok then
+				autopairs.setup({
+					disable_filetype = { "TelescopePrompt" },
+				})
+			end
+		end,
+	},
+
+	{
+		"echasnovski/mini.nvim",
+		config = function()
+			local ok, mini_cursorword = pcall(require, "mini.cursorword")
+			if ok then
+				mini_cursorword.setup()
+				vim.cmd([[
+                    hi MiniCursorword        guisp=none guifg=none guibg=#222022 gui=none
+                    hi MiniCursorwordCurrent guisp=none guifg=none guibg=none gui=none
+                ]])
+			end
+
+			local ok, mini_move = pcall(require, "mini.move")
+			if ok then
+				mini_move.setup({
+					mappings = {
+						left = "<",
+						right = ">",
+						down = "J",
+						up = "K",
+
+						line_left = "<",
+						line_right = ">",
+						line_down = "",
+						line_up = "",
+					},
+				})
+			end
+		end,
+	},
+
+	{
+		"lukas-reineke/indent-blankline.nvim",
+		config = function()
+			local ok, indent_blankline = pcall(require, "indent_blankline")
+			if ok then
+				-- vim.opt.list = true
+				-- vim.opt.listchars:append("space:·")
+				-- vim.opt.listchars:append("trail:·")
+				-- vim.opt.listchars:append("tab:··")
+				indent_blankline.setup({
+					show_trailing_blankline_indent = false,
+				})
+			end
+		end,
+	},
+	{ "Vimjas/vim-python-pep8-indent", event = "VeryLazy" },
+}
+require("lazy").setup(plugins, opts)
 
 -- SETTINGS --
 
@@ -161,483 +674,11 @@ vim.g.VM_maps = {
 }
 
 vim.g.wordmotion_spaces = { "w@<=-w@=", ".", ",", ";", ":", "w@<(-w@)", "w@<{-w@}", "w@<[-w@]", "w@<<-w@>" }
-
-local chadtree_settings = {
-	view = {
-		width = 30,
-	},
-	keymap = {
-		primary = { "o" },
-		open_sys = { "O" },
-	},
-	["theme.text_colour_set"] = "env",
-	-- ["theme.icon_glyph_set"] = "ascii_hollow",
-}
-
-vim.api.nvim_set_var("chadtree_settings", chadtree_settings)
+vim.g.neoformat_only_msg_on_error = 1
 
 -- PLUGINS
 
-local ok, lightspeed = pcall(require, "lightspeed")
-if ok then
-	-- vim.g.lightspeed_no_default_keymaps = true
-	lightspeed.setup({
-		exit_after_idle_msecs = { unlabeled = 300, labeled = nil },
-		--- s/x ---
-		jump_to_unique_chars = { safety_timeout = 300 },
-		ignore_case = true,
-		repeat_ft_with_target_char = true,
-	})
-	vim.cmd([[
-        let g:lightspeed_last_motion = ''
-        augroup lightspeed_last_motion
-        autocmd!
-        autocmd User LightspeedSxEnter let g:lightspeed_last_motion = 'sx'
-        autocmd User LightspeedFtEnter let g:lightspeed_last_motion = 'ft'
-        augroup end
-        map <expr> ; g:lightspeed_last_motion == 'sx' ? "<Plug>Lightspeed_;_sx" : "<Plug>Lightspeed_;_ft"
-        map <expr> , g:lightspeed_last_motion == 'sx' ? "<Plug>Lightspeed_,_sx" : "<Plug>Lightspeed_,_ft"
-    ]])
-end
-
-local ok, terminal = pcall(require, "nvim-terminal")
-if ok then
-	terminal.setup({
-		window = {
-			-- Do `:h :botright` for more information
-			-- NOTE: width or height may not be applied in some "pos"
-			position = "botright",
-
-			-- Do `:h split` for more information
-			split = "sp",
-
-			-- Width of the terminal
-			width = 50,
-
-			-- Height of the terminal
-			height = 15,
-		},
-
-		-- keymap to disable all the default keymaps
-		disable_default_keymaps = false,
-
-		-- keymap to toggle open and close terminal window
-		toggle_keymap = "<c-;>",
-
-		-- increase the window height by when you hit the keymap
-		window_height_change_amount = 2,
-
-		-- increase the window width by when you hit the keymap
-		window_width_change_amount = 2,
-
-		-- keymap to increase the window width
-		increase_width_keymap = "<m-=>",
-
-		-- keymap to decrease the window width
-		decrease_width_keymap = "<m-->",
-
-		-- keymap to increase the window height
-		increase_height_keymap = "<m-+>",
-
-		-- keymap to decrease the window height
-		decrease_height_keymap = "<m-_>",
-
-		terminals = {
-			-- keymaps to open nth terminal
-			{ keymap = "<c-1>" },
-			{ keymap = "<c-2>" },
-			{ keymap = "<c-3>" },
-			{ keymap = "<c-4>" },
-			{ keymap = "<c-5>" },
-		},
-	})
-end
-
-local ok, nvim_comment = pcall(require, "Comment")
-if ok then
-	nvim_comment.setup({
-		toggler = {
-			---Line-comment toggle keymap
-			line = "gc",
-			---Block-comment toggle keymap
-			block = "gb",
-		},
-	})
-end
-
-local ok, bufdel = pcall(require, "bufdel")
-if ok then
-	bufdel.setup({
-		next = "cycle",
-		quit = false,
-	})
-end
-
-local ok, telescope = pcall(require, "telescope")
-if ok then
-	local actions = require("telescope.actions")
-	telescope.setup({
-		defaults = {
-			mappings = {
-				i = {
-					["<C-bs>"] = function()
-						vim.api.nvim_input("<c-s-w>")
-					end,
-					["<c-k>"] = "move_selection_previous",
-					["<c-j>"] = "move_selection_next",
-					-- ["<esc>"] = actions.close,
-					["jk"] = actions.close,
-					["kj"] = actions.close,
-				},
-			},
-			initial_mode = "insert",
-			path_display = { "smart" },
-			borderchars = { "─", "│", "─", "│", "┌", "┐", "┘", "└" },
-			border = false,
-			layout_strategy = "bottom_pane",
-			layout_config = {
-				height = 10,
-				prompt_position = "bottom",
-			},
-			preview = false,
-		},
-	})
-end
-
-local ok, nvim_treesitter = pcall(require, "nvim-treesitter.configs")
-if ok then
-	nvim_treesitter.setup({
-		ensure_installed = {
-			"lua",
-			"c",
-			"cpp",
-			"zig",
-			"query",
-			"python",
-			"json",
-			"glsl",
-			"vue",
-			"javascript",
-			"typescript",
-			"prisma",
-			"html",
-			"css",
-			"markdown",
-		},
-		highlight = {
-			enable = true,
-			additional_vim_regex_highlighting = false,
-		},
-		indent = {
-			enable = true,
-			disable = { "python", "rust", "cpp", "html" },
-		},
-		autotag = {
-			enable = true,
-		},
-		incremental_selection = {
-			enable = true,
-			keymaps = {
-				init_selection = "m",
-				node_incremental = "m",
-				node_decremental = "M",
-				scope_incremental = "<c-/>",
-			},
-		},
-	})
-
-	require("nvim-treesitter.configs").setup({
-		endwise = {
-			enable = true,
-		},
-		playground = {
-			enable = true,
-			disable = {},
-			updatetime = 25,
-			persist_queries = false,
-			keybindings = {
-				toggle_query_editor = "o",
-				toggle_hl_groups = "i",
-				toggle_injected_languages = "t",
-				toggle_anonymous_nodes = "a",
-				toggle_language_display = "I",
-				focus_language = "f",
-				unfocus_language = "F",
-				update = "R",
-				goto_node = "<cr>",
-				show_help = "?",
-			},
-		},
-	})
-
-	local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
-	parser_config.tsx.filetype_to_parsername = { "javascript", "typescript.tsx" }
-
-	vim.cmd([[
-        autocmd BufRead *.scm set filetype=query
-    ]])
-end
-
-local ok, cokeline = pcall(require, "cokeline")
-if ok then
-	local utils = require("cokeline/utils")
-	local get_hex = require("cokeline/utils").get_hex
-	local yellow = vim.g.terminal_color_3
-	cokeline.setup({
-		sidebar = {
-			filetype = "CHADTree",
-			components = {
-				{
-					text = "  CHADTree",
-					fg = yellow,
-					bg = get_hex("Normal", "bg"),
-					style = "bold",
-				},
-			},
-		},
-		components = {
-			{
-				text = "   ",
-			},
-			{
-				text = function(buffer)
-					return buffer.filename .. " "
-				end,
-				style = function(buffer)
-					return buffer.is_focused and nil
-				end,
-			},
-			{
-				text = function(buffer)
-					if buffer.is_modified then
-						return "●"
-					end
-					return " "
-				end,
-			},
-			{
-				text = " ",
-			},
-		},
-	})
-end
-
--- neoformat
-vim.api.nvim_create_autocmd("BufWritePre", { pattern = "*.lua", command = ":Neoformat stylua" })
-vim.api.nvim_create_autocmd("BufWritePre", {
-	pattern = { "*.vue", "*.ts", "*.tsx", "*.js", "*.jsx", "*.html", "*.css", "*.scss", "*.json" },
-	-- command = ":Neoformat prettier",
-	command = ":Neoformat prettierd",
-})
-vim.g.neoformat_only_msg_on_error = 1
-
-local ok, autotag = pcall(require, "nvim-ts-autotag")
-if ok then
-	autotag.setup({})
-end
-
-local ok, gitsigns = pcall(require, "gitsigns")
-if ok then
-	gitsigns.setup()
-end
-
-local ok, mini_cursorword = pcall(require, "mini.cursorword")
-if ok then
-	mini_cursorword.setup()
-	vim.cmd([[
-        hi MiniCursorword        guisp=none guifg=none guibg=#222022 gui=none
-        hi MiniCursorwordCurrent guisp=none guifg=none guibg=none gui=none
-    ]])
-end
-
-local ok, mini_move = pcall(require, "mini.move")
-if ok then
-	mini_move.setup({
-		mappings = {
-			left = "<",
-			right = ">",
-			down = "J",
-			up = "K",
-
-			line_left = "<",
-			line_right = ">",
-			line_down = "",
-			line_up = "",
-		},
-	})
-end
-
-local ok, autopairs = pcall(require, "nvim-autopairs")
-if ok then
-	autopairs.setup({
-		disable_filetype = { "TelescopePrompt" },
-	})
-end
-
-local ok, indent_blankline = pcall(require, "indent_blankline")
-if ok then
-	-- vim.opt.list = true
-	-- vim.opt.listchars:append("space:·")
-	-- vim.opt.listchars:append("trail:·")
-	-- vim.opt.listchars:append("tab:··")
-	indent_blankline.setup({
-		show_trailing_blankline_indent = false,
-	})
-end
-
 require("swap_buffer")
-
-if not (vim.g.arpeggio_timeoutlen ~= nil) then
-	vim.cmd([[
-        let g:arpeggio_timeoutlen = 80
-        call arpeggio#map('i', '', 0, 'jk', '<Esc>')
-        call arpeggio#map('i', '', 0, 'kj', '<Esc>')
-        call arpeggio#map('v', '', 0, 'jk', '<Esc>')
-        call arpeggio#map('v', '', 0, 'kj', '<Esc>')
-        call arpeggio#map('s', '', 0, 'jk', '<Esc>')
-        call arpeggio#map('s', '', 0, 'kj', '<Esc>')
-        call arpeggio#map('x', '', 0, 'jk', '<Esc>')
-        call arpeggio#map('x', '', 0, 'kj', '<Esc>')
-        call arpeggio#map('c', '', 0, 'jk', '<c-c>')
-        call arpeggio#map('c', '', 0, 'kj', '<c-c>')
-        call arpeggio#map('o', '', 0, 'jk', '<Esc>')
-        call arpeggio#map('o', '', 0, 'kj', '<Esc>')
-        call arpeggio#map('l', '', 0, 'jk', '<Esc>')
-        call arpeggio#map('l', '', 0, 'kj', '<Esc>')
-        call arpeggio#map('t', '', 0, 'jk', '<C-\><C-n>')
-        call arpeggio#map('t', '', 0, 'kj', '<C-\><C-n>')
-
-        call arpeggio#map('i', '', 0, 'JK', '<Esc>')
-        call arpeggio#map('i', '', 0, 'KJ', '<Esc>')
-        call arpeggio#map('c', '', 0, 'JK', '<c-c>')
-        call arpeggio#map('c', '', 0, 'KJ', '<c-c>')
-        call arpeggio#map('o', '', 0, 'JK', '<Esc>')
-        call arpeggio#map('o', '', 0, 'KJ', '<Esc>')
-        call arpeggio#map('l', '', 0, 'JK', '<Esc>')
-        call arpeggio#map('l', '', 0, 'KJ', '<Esc>')
-        call arpeggio#map('t', '', 0, 'JK', '<C-\><C-n>')
-        call arpeggio#map('t', '', 0, 'KJ', '<C-\><C-n>')
-    ]])
-end
-
-local ok, lspconfig = pcall(require, "lspconfig")
-if ok then
-	lspconfig.pylsp.setup({})
-	lspconfig.tsserver.setup({})
-	lspconfig.jsonls.setup({})
-	lspconfig.prismals.setup({})
-	lspconfig.tailwindcss.setup({})
-	-- lspconfig.tailwindcss.setup({
-	-- 	performance = {
-	-- 		trigger_debounce_time = 500,
-	-- 		throttle = 550,
-	-- 		fetching_timeout = 80,
-	-- 	},
-	-- })
-
-	local configs = require("lspconfig/configs")
-	local capabilities = vim.lsp.protocol.make_client_capabilities()
-	capabilities.textDocument.completion.completionItem.snippetSupport = true
-
-	lspconfig.emmet_ls.setup({
-		capabilities = capabilities,
-		filetypes = { "vue", "html", "typescriptreact", "javascriptreact", "css", "sass", "scss", "less" },
-		init_options = {
-			html = {
-				options = {
-					-- For possible options, see: https://github.com/emmetio/emmet/blob/master/src/config.ts#L79-L267
-					["bem.enabled"] = true,
-					["output.compactBoolean"] = true,
-				},
-			},
-		},
-	})
-
-	local util = require("lspconfig.util")
-	local function get_typescript_server_path(root_dir)
-		local global_ts = "C:/Users/Vallahor/AppData/Roaming/npm/node_modules/typescript/lib"
-		-- Alternative location if installed as root:
-		-- local global_ts = '/usr/local/lib/node_modules/typescript/lib'
-		local found_ts = ""
-		local function check_dir(path)
-			found_ts = util.path.join(path, "node_modules", "typescript", "lib")
-			if util.path.exists(found_ts) then
-				return path
-			end
-		end
-		if util.search_ancestors(root_dir, check_dir) then
-			return found_ts
-		else
-			return global_ts
-		end
-	end
-
-	lspconfig.volar.setup({
-		on_new_config = function(new_config, new_root_dir)
-			new_config.init_options.typescript.tsdk = get_typescript_server_path(new_root_dir)
-		end,
-		-- filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue", "json" },
-	})
-	-- lspconfig.volar.setup({
-	-- 	-- filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue", "json" },
-	-- 	init_options = {
-	-- 		typescript = {
-	-- 			tsdk = "C:/Users/Vallahor/AppData/Roaming/npm/node_modules/typescript/lib",
-	-- 		},
-	-- 	},
-	-- })
-end
-
-local ok, cmp = pcall(require, "cmp")
-if ok then
-	cmp.setup({
-		sources = {
-			{ name = "nvim_lsp", max_item_count = 200 },
-			{ name = "path" },
-			{ name = "buffer" },
-		},
-		snippet = {
-			expand = function(args)
-				local ok, luasnip = pcall(require, "luasnip")
-				if ok then
-					luasnip.lsp_expand(args.body) -- For `luasnip` users.
-				end
-			end,
-		},
-		mapping = {
-			["<C-Space>"] = cmp.mapping.complete(),
-			["<C-q>"] = cmp.mapping.close(),
-			["<c-j>"] = cmp.mapping(function()
-				if cmp.visible() then
-					cmp.select_next_item({ behavior = cmp.SelectBehavior.Insert, select = false })
-				end
-			end, { "i", "s", "c" }),
-
-			["<c-k>"] = cmp.mapping(function()
-				if cmp.visible() then
-					cmp.select_prev_item({ behavior = cmp.SelectBehavior.Insert, select = false })
-				end
-			end, { "i", "s", "c" }),
-			["<tab>"] = cmp.mapping.confirm({
-				select = true,
-				behavior = cmp.ConfirmBehavior.Replace,
-			}),
-			["<CR>"] = cmp.mapping.confirm({
-				select = false,
-			}),
-			["<c-e>"] = cmp.mapping.abort(),
-		},
-	})
-
-	cmp.setup.cmdline(":", {
-		mapping = cmp.mapping.preset.cmdline(),
-		sources = cmp.config.sources({
-			{ name = "path" },
-		}, {
-			{ name = "cmdline" },
-		}),
-	})
-end
 
 -- MAPPING --
 
@@ -650,14 +691,8 @@ vim.keymap.set("i", "<c-j>", "<esc>")
 vim.keymap.set("i", "<c-k>", "<esc>")
 
 vim.keymap.set("n", "<c-g>", "<cmd>LazyGit<cr>")
-vim.keymap.set("n", "<C-t>", "<cmd>CHADopen<cr>")
 
--- vim.keymap.set("n", "<c-p>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
-vim.keymap.set("n", "<c-f>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
-vim.keymap.set("n", "<c-/>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
-vim.keymap.set("n", "<c-space>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
-
-vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>")
+vim.keymap.set({ "n", "v", "i" }, "<c-enter>", "<cmd>w!<CR><esc>")
 
 vim.keymap.set("n", "H", "<c-u>zz")
 vim.keymap.set("n", "L", "<c-d>zz")
@@ -665,19 +700,11 @@ vim.keymap.set("n", "L", "<c-d>zz")
 vim.keymap.set({ "n", "v" }, "<c-n>", "}")
 vim.keymap.set({ "n", "v" }, "<c-p>", "{")
 
-vim.keymap.set("v", "<c-s>", "<Plug>(VM-Reselect-Last)")
-
 vim.keymap.set("n", "<c-\\>", "<cmd>clo<cr>")
-vim.keymap.set("n", "|", "<cmd>BufDel<CR><cmd>clo<cr>")
 vim.keymap.set("n", "<c-=>", "<cmd>vs<cr>")
 vim.keymap.set("n", "<c-->", "<cmd>sp<cr>")
 vim.keymap.set("n", "<c-0>", "<c-w>o")
 vim.keymap.set("n", "<c-9>", "<c-w>r")
-vim.keymap.set("n", "<c-w>", "<cmd>BufDel<CR>")
-
-vim.keymap.set("i", "<c-s-enter>", "<c-o>O")
-vim.keymap.set("i", "<c-enter>", "<c-o>o")
-vim.keymap.set("i", "<c-;>", "<cmd>call setline('.', getline('.') . nr2char(getchar()))<cr>")
 
 vim.keymap.set({ "n", "v" }, "<c-h>", "<c-w>h")
 vim.keymap.set({ "n", "v" }, "<c-j>", "<c-w>j")
@@ -705,36 +732,9 @@ vim.keymap.set("n", "-", "$")
 vim.keymap.set("v", "-", "$h")
 vim.keymap.set({ "n", "v" }, "0", "^")
 
--- vim.keymap.set("n", "j", "v:count ? 'j^' : 'gj'", { expr = true })
--- vim.keymap.set("n", "k", "v:count ? 'k^' : 'gk'", { expr = true })
-
 -- vim.keymap.set("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
 vim.keymap.set("n", "<f4>", "<cmd>:e $MYVIMRC<CR>")
 vim.keymap.set("n", "<f5>", "<cmd>so %<CR>")
-
--- vim.keymap.set("v", "s", "<Plug>Lightspeed_s")
--- vim.keymap.set("v", "S", "<Plug>Lightspeed_S")
-
-vim.keymap.set("v", "n", "<Plug>Lightspeed_s")
-vim.keymap.set("v", "N", "<Plug>Lightspeed_S")
-
-vim.keymap.set("v", "s", "<Plug>VSurround")
-
-vim.keymap.set("v", "(", "<Plug>VSurround)")
-vim.keymap.set("v", ")", "<Plug>VSurround)")
-
-vim.keymap.set("v", "[", "<nop>")
-vim.keymap.set("v", "]", "<nop>")
-
-vim.keymap.set("v", "[", "<Plug>VSurround]")
-vim.keymap.set("v", "]", "<Plug>VSurround]")
-
-vim.keymap.set("v", "{", "<Plug>VSurround}")
-vim.keymap.set("v", "}", "<Plug>VSurround}")
-
-vim.keymap.set("v", "'", "<Plug>VSurround'")
-vim.keymap.set("v", "`", "<Plug>VSurround`")
-vim.keymap.set("v", '"', '<Plug>VSurround"')
 
 vim.keymap.set("n", "<F3>", "<cmd>TSHighlightCapturesUnderCursor<cr>")
 
@@ -742,26 +742,6 @@ vim.keymap.set("n", "<c-6>", "<C-^>")
 vim.keymap.set("n", "^", "<C-^>:bd#<cr>")
 
 -- tab
-
-vim.keymap.set("n", "<c-,>", "<Plug>(cokeline-focus-prev)")
-vim.keymap.set("n", "<c-.>", "<Plug>(cokeline-focus-next)")
--- Re-order to previous/next
-vim.keymap.set("n", "<a-,>", "<Plug>(cokeline-switch-prev)")
-vim.keymap.set("n", "<a-.>", "<Plug>(cokeline-switch-next)")
--- close
-vim.keymap.set("n", "<a-w>", "<c-o><cmd>bdel #<CR>")
-
--- MAPPING LSP
-vim.keymap.set("n", "gd", vim.lsp.buf.definition)
-vim.keymap.set("n", "K", vim.lsp.buf.hover)
--- vim.keymap.set("n", "<f2>", vim.lsp.buf.rename)
-vim.keymap.set("n", "<a-d>", vim.lsp.buf.definition)
-vim.keymap.set("n", "<a-n>", vim.lsp.buf.rename)
-vim.keymap.set("n", "<a-a>", vim.lsp.buf.code_action)
---
-vim.keymap.set({ "n", "v" }, "w", "<Plug>WordMotion_w")
-vim.keymap.set({ "n", "v" }, "b", "<Plug>WordMotion_b")
-vim.keymap.set({ "n", "v" }, "e", "<Plug>WordMotion_e")
 
 vim.keymap.set("n", "<leader>h", "<cmd>lua Swap_left()<CR>")
 vim.keymap.set("n", "<leader>j", "<cmd>lua Swap_down()<CR>")
@@ -793,18 +773,11 @@ vim.cmd([[
 language en_US
 filetype on
 
-" vnoremap J :m '>+1<CR>gv=gv
-" vnoremap K :m '<-2<CR>gv=gv
-
 fun! TrimWhitespace()
     let l:save = winsaveview()
     keeppatterns %s/\s\+$//e
     call winrestview(l:save)
 endfun
 autocmd BufWritePre * :call TrimWhitespace()
-
+"
 ]])
-local ok, theme = pcall(require, "theme")
-if ok then
-	theme.colorscheme()
-end
