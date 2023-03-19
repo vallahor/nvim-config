@@ -13,6 +13,16 @@ vim.opt.rtp:prepend(lazypath)
 
 local plugins = {
 	{
+		dir = "./lua/swap_buffer.lua",
+		evet = "VeryLazy",
+		config = function()
+			vim.keymap.set("n", "<leader>h", "<cmd>lua Swap_left()<CR>")
+			vim.keymap.set("n", "<leader>j", "<cmd>lua Swap_down()<CR>")
+			vim.keymap.set("n", "<leader>k", "<cmd>lua Swap_up()<CR>")
+			vim.keymap.set("n", "<leader>l", "<cmd>lua Swap_right()<CR>")
+		end,
+	},
+	{
 		dir = "./lua/theme.lua",
 		init = function()
 			local ok, theme = pcall(require, "theme")
@@ -22,11 +32,9 @@ local plugins = {
 		end,
 	},
 
+	{ "nvim-lua/plenary.nvim" },
 	{
 		"nvim-telescope/telescope.nvim",
-		dependencies = {
-			{ "nvim-lua/plenary.nvim" },
-		},
 		config = function()
 			local ok, telescope = pcall(require, "telescope")
 			if ok then
@@ -71,7 +79,6 @@ local plugins = {
 		build = ":TSUpdate",
 		event = "BufRead",
 		dependencies = {
-
 			{
 				"windwp/nvim-ts-autotag",
 				config = function()
@@ -82,7 +89,8 @@ local plugins = {
 				end,
 			},
 			{ "RRethy/nvim-treesitter-endwise" },
-			{ "nvim-treesitter/playground" },
+			{ "nvim-treesitter/playground", module = true },
+			{ "JoosepAlviste/nvim-ts-context-commentstring" },
 		},
 		config = function()
 			local ok, nvim_treesitter = pcall(require, "nvim-treesitter.configs")
@@ -128,6 +136,13 @@ local plugins = {
 					endwise = {
 						enable = true,
 					},
+					context_commentstring = {
+						enable = true,
+						config = {
+							typescript = { __default = "// %s", __multiline = "/* %s */" },
+							javascript = { __default = "// %s", __multiline = "/* %s */" },
+						},
+					},
 					playground = {
 						enable = true,
 						disable = {},
@@ -157,6 +172,7 @@ local plugins = {
 
 	{
 		"ggandor/lightspeed.nvim",
+		event = "VeryLazy",
 		config = function()
 			local ok, lightspeed = pcall(require, "lightspeed")
 			if ok then
@@ -191,6 +207,9 @@ local plugins = {
 		"ms-jpq/chadtree",
 		branch = "chad",
 		build = ":CHADdeps",
+		keys = {
+			{ "<C-t>", "<cmd>CHADopen<cr>", mode = "n" },
+		},
 		config = function()
 			local chadtree_settings = {
 				view = {
@@ -205,7 +224,6 @@ local plugins = {
 			}
 
 			vim.api.nvim_set_var("chadtree_settings", chadtree_settings)
-			vim.keymap.set("n", "<C-t>", "<cmd>CHADopen<cr>")
 		end,
 	},
 
@@ -217,9 +235,7 @@ local plugins = {
 			if ok then
 				nvim_comment.setup({
 					toggler = {
-						---Line-comment toggle keymap
 						line = "gc",
-						---Block-comment toggle keymap
 						block = "gb",
 					},
 				})
@@ -229,6 +245,7 @@ local plugins = {
 
 	{
 		"tpope/vim-surround",
+		event = "VeryLazy",
 		config = function()
 			vim.keymap.set("v", "s", "<Plug>VSurround")
 
@@ -249,7 +266,6 @@ local plugins = {
 			vim.keymap.set("v", '"', '<Plug>VSurround"')
 		end,
 	},
-	{ "tpope/vim-repeat", event = "VeryLazy" },
 
 	{
 		"mg979/vim-visual-multi",
@@ -315,6 +331,7 @@ local plugins = {
 	},
 	{
 		"ojroques/nvim-bufdel",
+		event = "VeryLazy",
 		config = function()
 			local ok, bufdel = pcall(require, "bufdel")
 			if ok then
@@ -323,7 +340,6 @@ local plugins = {
 					quit = false,
 				})
 			end
-			vim.keymap.set("n", "|", "<cmd>BufDel<CR><cmd>clo<cr>")
 			vim.keymap.set("n", "<c-w>", "<cmd>BufDel<CR>")
 		end,
 	},
@@ -386,14 +402,14 @@ local plugins = {
 				lspconfig.tsserver.setup({})
 				lspconfig.jsonls.setup({})
 				lspconfig.prismals.setup({})
-				lspconfig.tailwindcss.setup({})
-				-- lspconfig.tailwindcss.setup({
-				-- 	performance = {
-				-- 		trigger_debounce_time = 500,
-				-- 		throttle = 550,
-				-- 		fetching_timeout = 80,
-				-- 	},
-				-- })
+				-- lspconfig.tailwindcss.setup({})
+				lspconfig.tailwindcss.setup({
+					performance = {
+						trigger_debounce_time = 500,
+						throttle = 550,
+						fetching_timeout = 80,
+					},
+				})
 
 				local configs = require("lspconfig/configs")
 				local capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -416,8 +432,6 @@ local plugins = {
 				local util = require("lspconfig.util")
 				local function get_typescript_server_path(root_dir)
 					local global_ts = "C:/Users/Vallahor/AppData/Roaming/npm/node_modules/typescript/lib"
-					-- Alternative location if installed as root:
-					-- local global_ts = '/usr/local/lib/node_modules/typescript/lib'
 					local found_ts = ""
 					local function check_dir(path)
 						found_ts = util.path.join(path, "node_modules", "typescript", "lib")
@@ -448,7 +462,7 @@ local plugins = {
 			end
 
 			-- close
-			vim.keymap.set("n", "<a-w>", "<c-o><cmd>bdel #<CR>")
+			vim.keymap.set("n", "<c-b>", "<c-o><cmd>bdel #<CR>")
 			vim.keymap.set("n", "gd", vim.lsp.buf.definition)
 			vim.keymap.set("n", "K", vim.lsp.buf.hover)
 			vim.keymap.set("n", "<a-n>", vim.lsp.buf.rename)
@@ -456,7 +470,9 @@ local plugins = {
 		end,
 	},
 
-	{ "kdheepak/lazygit.nvim", event = "VeryLazy" },
+	{ "kdheepak/lazygit.nvim", keys = {
+		{ "<c-g>", "<cmd>LazyGit<cr>", mode = "n" },
+	} },
 
 	{
 		"hrsh7th/nvim-cmp",
@@ -524,6 +540,7 @@ local plugins = {
 
 	{
 		"chaoren/vim-wordmotion",
+		event = "VeryLazy",
 		config = function()
 			vim.keymap.set({ "n", "v" }, "w", "<Plug>WordMotion_w")
 			vim.keymap.set({ "n", "v" }, "b", "<Plug>WordMotion_b")
@@ -590,7 +607,7 @@ local plugins = {
 			end
 		end,
 	},
-	{ "Vimjas/vim-python-pep8-indent", event = "VeryLazy" },
+	{ "Vimjas/vim-python-pep8-indent", event = "BufEnter *.py" },
 }
 require("lazy").setup(plugins, opts)
 
@@ -675,10 +692,6 @@ vim.g.VM_maps = {
 vim.g.wordmotion_spaces = { "w@<=-w@=", ".", ",", ";", ":", "w@<(-w@)", "w@<{-w@}", "w@<[-w@]", "w@<<-w@>" }
 vim.g.neoformat_only_msg_on_error = 1
 
--- PLUGINS
-
-require("swap_buffer")
-
 -- MAPPING --
 
 vim.g.mapleader = " "
@@ -688,8 +701,6 @@ vim.keymap.set("n", "<esc>", "<cmd>nohl<cr><esc>")
 
 vim.keymap.set("i", "<c-j>", "<esc>")
 vim.keymap.set("i", "<c-k>", "<esc>")
-
-vim.keymap.set("n", "<c-g>", "<cmd>LazyGit<cr>")
 
 vim.keymap.set({ "n", "v", "i" }, "<c-enter>", "<cmd>w!<CR><esc>")
 
@@ -742,10 +753,7 @@ vim.keymap.set("n", "^", "<C-^>:bd#<cr>")
 
 -- tab
 
-vim.keymap.set("n", "<leader>h", "<cmd>lua Swap_left()<CR>")
-vim.keymap.set("n", "<leader>j", "<cmd>lua Swap_down()<CR>")
-vim.keymap.set("n", "<leader>k", "<cmd>lua Swap_up()<CR>")
-vim.keymap.set("n", "<leader>l", "<cmd>lua Swap_right()<CR>")
+vim.keymap.set("n", "|", "<cmd>bd<cr>")
 
 vim.api.nvim_create_autocmd("FocusGained", {
 	pattern = "*",
