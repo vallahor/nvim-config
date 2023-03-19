@@ -77,7 +77,7 @@ local plugins = {
 	{
 		"nvim-treesitter/nvim-treesitter",
 		build = ":TSUpdate",
-		event = "BufRead",
+		event = { "BufRead", "BufEnter" },
 		dependencies = {
 			{
 				"windwp/nvim-ts-autotag",
@@ -99,6 +99,7 @@ local plugins = {
 				nvim_treesitter.setup({
 					ensure_installed = {
 						"lua",
+                        "vim",
 						"c",
 						"cpp",
 						"zig",
@@ -108,6 +109,7 @@ local plugins = {
 						"glsl",
 						"vue",
 						"javascript",
+						"tsx",
 						"typescript",
 						"prisma",
 						"html",
@@ -116,6 +118,7 @@ local plugins = {
 					},
 					highlight = {
 						enable = true,
+						additional_vim_regex_highlighting = false,
 					},
 					indent = {
 						enable = true,
@@ -233,6 +236,8 @@ local plugins = {
 		config = function()
 			local ok, nvim_comment = pcall(require, "Comment")
 			if ok then
+				vim.keymap.set({ "n", "v" }, "gc", "<nop>")
+				vim.keymap.set({ "n", "v" }, "gb", "<nop>")
 				nvim_comment.setup({
 					toggler = {
 						line = "gc",
@@ -246,6 +251,9 @@ local plugins = {
 	{
 		"tpope/vim-surround",
 		event = "VeryLazy",
+		dependencies = {
+			{ "tpope/vim-repeat" },
+		},
 		config = function()
 			vim.keymap.set("v", "s", "<Plug>VSurround")
 

@@ -1,19 +1,19 @@
-; ; extends
-; [
-;  "default"
-;  "export"
-;  "async"
-;  "await"
-;  "typeof"
-;  "keyof"
-;  "declare"
-;  "extends"
-;  "=>"
-; ] @keyword.js
-;
-; [
-;  "as"
-; ] @operator
+; extends
+[
+ "default"
+ "export"
+ "async"
+ "await"
+ "typeof"
+ "keyof"
+ "declare"
+ "extends"
+ "=>"
+] @keyword.js
+
+[
+ "as"
+] @operator
 
 ; (jsx_opening_element (identifier) @tag)
 ; (jsx_closing_element (identifier) @tag)
