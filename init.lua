@@ -211,6 +211,7 @@ local plugins = {
 
 	{
 		"numToStr/Comment.nvim",
+		event = "VeryLazy",
 		config = function()
 			local ok, nvim_comment = pcall(require, "Comment")
 			if ok then
@@ -228,7 +229,6 @@ local plugins = {
 
 	{
 		"tpope/vim-surround",
-		event = "VeryLazy",
 		config = function()
 			vim.keymap.set("v", "s", "<Plug>VSurround")
 
@@ -315,7 +315,6 @@ local plugins = {
 	},
 	{
 		"ojroques/nvim-bufdel",
-		event = "VeryLazy",
 		config = function()
 			local ok, bufdel = pcall(require, "bufdel")
 			if ok then
@@ -333,40 +332,41 @@ local plugins = {
 		"kana/vim-arpeggio",
 		config = function()
 			vim.cmd([[
-        let g:arpeggio_timeoutlen = 80
-        call arpeggio#map('i', '', 0, 'jk', '<Esc>')
-        call arpeggio#map('i', '', 0, 'kj', '<Esc>')
-        call arpeggio#map('v', '', 0, 'jk', '<Esc>')
-        call arpeggio#map('v', '', 0, 'kj', '<Esc>')
-        call arpeggio#map('s', '', 0, 'jk', '<Esc>')
-        call arpeggio#map('s', '', 0, 'kj', '<Esc>')
-        call arpeggio#map('x', '', 0, 'jk', '<Esc>')
-        call arpeggio#map('x', '', 0, 'kj', '<Esc>')
-        call arpeggio#map('c', '', 0, 'jk', '<c-c>')
-        call arpeggio#map('c', '', 0, 'kj', '<c-c>')
-        call arpeggio#map('o', '', 0, 'jk', '<Esc>')
-        call arpeggio#map('o', '', 0, 'kj', '<Esc>')
-        call arpeggio#map('l', '', 0, 'jk', '<Esc>')
-        call arpeggio#map('l', '', 0, 'kj', '<Esc>')
-        call arpeggio#map('t', '', 0, 'jk', '<C-\><C-n>')
-        call arpeggio#map('t', '', 0, 'kj', '<C-\><C-n>')
+                let g:arpeggio_timeoutlen = 80
+                call arpeggio#map('i', '', 0, 'jk', '<Esc>')
+                call arpeggio#map('i', '', 0, 'kj', '<Esc>')
+                call arpeggio#map('v', '', 0, 'jk', '<Esc>')
+                call arpeggio#map('v', '', 0, 'kj', '<Esc>')
+                call arpeggio#map('s', '', 0, 'jk', '<Esc>')
+                call arpeggio#map('s', '', 0, 'kj', '<Esc>')
+                call arpeggio#map('x', '', 0, 'jk', '<Esc>')
+                call arpeggio#map('x', '', 0, 'kj', '<Esc>')
+                call arpeggio#map('c', '', 0, 'jk', '<c-c>')
+                call arpeggio#map('c', '', 0, 'kj', '<c-c>')
+                call arpeggio#map('o', '', 0, 'jk', '<Esc>')
+                call arpeggio#map('o', '', 0, 'kj', '<Esc>')
+                call arpeggio#map('l', '', 0, 'jk', '<Esc>')
+                call arpeggio#map('l', '', 0, 'kj', '<Esc>')
+                call arpeggio#map('t', '', 0, 'jk', '<C-\><C-n>')
+                call arpeggio#map('t', '', 0, 'kj', '<C-\><C-n>')
 
-        call arpeggio#map('i', '', 0, 'JK', '<Esc>')
-        call arpeggio#map('i', '', 0, 'KJ', '<Esc>')
-        call arpeggio#map('c', '', 0, 'JK', '<c-c>')
-        call arpeggio#map('c', '', 0, 'KJ', '<c-c>')
-        call arpeggio#map('o', '', 0, 'JK', '<Esc>')
-        call arpeggio#map('o', '', 0, 'KJ', '<Esc>')
-        call arpeggio#map('l', '', 0, 'JK', '<Esc>')
-        call arpeggio#map('l', '', 0, 'KJ', '<Esc>')
-        call arpeggio#map('t', '', 0, 'JK', '<C-\><C-n>')
-        call arpeggio#map('t', '', 0, 'KJ', '<C-\><C-n>')
-        ]])
+                call arpeggio#map('i', '', 0, 'JK', '<Esc>')
+                call arpeggio#map('i', '', 0, 'KJ', '<Esc>')
+                call arpeggio#map('c', '', 0, 'JK', '<c-c>')
+                call arpeggio#map('c', '', 0, 'KJ', '<c-c>')
+                call arpeggio#map('o', '', 0, 'JK', '<Esc>')
+                call arpeggio#map('o', '', 0, 'KJ', '<Esc>')
+                call arpeggio#map('l', '', 0, 'JK', '<Esc>')
+                call arpeggio#map('l', '', 0, 'KJ', '<Esc>')
+                call arpeggio#map('t', '', 0, 'JK', '<C-\><C-n>')
+                call arpeggio#map('t', '', 0, 'KJ', '<C-\><C-n>')
+            ]])
 		end,
 	},
 
 	{
 		"sbdchd/neoformat",
+		event = "BufWritePre",
 		config = function()
 			vim.api.nvim_create_autocmd("BufWritePre", { pattern = "*.lua", command = ":Neoformat stylua" })
 			vim.api.nvim_create_autocmd("BufWritePre", {
@@ -465,7 +465,7 @@ local plugins = {
 			{ "hrsh7th/cmp-nvim-lsp" },
 			{ "hrsh7th/cmp-buffer" },
 			{ "hrsh7th/cmp-path" },
-			{ "hrsh7th/cmp-cmdline" },
+			{ "hrsh7th/cmp-cmdline", event = "VeryLazy" },
 			{ "L3MON4D3/LuaSnip" },
 		},
 		config = function()
@@ -524,7 +524,6 @@ local plugins = {
 
 	{
 		"chaoren/vim-wordmotion",
-		event = "VeryLazy",
 		config = function()
 			vim.keymap.set({ "n", "v" }, "w", "<Plug>WordMotion_w")
 			vim.keymap.set({ "n", "v" }, "b", "<Plug>WordMotion_b")
