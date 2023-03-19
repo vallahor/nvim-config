@@ -319,6 +319,7 @@ if ok then
 			"vue",
 			"javascript",
 			"typescript",
+			"prisma",
 			"html",
 			"css",
 			"markdown",
@@ -333,9 +334,6 @@ if ok then
 		},
 		autotag = {
 			enable = true,
-			filetype = {
-				"htmldjango",
-			},
 		},
 		incremental_selection = {
 			enable = true,
@@ -428,7 +426,8 @@ end
 vim.api.nvim_create_autocmd("BufWritePre", { pattern = "*.lua", command = ":Neoformat stylua" })
 vim.api.nvim_create_autocmd("BufWritePre", {
 	pattern = { "*.vue", "*.ts", "*.tsx", "*.js", "*.jsx", "*.html", "*.css", "*.scss", "*.json" },
-	command = ":Neoformat prettier",
+	-- command = ":Neoformat prettier",
+	command = ":Neoformat prettierd",
 })
 vim.g.neoformat_only_msg_on_error = 1
 
@@ -486,17 +485,6 @@ if ok then
 	})
 end
 
--- local ok, nvim_surround = pcall(require, "nvim-surround")
--- if ok then
--- 	nvim_surround.setup({
--- 		keymaps = {
--- 			visual = "s",
--- 			visual_line = "s",
--- 		},
--- 	})
--- end
-
-require("heirline_config")
 require("swap_buffer")
 
 if not (vim.g.arpeggio_timeoutlen ~= nil) then
@@ -519,23 +507,6 @@ if not (vim.g.arpeggio_timeoutlen ~= nil) then
         call arpeggio#map('t', '', 0, 'jk', '<C-\><C-n>')
         call arpeggio#map('t', '', 0, 'kj', '<C-\><C-n>')
 
-        call arpeggio#map('i', '', 0, 'fd', '<Esc>')
-        call arpeggio#map('i', '', 0, 'df', '<Esc>')
-        call arpeggio#map('v', '', 0, 'fd', '<Esc>')
-        call arpeggio#map('v', '', 0, 'df', '<Esc>')
-        call arpeggio#map('s', '', 0, 'fd', '<Esc>')
-        call arpeggio#map('s', '', 0, 'df', '<Esc>')
-        call arpeggio#map('x', '', 0, 'fd', '<Esc>')
-        call arpeggio#map('x', '', 0, 'df', '<Esc>')
-        call arpeggio#map('c', '', 0, 'fd', '<c-c>')
-        call arpeggio#map('c', '', 0, 'df', '<c-c>')
-        call arpeggio#map('o', '', 0, 'fd', '<Esc>')
-        call arpeggio#map('o', '', 0, 'df', '<Esc>')
-        call arpeggio#map('l', '', 0, 'fd', '<Esc>')
-        call arpeggio#map('l', '', 0, 'df', '<Esc>')
-        call arpeggio#map('t', '', 0, 'fd', '<C-\><C-n>')
-        call arpeggio#map('t', '', 0, 'df', '<C-\><C-n>')
-
         call arpeggio#map('i', '', 0, 'JK', '<Esc>')
         call arpeggio#map('i', '', 0, 'KJ', '<Esc>')
         call arpeggio#map('c', '', 0, 'JK', '<c-c>')
@@ -552,16 +523,17 @@ end
 local ok, lspconfig = pcall(require, "lspconfig")
 if ok then
 	lspconfig.pylsp.setup({})
-	-- lspconfig.eslint.setup({})
-	-- lspconfig.tsserver.setup({})
-	lspconfig.volar.setup({
-		filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue", "json" },
-		init_options = {
-			typescript = {
-				tsdk = "C:/Users/Vallahor/AppData/Roaming/npm/node_modules/typescript/lib",
-			},
-		},
-	})
+	lspconfig.tsserver.setup({})
+	lspconfig.jsonls.setup({})
+	lspconfig.prismals.setup({})
+	lspconfig.tailwindcss.setup({})
+	-- lspconfig.tailwindcss.setup({
+	-- 	performance = {
+	-- 		trigger_debounce_time = 500,
+	-- 		throttle = 550,
+	-- 		fetching_timeout = 80,
+	-- 	},
+	-- })
 
 	local configs = require("lspconfig/configs")
 	local capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -580,13 +552,47 @@ if ok then
 			},
 		},
 	})
+
+	local util = require("lspconfig.util")
+	local function get_typescript_server_path(root_dir)
+		local global_ts = "C:/Users/Vallahor/AppData/Roaming/npm/node_modules/typescript/lib"
+		-- Alternative location if installed as root:
+		-- local global_ts = '/usr/local/lib/node_modules/typescript/lib'
+		local found_ts = ""
+		local function check_dir(path)
+			found_ts = util.path.join(path, "node_modules", "typescript", "lib")
+			if util.path.exists(found_ts) then
+				return path
+			end
+		end
+		if util.search_ancestors(root_dir, check_dir) then
+			return found_ts
+		else
+			return global_ts
+		end
+	end
+
+	lspconfig.volar.setup({
+		on_new_config = function(new_config, new_root_dir)
+			new_config.init_options.typescript.tsdk = get_typescript_server_path(new_root_dir)
+		end,
+		-- filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue", "json" },
+	})
+	-- lspconfig.volar.setup({
+	-- 	-- filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue", "json" },
+	-- 	init_options = {
+	-- 		typescript = {
+	-- 			tsdk = "C:/Users/Vallahor/AppData/Roaming/npm/node_modules/typescript/lib",
+	-- 		},
+	-- 	},
+	-- })
 end
 
 local ok, cmp = pcall(require, "cmp")
 if ok then
 	cmp.setup({
 		sources = {
-			{ name = "nvim_lsp" },
+			{ name = "nvim_lsp", max_item_count = 200 },
 			{ name = "path" },
 			{ name = "buffer" },
 		},
@@ -605,13 +611,13 @@ if ok then
 				if cmp.visible() then
 					cmp.select_next_item({ behavior = cmp.SelectBehavior.Insert, select = false })
 				end
-			end, { "i", "s" }),
+			end, { "i", "s", "c" }),
 
 			["<c-k>"] = cmp.mapping(function()
 				if cmp.visible() then
 					cmp.select_prev_item({ behavior = cmp.SelectBehavior.Insert, select = false })
 				end
-			end, { "i", "s" }),
+			end, { "i", "s", "c" }),
 			["<tab>"] = cmp.mapping.confirm({
 				select = true,
 				behavior = cmp.ConfirmBehavior.Replace,
@@ -640,8 +646,8 @@ vim.g.mapleader = " "
 vim.keymap.set("n", "<leader><leader>", "<cmd>nohl<cr><esc>")
 vim.keymap.set("n", "<esc>", "<cmd>nohl<cr><esc>")
 
-vim.keymap.set({ "i", "c" }, "<c-j>", "<esc>")
-vim.keymap.set({ "i", "c" }, "<c-k>", "<esc>")
+vim.keymap.set("i", "<c-j>", "<esc>")
+vim.keymap.set("i", "<c-k>", "<esc>")
 
 vim.keymap.set("n", "<c-g>", "<cmd>LazyGit<cr>")
 vim.keymap.set("n", "<C-t>", "<cmd>CHADopen<cr>")
@@ -656,12 +662,13 @@ vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>")
 vim.keymap.set("n", "H", "<c-u>zz")
 vim.keymap.set("n", "L", "<c-d>zz")
 
-vim.keymap.set({ "n", "v" }, "<c-j>", "}")
-vim.keymap.set({ "n", "v" }, "<c-k>", "{")
+vim.keymap.set({ "n", "v" }, "<c-n>", "}")
+vim.keymap.set({ "n", "v" }, "<c-p>", "{")
 
 vim.keymap.set("v", "<c-s>", "<Plug>(VM-Reselect-Last)")
 
 vim.keymap.set("n", "<c-\\>", "<cmd>clo<cr>")
+vim.keymap.set("n", "|", "<cmd>BufDel<CR><cmd>clo<cr>")
 vim.keymap.set("n", "<c-=>", "<cmd>vs<cr>")
 vim.keymap.set("n", "<c-->", "<cmd>sp<cr>")
 vim.keymap.set("n", "<c-0>", "<c-w>o")
@@ -672,12 +679,9 @@ vim.keymap.set("i", "<c-s-enter>", "<c-o>O")
 vim.keymap.set("i", "<c-enter>", "<c-o>o")
 vim.keymap.set("i", "<c-;>", "<cmd>call setline('.', getline('.') . nr2char(getchar()))<cr>")
 
--- vim.keymap.set({ "n", "v" }, "<c-j>", "<c-w>j")
--- vim.keymap.set({ "n", "v" }, "<c-k>", "<c-w>k")
-
 vim.keymap.set({ "n", "v" }, "<c-h>", "<c-w>h")
-vim.keymap.set({ "n", "v" }, "<c-n>", "<c-w>j")
-vim.keymap.set({ "n", "v" }, "<c-p>", "<c-w>k")
+vim.keymap.set({ "n", "v" }, "<c-j>", "<c-w>j")
+vim.keymap.set({ "n", "v" }, "<c-k>", "<c-w>k")
 vim.keymap.set({ "n", "v" }, "<c-l>", "<c-w>l")
 
 vim.keymap.set("c", "<c-v>", "<c-r>*")
@@ -735,6 +739,7 @@ vim.keymap.set("v", '"', '<Plug>VSurround"')
 vim.keymap.set("n", "<F3>", "<cmd>TSHighlightCapturesUnderCursor<cr>")
 
 vim.keymap.set("n", "<c-6>", "<C-^>")
+vim.keymap.set("n", "^", "<C-^>:bd#<cr>")
 
 -- tab
 
