@@ -157,7 +157,7 @@ vim.keymap.set("n", "<f5>", "<cmd>so %<CR>")
 vim.keymap.set("n", "<F3>", "<cmd>TSHighlightCapturesUnderCursor<cr>")
 
 vim.keymap.set("n", "<c-6>", "<C-^>")
-vim.keymap.set("n", "^", "<C-^>:bd#<cr>")
+vim.keymap.set("n", "<c-b>", "<C-^>:bd#<cr>")
 
 vim.keymap.set("n", "|", "<cmd>bd<cr>")
 

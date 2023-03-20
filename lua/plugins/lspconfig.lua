@@ -10,6 +10,7 @@ return {
 			local lspconfig = require("lspconfig")
 			lspconfig.ruff_lsp.setup({})
 			lspconfig.lua_ls.setup({})
+			lspconfig.gopls.setup({})
 			lspconfig.tsserver.setup({})
 			lspconfig.jsonls.setup({})
 			lspconfig.prismals.setup({})
@@ -44,11 +45,13 @@ return {
 				end,
 			})
 
-			vim.keymap.set("n", "<c-b>", "<c-o><cmd>bdel #<CR>")
+			-- vim.keymap.set("n", "<c-b>", "<c-o><cmd>bdel #<CR>")
 			vim.keymap.set("n", "gd", vim.lsp.buf.definition)
 			vim.keymap.set("n", "K", vim.lsp.buf.hover)
-			vim.keymap.set("n", "<a-n>", vim.lsp.buf.rename)
-			vim.keymap.set("n", "<a-a>", vim.lsp.buf.code_action)
+			-- vim.keymap.set("n", "<leader>mo", vim.lsp.buf.open_float)
+			-- vim.keymap.set("n", "<leader>md", vim.lsp.buf.definition)
+			-- vim.keymap.set("n", "<leader>mr", vim.lsp.buf.rename)
+			-- vim.keymap.set("n", "<leader>ma", vim.lsp.buf.code_action)
 		end,
 	},
 
@@ -85,7 +88,16 @@ return {
 	{
 		"williamboman/mason-lspconfig.nvim",
 		opts = {
-			ensure_installed = { "lua_ls", "jsonls", "tailwindcss", "volar", "tsserver", "ruff_lsp", "prismals" },
+			ensure_installed = {
+				"lua_ls",
+				"jsonls",
+				"tailwindcss",
+				"volar",
+				"tsserver",
+				"ruff_lsp",
+				"prismals",
+				"gopls",
+			},
 		},
 		config = function(_, opts)
 			require("mason-lspconfig").setup(opts)
@@ -101,6 +113,7 @@ return {
 				"stylua",
 				"black",
 				"prettierd",
+				"goimports",
 			},
 		},
 		config = function(_, opts)
