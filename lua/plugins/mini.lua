@@ -35,6 +35,21 @@ return {
 					comment_line = "gc",
 				},
 			})
+			require("mini.indentscope").setup({
+				draw = {
+					delay = 0,
+					animation = require("mini.indentscope").gen_animation.none(),
+				},
+				options = {
+					border = "top",
+					indent_at_cursor = false,
+					try_as_border = true,
+				},
+				symbol = "│",
+			})
+			vim.cmd([[
+                hi MiniIndentscopeSymbol guisp=none guifg=#493441 guibg=NONE gui=none
+            ]])
 		end,
 	},
 }

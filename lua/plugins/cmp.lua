@@ -12,7 +12,7 @@ return {
 			local cmp = require("cmp")
 			cmp.setup({
 				completion = {
-					completeopt = "menu,menuone,noinsert",
+					completeopt = "menu,noinsert,menuone,noselect",
 				},
 				sources = {
 					{
