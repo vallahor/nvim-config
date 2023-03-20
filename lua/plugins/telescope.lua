@@ -14,6 +14,7 @@ return {
 							["<c-k>"] = "move_selection_previous",
 							["<c-j>"] = "move_selection_next",
 							["<esc>"] = actions.close,
+							["<c-space>"] = actions.close,
 							["jk"] = actions.close,
 							["kj"] = actions.close,
 							["<c-d>"] = actions.delete_buffer,
