@@ -20,7 +20,6 @@ return {
 			theme.colorscheme()
 		end,
 	},
-
 	{ "Vimjas/vim-python-pep8-indent", event = "BufEnter *.py" },
 	{
 		"mattn/emmet-vim",

@@ -17,13 +17,13 @@ return {
 				sources = {
 					{
 						name = "nvim_lsp",
-						max_item_count = 100,
+						max_item_count = 20,
 						entry_filter = function(entry, ctx)
 							return cmp.lsp.CompletionItemKind.Text ~= entry:get_kind()
 						end,
 					},
-					{ name = "buffer", max_item_count = 100 },
-					{ name = "path", max_item_count = 100 },
+					{ name = "buffer", max_item_count = 20 },
+					{ name = "path", max_item_count = 20 },
 				},
 				mapping = {
 					["<C-Space>"] = cmp.mapping.complete(),

@@ -6,6 +6,13 @@ return {
 		event = { "BufRead", "BufEnter" },
 		dependencies = {
 			-- { "nvim-treesitter/playground", module = true },
+			{
+				"windwp/nvim-ts-autotag",
+				config = function()
+					require("nvim-ts-autotag").setup({})
+				end,
+			},
+			{ "RRethy/nvim-treesitter-endwise" },
 		},
 		opts = {
 			ensure_installed = {
