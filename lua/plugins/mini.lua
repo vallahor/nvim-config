@@ -48,6 +48,11 @@ return {
 			vim.keymap.set("n", "<c-w>", "<cmd>lua MiniBufremove.delete(0, false)<CR>")
 			vim.keymap.set("n", "<a-w>", "<cmd>lua MiniBufremove.delete(0, true)<CR>")
 
+			vim.api.nvim_create_autocmd(
+				"FileType",
+				{ pattern = "CHADTree", command = ":lua vim.b.miniindentscope_disable=true" }
+			)
+
 			vim.cmd([[
                 hi MiniCursorword        guisp=none guifg=none guibg=#222022 gui=none
                 hi MiniCursorwordCurrent guisp=none guifg=none guibg=none gui=none
