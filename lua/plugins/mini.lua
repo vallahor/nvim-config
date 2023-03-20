@@ -1,4 +1,5 @@
 return {
+	{ "JoosepAlviste/nvim-ts-context-commentstring", lazy = true },
 	{
 		"echasnovski/mini.nvim",
 		config = function()
@@ -19,6 +20,19 @@ return {
 					line_right = ">",
 					line_down = "",
 					line_up = "",
+				},
+			})
+
+			require("mini.pairs").setup()
+
+			require("mini.comment").setup({
+				hooks = {
+					pre = function()
+						require("ts_context_commentstring.internal").update_commentstring({})
+					end,
+				},
+				mappings = {
+					comment_line = "gc",
 				},
 			})
 		end,

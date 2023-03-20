@@ -5,7 +5,7 @@ if not vim.loop.fs_stat(lazypath) then
 		"clone",
 		"--filter=blob:none",
 		"https://github.com/folke/lazy.nvim.git",
-		"--branch=stable", -- latest stable release
+		"--branch=stable",
 		lazypath,
 	})
 end
@@ -55,12 +55,9 @@ vim.opt.cursorline = true
 vim.opt.scrolloff = 3
 vim.opt.backup = false
 vim.opt.gdefault = true
--- vim.opt.colorcolumn = "80"
--- vim.opt.cmdheight = 0
 -- vim.opt.guicursor = "i-ci:block-iCursor" -- comment when using nvim-qt (new version)
 -- vim.opt.guicursor = "a:blinkon100" -- comment when using nvim-qt (new version)
--- vim.opt.completeopt = { "menu", "menuone", "noselect" }
-vim.opt.completeopt = { "menu", "noinsert", "menuone", "noselect" }
+-- vim.opt.completeopt = { "menu", "noinsert", "menuone", "noselect" }
 vim.opt.cindent = true
 vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
 vim.opt.timeoutlen = 200
@@ -159,8 +156,6 @@ vim.keymap.set("n", "<F3>", "<cmd>TSHighlightCapturesUnderCursor<cr>")
 vim.keymap.set("n", "<c-6>", "<C-^>")
 vim.keymap.set("n", "^", "<C-^>:bd#<cr>")
 
--- tab
-
 vim.keymap.set("n", "|", "<cmd>bd<cr>")
 
 vim.api.nvim_create_autocmd("FocusGained", {
@@ -194,5 +189,4 @@ fun! TrimWhitespace()
     call winrestview(l:save)
 endfun
 autocmd BufWritePre * :call TrimWhitespace()
-"
 ]])
