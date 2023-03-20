@@ -115,6 +115,9 @@ vim.keymap.set("n", "L", "<c-d>zz")
 vim.keymap.set({ "n", "v" }, "<c-n>", "}")
 vim.keymap.set({ "n", "v" }, "<c-p>", "{")
 
+vim.keymap.set({ "n", "v" }, "<c-.>", "}")
+vim.keymap.set({ "n", "v" }, "<c-,>", "{")
+
 vim.keymap.set("n", "<c-\\>", "<cmd>clo<cr>")
 vim.keymap.set("n", "<c-=>", "<cmd>vs<cr>")
 vim.keymap.set("n", "<c-->", "<cmd>sp<cr>")
