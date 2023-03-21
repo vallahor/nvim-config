@@ -21,7 +21,7 @@ require("lazy").setup("plugins", {
 
 -- SETTINGS --
 
-local indent = 4
+local indent = 2
 
 vim.opt.guifont = { "JetBrainsMonoNL NFM:h13" }
 -- vim.opt.guifont = { "Consolas:h15" }
@@ -173,7 +173,7 @@ vim.api.nvim_create_autocmd("FocusGained", {
 -- })
 
 vim.api.nvim_create_autocmd("BufEnter", {
-	pattern = "*.py",
+	pattern = { "*.py", "*.go" },
 	callback = function()
 		vim.opt_local.shiftwidth = 4
 		vim.opt_local.tabstop = 4

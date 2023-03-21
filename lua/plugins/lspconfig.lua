@@ -8,7 +8,8 @@ return {
 		},
 		config = function()
 			local lspconfig = require("lspconfig")
-			lspconfig.ruff_lsp.setup({})
+			-- lspconfig.ruff_lsp.setup({})
+			lspconfig.pylsp.setup({})
 			lspconfig.lua_ls.setup({})
 			lspconfig.gopls.setup({})
 			lspconfig.tsserver.setup({})
@@ -49,10 +50,12 @@ return {
 			-- vim.keymap.set("n", "<c-b>", "<c-o><cmd>bdel #<CR>")
 			vim.keymap.set("n", "gd", vim.lsp.buf.definition)
 			vim.keymap.set("n", "K", vim.lsp.buf.hover)
-			-- vim.keymap.set("n", "<leader>mo", vim.lsp.buf.open_float)
+			vim.keymap.set("n", "<a-d>", vim.diagnostic.open_float)
+			vim.keymap.set("n", "{", vim.diagnostic.goto_prev)
+			vim.keymap.set("n", "}", vim.diagnostic.goto_next)
+			vim.keymap.set("n", "<a-n>", vim.lsp.buf.rename)
+			vim.keymap.set("n", "<a-a>", vim.lsp.buf.code_action)
 			-- vim.keymap.set("n", "<leader>md", vim.lsp.buf.definition)
-			-- vim.keymap.set("n", "<leader>mr", vim.lsp.buf.rename)
-			-- vim.keymap.set("n", "<leader>ma", vim.lsp.buf.code_action)
 		end,
 	},
 
@@ -93,10 +96,11 @@ return {
 			ensure_installed = {
 				"lua_ls",
 				"jsonls",
-				"tailwindcss",
+				-- "tailwindcss",
 				"volar",
 				"tsserver",
 				"ruff_lsp",
+				"pylsp",
 				"prismals",
 				"gopls",
 			},

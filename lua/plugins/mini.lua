@@ -19,7 +19,7 @@ return {
 				},
 			})
 
-			require("mini.pairs").setup()
+			-- require("mini.pairs").setup()
 			require("mini.bufremove").setup()
 
 			require("mini.comment").setup({

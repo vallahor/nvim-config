@@ -12,18 +12,18 @@ return {
 			local cmp = require("cmp")
 			cmp.setup({
 				completion = {
-					completeopt = "menu,noinsert,menuone,noselect",
+					-- completeopt = "menu,noinsert,menuone,noselect",
+					completeopt = "menu,preview,menuone,noselect",
 				},
 				sources = {
 					{
 						name = "nvim_lsp",
-						max_item_count = 20,
-						entry_filter = function(entry, ctx)
+						entry_filter = function(entry, _ctx)
 							return cmp.lsp.CompletionItemKind.Text ~= entry:get_kind()
 						end,
 					},
-					{ name = "buffer", max_item_count = 20 },
-					{ name = "path", max_item_count = 20 },
+					{ name = "buffer" },
+					{ name = "path" },
 				},
 				mapping = {
 					["<C-Space>"] = cmp.mapping.complete(),
@@ -33,7 +33,6 @@ return {
 							cmp.select_next_item({ behavior = cmp.SelectBehavior.Insert, select = false })
 						end
 					end, { "i", "s", "c" }),
-
 					["<c-k>"] = cmp.mapping(function()
 						if cmp.visible() then
 							cmp.select_prev_item({ behavior = cmp.SelectBehavior.Insert, select = false })
@@ -42,9 +41,6 @@ return {
 					["<tab>"] = cmp.mapping.confirm({
 						select = true,
 						behavior = cmp.ConfirmBehavior.Replace,
-					}),
-					["<CR>"] = cmp.mapping.confirm({
-						select = false,
 					}),
 					["<c-e>"] = cmp.mapping.abort(),
 				},
