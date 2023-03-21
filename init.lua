@@ -24,6 +24,7 @@ require("lazy").setup("plugins", {
 local indent = 4
 
 vim.opt.guifont = { "JetBrainsMonoNL NFM:h13" }
+-- vim.opt.guifont = { "Consolas:h15" }
 vim.opt.shiftwidth = indent
 vim.opt.tabstop = indent
 vim.opt.softtabstop = indent
@@ -95,9 +96,6 @@ vim.g.VM_maps = {
 	["Remove Region"] = "+",
 	-- ["Add Cursor At Pos"] = "<enter>",
 }
-
-vim.g.wordmotion_spaces = { "w@<=-w@=", ".", ",", ";", ":", "w@<(-w@)", "w@<{-w@}", "w@<[-w@]", "w@<<-w@>" }
-vim.g.neoformat_only_msg_on_error = 1
 
 -- MAPPING --
 
