@@ -14,7 +14,7 @@ return {
 			lspconfig.tsserver.setup({})
 			lspconfig.jsonls.setup({})
 			lspconfig.prismals.setup({})
-			lspconfig.tailwindcss.setup({})
+			-- lspconfig.tailwindcss.setup({})
 			-- lspconfig.tailwindcss.setup({
 			-- 	performance = {
 			-- 		trigger_debounce_time = 500,

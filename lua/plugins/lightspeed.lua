@@ -14,8 +14,8 @@ return {
 			-- vim.keymap.set("v", "s", "<Plug>Lightspeed_s")
 			-- vim.keymap.set("v", "S", "<Plug>Lightspeed_S")
 
-			vim.keymap.set("v", "n", "<Plug>Lightspeed_s")
-			vim.keymap.set("v", "N", "<Plug>Lightspeed_S")
+			vim.keymap.set("v", "u", "<Plug>Lightspeed_s")
+			vim.keymap.set("v", "U", "<Plug>Lightspeed_S")
 			vim.cmd([[
                 let g:lightspeed_last_motion = ''
                 augroup lightspeed_last_motion
