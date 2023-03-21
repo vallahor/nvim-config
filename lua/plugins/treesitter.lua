@@ -24,6 +24,7 @@ return {
 				"zig",
 				"query",
 				"go",
+				"gomod",
 				"python",
 				"json",
 				"glsl",

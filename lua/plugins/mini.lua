@@ -50,7 +50,7 @@ return {
 
 			vim.api.nvim_create_autocmd(
 				"FileType",
-				{ pattern = "CHADTree", command = ":lua vim.b.miniindentscope_disable=true" }
+				{ pattern = { "CHADTree", "python" }, command = ":lua vim.b.miniindentscope_disable=true" }
 			)
 
 			vim.cmd([[
