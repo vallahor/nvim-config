@@ -5,11 +5,12 @@ return {
 			local sj = require("sj")
 			sj.setup({
 				separator = ";",
+				relative_labels = true,
 				-- separator = "",
 				-- max_pattern_length = 0,
 				keymaps = {
-					cancel = "<c-space>",
-					validate = "<space>",
+					cancel = "<space>",
+					validate = "<cr>",
 					delete_prev_word = "<C-bs>",
 				},
         -- stylua: ignore
@@ -22,9 +23,7 @@ return {
           "B", "X", "Z",
         },
 			})
-			vim.keymap.set({ "n", "v", "x" }, "f", sj.run)
-			-- vim.keymap.set("n", "s", sj.run)
-			-- vim.keymap.set({ "v", "x" }, "z", sj.run)
+			vim.keymap.set({ "n", "v", "x" }, "s", sj.run)
 			vim.keymap.set("n", "<c-p>", sj.prev_match)
 			vim.keymap.set("n", "<c-n>", sj.next_match)
 			vim.keymap.set("n", "<c-s>", sj.redo)
