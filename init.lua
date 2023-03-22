@@ -114,9 +114,6 @@ vim.keymap.set({ "n", "v", "i" }, "<c-enter>", "<cmd>w!<CR><esc>")
 vim.keymap.set("n", "H", "<c-u>zz")
 vim.keymap.set("n", "L", "<c-d>zz")
 
-vim.keymap.set({ "n", "v" }, "<c-n>", "}")
-vim.keymap.set({ "n", "v" }, "<c-p>", "{")
-
 vim.keymap.set({ "n", "v" }, "<c-.>", "}")
 vim.keymap.set({ "n", "v" }, "<c-,>", "{")
 
