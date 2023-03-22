@@ -64,6 +64,10 @@ vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
 vim.opt.timeoutlen = 200
 vim.opt.updatetime = 200
 
+-- vim.opt.laststatus = 0
+-- vim.opt.winbar = " %f %m%=%l "
+vim.opt.cmdheight = 0
+
 vim.wo.signcolumn = "no"
 vim.wo.relativenumber = true
 -- vim.wo.number = true

@@ -8,21 +8,12 @@ return {
 		},
 		config = function()
 			local lspconfig = require("lspconfig")
-			-- lspconfig.ruff_lsp.setup({})
-			lspconfig.pylsp.setup({})
+			lspconfig.pyright.setup({})
 			lspconfig.lua_ls.setup({})
 			lspconfig.gopls.setup({})
 			lspconfig.tsserver.setup({})
 			lspconfig.jsonls.setup({})
 			lspconfig.prismals.setup({})
-			-- lspconfig.tailwindcss.setup({})
-			-- lspconfig.tailwindcss.setup({
-			-- 	performance = {
-			-- 		trigger_debounce_time = 500,
-			-- 		throttle = 550,
-			-- 		fetching_timeout = 80,
-			-- 	},
-			-- })
 
 			local util = require("lspconfig.util")
 			local function get_typescript_server_path(root_dir)
@@ -96,11 +87,9 @@ return {
 			ensure_installed = {
 				"lua_ls",
 				"jsonls",
-				-- "tailwindcss",
 				"volar",
 				"tsserver",
-				"ruff_lsp",
-				"pylsp",
+				"pyright",
 				"prismals",
 				"gopls",
 			},

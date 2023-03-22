@@ -22,7 +22,6 @@ return {
 					},
 					initial_mode = "insert",
 					path_display = { "smart" },
-					-- borderchars = { "─", "│", "─", "│", "┌", "┐", "┘", "└" },
 					border = false,
 					layout_strategy = "bottom_pane",
 					layout_config = {
@@ -30,6 +29,7 @@ return {
 						prompt_position = "bottom",
 					},
 					preview = false,
+					file_ignore_patterns = { "node_modules", ".venv" },
 				},
 			})
 
