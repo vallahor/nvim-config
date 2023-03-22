@@ -10,7 +10,7 @@ return {
 				keymaps = {
 					cancel = "<c-space>",
 					validate = "<space>",
-					delete_prev_word = "<C-<bs>>",
+					delete_prev_word = "<C-bs>",
 				},
         -- stylua: ignore
         labels = {
