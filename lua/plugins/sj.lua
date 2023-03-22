@@ -10,12 +10,16 @@ return {
 				keymaps = {
 					cancel = "<c-space>",
 					validate = "<space>",
+					delete_prev_word = "<C-<bs>>",
 				},
         -- stylua: ignore
         labels = {
           "a", "s", "d", "f", "g", "h", "j", "k", "l", "w", "r", "t",
-          "y", "u", "i", "o",
-          -- "s", "t", "u", "v", "w", "x", "y", "z",
+          "y", "u", "i", "o", "q", "p", "n", "m", "v", "b", "c", "x",
+          "[", "]", "J", "k", "L", "N", "M", "I", "O", "P", "U", "Y",
+          "F", "G", "T", "R", "D", "E", "W", "S", 'Q', "A", "V", "C",
+          "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ",", "!",
+          "B", "X", "Z",
         },
 			})
 			vim.keymap.set({ "n", "v", "x" }, "f", sj.run)
