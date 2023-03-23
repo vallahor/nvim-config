@@ -64,9 +64,16 @@ vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
 vim.opt.timeoutlen = 200
 vim.opt.updatetime = 200
 
--- vim.opt.laststatus = 0
--- vim.opt.winbar = " %f %m%=%l "
 vim.opt.cmdheight = 0
+vim.opt.winbar = " %f %m%=%l "
+
+vim.cmd([[
+set laststatus=0
+hi! HorSplit guifg=#382536 guibg=#121112
+hi! link StatusLine HorSplit
+hi! link StatusLineNC HorSplit
+set statusline=%{repeat('─',winwidth('.'))}
+]])
 
 vim.wo.signcolumn = "no"
 vim.wo.relativenumber = true
