@@ -126,7 +126,7 @@ local t = {
 	WarningMsg = { fg = p.pink2 },
 	WildMenu = { bg = p.fg4 },
 	Normal = { fg = p.fg1, bg = p.bg1 },
-	Comment = { fg = p.green2 },
+	Comment = { fg = p.green2, effect = "italic" },
 	Constant = { fg = p.pink_pastel },
 	Identifier = { fg = p.fg1 },
 	Statement = { fg = p.purple_dark },
@@ -162,7 +162,7 @@ local t = {
 	SpecialKey = { fg = p.pink_pastel },
 	Tag = { fg = p.red },
 	Delimiter = { fg = p.purple_dark },
-	SpecialComment = { fg = p.purple_dark },
+	SpecialComment = { fg = p.purple_dark, effect = "italic" },
 	Debug = { fg = p.purple_dark },
 	gitcommitSummary = { fg = p.fg2 },
 	DiagnosticError = { fg = p.red4 },
@@ -260,7 +260,7 @@ local t = {
 	["@debug"] = { fg = p.purple_dark },
 	["@storageclass"] = { fg = p.red, effect = italic_active },
 	["@storageclass.lifetime"] = { fg = p.pink_half_dark, effect = italic_active },
-	["@comment"] = { fg = p.green2 },
+	["@comment"] = { fg = p.green2, effect = "italic" },
 }
 
 local function highlight(group, style)

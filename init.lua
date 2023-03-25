@@ -23,6 +23,7 @@ require("lazy").setup("plugins", {
 
 local indent = 2
 
+-- vim.opt.guifont = { "JetBrainsMonoNL NFM:h14" }
 vim.opt.guifont = { "JetBrainsMonoNL NFM:h13" }
 -- vim.opt.guifont = { "Consolas:h15" }
 vim.opt.shiftwidth = indent
@@ -56,7 +57,7 @@ vim.opt.cursorline = true
 vim.opt.scrolloff = 3
 vim.opt.backup = false
 vim.opt.gdefault = true
--- vim.opt.guicursor = "i-ci:block-iCursor" -- comment when using nvim-qt (new version)
+vim.opt.guicursor = "i-ci:block-iCursor" -- comment when using nvim-qt (new version)
 -- vim.opt.guicursor = "a:blinkon100" -- comment when using nvim-qt (new version)
 -- vim.opt.completeopt = { "menu", "noinsert", "menuone", "noselect" }
 vim.opt.cindent = true
@@ -130,6 +131,9 @@ vim.keymap.set("n", "<c-->", "<cmd>sp<cr>")
 vim.keymap.set("n", "<c-0>", "<c-w>o")
 vim.keymap.set("n", "<c-9>", "<c-w>r")
 
+-- resize windows
+vim.keymap.set("n", "<a-=>", "<c-w>=")
+
 vim.keymap.set({ "n", "v" }, "<c-h>", "<c-w>h")
 vim.keymap.set({ "n", "v" }, "<c-j>", "<c-w>j")
 vim.keymap.set({ "n", "v" }, "<c-k>", "<c-w>k")
@@ -140,7 +144,6 @@ vim.keymap.set("c", "<c-v>", "<c-r>*")
 vim.keymap.set("v", "v", "V")
 
 vim.keymap.set({ "i", "c" }, "<c-bs>", "<c-w>")
--- vim.keymap.set("i", "<c-bs>", "<c-o>v<Plug>WordMotion_bx")
 
 vim.keymap.set("n", "x", '"_x')
 vim.keymap.set("v", "x", '"_d')
