@@ -25,6 +25,8 @@ return {
 				"query",
 				"go",
 				"gomod",
+				"gosum",
+				"gowork",
 				"python",
 				"json",
 				"glsl",
