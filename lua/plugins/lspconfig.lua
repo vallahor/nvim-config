@@ -7,13 +7,27 @@ return {
 			"williamboman/mason-lspconfig.nvim",
 		},
 		config = function()
+			local capabilities = require("cmp_nvim_lsp").default_capabilities()
+
 			local lspconfig = require("lspconfig")
-			lspconfig.pyright.setup({})
-			lspconfig.lua_ls.setup({})
-			lspconfig.gopls.setup({})
-			lspconfig.tsserver.setup({})
-			lspconfig.jsonls.setup({})
-			lspconfig.prismals.setup({})
+			lspconfig.pyright.setup({
+				capabilities = capabilities,
+			})
+			lspconfig.lua_ls.setup({
+				capabilities = capabilities,
+			})
+			lspconfig.gopls.setup({
+				capabilities = capabilities,
+			})
+			lspconfig.tsserver.setup({
+				capabilities = capabilities,
+			})
+			lspconfig.jsonls.setup({
+				capabilities = capabilities,
+			})
+			lspconfig.prismals.setup({
+				capabilities = capabilities,
+			})
 
 			local util = require("lspconfig.util")
 			local function get_typescript_server_path(root_dir)
@@ -33,6 +47,7 @@ return {
 			end
 
 			lspconfig.volar.setup({
+				capabilities = capabilities,
 				on_new_config = function(new_config, new_root_dir)
 					new_config.init_options.typescript.tsdk = get_typescript_server_path(new_root_dir)
 				end,

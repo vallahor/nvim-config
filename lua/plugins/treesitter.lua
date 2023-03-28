@@ -45,10 +45,10 @@ return {
 			highlight = {
 				enable = true,
 			},
-			indent = {
-				enable = true,
-				disable = { "python", "rust", "cpp" },
-			},
+			-- indent = {
+			-- 	enable = true,
+			-- 	disable = { "python", "rust", "cpp", "go" },
+			-- },
 			autotag = {
 				enable = true,
 			},

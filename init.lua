@@ -58,8 +58,6 @@ vim.opt.scrolloff = 3
 vim.opt.backup = false
 vim.opt.gdefault = true
 vim.opt.guicursor = "i-ci:block-iCursor" -- comment when using nvim-qt (new version)
--- vim.opt.guicursor = "a:blinkon100" -- comment when using nvim-qt (new version)
--- vim.opt.completeopt = { "menu", "noinsert", "menuone", "noselect" }
 vim.opt.cindent = true
 vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
 vim.opt.timeoutlen = 200

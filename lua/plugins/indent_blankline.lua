@@ -9,6 +9,12 @@ return {
 			require("indent_blankline").setup({
 				show_trailing_blankline_indent = false,
 			})
+			vim.g.indent_blankline_use_treesitter = true
+
+			vim.api.nvim_create_autocmd(
+				"FileType",
+				{ pattern = { "CHADTree", "python" }, command = ":lua vim.b.indent_blankline_use_treesitter=false" }
+			)
 		end,
 	},
 }
