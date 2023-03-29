@@ -7,6 +7,7 @@ local undercurl_bold_active = "undercurl,bold"
 
 local p = {
 	other1 = "#821554",
+	other2 = "#CC94A0", -- check if really worth and get a new name
 	brown = "#7F5446", -- not used
 	fg1 = "#A98D92",
 	fg2 = "#C0AEA0",
@@ -241,6 +242,7 @@ local t = {
 	["@type.builtin"] = { fg = p.purple_light },
 	-- ["@function"] = { fg = p.yellow },
 	["@function"] = { fg = p.yellow },
+	-- ["@function.builtin"] = { fg = p.other2 },
 	["@function.builtin"] = { fg = p.purple_light },
 	-- ["@function.builtin"] = { fg = p.red6 },
 	["@function.call"] = { fg = p.yellow },

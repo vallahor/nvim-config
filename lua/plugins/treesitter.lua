@@ -16,6 +16,7 @@ return {
 		},
 		opts = {
 			ensure_installed = {
+				"bash",
 				"lua",
 				"vim",
 				"help",
@@ -34,7 +35,7 @@ return {
 				"javascript",
 				"tsx",
 				"typescript",
-				"prisma",
+				"sql",
 				"html",
 				"yaml",
 				"css",
@@ -45,10 +46,10 @@ return {
 			highlight = {
 				enable = true,
 			},
-			-- indent = {
-			-- 	enable = true,
-			-- 	disable = { "python", "rust", "cpp", "go" },
-			-- },
+			indent = {
+				enable = true,
+				disable = { "python", "rust", "cpp", "go" },
+			},
 			autotag = {
 				enable = true,
 			},
@@ -92,8 +93,8 @@ return {
 			require("nvim-treesitter.configs").setup(opts)
 
 			vim.cmd([[
-                autocmd BufRead *.scm set filetype=query
-            ]])
+        autocmd BufRead *.scm set filetype=query
+      ]])
 		end,
 	},
 }

@@ -21,7 +21,7 @@ require("lazy").setup("plugins", {
 
 -- SETTINGS --
 
-local indent = 2
+local indent = 4
 
 -- vim.opt.guifont = { "JetBrainsMonoNL NFM:h14" }
 vim.opt.guifont = { "JetBrainsMonoNL NFM:h13" }
@@ -64,6 +64,7 @@ vim.opt.timeoutlen = 200
 vim.opt.updatetime = 200
 
 vim.opt.cmdheight = 0
+
 vim.opt.winbar = " %f %m%=%l "
 
 vim.cmd([[
@@ -173,19 +174,42 @@ vim.api.nvim_create_autocmd("FocusGained", {
 	command = "silent! checktime",
 })
 
--- vim.api.nvim_create_autocmd("BufEnter", {
--- 	pattern = { "*.vue", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.html", "*.css" },
--- 	callback = function()
--- 		vim.opt_local.shiftwidth = 2
--- 		vim.opt_local.tabstop = 2
--- 	end,
--- })
+vim.api.nvim_create_autocmd("BufEnter", {
+	pattern = { "*.vue", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.html", "*.css" },
+	callback = function()
+		vim.opt_local.shiftwidth = 2
+		vim.opt_local.tabstop = 2
+	end,
+})
 
 vim.api.nvim_create_autocmd("BufEnter", {
 	pattern = { "*.py", "*.go" },
 	callback = function()
 		vim.opt_local.shiftwidth = 4
 		vim.opt_local.tabstop = 4
+	end,
+})
+
+local function show_macro_recording()
+	local recording_register = vim.fn.reg_recording()
+	if recording_register == "" then
+		return ""
+	else
+		return "Recording @" .. recording_register
+	end
+end
+
+vim.api.nvim_create_autocmd("RecordingEnter", {
+	pattern = "*",
+	callback = function()
+		vim.opt.winbar = " " .. show_macro_recording() .. " %f %m%=%l "
+	end,
+})
+
+vim.api.nvim_create_autocmd("RecordingLeave", {
+	pattern = "*",
+	callback = function()
+		vim.opt.winbar = " %f %m%=%l "
 	end,
 })
 

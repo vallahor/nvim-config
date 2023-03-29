@@ -25,9 +25,6 @@ return {
 			lspconfig.jsonls.setup({
 				capabilities = capabilities,
 			})
-			lspconfig.prismals.setup({
-				capabilities = capabilities,
-			})
 
 			local util = require("lspconfig.util")
 			local function get_typescript_server_path(root_dir)
@@ -105,7 +102,6 @@ return {
 				"volar",
 				"tsserver",
 				"pyright",
-				"prismals",
 				"gopls",
 			},
 		},
