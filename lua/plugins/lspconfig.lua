@@ -25,6 +25,13 @@ return {
 			lspconfig.jsonls.setup({
 				capabilities = capabilities,
 			})
+			lspconfig.ruff_lsp.setup({
+				capabilities = capabilities,
+			})
+			-- check how to make it work properly
+			-- lspconfig.clangd.setup({
+			-- 	capabilities = capabilities,
+			-- })
 
 			local util = require("lspconfig.util")
 			local function get_typescript_server_path(root_dir)
@@ -97,12 +104,14 @@ return {
 		"williamboman/mason-lspconfig.nvim",
 		opts = {
 			ensure_installed = {
+				"clangd",
 				"lua_ls",
 				"jsonls",
 				"volar",
 				"tsserver",
-				"pyright",
 				"gopls",
+				"pyright",
+				"ruff_lsp",
 			},
 		},
 		config = function(_, opts)
