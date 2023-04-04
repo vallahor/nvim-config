@@ -146,7 +146,7 @@ vim.keymap.set({ "i", "c" }, "<c-bs>", "<c-w>")
 
 vim.keymap.set("n", "x", '"_x')
 vim.keymap.set("v", "x", '"_d')
-vim.keymap.set({ "n", "v" }, "c", '"_c')
+-- vim.keymap.set({ "n", "v" }, "c", '"_c')
 vim.keymap.set("v", "p", '"_dP')
 
 vim.keymap.set("n", "*", "*``")

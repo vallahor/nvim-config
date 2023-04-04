@@ -25,9 +25,6 @@ return {
 			lspconfig.jsonls.setup({
 				capabilities = capabilities,
 			})
-			lspconfig.ruff_lsp.setup({
-				capabilities = capabilities,
-			})
 			-- check how to make it work properly
 			-- lspconfig.clangd.setup({
 			-- 	capabilities = capabilities,
@@ -57,7 +54,6 @@ return {
 				end,
 			})
 
-			-- vim.keymap.set("n", "<c-b>", "<c-o><cmd>bdel #<CR>")
 			vim.keymap.set("n", "gd", vim.lsp.buf.definition)
 			vim.keymap.set("n", "K", vim.lsp.buf.hover)
 			vim.keymap.set("n", "<a-d>", vim.diagnostic.open_float)
@@ -111,7 +107,6 @@ return {
 				"tsserver",
 				"gopls",
 				"pyright",
-				"ruff_lsp",
 			},
 		},
 		config = function(_, opts)

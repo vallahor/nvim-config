@@ -5,7 +5,7 @@ return {
 		build = ":TSUpdate",
 		event = { "BufRead", "BufEnter" },
 		dependencies = {
-			-- { "nvim-treesitter/playground", module = true },
+			{ "nvim-treesitter/playground", module = true },
 			{
 				"windwp/nvim-ts-autotag",
 				config = function()
@@ -23,6 +23,7 @@ return {
 				"c",
 				"cpp",
 				"zig",
+				"rust",
 				"query",
 				"go",
 				"gomod",
@@ -41,7 +42,6 @@ return {
 				"css",
 				"regex",
 				"markdown",
-				"markdown_inline",
 			},
 			highlight = {
 				enable = true,
