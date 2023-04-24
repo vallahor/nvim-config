@@ -1,6 +1,5 @@
 return {
 	{
-
 		"rebelot/heirline.nvim",
 		config = function()
 			local heirline = require("heirline")
@@ -68,15 +67,14 @@ return {
 
 			local Git = {
 				condition = conditions.is_git_repo,
-
 				init = function(self)
 					self.status_dict = vim.b.gitsigns_status_dict
 					self.has_changes = self.status_dict.added ~= 0
 						or self.status_dict.removed ~= 0
 						or self.status_dict.changed ~= 0
 				end,
-
-				{ -- git branch name
+				{
+					-- git branch name
 					provider = function(self)
 						if string.len(self.status_dict.head) ~= 0 then
 							return " [" .. self.status_dict.head .. "]"
@@ -143,7 +141,7 @@ return {
 				-- %l = current line number
 				-- %L = number of lines in the buffer
 				-- provider = "%7(%l/%3L%)",
-				provider = "%7(%l/%L%)",
+				provider = "- L%l C%c %S",
 			}
 
 			local statusline = {
@@ -151,13 +149,14 @@ return {
 				Git,
 				FileNameBlock,
 				FileFlags,
-				{ provider = "%=" },
+				-- { provider = "%=" },
 				Ruler,
-				FileType,
-				FileFormat,
+				-- FileType,
+				-- FileFormat,
 			}
 
-			heirline.setup({ statusline = statusline })
+			-- heirline.setup({ statusline = statusline })
+			heirline.setup({ winbar = statusline })
 		end,
 	},
 }

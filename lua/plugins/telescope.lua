@@ -1,6 +1,9 @@
 return {
 	{
 		"nvim-telescope/telescope.nvim",
+		dependencies = {
+			{ "nvim-lua/plenary.nvim", lazy = true },
+		},
 		config = function()
 			local telescope = require("telescope")
 			local actions = require("telescope.actions")
@@ -13,6 +16,13 @@ return {
 							end,
 							["<c-k>"] = "move_selection_previous",
 							["<c-j>"] = "move_selection_next",
+							-- ["<esc>"] = actions.close,
+							-- ["<c-space>"] = actions.close,
+							-- ["jk"] = actions.close,
+							-- ["kj"] = actions.close,
+							["<c-d>"] = actions.delete_buffer,
+						},
+						n = {
 							["<esc>"] = actions.close,
 							["<c-space>"] = actions.close,
 							["jk"] = actions.close,

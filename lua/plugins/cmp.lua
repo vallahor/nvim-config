@@ -30,7 +30,7 @@ return {
 					},
 					{ name = "buffer" },
 					{ name = "path" },
-					{ name = "luasnip" },
+					-- { name = "luasnip" },
 				},
 				mapping = {
 					["<C-q>"] = cmp.mapping.close(),
