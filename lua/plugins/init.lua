@@ -13,13 +13,13 @@ return {
 			vim.keymap.set("n", "<a-l>", "<cmd>lua Swap_right()<CR>")
 		end,
 	},
-	{
-		dir = "../theme.lua",
-		init = function()
-			local theme = require("theme")
-			theme.colorscheme()
-		end,
-	},
+	-- {
+	-- 	dir = "../theme.lua",
+	-- 	init = function()
+	-- 		local theme = require("theme")
+	-- 		theme.colorscheme()
+	-- 	end,
+	-- },
 	{ "Vimjas/vim-python-pep8-indent", event = "BufEnter *.py" },
 	{ "ziglang/zig.vim", event = "BufEnter *.zig" },
 	{ "Tetralux/odin.vim" },

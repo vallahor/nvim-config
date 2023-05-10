@@ -61,9 +61,13 @@ vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
 vim.opt.timeoutlen = 200
 vim.opt.updatetime = 200
 vim.opt.laststatus = 0
-vim.opt.guicursor = "i-ci:block-iCursor"
+-- vim.opt.guicursor = "i-ci:block-iCursor"
 
 vim.opt.cmdheight = 0
+-- vim.opt.colorscheme = AEHO
+vim.cmd([[
+colorscheme AEHO
+]])
 
 local winbar = " %M%f - L%l C%c %S"
 
@@ -94,7 +98,7 @@ vim.o.winbar = winbar
 vim.o.showcmdloc = "statusline"
 
 vim.cmd([[
-hi! HorSplit guifg=#382536 guibg=#121112
+hi! HorSplit guifg=NONE guibg=#ffefce
 hi! link StatusLine HorSplit
 hi! link StatusLineNC HorSplit
 set statusline=%{repeat('─',winwidth('.'))}
