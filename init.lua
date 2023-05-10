@@ -25,6 +25,7 @@ local indent = 4
 
 -- vim.opt.guifont = { "JetBrainsMonoNL NFM:h14" }
 vim.opt.guifont = { "JetBrains Mono NL:h13" }
+-- vim.opt.guifont = { "Liberation Mono:h13" }
 -- vim.opt.guifont = { "Consolas:h15" }
 vim.opt.shiftwidth = indent
 vim.opt.tabstop = indent
@@ -57,9 +58,10 @@ vim.opt.backup = false
 vim.opt.gdefault = true
 vim.opt.cindent = true
 vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
--- vim.opt.timeoutlen = 200
+vim.opt.timeoutlen = 200
 vim.opt.updatetime = 200
 vim.opt.laststatus = 0
+vim.opt.guicursor = "i-ci:block-iCursor"
 
 vim.opt.cmdheight = 0
 
@@ -116,6 +118,9 @@ vim.keymap.set("n", "<esc>", "<cmd>nohl<cr><esc>")
 -- vim.keymap.set({ "n", "v", "i" }, "<c-enter>", "<cmd>w!<CR><esc>")
 vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>")
 
+vim.keymap.set("i", "<c-enter>", "<esc>o")
+vim.keymap.set("i", "<c-s-enter>", "<esc>O")
+
 vim.keymap.set({ "n", "v" }, "H", "<c-u>zz")
 
 vim.keymap.set({ "n", "v" }, "L", "<c-d>zz")
@@ -126,12 +131,6 @@ vim.keymap.set("n", "<c-->", "<cmd>sp<cr>")
 vim.keymap.set("n", "<c-0>", "<c-w>o")
 vim.keymap.set("n", "<c-9>", "<c-w>r")
 vim.keymap.set("n", "|", "<cmd>bd<cr>")
-
-vim.keymap.set("n", "<", "<<")
-vim.keymap.set("n", ">", ">>")
-
-vim.keymap.set("v", "<", "<gv")
-vim.keymap.set("v", ">", ">gv")
 
 -- vim.keymap.set("n", "<leader>bd", "<cmd>bd<cr>")
 -- vim.keymap.set("n", "|", "<cmd>clo<cr>")
@@ -153,7 +152,10 @@ vim.keymap.set("c", "<c-v>", "<c-r>*")
 vim.keymap.set("v", "v", "V")
 -- vim.keymap.set("v", "v", "<esc>")
 
+-- vim.keymap.set({ "i", "c" }, "<c-bs>", "<c-w>")
 vim.keymap.set({ "i", "c" }, "<c-bs>", "<c-w>")
+-- vim.keymap.set("c", "<c-bs>", "<c-w>")
+-- vim.keymap.set("c", "<c-h>", "<c-w>")
 
 vim.keymap.set("n", "x", '"_x')
 vim.keymap.set("v", "x", '"_d')
@@ -167,15 +169,28 @@ vim.keymap.set("n", "-", "$")
 vim.keymap.set("v", "-", "$h")
 vim.keymap.set({ "n", "v" }, "0", function()
 	local old_pos = vim.fn.col(".")
+	vim.fn.setpos(".", { 0, vim.fn.line("."), 0, 0 })
 	vim.fn.execute("normal ^")
 	if old_pos == vim.fn.col(".") then
 		vim.fn.setpos(".", { 0, vim.fn.line("."), 0, 0 })
 	end
 end)
 
+vim.keymap.set("n", "<c-u>", "<c-r>")
+
+vim.keymap.set("n", "<c-r>", ":%s/")
+vim.keymap.set("v", "<c-r>", ":s/")
+
 -- vim.keymap.set("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
 vim.keymap.set("n", "<f4>", "<cmd>:e $MYVIMRC<CR>")
 vim.keymap.set("n", "<f5>", "<cmd>so %<CR>")
+
+-- move lines
+vim.keymap.set("n", "<", "<<")
+vim.keymap.set("n", ">", ">>")
+
+vim.keymap.set("v", "<", "<gv")
+vim.keymap.set("v", ">", ">gv")
 
 vim.keymap.set("n", "<c-6>", "<C-^>")
 vim.keymap.set("n", "<c-b>", "<C-^>:bd#<cr>")
@@ -188,13 +203,13 @@ vim.api.nvim_create_autocmd("FocusGained", {
 	command = "silent! checktime",
 })
 
-vim.api.nvim_create_autocmd("BufEnter", {
-	pattern = { "*.vue", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.html", "*.css" },
-	callback = function()
-		vim.opt_local.shiftwidth = 2
-		vim.opt_local.tabstop = 2
-	end,
-})
+-- vim.api.nvim_create_autocmd("BufEnter", {
+-- 	pattern = { "*.vue", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.html", "*.css" },
+-- 	callback = function()
+-- 		vim.opt_local.shiftwidth = 2
+-- 		vim.opt_local.tabstop = 2
+-- 	end,
+-- })
 
 -- vim.api.nvim_create_autocmd("BufEnter", {
 -- 	pattern = { "*.py", "*.go" },
@@ -208,6 +223,7 @@ vim.cmd([[
 language en_US
 filetype on
 
+" move lines
 vnoremap J :m '>+1<CR>gv=gv
 vnoremap K :m '<-2<CR>gv=gv
 

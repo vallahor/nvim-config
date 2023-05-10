@@ -20,22 +20,17 @@ return {
 			theme.colorscheme()
 		end,
 	},
-	-- {
-	-- 	"chama-chomo/grail",
-	-- 	version = false,
-	-- 	lazy = false,
-	-- 	priority = 1000, -- make sure to load this before all the other start plugins
-	-- 	-- Optional; default configuration will be used if setup isn't called.
-	-- 	config = function()
-	-- 		require("grail").setup({
-	-- 			italics = false,
-	-- 		})
-	-- 		vim.cmd([[
-	--            colorscheme grail
-	--            ]])
-	-- 	end,
-	-- },
 	{ "Vimjas/vim-python-pep8-indent", event = "BufEnter *.py" },
 	{ "ziglang/zig.vim", event = "BufEnter *.zig" },
-	{ "Tetralux/odin.vim", event = "BufEnter *.odin" },
+	{ "Tetralux/odin.vim" },
+	{
+		"numToStr/Comment.nvim",
+		config = function()
+			require("Comment").setup({
+				toggler = {
+					line = "gc",
+				},
+			})
+		end,
+	},
 }
