@@ -5,23 +5,8 @@ return {
 			vim.cmd([[
                 let g:arpeggio_timeoutlen = 80
 
-                " call arpeggio#map('i', '', 0, 'fd', '<Esc>')
-                " call arpeggio#map('v', '', 0, 'fd', '<Esc>')
-                " call arpeggio#map('s', '', 0, 'fd', '<Esc>')
-                " call arpeggio#map('x', '', 0, 'fd', '<Esc>')
-                " call arpeggio#map('c', '', 0, 'fd', '<c-c>')
-                " call arpeggio#map('l', '', 0, 'fd', '<Esc>')
-                " call arpeggio#map('t', '', 0, 'fd', '<C-\><C-n>')
-                " call arpeggio#map('o', '', 0, 'fd', '<Esc>')
-                "
-                " call arpeggio#map('i', '', 0, 'df', '<Esc>')
-                " call arpeggio#map('v', '', 0, 'df', '<Esc>')
-                " call arpeggio#map('s', '', 0, 'df', '<Esc>')
-                " call arpeggio#map('x', '', 0, 'df', '<Esc>')
-                " call arpeggio#map('c', '', 0, 'df', '<c-c>')
-                " call arpeggio#map('l', '', 0, 'df', '<Esc>')
-                " call arpeggio#map('t', '', 0, 'df', '<C-\><C-n>')
-                " call arpeggio#map('o', '', 0, 'df', '<Esc>')
+                call arpeggio#map('n', '', 0, 'jk', ':noh<cr><Esc>')
+                call arpeggio#map('n', '', 0, 'kj', ':noh<cr><Esc>')
 
                 call arpeggio#map('i', '', 0, 'jk', '<Esc>')
                 call arpeggio#map('v', '', 0, 'jk', '<Esc>')

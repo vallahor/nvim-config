@@ -11,6 +11,11 @@ return {
 				-- command = ":Neoformat prettier",
 				command = ":Neoformat prettierd",
 			})
+
+			vim.api.nvim_create_autocmd("BufWritePre", {
+				pattern = { "*.sol" },
+				command = ":Neoformat prettier",
+			})
 		end,
 	},
 }

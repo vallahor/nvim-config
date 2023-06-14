@@ -36,13 +36,13 @@ return {
 					},
 					initial_mode = "insert",
 					path_display = { "smart" },
-					border = false,
-					layout_strategy = "bottom_pane",
-					layout_config = {
-						height = 10,
-						prompt_position = "bottom",
-					},
-					preview = false,
+					-- border = false,
+					-- layout_strategy = "bottom_pane",
+					-- layout_config = {
+					-- 	height = 10,
+					-- 	prompt_position = "bottom",
+					-- },
+					-- preview = false,
 					file_ignore_patterns = { "node_modules", ".venv" },
 				},
 			})

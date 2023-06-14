@@ -1,6 +1,15 @@
 return {
 	{
 		"nvim-treesitter/nvim-treesitter",
+		dependencies = {
+			{
+				"windwp/nvim-ts-autotag",
+				config = function()
+					require("nvim-ts-autotag").setup({})
+				end,
+			},
+			{ "RRethy/nvim-treesitter-endwise" },
+		},
 		version = false,
 		build = ":TSUpdate",
 		event = { "BufRead", "BufEnter" },
@@ -19,21 +28,23 @@ return {
 				"glsl",
 				"java",
 				"smali",
-				"javascript",
-				"typescript",
-				"sql",
-				-- "tsx",
-				-- "vue",
-				-- "html",
-				-- "yaml",
-				-- "css",
+				-- "javascript",
+				-- "typescript",
+				"solidity",
+				"tsx",
+				"html",
+				"yaml",
+				"css",
+				"ocaml",
+				"ocamllex",
+				"ocaml_interface",
 			},
 			highlight = {
 				enable = true,
 			},
 			indent = {
 				enable = true,
-				disable = { "python", "rust", "cpp", "go" },
+				disable = { "python", "rust", "cpp", "go", "ocaml" },
 			},
 			incremental_selection = {
 				enable = true,
@@ -48,6 +59,12 @@ return {
 				enable = true,
 				enable_autocmd = false,
 			},
+			endwise = {
+				enable = true,
+			},
+		},
+		autotag = {
+			enable = true,
 		},
 		config = function(_, opts)
 			require("nvim-treesitter.install").compilers = { "clang" }

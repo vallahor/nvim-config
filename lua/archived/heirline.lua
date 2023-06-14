@@ -155,8 +155,8 @@ return {
 				-- FileFormat,
 			}
 
-			-- heirline.setup({ statusline = statusline })
-			heirline.setup({ winbar = statusline })
+			heirline.setup({ statusline = statusline })
+			-- heirline.setup({ winbar = statusline })
 		end,
 	},
 }

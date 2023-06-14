@@ -23,10 +23,7 @@ require("lazy").setup("plugins", {
 
 local indent = 4
 
--- vim.opt.guifont = { "JetBrainsMonoNL NFM:h14" }
 vim.opt.guifont = { "JetBrains Mono NL:h13" }
--- vim.opt.guifont = { "Liberation Mono:h13" }
--- vim.opt.guifont = { "Consolas:h15" }
 vim.opt.shiftwidth = indent
 vim.opt.tabstop = indent
 vim.opt.softtabstop = indent
@@ -55,54 +52,61 @@ vim.opt.mousefocus = true
 vim.opt.cursorline = true
 vim.opt.scrolloff = 3
 vim.opt.backup = false
+vim.opt.writebackup = false
 vim.opt.gdefault = true
 vim.opt.cindent = true
 vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
 vim.opt.timeoutlen = 200
 vim.opt.updatetime = 200
+vim.opt.guicursor = "i-ci:block-iCursor"
+-- vim.cmd([[set guicursor=i-ci:block-iCursor]])
+
 vim.opt.laststatus = 0
--- vim.opt.guicursor = "i-ci:block-iCursor"
+-- vim.opt.cmdheight = 0
+vim.opt.cmdheight = 1
 
-vim.opt.cmdheight = 0
--- vim.opt.colorscheme = AEHO
-vim.cmd([[
-colorscheme AEHO
-]])
+local set_winbar = function()
+	local winbar = " %f - L%l C%c %S%="
+	local modified = "%{&mod ? '[MODIFIED]' : ''} "
 
-local winbar = " %M%f - L%l C%c %S"
-
-local function show_macro_recording()
-	local recording_register = vim.fn.reg_recording()
-	if recording_register == "" then
-		return ""
-	else
-		return "Recording @" .. recording_register
+	local function show_macro_recording()
+		local recording_register = vim.fn.reg_recording()
+		if recording_register == "" then
+			return ""
+		else
+			return "Recording @" .. recording_register
+		end
 	end
+
+	vim.api.nvim_create_autocmd("RecordingEnter", {
+		pattern = "*",
+		callback = function()
+			-- vim.o.winbar = " " .. show_macro_recording() .. " " .. winbar
+			vim.o.winbar = winbar .. show_macro_recording() .. " "
+		end,
+	})
+
+	vim.api.nvim_create_autocmd("RecordingLeave", {
+		pattern = "*",
+		callback = function()
+			vim.o.winbar = winbar .. modified
+		end,
+	})
+
+	return winbar .. modified
 end
 
-vim.api.nvim_create_autocmd("RecordingEnter", {
-	pattern = "*",
-	callback = function()
-		vim.o.winbar = " " .. show_macro_recording() .. " " .. winbar
-	end,
-})
-
-vim.api.nvim_create_autocmd("RecordingLeave", {
-	pattern = "*",
-	callback = function()
-		vim.o.winbar = winbar
-	end,
-})
-
-vim.o.winbar = winbar
-vim.o.showcmdloc = "statusline"
+-- vim.o.winbar = set_winbar()
+-- vim.o.showcmdloc = "statusline"
 
 vim.cmd([[
-hi! HorSplit guifg=NONE guibg=#ffefce
+" hi! HorSplit guifg=NONE guibg=#ffefce
+hi! HorSplit guifg=#382536 guibg=#121112
 hi! link StatusLine HorSplit
 hi! link StatusLineNC HorSplit
-set statusline=%{repeat('─',winwidth('.'))}
+" set statusline=%{repeat('─',winwidth('.'))}
 ]])
+vim.o.statusline = "%{repeat('─',winwidth('.'))}"
 
 vim.wo.signcolumn = "no"
 vim.wo.relativenumber = true
@@ -121,6 +125,8 @@ vim.keymap.set("n", "<esc>", "<cmd>nohl<cr><esc>")
 
 -- vim.keymap.set({ "n", "v", "i" }, "<c-enter>", "<cmd>w!<CR><esc>")
 vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>")
+
+vim.keymap.set({ "n", "v" }, "<leader>fs", "<cmd>w!<CR><esc>")
 
 vim.keymap.set("i", "<c-enter>", "<esc>o")
 vim.keymap.set("i", "<c-s-enter>", "<esc>O")
@@ -146,10 +152,18 @@ vim.keymap.set("n", "|", "<cmd>bd<cr>")
 -- resize windows
 vim.keymap.set("n", "<a-=>", "<c-w>=")
 
+vim.keymap.set({ "n", "v" }, "<leader>h", "<c-w>h")
+vim.keymap.set({ "n", "v" }, "<leader>j", "<c-w>j")
+vim.keymap.set({ "n", "v" }, "<leader>k", "<c-w>k")
+vim.keymap.set({ "n", "v" }, "<leader>l", "<c-w>l")
+
 vim.keymap.set({ "n", "v" }, "<c-h>", "<c-w>h")
-vim.keymap.set({ "n", "v" }, "<c-j>", "<c-w>j")
-vim.keymap.set({ "n", "v" }, "<c-k>", "<c-w>k")
+vim.keymap.set({ "n", "v" }, "<c-n>", "<c-w>j")
+vim.keymap.set({ "n", "v" }, "<c-p>", "<c-w>k")
 vim.keymap.set({ "n", "v" }, "<c-l>", "<c-w>l")
+
+-- vim.keymap.set({ "n", "v" }, "<c-j>", "<c-w>j")
+-- vim.keymap.set({ "n", "v" }, "<c-k>", "<c-w>k")
 
 vim.keymap.set("c", "<c-v>", "<c-r>*")
 
@@ -158,27 +172,35 @@ vim.keymap.set("v", "v", "V")
 
 -- vim.keymap.set({ "i", "c" }, "<c-bs>", "<c-w>")
 vim.keymap.set({ "i", "c" }, "<c-bs>", "<c-w>")
+vim.keymap.set({ "i", "c" }, "<c-h>", "<c-w>")
 -- vim.keymap.set("c", "<c-bs>", "<c-w>")
 -- vim.keymap.set("c", "<c-h>", "<c-w>")
 
 vim.keymap.set("n", "x", '"_x')
 vim.keymap.set("v", "x", '"_d')
 vim.keymap.set({ "n", "v" }, "c", '"_c')
-vim.keymap.set("v", "p", '"_dP')
 
 vim.keymap.set("n", "*", "*``")
 vim.keymap.set("v", "*", '"sy/\\V<c-r>s<cr>``')
 
-vim.keymap.set("n", "-", "$")
-vim.keymap.set("v", "-", "$h")
-vim.keymap.set({ "n", "v" }, "0", function()
+local begnning_of_the_line = function()
 	local old_pos = vim.fn.col(".")
 	vim.fn.setpos(".", { 0, vim.fn.line("."), 0, 0 })
 	vim.fn.execute("normal ^")
 	if old_pos == vim.fn.col(".") then
 		vim.fn.setpos(".", { 0, vim.fn.line("."), 0, 0 })
 	end
-end)
+end
+
+vim.keymap.set({ "n", "v" }, "0", begnning_of_the_line)
+vim.keymap.set("n", "-", "$")
+vim.keymap.set("v", "-", "$h")
+--
+vim.keymap.set({ "n", "v" }, "<c-k>", "{")
+vim.keymap.set({ "n", "v" }, "<c-j>", "}")
+
+-- vim.keymap.set({ "n", "v" }, "<c-p>", "{")
+-- vim.keymap.set({ "n", "v" }, "<c-n>", "}")
 
 vim.keymap.set("n", "<c-u>", "<c-r>")
 
@@ -197,7 +219,7 @@ vim.keymap.set("v", "<", "<gv")
 vim.keymap.set("v", ">", ">gv")
 
 vim.keymap.set("n", "<c-6>", "<C-^>")
-vim.keymap.set("n", "<c-b>", "<C-^>:bd#<cr>")
+-- vim.keymap.set("n", "<c-b>", "<C-^>:bd#<cr>")
 -- vim.keymap.set("n", "^", "<C-^>:bd#<cr>")
 
 vim.keymap.set("n", "<f3>", ":Inspect<CR>")
@@ -207,13 +229,13 @@ vim.api.nvim_create_autocmd("FocusGained", {
 	command = "silent! checktime",
 })
 
--- vim.api.nvim_create_autocmd("BufEnter", {
--- 	pattern = { "*.vue", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.html", "*.css" },
--- 	callback = function()
--- 		vim.opt_local.shiftwidth = 2
--- 		vim.opt_local.tabstop = 2
--- 	end,
--- })
+vim.api.nvim_create_autocmd("BufEnter", {
+	pattern = { "*.vue", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.html", "*.css" },
+	callback = function()
+		vim.opt_local.shiftwidth = 2
+		vim.opt_local.tabstop = 2
+	end,
+})
 
 -- vim.api.nvim_create_autocmd("BufEnter", {
 -- 	pattern = { "*.py", "*.go" },
@@ -228,8 +250,11 @@ language en_US
 filetype on
 
 " move lines
-vnoremap J :m '>+1<CR>gv=gv
-vnoremap K :m '<-2<CR>gv=gv
+" vnoremap J :m '>+1<CR>gv=gv
+" vnoremap K :m '<-2<CR>gv=gv
+
+vnoremap <expr> p 'pgv"'.v:register.'y`>'
+xnoremap <expr> p 'pgv"'.v:register.'y`>'
 
 fun! TrimWhitespace()
     let l:save = winsaveview()
@@ -239,4 +264,22 @@ endfun
 autocmd BufWritePre * :call TrimWhitespace()
 
 map <f1> <nop>
+
+augroup highlight_yank
+autocmd!
+au TextYankPost * silent! lua vim.highlight.on_yank({higroup="Visual", timeout=200})
+augroup END
+
+hi! ErrorBg guibg=#351C1D
+hi! WarningBg guibg=#3A2717
+
+hi! InfoBg guibg=#0F2D35
+hi! HintBg guibg=#13292A
+
+" :h diagnostic-signs
+sign define DiagnosticSignError text=E texthl=DiagnosticSignError linehl=ErrorBg numhl=ErrorBg
+sign define DiagnosticSignWarn text=W texthl=DiagnosticSignWarn linehl=WarningBg numhl=WarningBg
+sign define DiagnosticSignInfo text=I texthl=DiagnosticSignInfo linehl=InforBg numhl=InforBg
+sign define DiagnosticSignHint text=H texthl=DiagnosticSignHint linehl=HintBg numhl=HintBg
+
 ]])
