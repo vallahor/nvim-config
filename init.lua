@@ -272,14 +272,19 @@ augroup END
 
 hi! ErrorBg guibg=#351C1D
 hi! WarningBg guibg=#3A2717
-
 hi! InfoBg guibg=#0F2D35
 hi! HintBg guibg=#13292A
 
+hi! ErrorLineBg guifg=#a23343 guibg=#351C1D
+hi! WarningLineBg guifg=#AF7C55 guibg=#3A2717
+hi! InfoLineBg guifg=#A8899C guibg=#0F2D35
+hi! HintLineBg guifg=#A98D92 guibg=#13292A
+
+
 " :h diagnostic-signs
-sign define DiagnosticSignError text=E texthl=DiagnosticSignError linehl=ErrorBg numhl=ErrorBg
-sign define DiagnosticSignWarn text=W texthl=DiagnosticSignWarn linehl=WarningBg numhl=WarningBg
-sign define DiagnosticSignInfo text=I texthl=DiagnosticSignInfo linehl=InforBg numhl=InforBg
-sign define DiagnosticSignHint text=H texthl=DiagnosticSignHint linehl=HintBg numhl=HintBg
+sign define DiagnosticSignError text=E texthl=DiagnosticSignError linehl=ErrorBg numhl=ErrorLineBg
+sign define DiagnosticSignWarn text=W texthl=DiagnosticSignWarn linehl=WarningBg numhl=WarningLineBg
+sign define DiagnosticSignInfo text=I texthl=DiagnosticSignInfo linehl=InforBg numhl=InforLineBg
+sign define DiagnosticSignHint text=H texthl=DiagnosticSignHint linehl=HintBg numhl=HintLineBg
 
 ]])
