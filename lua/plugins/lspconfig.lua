@@ -14,10 +14,6 @@ return {
 				vim.keymap.set("n", "<c-1>", "<cmd>lua require('telescope.builtin').lsp_implementations()<cr>")
 			end
 
-			vim.keymap.set("n", "<a-d>", vim.diagnostic.open_float)
-			vim.keymap.set("n", "<a-[>", vim.diagnostic.goto_prev)
-			vim.keymap.set("n", "<a-]>", vim.diagnostic.goto_next)
-
 			-- vim.keymap.set("n", "<c-;>", vim.diagnostic.open_float)
 			-- vim.keymap.set("n", "<c-,>", vim.diagnostic.goto_prev)
 			-- vim.keymap.set("n", "<c-.>", vim.diagnostic.goto_next)
@@ -30,10 +26,10 @@ return {
 			-- 	on_attach = on_attach,
 			-- 	-- capabilities = capabilities,
 			-- })
-			-- lspconfig.gopls.setup({
-			-- 	on_attach = on_attach,
-			-- 	-- capabilities = capabilities,
-			-- })
+			lspconfig.gopls.setup({
+				on_attach = on_attach,
+				-- capabilities = capabilities,
+			})
 			lspconfig.tsserver.setup({
 				on_attach = on_attach,
 				-- capabilities = capabilities,
@@ -55,7 +51,7 @@ return {
 
 			lspconfig.rust_analyzer.setup({
 				on_attach = on_attach,
-				-- capabilities = capabilities,
+				capabilities = capabilities,
 			})
 
 			-- local configs = require("lspconfig.configs")
@@ -109,6 +105,7 @@ return {
 			-- ),
 
 			-- vim.diagnostic.config({ virtual_text = false })
+			-- vim.diagnostic.config({ update_in_insert = true })
 			-- vim.diagnostic.disable()
 		end,
 	},

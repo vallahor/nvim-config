@@ -61,52 +61,52 @@ vim.opt.updatetime = 200
 vim.opt.guicursor = "i-ci:block-iCursor"
 -- vim.cmd([[set guicursor=i-ci:block-iCursor]])
 
-vim.opt.laststatus = 0
+-- vim.opt.laststatus = 0
 -- vim.opt.cmdheight = 0
-vim.opt.cmdheight = 1
+-- vim.opt.cmdheight = 1
 
-local set_winbar = function()
-	local winbar = " %f - L%l C%c %S%="
-	local modified = "%{&mod ? '[MODIFIED]' : ''} "
+-- local set_winbar = function()
+-- 	local winbar = " %f - L%l C%c %S%="
+-- 	local modified = "%{&mod ? '[MODIFIED]' : ''} "
 
-	local function show_macro_recording()
-		local recording_register = vim.fn.reg_recording()
-		if recording_register == "" then
-			return ""
-		else
-			return "Recording @" .. recording_register
-		end
-	end
+-- 	local function show_macro_recording()
+-- 		local recording_register = vim.fn.reg_recording()
+-- 		if recording_register == "" then
+-- 			return ""
+-- 		else
+-- 			return "Recording @" .. recording_register
+-- 		end
+-- 	end
 
-	vim.api.nvim_create_autocmd("RecordingEnter", {
-		pattern = "*",
-		callback = function()
-			-- vim.o.winbar = " " .. show_macro_recording() .. " " .. winbar
-			vim.o.winbar = winbar .. show_macro_recording() .. " "
-		end,
-	})
+-- 	vim.api.nvim_create_autocmd("RecordingEnter", {
+-- 		pattern = "*",
+-- 		callback = function()
+-- 			-- vim.o.winbar = " " .. show_macro_recording() .. " " .. winbar
+-- 			vim.o.winbar = winbar .. show_macro_recording() .. " "
+-- 		end,
+-- 	})
 
-	vim.api.nvim_create_autocmd("RecordingLeave", {
-		pattern = "*",
-		callback = function()
-			vim.o.winbar = winbar .. modified
-		end,
-	})
+-- 	vim.api.nvim_create_autocmd("RecordingLeave", {
+-- 		pattern = "*",
+-- 		callback = function()
+-- 			vim.o.winbar = winbar .. modified
+-- 		end,
+-- 	})
 
-	return winbar .. modified
-end
+-- 	return winbar .. modified
+-- end
 
 -- vim.o.winbar = set_winbar()
 -- vim.o.showcmdloc = "statusline"
 
-vim.cmd([[
-" hi! HorSplit guifg=NONE guibg=#ffefce
-hi! HorSplit guifg=#382536 guibg=#121112
-hi! link StatusLine HorSplit
-hi! link StatusLineNC HorSplit
-" set statusline=%{repeat('─',winwidth('.'))}
-]])
-vim.o.statusline = "%{repeat('─',winwidth('.'))}"
+-- vim.cmd([[
+-- " hi! HorSplit guifg=NONE guibg=#ffefce
+-- hi! HorSplit guifg=#382536 guibg=#121112
+-- hi! link StatusLine HorSplit
+-- hi! link StatusLineNC HorSplit
+-- " set statusline=%{repeat('─',winwidth('.'))}
+-- ]])
+-- vim.o.statusline = "%{repeat('─',winwidth('.'))}"
 
 vim.wo.signcolumn = "no"
 vim.wo.relativenumber = true
@@ -158,12 +158,12 @@ vim.keymap.set({ "n", "v" }, "<leader>k", "<c-w>k")
 vim.keymap.set({ "n", "v" }, "<leader>l", "<c-w>l")
 
 vim.keymap.set({ "n", "v" }, "<c-h>", "<c-w>h")
-vim.keymap.set({ "n", "v" }, "<c-n>", "<c-w>j")
-vim.keymap.set({ "n", "v" }, "<c-p>", "<c-w>k")
+-- vim.keymap.set({ "n", "v" }, "<c-n>", "<c-w>j")
+-- vim.keymap.set({ "n", "v" }, "<c-p>", "<c-w>k")
 vim.keymap.set({ "n", "v" }, "<c-l>", "<c-w>l")
 
--- vim.keymap.set({ "n", "v" }, "<c-j>", "<c-w>j")
--- vim.keymap.set({ "n", "v" }, "<c-k>", "<c-w>k")
+vim.keymap.set({ "n", "v" }, "<c-j>", "<c-w>j")
+vim.keymap.set({ "n", "v" }, "<c-k>", "<c-w>k")
 
 vim.keymap.set("c", "<c-v>", "<c-r>*")
 
@@ -196,11 +196,11 @@ vim.keymap.set({ "n", "v" }, "0", begnning_of_the_line)
 vim.keymap.set("n", "-", "$")
 vim.keymap.set("v", "-", "$h")
 --
-vim.keymap.set({ "n", "v" }, "<c-k>", "{")
-vim.keymap.set({ "n", "v" }, "<c-j>", "}")
+-- vim.keymap.set({ "n", "v" }, "<c-k>", "{")
+-- vim.keymap.set({ "n", "v" }, "<c-j>", "}")
 
--- vim.keymap.set({ "n", "v" }, "<c-p>", "{")
--- vim.keymap.set({ "n", "v" }, "<c-n>", "}")
+vim.keymap.set({ "n", "v" }, "<c-p>", "{")
+vim.keymap.set({ "n", "v" }, "<c-n>", "}")
 
 vim.keymap.set("n", "<c-u>", "<c-r>")
 
@@ -223,6 +223,10 @@ vim.keymap.set("n", "<c-6>", "<C-^>")
 -- vim.keymap.set("n", "^", "<C-^>:bd#<cr>")
 
 vim.keymap.set("n", "<f3>", ":Inspect<CR>")
+
+vim.keymap.set("n", "<c-y>", vim.diagnostic.open_float)
+vim.keymap.set("n", "[[", vim.diagnostic.goto_prev)
+vim.keymap.set("n", "]]", vim.diagnostic.goto_next)
 
 vim.api.nvim_create_autocmd("FocusGained", {
 	pattern = "*",
@@ -272,13 +276,14 @@ augroup END
 
 hi! ErrorBg guibg=#351C1D
 hi! WarningBg guibg=#3A2717
-hi! InfoBg guibg=#0F2D35
-hi! HintBg guibg=#13292A
+hi! InfoBg guibg=#2B2627
+hi! HintBg guibg=#2B2627
 
+" @check: do we really need the number fg highlight?
 hi! ErrorLineBg guifg=#a23343 guibg=#351C1D
 hi! WarningLineBg guifg=#AF7C55 guibg=#3A2717
-hi! InfoLineBg guifg=#A8899C guibg=#0F2D35
-hi! HintLineBg guifg=#A98D92 guibg=#13292A
+hi! InfoLineBg guifg=#A8899C guibg=#2B2627
+hi! HintLineBg guifg=#A98D92 guibg=#2B2627
 
 
 " :h diagnostic-signs
@@ -288,3 +293,16 @@ sign define DiagnosticSignInfo text=I texthl=DiagnosticSignInfo linehl=InforBg n
 sign define DiagnosticSignHint text=H texthl=DiagnosticSignHint linehl=HintBg numhl=HintLineBg
 
 ]])
+
+-- local lsp_util = require("nvim.utils.lsp")
+
+-- vim.api.nvim_create_autocmd("LspAttach", {
+-- 	callback = function(ev)
+-- 		local client = lsp_util.get_client(ev)
+
+-- 		if client.server_capabilities.inlayHintProvider then
+-- 			vim.lsp.buf.inlay_hint(0, true)
+-- 			vim.api.nvim_set_hl(0, "LspInlayHint", { fg = "red" })
+-- 		end
+-- 	end,
+-- })

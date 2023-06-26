@@ -40,6 +40,21 @@ return {
 
 			vim.keymap.set("n", "<c-w>", "<cmd>lua MiniBufremove.delete(0, false)<CR>")
 			vim.keymap.set("n", "<a-w>", "<cmd>lua MiniBufremove.delete(0, true)<CR>")
+
+			require("mini.cursorword").setup({
+				delay = 0,
+			})
+			vim.cmd([[
+			             " hi MiniCursorword        guisp=none guifg=none guibg=#222022 gui=none
+			             " hi MiniCursorword        guisp=none guifg=none guibg=#24141E gui=none
+			             " hi MiniCursorword        guisp=none guifg=none guibg=#2D1625 gui=none
+
+			             " hi MiniCursorword        guisp=none guifg=none guibg=#35172B gui=none
+			             " hi MiniCursorwordCurrent guisp=none guifg=none guibg=#35172B gui=none
+
+			             hi MiniCursorword        guisp=none guifg=none guibg=#1c212f gui=none
+			             hi MiniCursorwordCurrent guisp=none guifg=none guibg=#1c212f gui=none
+			         ]])
 		end,
 	},
 }
