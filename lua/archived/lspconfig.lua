@@ -26,33 +26,30 @@ return {
 			-- 	on_attach = on_attach,
 			-- 	-- capabilities = capabilities,
 			-- })
+
+			-- I need this
 			lspconfig.gopls.setup({
 				on_attach = on_attach,
 				-- capabilities = capabilities,
 			})
-			lspconfig.tsserver.setup({
-				on_attach = on_attach,
-				-- capabilities = capabilities,
-			})
-			lspconfig.jsonls.setup({
-				on_attach = on_attach,
-				-- capabilities = capabilities,
-			})
+			-- lspconfig.tsserver.setup({
+			-- on_attach = on_attach,
+			-- capabilities = capabilities,
+			-- })
+			-- lspconfig.jsonls.setup({
+			-- on_attach = on_attach,
+			-- capabilities = capabilities,
+			-- })
 
-			lspconfig.clangd.setup({
-				on_attach = on_attach,
-				-- capabilities = capabilities,
-			})
+			-- lspconfig.clangd.setup({
+			-- on_attach = on_attach,
+			-- capabilities = capabilities,
+			-- })
 
-			lspconfig.gdscript.setup({
-				-- capabilities = capabilities,
-				cmd = { "ncat", "localhost", "6005" },
-			})
-
-			lspconfig.rust_analyzer.setup({
-				on_attach = on_attach,
-				capabilities = capabilities,
-			})
+			-- lspconfig.rust_analyzer.setup({
+			-- 	on_attach = on_attach,
+			-- 	capabilities = capabilities,
+			-- })
 
 			-- local configs = require("lspconfig.configs")
 
@@ -105,7 +102,7 @@ return {
 			-- ),
 
 			-- vim.diagnostic.config({ virtual_text = false })
-			-- vim.diagnostic.config({ update_in_insert = true })
+			vim.diagnostic.config({ update_in_insert = true })
 			-- vim.diagnostic.disable()
 		end,
 	},

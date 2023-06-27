@@ -20,7 +20,4 @@ return {
 			theme.colorscheme()
 		end,
 	},
-	{ "ziglang/zig.vim", event = "BufEnter *.zig" },
-	{ "Tetralux/odin.vim" },
-	{ "ShinKage/idris2-nvim" },
 }
