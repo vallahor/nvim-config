@@ -224,9 +224,12 @@ vim.keymap.set("n", "<c-6>", "<C-^>")
 
 vim.keymap.set("n", "<f3>", ":Inspect<CR>")
 
--- vim.keymap.set("n", "<c-y>", vim.diagnostic.open_float)
--- vim.keymap.set("n", "<a-[>", vim.diagnostic.goto_prev)
--- vim.keymap.set("n", "<a-]>", vim.diagnostic.goto_next)
+vim.keymap.set({ "n", "v", "x" }, "[", "{", { nowait = true })
+vim.keymap.set({ "n", "v", "x" }, "]", "}", { nowait = true })
+
+vim.keymap.set("n", "<c-y>", vim.diagnostic.open_float)
+vim.keymap.set("n", "<c-,>", vim.diagnostic.goto_prev)
+vim.keymap.set("n", "<c-.>", vim.diagnostic.goto_next)
 
 vim.api.nvim_create_autocmd("FocusGained", {
 	pattern = "*",
