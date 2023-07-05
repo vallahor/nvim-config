@@ -224,9 +224,9 @@ vim.keymap.set("n", "<c-6>", "<C-^>")
 
 vim.keymap.set("n", "<f3>", ":Inspect<CR>")
 
-vim.keymap.set("n", "<c-y>", vim.diagnostic.open_float)
-vim.keymap.set("n", "[[", vim.diagnostic.goto_prev)
-vim.keymap.set("n", "]]", vim.diagnostic.goto_next)
+-- vim.keymap.set("n", "<c-y>", vim.diagnostic.open_float)
+-- vim.keymap.set("n", "<a-[>", vim.diagnostic.goto_prev)
+-- vim.keymap.set("n", "<a-]>", vim.diagnostic.goto_next)
 
 vim.api.nvim_create_autocmd("FocusGained", {
 	pattern = "*",
@@ -291,6 +291,9 @@ sign define DiagnosticSignError text=E texthl=DiagnosticSignError linehl=ErrorBg
 sign define DiagnosticSignWarn text=W texthl=DiagnosticSignWarn linehl=WarningBg numhl=WarningLineBg
 sign define DiagnosticSignInfo text=I texthl=DiagnosticSignInfo linehl=InforBg numhl=InforLineBg
 sign define DiagnosticSignHint text=H texthl=DiagnosticSignHint linehl=HintBg numhl=HintLineBg
+
+
+autocmd! BufNewFile,BufRead *.vs,*.fs,*.vert,*.frag set ft=glsl
 
 ]])
 

@@ -1,6 +1,6 @@
 return {
-	-- "dense-analysis/ale",
-	"hbarcelos/ale", -- hes version works with solc
+	"dense-analysis/ale",
+	-- "hbarcelos/ale", -- hes version works with solc
 	config = function()
 		vim.cmd([[
 	               let g:ale_linters = {
@@ -9,10 +9,11 @@ return {
 	               \}
                    let g:ale_solidity_solc_options = '--include-path node_modules/ --base-path .'
 
+                   " \   'rust': ['analyzer'],
                    " let g:ale_rust_cargo_use_clippy = executable('cargo-clippy')
 
 	               let g:ale_lint_on_enter = 1
-	               " let g:ale_lint_on_save = 1
+	               let g:ale_lint_on_save = 1
 	               let g:ale_lint_on_text_changed = 1
 	               let g:ale_lint_on_insert_leave = 1
 	               let g:ale_linters_explicit = 1
