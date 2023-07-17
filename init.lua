@@ -196,12 +196,6 @@ vim.keymap.set({ "n", "v" }, "0", begnning_of_the_line)
 vim.keymap.set("n", "-", "$")
 vim.keymap.set("v", "-", "$h")
 --
--- vim.keymap.set({ "n", "v" }, "<c-k>", "{")
--- vim.keymap.set({ "n", "v" }, "<c-j>", "}")
-
-vim.keymap.set({ "n", "v" }, "<c-p>", "{")
-vim.keymap.set({ "n", "v" }, "<c-n>", "}")
-
 vim.keymap.set("n", "<c-u>", "<c-r>")
 
 vim.keymap.set("n", "<c-r>", ":%s/")
@@ -223,9 +217,6 @@ vim.keymap.set("n", "<c-6>", "<C-^>")
 -- vim.keymap.set("n", "^", "<C-^>:bd#<cr>")
 
 vim.keymap.set("n", "<f3>", ":Inspect<CR>")
-
-vim.keymap.set({ "n", "v", "x" }, "[", "{", { nowait = true })
-vim.keymap.set({ "n", "v", "x" }, "]", "}", { nowait = true })
 
 vim.keymap.set("n", "<c-y>", vim.diagnostic.open_float)
 vim.keymap.set("n", "<c-,>", vim.diagnostic.goto_prev)
@@ -251,6 +242,14 @@ vim.api.nvim_create_autocmd("BufEnter", {
 -- 		vim.opt_local.tabstop = 4
 -- 	end,
 -- })
+
+vim.api.nvim_create_autocmd("BufEnter", {
+	pattern = "*",
+	callback = function()
+		vim.keymap.set({ "n", "v", "x" }, "[", "{", { nowait = true, buffer = true })
+		vim.keymap.set({ "n", "v", "x" }, "]", "}", { nowait = true, buffer = true })
+	end,
+})
 
 vim.cmd([[
 language en_US

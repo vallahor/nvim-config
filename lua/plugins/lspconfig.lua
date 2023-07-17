@@ -29,10 +29,15 @@ return {
 			-- 	-- capabilities = capabilities,
 			-- })
 
-			lspconfig.ruff_lsp.setup({
+			lspconfig.pyright.setup({
 				on_attach = on_attach,
 				-- capabilities = capabilities,
 			})
+
+			-- lspconfig.ruff_lsp.setup({
+			-- 	on_attach = on_attach,
+			-- 	-- capabilities = capabilities,
+			-- })
 
 			lspconfig.gopls.setup({
 				on_attach = on_attach,
