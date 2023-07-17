@@ -59,7 +59,6 @@ vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
 vim.opt.timeoutlen = 200
 vim.opt.updatetime = 200
 vim.opt.guicursor = "i-ci:block-iCursor"
--- vim.cmd([[set guicursor=i-ci:block-iCursor]])
 
 -- vim.opt.laststatus = 0
 -- vim.opt.cmdheight = 0
@@ -123,13 +122,9 @@ vim.bo.swapfile = false
 vim.keymap.set("n", "<leader><leader>", "<cmd>nohl<cr><esc>")
 vim.keymap.set("n", "<esc>", "<cmd>nohl<cr><esc>")
 
--- vim.keymap.set({ "n", "v", "i" }, "<c-enter>", "<cmd>w!<CR><esc>")
 vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>")
 
 vim.keymap.set({ "n", "v" }, "<leader>fs", "<cmd>w!<CR><esc>")
-
-vim.keymap.set("i", "<c-enter>", "<esc>o")
-vim.keymap.set("i", "<c-s-enter>", "<esc>O")
 
 vim.keymap.set({ "n", "v" }, "H", "<c-u>zz")
 
@@ -149,32 +144,25 @@ vim.keymap.set("n", "|", "<cmd>bd<cr>")
 -- vim.keymap.set("n", ")", "<c-w>o")
 -- vim.keymap.set("n", "(", "<c-w>r")
 
+-- vim.keymap.set({ "n", "v" }, "<leader>h", "<c-w>h")
+-- vim.keymap.set({ "n", "v" }, "<leader>j", "<c-w>j")
+-- vim.keymap.set({ "n", "v" }, "<leader>k", "<c-w>k")
+-- vim.keymap.set({ "n", "v" }, "<leader>l", "<c-w>l")
+
 -- resize windows
 vim.keymap.set("n", "<a-=>", "<c-w>=")
 
-vim.keymap.set({ "n", "v" }, "<leader>h", "<c-w>h")
-vim.keymap.set({ "n", "v" }, "<leader>j", "<c-w>j")
-vim.keymap.set({ "n", "v" }, "<leader>k", "<c-w>k")
-vim.keymap.set({ "n", "v" }, "<leader>l", "<c-w>l")
-
 vim.keymap.set({ "n", "v" }, "<c-h>", "<c-w>h")
--- vim.keymap.set({ "n", "v" }, "<c-n>", "<c-w>j")
--- vim.keymap.set({ "n", "v" }, "<c-p>", "<c-w>k")
-vim.keymap.set({ "n", "v" }, "<c-l>", "<c-w>l")
-
 vim.keymap.set({ "n", "v" }, "<c-j>", "<c-w>j")
 vim.keymap.set({ "n", "v" }, "<c-k>", "<c-w>k")
+vim.keymap.set({ "n", "v" }, "<c-l>", "<c-w>l")
 
 vim.keymap.set("c", "<c-v>", "<c-r>*")
 
 vim.keymap.set("v", "v", "V")
--- vim.keymap.set("v", "v", "<esc>")
 
--- vim.keymap.set({ "i", "c" }, "<c-bs>", "<c-w>")
 vim.keymap.set({ "i", "c" }, "<c-bs>", "<c-w>")
 vim.keymap.set({ "i", "c" }, "<c-h>", "<c-w>")
--- vim.keymap.set("c", "<c-bs>", "<c-w>")
--- vim.keymap.set("c", "<c-h>", "<c-w>")
 
 vim.keymap.set("n", "x", '"_x')
 vim.keymap.set("v", "x", '"_d')
@@ -213,8 +201,6 @@ vim.keymap.set("v", "<", "<gv")
 vim.keymap.set("v", ">", ">gv")
 
 vim.keymap.set("n", "<c-6>", "<C-^>")
--- vim.keymap.set("n", "<c-b>", "<C-^>:bd#<cr>")
--- vim.keymap.set("n", "^", "<C-^>:bd#<cr>")
 
 vim.keymap.set("n", "<f3>", ":Inspect<CR>")
 
@@ -234,14 +220,6 @@ vim.api.nvim_create_autocmd("BufEnter", {
 		vim.opt_local.tabstop = 2
 	end,
 })
-
--- vim.api.nvim_create_autocmd("BufEnter", {
--- 	pattern = { "*.py", "*.go" },
--- 	callback = function()
--- 		vim.opt_local.shiftwidth = 4
--- 		vim.opt_local.tabstop = 4
--- 	end,
--- })
 
 vim.api.nvim_create_autocmd("BufEnter", {
 	pattern = "*",
@@ -287,27 +265,12 @@ hi! WarningLineBg guifg=#AF7C55 guibg=#3A2717
 hi! InfoLineBg guifg=#A8899C guibg=#2B2627
 hi! HintLineBg guifg=#A98D92 guibg=#2B2627
 
-
 " :h diagnostic-signs
 sign define DiagnosticSignError text=E texthl=DiagnosticSignError linehl=ErrorBg numhl=ErrorLineBg
 sign define DiagnosticSignWarn text=W texthl=DiagnosticSignWarn linehl=WarningBg numhl=WarningLineBg
 sign define DiagnosticSignInfo text=I texthl=DiagnosticSignInfo linehl=InforBg numhl=InforLineBg
 sign define DiagnosticSignHint text=H texthl=DiagnosticSignHint linehl=HintBg numhl=HintLineBg
 
-
 autocmd! BufNewFile,BufRead *.vs,*.fs,*.vert,*.frag set ft=glsl
 
 ]])
-
--- local lsp_util = require("nvim.utils.lsp")
-
--- vim.api.nvim_create_autocmd("LspAttach", {
--- 	callback = function(ev)
--- 		local client = lsp_util.get_client(ev)
-
--- 		if client.server_capabilities.inlayHintProvider then
--- 			vim.lsp.buf.inlay_hint(0, true)
--- 			vim.api.nvim_set_hl(0, "LspInlayHint", { fg = "red" })
--- 		end
--- 	end,
--- })
