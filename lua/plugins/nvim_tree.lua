@@ -19,6 +19,7 @@ return {
 
 			-- your removals and mappings go here
 			vim.keymap.set("n", "<C-t>", api.tree.close, opts("Close"))
+			vim.keymap.set("n", "<leader>t", api.tree.close, opts("Close"))
 		end
 
 		require("nvim-tree").setup({
@@ -44,5 +45,7 @@ return {
 		-- vim.keymap.set("n", "<c-g>", "<cmd>NvimTreeToggle<cr>")
 		vim.keymap.set("n", "<c-t>", "<cmd>NvimTreeFocus<cr>")
 		vim.keymap.set("n", "<c-b>", "<cmd>NvimTreeClose<cr>")
+
+		vim.keymap.set("n", "<leader>t", "<cmd>NvimTreeFocus<cr>")
 	end,
 }

@@ -7,17 +7,12 @@ return {
 			vim.api.nvim_create_autocmd("BufWritePre", { pattern = "*.go", command = ":Neoformat goimports" })
 			vim.api.nvim_create_autocmd("BufWritePre", { pattern = "*.lua", command = ":Neoformat stylua" })
 
-			vim.api.nvim_create_autocmd("BufWritePre", { pattern = "*.rs", command = ":Neoformat" })
+			-- vim.api.nvim_create_autocmd("BufWritePre", { pattern = "*.rs", command = ":Neoformat" })
 
 			vim.api.nvim_create_autocmd("BufWritePre", {
 				pattern = { "*.vue", "*.ts", "*.tsx", "*.js", "*.jsx", "*.html", "*.css", "*.scss", "*.json" },
 				-- command = ":Neoformat prettier",
 				command = ":Neoformat prettierd",
-			})
-
-			vim.api.nvim_create_autocmd("BufWritePre", {
-				pattern = { "*.sol" },
-				command = ":Neoformat prettier",
 			})
 		end,
 	},

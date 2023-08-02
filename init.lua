@@ -119,7 +119,7 @@ vim.bo.swapfile = false
 
 -- MAPPING --
 
-vim.keymap.set("n", "<leader><leader>", "<cmd>nohl<cr><esc>")
+-- vim.keymap.set("n", "<leader><leader>", "<cmd>nohl<cr><esc>")
 vim.keymap.set("n", "<esc>", "<cmd>nohl<cr><esc>")
 
 vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>")
@@ -130,36 +130,38 @@ vim.keymap.set({ "n", "v" }, "H", "<c-u>zz")
 
 vim.keymap.set({ "n", "v" }, "L", "<c-d>zz")
 
-vim.keymap.set("n", "<c-\\>", "<cmd>clo<cr>")
-vim.keymap.set("n", "<c-=>", "<cmd>vs<cr>")
-vim.keymap.set("n", "<c-->", "<cmd>sp<cr>")
-vim.keymap.set("n", "<c-0>", "<c-w>o")
-vim.keymap.set("n", "<c-9>", "<c-w>r")
-vim.keymap.set("n", "|", "<cmd>bd<cr>")
+-- vim.keymap.set("n", "<c-\\>", "<cmd>clo<cr>")
+-- vim.keymap.set("n", "<c-=>", "<cmd>vs<cr>")
+-- vim.keymap.set("n", "<c-->", "<cmd>sp<cr>")
+-- vim.keymap.set("n", "<c-0>", "<c-w>o")
+-- vim.keymap.set("n", "<c-9>", "<c-w>r")
+-- vim.keymap.set("n", "|", "<cmd>bd<cr>")
 
 -- vim.keymap.set("n", "<leader>bd", "<cmd>bd<cr>")
--- vim.keymap.set("n", "|", "<cmd>clo<cr>")
--- vim.keymap.set("n", "+", "<cmd>vs<cr>")
--- vim.keymap.set("n", "_", "<cmd>sp<cr>")
--- vim.keymap.set("n", ")", "<c-w>o")
--- vim.keymap.set("n", "(", "<c-w>r")
+vim.keymap.set("n", "|", "<cmd>clo<cr>")
+vim.keymap.set("n", "+", "<cmd>vs<cr>")
+vim.keymap.set("n", "_", "<cmd>sp<cr>")
+vim.keymap.set("n", ")", "<c-w>o")
+vim.keymap.set("n", "(", "<c-w>r")
 
--- vim.keymap.set({ "n", "v" }, "<leader>h", "<c-w>h")
--- vim.keymap.set({ "n", "v" }, "<leader>j", "<c-w>j")
--- vim.keymap.set({ "n", "v" }, "<leader>k", "<c-w>k")
--- vim.keymap.set({ "n", "v" }, "<leader>l", "<c-w>l")
+vim.keymap.set({ "n", "v" }, "<leader>h", "<c-w>h")
+vim.keymap.set({ "n", "v" }, "<leader>j", "<c-w>j")
+vim.keymap.set({ "n", "v" }, "<leader>k", "<c-w>k")
+vim.keymap.set({ "n", "v" }, "<leader>l", "<c-w>l")
 
 -- resize windows
 vim.keymap.set("n", "<a-=>", "<c-w>=")
+vim.keymap.set("n", "<leader>=", "<c-w>=")
 
-vim.keymap.set({ "n", "v" }, "<c-h>", "<c-w>h")
-vim.keymap.set({ "n", "v" }, "<c-j>", "<c-w>j")
-vim.keymap.set({ "n", "v" }, "<c-k>", "<c-w>k")
-vim.keymap.set({ "n", "v" }, "<c-l>", "<c-w>l")
+-- vim.keymap.set({ "n", "v" }, "<c-h>", "<c-w>h")
+-- vim.keymap.set({ "n", "v" }, "<c-j>", "<c-w>j")
+-- vim.keymap.set({ "n", "v" }, "<c-k>", "<c-w>k")
+-- vim.keymap.set({ "n", "v" }, "<c-l>", "<c-w>l")
 
 vim.keymap.set("c", "<c-v>", "<c-r>*")
 
 vim.keymap.set("v", "v", "V")
+-- vim.keymap.set({ "n", "v" }, "V", "<c-v>")
 
 vim.keymap.set({ "i", "c" }, "<c-bs>", "<c-w>")
 vim.keymap.set({ "i", "c" }, "<c-h>", "<c-w>")
@@ -201,6 +203,7 @@ vim.keymap.set("v", "<", "<gv")
 vim.keymap.set("v", ">", ">gv")
 
 vim.keymap.set("n", "<c-6>", "<C-^>")
+vim.keymap.set("n", "^", "<C-^>")
 
 vim.keymap.set("n", "<f3>", ":Inspect<CR>")
 
