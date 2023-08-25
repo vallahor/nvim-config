@@ -16,6 +16,16 @@ return {
 				completion = {
 					completeopt = "menu,menuone,noinsert",
 				},
+				-- formatting = {
+				-- 	format = function(entry, vim_item)
+				-- 		vim_item.abbr = vim_item.abbr:match("[^(]+")
+				-- 		vim_item.abbr = string.sub(vim_item.abbr, 1, 40)
+				-- 		return vim_item
+				-- 	end,
+				-- },
+				window = {
+					documentation = cmp.config.disable,
+				},
 				snippet = {
 					expand = function(args)
 						require("luasnip").lsp_expand(args.body)
@@ -24,12 +34,13 @@ return {
 				sources = {
 					{
 						name = "nvim_lsp",
+						max_item_count = 10,
 						-- entry_filter = function(entry, _ctx)
 						-- 	return cmp.lsp.CompletionItemKind.Text ~= entry:get_kind()
 						-- end,
 					},
-					{ name = "buffer" },
-					{ name = "path" },
+					{ name = "buffer", max_item_count = 10 },
+					{ name = "path", max_item_count = 10 },
 					-- { name = "luasnip" },
 				},
 				mapping = {

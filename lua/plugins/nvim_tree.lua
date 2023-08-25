@@ -1,8 +1,8 @@
 return {
 	"nvim-tree/nvim-tree.lua",
-	dependencies = {
-		"nvim-tree/nvim-web-devicons",
-	},
+	-- dependencies = {
+	-- 	"nvim-tree/nvim-web-devicons",
+	-- },
 	config = function()
 		vim.g.loaded_netrw = 1
 		vim.g.loaded_netrwPlugin = 1
@@ -19,11 +19,14 @@ return {
 
 			-- your removals and mappings go here
 			vim.keymap.set("n", "<C-t>", api.tree.close, opts("Close"))
-			vim.keymap.set("n", "<leader>t", api.tree.close, opts("Close"))
 		end
 
 		require("nvim-tree").setup({
 			on_attach = my_on_attach,
+			update_focused_file = {
+				enable = true,
+				update_cwd = true,
+			},
 			view = {
 				width = 30,
 			},
@@ -45,7 +48,5 @@ return {
 		-- vim.keymap.set("n", "<c-g>", "<cmd>NvimTreeToggle<cr>")
 		vim.keymap.set("n", "<c-t>", "<cmd>NvimTreeFocus<cr>")
 		vim.keymap.set("n", "<c-b>", "<cmd>NvimTreeClose<cr>")
-
-		vim.keymap.set("n", "<leader>t", "<cmd>NvimTreeFocus<cr>")
 	end,
 }

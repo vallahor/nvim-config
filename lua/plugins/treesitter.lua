@@ -33,7 +33,7 @@ return {
 			},
 			indent = {
 				enable = true,
-				disable = { "python", "rust", "cpp", "go" },
+				disable = { "python", "rust", "cpp", "go", "ocaml" },
 			},
 			incremental_selection = {
 				enable = true,

@@ -13,6 +13,9 @@ return {
 				vim.keymap.set("n", "<c-3>", "<cmd>lua require('telescope.builtin').lsp_references()<cr>")
 				vim.keymap.set("n", "<c-1>", "<cmd>lua require('telescope.builtin').lsp_implementations()<cr>")
 
+				vim.keymap.set("n", "<{>", vim.diagnostic.goto_prev)
+				vim.keymap.set("n", "<}>", vim.diagnostic.goto_next)
+
 				client.server_capabilities.semanticTokensProvider = nil
 			end
 
@@ -42,13 +45,15 @@ return {
 
 			lspconfig.clangd.setup({
 				on_attach = on_attach,
-				hint = {
-					enable = false,
-				},
 				-- capabilities = capabilities,
 			})
 
 			lspconfig.rust_analyzer.setup({
+				on_attach = on_attach,
+				-- capabilities = capabilities,
+			})
+
+			lspconfig.ocamlls.setup({
 				on_attach = on_attach,
 				-- capabilities = capabilities,
 			})

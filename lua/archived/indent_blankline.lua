@@ -13,7 +13,7 @@ return {
 
 			vim.api.nvim_create_autocmd(
 				"FileType",
-				{ pattern = { "CHADTree", "python" }, command = ":lua vim.b.indent_blankline_use_treesitter=false" }
+				{ pattern = { "python" }, command = ":lua vim.b.indent_blankline_use_treesitter=false" }
 			)
 		end,
 	},

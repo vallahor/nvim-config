@@ -36,25 +36,27 @@ return {
 					},
 					initial_mode = "insert",
 					path_display = { "smart" },
-					-- border = false,
-					-- layout_strategy = "bottom_pane",
-					-- layout_config = {
-					-- 	height = 10,
-					-- 	prompt_position = "bottom",
-					-- },
-					-- preview = false,
+					border = false,
+					layout_strategy = "bottom_pane",
+					layout_config = {
+						height = 10,
+						prompt_position = "bottom",
+					},
+					preview = false,
 					file_ignore_patterns = { "node_modules", ".venv" },
 				},
 			})
 
-			-- vim.keymap.set("n", "<c-p>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
+			vim.keymap.set("n", "<c-p>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
 			vim.keymap.set("n", "<c-f>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
 			vim.keymap.set("n", "<c-/>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
 			vim.keymap.set("n", "<c-space>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
 
-			vim.keymap.set("n", "<leader>f", "<cmd>lua require('telescope.builtin').find_files()<cr>")
-			vim.keymap.set("n", "<leader>/", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
-			vim.keymap.set("n", "<leader><leader>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
+			-- vim.keymap.set("n", "<leader>f", "<cmd>lua require('telescope.builtin').find_files()<cr>")
+			-- vim.keymap.set("n", "<leader>ff", "<cmd>lua require('telescope.builtin').find_files()<cr>")
+			-- vim.keymap.set("n", "<leader>o", "<cmd>lua require('telescope.builtin').find_files()<cr>")
+			-- vim.keymap.set("n", "<leader>/", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
+			-- vim.keymap.set("n", "<leader><leader>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
 		end,
 	},
 }
