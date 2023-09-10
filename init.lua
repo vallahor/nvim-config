@@ -57,7 +57,7 @@ vim.opt.gdefault = true
 vim.opt.cindent = true
 vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
 vim.opt.timeoutlen = 200
-vim.opt.updatetime = 200
+vim.opt.updatetime = 100
 vim.opt.guicursor = "i-ci:block-iCursor"
 
 -- vim.opt.laststatus = 0
@@ -116,6 +116,26 @@ vim.bo.autoread = true
 vim.bo.copyindent = true
 vim.bo.grepprg = "rg"
 vim.bo.swapfile = false
+
+vim.g.VM_theme = "iceblue"
+vim.g.VM_default_mappings = 0
+vim.g.VM_custom_remaps = { ["-"] = "$" }
+vim.g.VM_maps = {
+	["Find Under"] = "<a-u>",
+	["Find Subword Under"] = "<a-u>",
+	["Select All"] = "<a-s-u>",
+	["Add Cursor Down"] = "<a-j>",
+	["Add Cursor Up"] = "<a-k>",
+	["Switch Mode"] = "<Tab>",
+	["Align"] = "<a-a>",
+	["Find Next"] = "<a-l>",
+	["Find Prev"] = "<a-h>",
+	["Goto Next"] = "<a-.>",
+	["Goto Prev"] = "<a-,>",
+	["Skip Region"] = "<a-;>",
+	["Remove Region"] = "<a-m>",
+	["I BS"] = "",
+}
 
 -- MAPPING --
 
@@ -207,8 +227,8 @@ vim.keymap.set("n", "<c-6>", "<C-^>")
 vim.keymap.set("n", "<f3>", ":Inspect<CR>")
 
 vim.keymap.set("n", "<c-y>", vim.diagnostic.open_float)
-vim.keymap.set("n", "<{>", vim.diagnostic.goto_prev)
-vim.keymap.set("n", "<}>", vim.diagnostic.goto_next)
+vim.keymap.set("n", "<c-,>", vim.diagnostic.goto_prev)
+vim.keymap.set("n", "<c-.>", vim.diagnostic.goto_next)
 
 vim.api.nvim_create_autocmd("FocusGained", {
 	pattern = "*",
@@ -216,24 +236,28 @@ vim.api.nvim_create_autocmd("FocusGained", {
 })
 
 vim.api.nvim_create_autocmd("BufEnter", {
-	pattern = { "*.vue", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.html", "*.css" },
+	pattern = { "*.svelte", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.html", "*.css" },
 	callback = function()
 		vim.opt_local.shiftwidth = 2
 		vim.opt_local.tabstop = 2
+		vim.opt_local.wrap = true
 	end,
 })
 
 vim.api.nvim_create_autocmd("BufEnter", {
 	pattern = "*",
 	callback = function()
-		vim.keymap.set({ "n", "v", "x" }, "[", "{", { nowait = true, buffer = true })
-		vim.keymap.set({ "n", "v", "x" }, "]", "}", { nowait = true, buffer = true })
+		vim.keymap.set({ "n", "v", "x" }, "[", "{", { nowait = true, buffer = true, remap = true })
+		vim.keymap.set({ "n", "v", "x" }, "]", "}", { nowait = true, buffer = true, remap = true })
 	end,
 })
 
 vim.cmd([[
 language en_US
 filetype on
+
+" @windows: nextjs and sveltkit folder name pattern
+set isfname+=(
 
 " autocmd InsertLeave * :normal! `^
 " set virtualedit=onemore

@@ -13,8 +13,9 @@ return {
 				vim.keymap.set("n", "<c-3>", "<cmd>lua require('telescope.builtin').lsp_references()<cr>")
 				vim.keymap.set("n", "<c-1>", "<cmd>lua require('telescope.builtin').lsp_implementations()<cr>")
 
-				vim.keymap.set("n", "<{>", vim.diagnostic.goto_prev)
-				vim.keymap.set("n", "<}>", vim.diagnostic.goto_next)
+				vim.keymap.set("n", "<c-y>", vim.diagnostic.open_float)
+				vim.keymap.set("n", "<c-,>", vim.diagnostic.goto_prev)
+				vim.keymap.set("n", "<c-.>", vim.diagnostic.goto_next)
 
 				client.server_capabilities.semanticTokensProvider = nil
 			end
@@ -35,13 +36,25 @@ return {
 
 			lspconfig.tsserver.setup({
 				on_attach = on_attach,
-				capabilities = capabilities,
+				-- capabilities = capabilities,
+			})
+			lspconfig.svelte.setup({
+				on_attach = on_attach,
+				-- capabilities = capabilities,
 			})
 
-			-- lspconfig.jsonls.setup({
-			-- on_attach = on_attach,
-			-- capabilities = capabilities,
-			-- })
+			lspconfig.tailwindcss.setup({
+				on_attach = on_attach,
+			})
+
+			lspconfig.sqlls.setup({
+				on_attach = on_attach,
+			})
+
+			lspconfig.jsonls.setup({
+				on_attach = on_attach,
+				-- capabilities = capabilities,
+			})
 
 			lspconfig.clangd.setup({
 				on_attach = on_attach,
@@ -53,9 +66,14 @@ return {
 				-- capabilities = capabilities,
 			})
 
-			lspconfig.ocamlls.setup({
+			lspconfig.zls.setup({
 				on_attach = on_attach,
 				-- capabilities = capabilities,
+			})
+
+			lspconfig.gdscript.setup({
+				on_attach = on_attach,
+				cmd = { "nc", "localhost", "6005" },
 			})
 		end,
 	},

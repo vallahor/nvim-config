@@ -7,10 +7,10 @@ return {
 		event = "VeryLazy",
 		config = function()
 			require("swap_buffer")
-			vim.keymap.set("n", "<a-h>", "<cmd>lua Swap_left()<CR>")
-			vim.keymap.set("n", "<a-j>", "<cmd>lua Swap_down()<CR>")
-			vim.keymap.set("n", "<a-k>", "<cmd>lua Swap_up()<CR>")
-			vim.keymap.set("n", "<a-l>", "<cmd>lua Swap_right()<CR>")
+			vim.keymap.set("n", "<a-H>", "<cmd>lua Swap_left()<CR>")
+			vim.keymap.set("n", "<a-J>", "<cmd>lua Swap_down()<CR>")
+			vim.keymap.set("n", "<a-K>", "<cmd>lua Swap_up()<CR>")
+			vim.keymap.set("n", "<a-L>", "<cmd>lua Swap_right()<CR>")
 		end,
 	},
 	{
@@ -18,6 +18,19 @@ return {
 		init = function()
 			local theme = require("theme")
 			theme.colorscheme()
+		end,
+	},
+	{
+		"habamax/vim-godot",
+		event = "BufEnter *.gd",
+		config = function()
+			vim.cmd([[
+            let g:godot_executable = 'C:/apps/godot/Godot_v4.1.1-stable_mono_win64.exe'
+            setlocal foldmethod=expr
+            setlocal tabstop=4
+            setlocal shiftwidth=4
+            setlocal indentexpr=
+            ]])
 		end,
 	},
 }

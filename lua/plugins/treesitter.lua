@@ -9,6 +9,7 @@ return {
 				end,
 			},
 			{ "RRethy/nvim-treesitter-endwise" },
+			{ "JoosepAlviste/nvim-ts-context-commentstring" },
 		},
 		version = false,
 		build = ":TSUpdate",
@@ -20,12 +21,17 @@ return {
 				"vim",
 				"c",
 				"cpp",
+				"c_sharp",
 				"zig",
 				"rust",
 				"go",
+				"gdscript",
 				"python",
 				"json",
 				"typescript",
+				"svelte",
+				"tsx",
+				"sql",
 				"yaml",
 			},
 			highlight = {
@@ -33,17 +39,17 @@ return {
 			},
 			indent = {
 				enable = true,
-				disable = { "python", "rust", "cpp", "go", "ocaml" },
+				disable = { "python", "rust", "cpp", "go", "ocaml", "zig" },
 			},
-			incremental_selection = {
-				enable = true,
-				keymaps = {
-					init_selection = "m",
-					node_incremental = "m",
-					node_decremental = "M",
-					scope_incremental = "<nop>",
-				},
-			},
+			-- incremental_selection = {
+			-- 	enable = true,
+			-- 	keymaps = {
+			-- 		init_selection = "m",
+			-- 		node_incremental = "m",
+			-- 		node_decremental = "M",
+			-- 		scope_incremental = "<nop>",
+			-- 	},
+			-- },
 			context_commentstring = {
 				enable = true,
 				enable_autocmd = false,
@@ -51,9 +57,10 @@ return {
 			endwise = {
 				enable = true,
 			},
-		},
-		autotag = {
-			enable = true,
+			autotag = {
+				enable = true,
+				enable_close_on_slash = false,
+			},
 		},
 		config = function(_, opts)
 			require("nvim-treesitter.install").compilers = { "clang" }

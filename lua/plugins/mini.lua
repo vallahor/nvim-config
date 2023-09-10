@@ -22,6 +22,10 @@ return {
 			require("mini.comment").setup({
 				options = {
 					ignore_blank_line = true,
+					custom_commentstring = function()
+						return require("ts_context_commentstring.internal").calculate_commentstring()
+							or vim.bo.commentstring
+					end,
 				},
 				hooks = {
 					pre = function()
@@ -34,11 +38,11 @@ return {
 				},
 			})
 
-			vim.cmd([[
-			             autocmd FileType solidity setlocal commentstring=//\ %s
-			             autocmd FileType c setlocal commentstring=//\ %s
-			             autocmd FileType cpp setlocal commentstring=//\ %s
-			         ]])
+			-- vim.cmd([[
+			--              autocmd FileType solidity setlocal commentstring=//\ %s
+			--              autocmd FileType c setlocal commentstring=//\ %s
+			--              autocmd FileType cpp setlocal commentstring=//\ %s
+			--          ]])
 
 			-- Statusline
 			require("mini.statusline").setup({

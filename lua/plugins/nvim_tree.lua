@@ -25,7 +25,7 @@ return {
 			on_attach = my_on_attach,
 			update_focused_file = {
 				enable = true,
-				update_cwd = true,
+				update_cwd = false,
 			},
 			view = {
 				width = 30,
