@@ -106,7 +106,9 @@ local t = {
 	ModeMsg = { fg = p.fg2, bg = p.bg3 },
 	MoreMsg = { fg = p.fg2, bg = p.bg3 },
 	-- Pmenu = { fg = p.fg2, bg = p.gray1 },
-	Pmenu = { fg = p.fg2, bg = p.menu_bg },
+	-- Pmenu = { fg = p.fg2, bg = p.menu_bg },
+	-- using blend
+	Pmenu = { fg = p.fg2 },
 	PmenuSel = { bg = p.fg4 },
 	PmenuSbar = { fg = p.fg2, bg = p.bg3 },
 	PmenuThumb = { fg = p.fg2 },
@@ -270,8 +272,8 @@ local t = {
 	["@function.macro"] = { fg = p.pink_half_dark },
 	["@method"] = { fg = p.yellow },
 	["@method.call"] = { fg = p.yellow },
-	["@constructor"] = { fg = p.yellow },
-	-- ["@constructor"] = { fg = p.purple_light },
+	-- ["@constructor"] = { fg = p.yellow }, -- @check if it's look better in some languages
+	["@constructor"] = { fg = p.purple_light },
 	["@field"] = { fg = p.pink_pastel2 },
 	["@property"] = { fg = p.pink_pastel2 },
 	["@parameter"] = { fg = p.fg1 },

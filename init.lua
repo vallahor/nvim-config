@@ -56,7 +56,7 @@ vim.opt.writebackup = false
 vim.opt.gdefault = true
 vim.opt.cindent = true
 vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
-vim.opt.timeoutlen = 200
+-- vim.opt.timeoutlen = 200 -- @check why I'm using that timeoutlen (maybe jk kj escaping thing)
 vim.opt.updatetime = 100
 vim.opt.guicursor = "i-ci:block-iCursor"
 
@@ -181,7 +181,6 @@ vim.keymap.set({ "n", "v" }, "<c-l>", "<c-w>l")
 vim.keymap.set("c", "<c-v>", "<c-r>*")
 
 vim.keymap.set("v", "v", "V")
--- vim.keymap.set({ "n", "v" }, "V", "<c-v>")
 
 vim.keymap.set({ "i", "c" }, "<c-bs>", "<c-w>")
 vim.keymap.set({ "i", "c" }, "<c-h>", "<c-w>")
@@ -191,6 +190,8 @@ vim.keymap.set("n", "<c-bs>", "i<c-w><esc>`^") -- @check if it's really works pr
 vim.keymap.set("n", "x", '"_x')
 vim.keymap.set("v", "x", '"_d')
 vim.keymap.set({ "n", "v" }, "c", '"_c')
+
+vim.keymap.set("n", "dx", '"_d') -- delete without copying to register @check working ok with default timeoutlen
 
 vim.keymap.set("n", "*", "*``")
 vim.keymap.set("v", "*", '"sy/\\V<c-r>s<cr>``')
@@ -207,9 +208,6 @@ end
 vim.keymap.set({ "n", "v" }, "0", begnning_of_the_line)
 vim.keymap.set("n", "-", "$")
 vim.keymap.set("v", "-", "$h")
-
--- vim.keymap.set("n", "<c-r>", ":%s/")
--- vim.keymap.set("v", "<c-r>", ":s/")
 
 -- vim.keymap.set("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
 vim.keymap.set("n", "<f4>", "<cmd>:e $MYVIMRC<CR>")
@@ -259,9 +257,6 @@ filetype on
 " @windows: nextjs and sveltkit folder name pattern
 set isfname+=(
 
-" autocmd InsertLeave * :normal! `^
-" set virtualedit=onemore
-
 " move lines
 vnoremap J :m '>+1<CR>gv=gv
 vnoremap K :m '<-2<CR>gv=gv
@@ -301,5 +296,7 @@ sign define DiagnosticSignInfo text=I texthl=DiagnosticSignInfo linehl=InforBg n
 sign define DiagnosticSignHint text=H texthl=DiagnosticSignHint linehl=HintBg numhl=HintLineBg
 
 autocmd! BufNewFile,BufRead *.vs,*.fs,*.vert,*.frag set ft=glsl
+
+set pumblend=15
 
 ]])

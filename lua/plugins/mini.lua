@@ -38,11 +38,11 @@ return {
 				},
 			})
 
-			-- vim.cmd([[
-			--              autocmd FileType solidity setlocal commentstring=//\ %s
-			--              autocmd FileType c setlocal commentstring=//\ %s
-			--              autocmd FileType cpp setlocal commentstring=//\ %s
-			--          ]])
+			vim.cmd([[
+                autocmd FileType solidity setlocal commentstring=//\ %s
+                autocmd FileType c setlocal commentstring=//\ %s
+                autocmd FileType cpp setlocal commentstring=//\ %s
+            ]])
 
 			-- Statusline
 			require("mini.statusline").setup({

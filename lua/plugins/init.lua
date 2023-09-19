@@ -7,10 +7,10 @@ return {
 		event = "VeryLazy",
 		config = function()
 			require("swap_buffer")
-			vim.keymap.set("n", "<a-H>", "<cmd>lua Swap_left()<CR>")
-			vim.keymap.set("n", "<a-J>", "<cmd>lua Swap_down()<CR>")
-			vim.keymap.set("n", "<a-K>", "<cmd>lua Swap_up()<CR>")
-			vim.keymap.set("n", "<a-L>", "<cmd>lua Swap_right()<CR>")
+			vim.keymap.set("n", "<leader>h", "<cmd>lua Swap_left()<CR>")
+			vim.keymap.set("n", "<leader>j", "<cmd>lua Swap_down()<CR>")
+			vim.keymap.set("n", "<leader>k", "<cmd>lua Swap_up()<CR>")
+			vim.keymap.set("n", "<leader>l", "<cmd>lua Swap_right()<CR>")
 		end,
 	},
 	{

@@ -10,6 +10,7 @@
   variable_type_function: (IDENTIFIER)
   field_access: (IDENTIFIER)
   function: (IDENTIFIER)
+  function_call: (IDENTIFIER)
  ] @type
  (#lua-match? @type "^[A-Z][a-z_0-9]*")
 )
@@ -30,12 +31,12 @@
 )
 
 (
- (ContainerField
+ (ParamType
    (ErrorUnionExpr
      (SuffixExpr
        [
         variable_type_function: (IDENTIFIER)
-        ] @constant
+        ] @type
        )
      ))
  )

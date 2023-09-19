@@ -8,6 +8,7 @@ return {
 				vim.keymap.set("n", "gi", vim.lsp.buf.implementation, { buffer = bufnr })
 
 				vim.keymap.set("n", "K", vim.lsp.buf.hover, { buffer = bufnr })
+				vim.keymap.set("n", "<c-;>", vim.lsp.buf.code_action, { buffer = bufnr })
 
 				vim.keymap.set("n", "<c-2>", vim.lsp.buf.rename, { buffer = bufnr })
 				vim.keymap.set("n", "<c-3>", "<cmd>lua require('telescope.builtin').lsp_references()<cr>")
