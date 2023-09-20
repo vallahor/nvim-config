@@ -60,53 +60,6 @@ vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
 vim.opt.updatetime = 100
 vim.opt.guicursor = "i-ci:block-iCursor"
 
--- vim.opt.laststatus = 0
--- vim.opt.cmdheight = 0
--- vim.opt.cmdheight = 1
-
--- local set_winbar = function()
--- 	local winbar = " %f - L%l C%c %S%="
--- 	local modified = "%{&mod ? '[MODIFIED]' : ''} "
-
--- 	local function show_macro_recording()
--- 		local recording_register = vim.fn.reg_recording()
--- 		if recording_register == "" then
--- 			return ""
--- 		else
--- 			return "Recording @" .. recording_register
--- 		end
--- 	end
-
--- 	vim.api.nvim_create_autocmd("RecordingEnter", {
--- 		pattern = "*",
--- 		callback = function()
--- 			-- vim.o.winbar = " " .. show_macro_recording() .. " " .. winbar
--- 			vim.o.winbar = winbar .. show_macro_recording() .. " "
--- 		end,
--- 	})
-
--- 	vim.api.nvim_create_autocmd("RecordingLeave", {
--- 		pattern = "*",
--- 		callback = function()
--- 			vim.o.winbar = winbar .. modified
--- 		end,
--- 	})
-
--- 	return winbar .. modified
--- end
-
--- vim.o.winbar = set_winbar()
--- vim.o.showcmdloc = "statusline"
-
--- vim.cmd([[
--- " hi! HorSplit guifg=NONE guibg=#ffefce
--- hi! HorSplit guifg=#382536 guibg=#121112
--- hi! link StatusLine HorSplit
--- hi! link StatusLineNC HorSplit
--- " set statusline=%{repeat('─',winwidth('.'))}
--- ]])
--- vim.o.statusline = "%{repeat('─',winwidth('.'))}"
-
 vim.wo.signcolumn = "no"
 vim.wo.relativenumber = true
 -- vim.wo.number = true
