@@ -26,19 +26,6 @@ return {
                 call arpeggio#map('t', '', 0, 'kj', '<C-\><C-n>')
                 call arpeggio#map('o', '', 0, 'kj', '<Esc>')
 
-                call arpeggio#map('i', '', 0, 'jj', '<Esc>')
-                call arpeggio#map('c', '', 0, 'jj', '<Esc>')
-                call arpeggio#map('l', '', 0, 'jj', '<Esc>')
-                call arpeggio#map('t', '', 0, 'jj', '<C-\><C-n>')
-                call arpeggio#map('o', '', 0, 'jj', '<Esc>')
-
-                call arpeggio#map('c', '', 0, 'kk', '<Esc>')
-                call arpeggio#map('i', '', 0, 'kk', '<Esc>')
-                call arpeggio#map('l', '', 0, 'kk', '<Esc>')
-                call arpeggio#map('t', '', 0, 'kk', '<C-\><C-n>')
-                call arpeggio#map('o', '', 0, 'kk', '<Esc>')
-
-
                 call arpeggio#map('i', '', 0, 'JK', '<Esc>')
                 call arpeggio#map('c', '', 0, 'JK', '<c-c>')
                 call arpeggio#map('o', '', 0, 'JK', '<Esc>')

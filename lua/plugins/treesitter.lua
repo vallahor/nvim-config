@@ -26,6 +26,8 @@ return {
 				"rust",
 				"go",
 				"gdscript",
+				"markdown",
+				"markdown_inline",
 				"python",
 				"json",
 				"typescript",
