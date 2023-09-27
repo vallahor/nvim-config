@@ -90,6 +90,15 @@ vim.g.VM_maps = {
 	["I BS"] = "",
 }
 
+vim.g.python_indent = {
+	disable_parentheses_indenting = false,
+	closed_paren_align_last_line = false,
+	searchpair_timeout = 150,
+	continue = indent,
+	open_paren = indent,
+	nested_paren = indent,
+}
+
 -- MAPPING --
 
 -- vim.keymap.set("n", "<leader><leader>", "<cmd>nohl<cr><esc>")
@@ -100,8 +109,10 @@ vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>")
 -- vim.keymap.set({ "n", "v" }, "<leader>fs", "<cmd>w!<CR><esc>")
 
 vim.keymap.set({ "n", "v" }, "H", "<c-u>zz")
-
 vim.keymap.set({ "n", "v" }, "L", "<c-d>zz")
+
+vim.keymap.set({ "n", "v" }, "<c-p>", "<c-u>zz")
+vim.keymap.set({ "n", "v" }, "<c-n>", "<c-d>zz")
 
 vim.keymap.set("n", "<c-\\>", "<cmd>clo<cr>")
 vim.keymap.set("n", "<c-=>", "<cmd>vs<cr>")
@@ -138,8 +149,6 @@ vim.keymap.set("v", "v", "V")
 vim.keymap.set({ "i", "c" }, "<c-bs>", "<c-w>")
 vim.keymap.set({ "i", "c" }, "<c-h>", "<c-w>")
 
-vim.keymap.set("n", "<bs>", "X")
-vim.keymap.set("n", "<c-bs>", "i<c-w><esc>`^") -- @check if it's really works properly
 vim.keymap.set("n", "x", '"_x')
 vim.keymap.set("v", "x", '"_d')
 vim.keymap.set({ "n", "v" }, "c", '"_c')

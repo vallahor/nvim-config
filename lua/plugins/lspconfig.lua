@@ -21,6 +21,23 @@ return {
 				client.server_capabilities.semanticTokensProvider = nil
 			end
 
+			vim.diagnostic.config({
+				signs = true,
+				update_in_insert = false,
+				virtual_text = {
+					prefix = "",
+					-- format = function(diagnostic)
+					-- 	if
+					-- 		diagnostic.severity == vim.diagnostic.severity.INFO
+					-- 		or diagnostic.severity == vim.diagnostic.severity.HINT
+					-- 	then
+					-- 		return ""
+					-- 	end
+					-- 	return diagnostic.message
+					-- end,
+				},
+			})
+
 			-- local capabilities = vim.lsp.protocol.make_client_capabilities()
 			-- capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
 

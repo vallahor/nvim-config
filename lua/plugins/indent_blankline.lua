@@ -10,6 +10,7 @@ return {
 				show_trailing_blankline_indent = false,
 			})
 			vim.g.indent_blankline_use_treesitter = true
+			vim.g.indent_blankline_char = "¦"
 
 			vim.api.nvim_create_autocmd(
 				"FileType",
