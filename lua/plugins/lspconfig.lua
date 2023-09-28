@@ -19,6 +19,7 @@ return {
 				vim.keymap.set("n", "<c-.>", vim.diagnostic.goto_next)
 
 				client.server_capabilities.semanticTokensProvider = nil
+				-- vim.g.inlay_hints_visible = true
 			end
 
 			vim.diagnostic.config({
