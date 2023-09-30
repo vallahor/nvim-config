@@ -43,15 +43,15 @@ return {
 				enable = true,
 				disable = { "python", "rust", "cpp", "go", "ocaml", "zig" },
 			},
-			-- incremental_selection = {
-			-- 	enable = true,
-			-- 	keymaps = {
-			-- 		init_selection = "m",
-			-- 		node_incremental = "m",
-			-- 		node_decremental = "M",
-			-- 		scope_incremental = "<nop>",
-			-- 	},
-			-- },
+			incremental_selection = {
+				enable = true,
+				keymaps = {
+					init_selection = "m",
+					node_incremental = "m",
+					node_decremental = "M",
+					scope_incremental = "<nop>",
+				},
+			},
 			context_commentstring = {
 				enable = true,
 				enable_autocmd = false,

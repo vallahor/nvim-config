@@ -137,10 +137,15 @@ vim.keymap.set("n", "|", "<cmd>bd<cr>")
 vim.keymap.set("n", "<a-=>", "<c-w>=")
 -- vim.keymap.set("n", "<leader>=", "<c-w>=")
 
-vim.keymap.set({ "n", "v" }, "<c-h>", "<c-w>h")
-vim.keymap.set({ "n", "v" }, "<c-j>", "<c-w>j")
-vim.keymap.set({ "n", "v" }, "<c-k>", "<c-w>k")
-vim.keymap.set({ "n", "v" }, "<c-l>", "<c-w>l")
+-- vim.keymap.set({ "n", "v" }, "<c-h>", "<c-w>h")
+-- vim.keymap.set({ "n", "v" }, "<c-j>", "<c-w>j")
+-- vim.keymap.set({ "n", "v" }, "<c-k>", "<c-w>k")
+-- vim.keymap.set({ "n", "v" }, "<c-l>", "<c-w>l")
+
+vim.keymap.set({ "n", "v" }, "<c-h>", "<cmd>wincmd h<cr>")
+vim.keymap.set({ "n", "v" }, "<c-j>", "<cmd>wincmd j<cr>")
+vim.keymap.set({ "n", "v" }, "<c-k>", "<cmd>wincmd k<cr>")
+vim.keymap.set({ "n", "v" }, "<c-l>", "<cmd>wincmd l<cr>")
 
 vim.keymap.set("c", "<c-v>", "<c-r>*")
 
@@ -180,7 +185,13 @@ vim.keymap.set("n", "<", "<<")
 vim.keymap.set("n", ">", ">>")
 
 vim.keymap.set("v", "<", "<gv")
-vim.keymap.set("v", ">", ">gv")
+vim.keymap.set("v", "<", "<gv")
+
+-- duplicate line and lines
+vim.keymap.set("n", "<c-s-j>", '"0yy"0p')
+vim.keymap.set("n", "<c-s-k>", '"0yy"0P')
+vim.keymap.set("v", "<c-s-j>", '"0ygvo<esc>"0pj')
+vim.keymap.set("v", "<c-s-k>", '"0y"0P')
 
 vim.keymap.set("n", "<c-6>", "<C-^>")
 
@@ -189,6 +200,11 @@ vim.keymap.set("n", "<f3>", ":Inspect<CR>")
 vim.keymap.set("n", "<c-y>", vim.diagnostic.open_float)
 vim.keymap.set("n", "<c-,>", vim.diagnostic.goto_prev)
 vim.keymap.set("n", "<c-.>", vim.diagnostic.goto_next)
+
+vim.diagnostic.config({
+	update_in_insert = false,
+	virtual_text = false,
+})
 
 vim.api.nvim_create_autocmd("FocusGained", {
 	pattern = "*",
@@ -240,22 +256,22 @@ autocmd!
 au TextYankPost * silent! lua vim.highlight.on_yank({higroup="Visual", timeout=200})
 augroup END
 
-hi! ErrorBg guibg=#351C1D
-hi! WarningBg guibg=#3A2717
-hi! InfoBg guibg=#2B2627
-hi! HintBg guibg=#2B2627
+" hi! ErrorBg guibg=#351C1D
+" hi! WarningBg guibg=#3A2717
+" hi! InfoBg guibg=#2B2627
+" hi! HintBg guibg=#2B2627
 
-" @check: do we really need the number fg highlight?
-hi! ErrorLineBg guifg=#a23343 guibg=#351C1D
-hi! WarningLineBg guifg=#AF7C55 guibg=#3A2717
-hi! InfoLineBg guifg=#A8899C guibg=#2B2627
-hi! HintLineBg guifg=#A98D92 guibg=#2B2627
+" " @check: do we really need the number fg highlight?
+" hi! ErrorLineBg guifg=#a23343 guibg=#351C1D
+" hi! WarningLineBg guifg=#AF7C55 guibg=#3A2717
+" hi! InfoLineBg guifg=#A8899C guibg=#2B2627
+" hi! HintLineBg guifg=#A98D92 guibg=#2B2627
 
-" :h diagnostic-signs
-sign define DiagnosticSignError text=E texthl=DiagnosticSignError linehl=ErrorBg numhl=ErrorLineBg
-sign define DiagnosticSignWarn text=W texthl=DiagnosticSignWarn linehl=WarningBg numhl=WarningLineBg
-sign define DiagnosticSignInfo text=I texthl=DiagnosticSignInfo linehl=InforBg numhl=InforLineBg
-sign define DiagnosticSignHint text=H texthl=DiagnosticSignHint linehl=HintBg numhl=HintLineBg
+" " :h diagnostic-signs
+" sign define DiagnosticSignError text=E texthl=DiagnosticSignError linehl=ErrorBg numhl=ErrorLineBg
+" sign define DiagnosticSignWarn text=W texthl=DiagnosticSignWarn linehl=WarningBg numhl=WarningLineBg
+" sign define DiagnosticSignInfo text=I texthl=DiagnosticSignInfo linehl=InforBg numhl=InforLineBg
+" sign define DiagnosticSignHint text=H texthl=DiagnosticSignHint linehl=HintBg numhl=HintLineBg
 
 autocmd! BufNewFile,BufRead *.vs,*.fs,*.vert,*.frag set ft=glsl
 
