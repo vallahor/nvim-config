@@ -185,18 +185,31 @@ vim.keymap.set("n", "<", "<<")
 vim.keymap.set("n", ">", ">>")
 
 vim.keymap.set("v", "<", "<gv")
-vim.keymap.set("v", "<", "<gv")
+vim.keymap.set("v", ">", ">gv")
 
 -- duplicate line and lines
 vim.keymap.set("n", "<c-s-j>", '"0yy"0p')
 vim.keymap.set("n", "<c-s-k>", '"0yy"0P')
-vim.keymap.set("v", "<c-s-j>", '"0ygvo<esc>"0pj')
+-- vim.keymap.set("v", "<c-s-j>", '"0ygv<esc>"0pj')
+
+vim.keymap.set("v", "<c-s-j>", function()
+	local init_pos = vim.fn.line("v")
+	vim.cmd([[noautocmd normal! "0ygv]])
+	local esc = vim.api.nvim_replace_termcodes("<esc>", true, false, true)
+	vim.api.nvim_feedkeys(esc, "v", false)
+	local end_pos = vim.fn.line(".")
+	vim.fn.setpos(".", { 0, math.max(init_pos, end_pos), 0, 0 })
+	local lines = vim.split(vim.fn.getreg("0"), "\n", { trimempty = true })
+	vim.api.nvim_put(lines, "l", true, false)
+end)
+
 vim.keymap.set("v", "<c-s-k>", '"0y"0P')
 
 vim.keymap.set("n", "<c-6>", "<C-^>")
 
 vim.keymap.set("n", "<f3>", ":Inspect<CR>")
 
+-- dianostics stuff
 vim.keymap.set("n", "<c-y>", vim.diagnostic.open_float)
 vim.keymap.set("n", "<c-,>", vim.diagnostic.goto_prev)
 vim.keymap.set("n", "<c-.>", vim.diagnostic.goto_next)
