@@ -111,9 +111,6 @@ vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>")
 vim.keymap.set({ "n", "v" }, "H", "<c-u>zz")
 vim.keymap.set({ "n", "v" }, "L", "<c-d>zz")
 
-vim.keymap.set({ "n", "v" }, "<c-p>", "<c-u>zz")
-vim.keymap.set({ "n", "v" }, "<c-n>", "<c-d>zz")
-
 vim.keymap.set("n", "<c-\\>", "<cmd>clo<cr>")
 vim.keymap.set("n", "<c-=>", "<cmd>vs<cr>")
 vim.keymap.set("n", "<c-->", "<cmd>sp<cr>")
@@ -128,19 +125,14 @@ vim.keymap.set("n", "|", "<cmd>bd<cr>")
 -- vim.keymap.set("n", ")", "<c-w>o")
 -- vim.keymap.set("n", "(", "<c-w>r")
 
--- vim.keymap.set({ "n", "v" }, "<leader>h", "<c-w>h")
--- vim.keymap.set({ "n", "v" }, "<leader>j", "<c-w>j")
--- vim.keymap.set({ "n", "v" }, "<leader>k", "<c-w>k")
--- vim.keymap.set({ "n", "v" }, "<leader>l", "<c-w>l")
+-- vim.keymap.set({ "n", "v" }, "<leader>h", "<cmd>wincmd h<cr>")
+-- vim.keymap.set({ "n", "v" }, "<leader>j", "<cmd>wincmd j<cr>")
+-- vim.keymap.set({ "n", "v" }, "<leader>k", "<cmd>wincmd k<cr>")
+-- vim.keymap.set({ "n", "v" }, "<leader>l", "<cmd>wincmd l<cr>")
 
 -- resize windows
 vim.keymap.set("n", "<a-=>", "<c-w>=")
 -- vim.keymap.set("n", "<leader>=", "<c-w>=")
-
--- vim.keymap.set({ "n", "v" }, "<c-h>", "<c-w>h")
--- vim.keymap.set({ "n", "v" }, "<c-j>", "<c-w>j")
--- vim.keymap.set({ "n", "v" }, "<c-k>", "<c-w>k")
--- vim.keymap.set({ "n", "v" }, "<c-l>", "<c-w>l")
 
 vim.keymap.set({ "n", "v" }, "<c-h>", "<cmd>wincmd h<cr>")
 vim.keymap.set({ "n", "v" }, "<c-j>", "<cmd>wincmd j<cr>")
@@ -184,15 +176,12 @@ vim.keymap.set("n", "<f5>", "<cmd>so %<CR>")
 vim.keymap.set("n", "<", "<<")
 vim.keymap.set("n", ">", ">>")
 
-vim.keymap.set("v", "<", "<gv")
-vim.keymap.set("v", ">", ">gv")
-
 -- duplicate line and lines
-vim.keymap.set("n", "<c-s-j>", '"0yy"0p')
-vim.keymap.set("n", "<c-s-k>", '"0yy"0P')
--- vim.keymap.set("v", "<c-s-j>", '"0ygv<esc>"0pj')
+vim.keymap.set("n", "<c-p>", '"0yy"0P')
+vim.keymap.set("n", "<c-n>", '"0yy"0p')
 
-vim.keymap.set("v", "<c-s-j>", function()
+vim.keymap.set("v", "<c-p>", '"0y"0P')
+vim.keymap.set("v", "<c-n>", function()
 	local init_pos = vim.fn.line("v")
 	vim.cmd([[noautocmd normal! "0ygv]])
 	local esc = vim.api.nvim_replace_termcodes("<esc>", true, false, true)
@@ -202,8 +191,6 @@ vim.keymap.set("v", "<c-s-j>", function()
 	local lines = vim.split(vim.fn.getreg("0"), "\n", { trimempty = true })
 	vim.api.nvim_put(lines, "l", true, false)
 end)
-
-vim.keymap.set("v", "<c-s-k>", '"0y"0P')
 
 vim.keymap.set("n", "<c-6>", "<C-^>")
 
@@ -233,11 +220,17 @@ vim.api.nvim_create_autocmd("BufEnter", {
 	end,
 })
 
+-- movements with timeout
 vim.api.nvim_create_autocmd("BufEnter", {
 	pattern = "*",
 	callback = function()
+		-- move paragraphs
 		vim.keymap.set({ "n", "v", "x" }, "[", "{", { nowait = true, buffer = true, remap = true })
 		vim.keymap.set({ "n", "v", "x" }, "]", "}", { nowait = true, buffer = true, remap = true })
+
+		-- move lines
+		vim.keymap.set("v", "<", "<gv", { nowait = true, buffer = true, remap = true })
+		vim.keymap.set("v", ">", ">gv", { nowait = true, buffer = true, remap = true })
 	end,
 })
 
@@ -269,10 +262,10 @@ autocmd!
 au TextYankPost * silent! lua vim.highlight.on_yank({higroup="Visual", timeout=200})
 augroup END
 
-" hi! ErrorBg guibg=#351C1D
-" hi! WarningBg guibg=#3A2717
-" hi! InfoBg guibg=#2B2627
-" hi! HintBg guibg=#2B2627
+hi! ErrorBg guibg=#351C1D
+hi! WarningBg guibg=#3A2717
+hi! InfoBg guibg=#2B2627
+hi! HintBg guibg=#2B2627
 
 " " @check: do we really need the number fg highlight?
 " hi! ErrorLineBg guifg=#a23343 guibg=#351C1D
@@ -280,11 +273,15 @@ augroup END
 " hi! InfoLineBg guifg=#A8899C guibg=#2B2627
 " hi! HintLineBg guifg=#A98D92 guibg=#2B2627
 
-" " :h diagnostic-signs
+" :h diagnostic-signs
 " sign define DiagnosticSignError text=E texthl=DiagnosticSignError linehl=ErrorBg numhl=ErrorLineBg
 " sign define DiagnosticSignWarn text=W texthl=DiagnosticSignWarn linehl=WarningBg numhl=WarningLineBg
 " sign define DiagnosticSignInfo text=I texthl=DiagnosticSignInfo linehl=InforBg numhl=InforLineBg
 " sign define DiagnosticSignHint text=H texthl=DiagnosticSignHint linehl=HintBg numhl=HintLineBg
+sign define DiagnosticSignError text=E numhl=ErrorLineBg
+sign define DiagnosticSignWarn text=W numhl=WarningLineBg
+sign define DiagnosticSignInfo text=I numhl=InforLineBg
+sign define DiagnosticSignHint text=H numhl=HintLineBg
 
 autocmd! BufNewFile,BufRead *.vs,*.fs,*.vert,*.frag set ft=glsl
 
