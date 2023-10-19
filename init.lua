@@ -60,6 +60,10 @@ vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
 vim.opt.updatetime = 100
 vim.opt.guicursor = "i-ci:block-iCursor"
 
+vim.opt.cmdheight = 0
+vim.opt.laststatus = 2
+vim.opt.showcmdloc = "statusline"
+
 vim.wo.signcolumn = "no"
 vim.wo.relativenumber = true
 -- vim.wo.number = true
@@ -70,6 +74,7 @@ vim.bo.copyindent = true
 vim.bo.grepprg = "rg"
 vim.bo.swapfile = false
 
+vim.g.user_emmet_install_global = 0
 -- multi-cursors (not work in it's lua file)
 vim.g.VM_theme = "iceblue"
 vim.g.VM_default_mappings = 0
@@ -193,20 +198,21 @@ vim.keymap.set("v", "<c-n>", function()
 	vim.fn.setpos(".", { 0, math.max(init_pos, end_pos), 0, 0 })
 	local lines = vim.split(vim.fn.getreg("0"), "\n", { trimempty = true })
 	vim.api.nvim_put(lines, "l", true, false)
-end) -- duplicate selection down (there's a, possible, bug when `gv` after duplicating)
+	vim.cmd([[noautocmd normal! gv]])
+end) -- duplicate selection down
 
 vim.keymap.set("n", "<c-6>", "<C-^>") -- back to last buffer
 
 vim.keymap.set("n", "<f3>", ":Inspect<CR>") -- inspect current token treesitter
 
 -- dianostics stuff
-vim.keymap.set("n", "<c-y>", vim.diagnostic.open_float) -- show diagnostic
-vim.keymap.set("n", "<c-,>", vim.diagnostic.goto_prev) -- prev diagnostic
-vim.keymap.set("n", "<c-.>", vim.diagnostic.goto_next) -- next diagnostic
+vim.keymap.set("n", "<a-y>", vim.diagnostic.open_float) -- show diagnostic
+vim.keymap.set("n", "<a-[>", vim.diagnostic.goto_prev) -- prev diagnostic
+vim.keymap.set("n", "<a-]>", vim.diagnostic.goto_next) -- next diagnostic
 
 vim.diagnostic.config({
 	update_in_insert = false,
-	virtual_text = false,
+	virtual_text = true,
 })
 
 vim.api.nvim_create_autocmd("FocusGained", {
@@ -214,8 +220,24 @@ vim.api.nvim_create_autocmd("FocusGained", {
 	command = "silent! checktime",
 })
 
+-- @check: could solve this with djlint indenting 2 spaces instead of 4 (must change the Neoformat command)
 vim.api.nvim_create_autocmd("BufEnter", {
-	pattern = { "*.svelte", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.html", "*.css" },
+	pattern = "*.html",
+	callback = function(opts)
+		if vim.bo[opts.buf].filetype == "htmldjango" then
+			vim.opt_local.shiftwidth = 4
+			vim.opt_local.tabstop = 4
+			vim.opt_local.wrap = true
+		else
+			vim.opt_local.shiftwidth = 2
+			vim.opt_local.tabstop = 2
+			vim.opt_local.wrap = true
+		end
+	end,
+})
+
+vim.api.nvim_create_autocmd("BufEnter", {
+	pattern = { "*.svelte", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.css" },
 	callback = function()
 		vim.opt_local.shiftwidth = 2
 		vim.opt_local.tabstop = 2
@@ -234,6 +256,30 @@ vim.api.nvim_create_autocmd("BufEnter", {
 		-- move lines
 		vim.keymap.set("v", "<", "<gv", { nowait = true, buffer = true, remap = true }) -- indent left in visual mode
 		vim.keymap.set("v", ">", ">gv", { nowait = true, buffer = true, remap = true }) -- indent right in visual mode
+	end,
+})
+
+-- show macro recording
+vim.api.nvim_create_autocmd("RecordingEnter", {
+	pattern = "*",
+	callback = function()
+		vim.opt_local.cmdheight = 1
+	end,
+})
+
+vim.api.nvim_create_autocmd("RecordingLeave", {
+	pattern = "*",
+	callback = function()
+		local timer = vim.loop.new_timer()
+		-- NOTE: Timer is here because we need to close cmdheight AFTER
+		-- the macro is ended, not during the Leave event
+		timer:start(
+			50,
+			0,
+			vim.schedule_wrap(function()
+				vim.opt_local.cmdheight = 0
+			end)
+		)
 	end,
 })
 
@@ -273,23 +319,32 @@ hi! InfoBg guibg=#2B2627
 hi! HintBg guibg=#2B2627
 
 " " @check: do we really need the number fg highlight?
-" hi! ErrorLineBg guifg=#a23343 guibg=#351C1D
-" hi! WarningLineBg guifg=#AF7C55 guibg=#3A2717
-" hi! InfoLineBg guifg=#A8899C guibg=#2B2627
-" hi! HintLineBg guifg=#A98D92 guibg=#2B2627
+hi! ErrorLineBg guifg=#a23343 guibg=#351C1D
+hi! WarningLineBg guifg=#AF7C55 guibg=#3A2717
+hi! InfoLineBg guifg=#A8899C guibg=#2B2627
+hi! HintLineBg guifg=#A98D92 guibg=#2B2627
+" hi! ErrorLineBg guifg=#a23343
+" hi! WarningLineBg guifg=#AF7C55
+" hi! InfoLineBg guifg=#A8899C
+" hi! HintLineBg guifg=#A98D92
 
 " :h diagnostic-signs
-" sign define DiagnosticSignError text=E texthl=DiagnosticSignError linehl=ErrorBg numhl=ErrorLineBg
-" sign define DiagnosticSignWarn text=W texthl=DiagnosticSignWarn linehl=WarningBg numhl=WarningLineBg
-" sign define DiagnosticSignInfo text=I texthl=DiagnosticSignInfo linehl=InforBg numhl=InforLineBg
-" sign define DiagnosticSignHint text=H texthl=DiagnosticSignHint linehl=HintBg numhl=HintLineBg
-sign define DiagnosticSignError text=E numhl=ErrorLineBg
-sign define DiagnosticSignWarn text=W numhl=WarningLineBg
-sign define DiagnosticSignInfo text=I numhl=InforLineBg
-sign define DiagnosticSignHint text=H numhl=HintLineBg
+sign define DiagnosticSignError text=E texthl=DiagnosticSignError linehl=ErrorBg numhl=ErrorLineBg
+sign define DiagnosticSignWarn text=W texthl=DiagnosticSignWarn linehl=WarningBg numhl=WarningLineBg
+sign define DiagnosticSignInfo text=I texthl=DiagnosticSignInfo linehl=InforBg numhl=InforLineBg
+sign define DiagnosticSignHint text=H texthl=DiagnosticSignHint linehl=HintBg numhl=HintLineBg
+" sign define DiagnosticSignError text=E numhl=ErrorLineBg
+" sign define DiagnosticSignWarn text=W numhl=WarningLineBg
+" sign define DiagnosticSignInfo text=I numhl=InforLineBg
+" sign define DiagnosticSignHint text=H numhl=HintLineBg
 
 autocmd! BufNewFile,BufRead *.vs,*.fs,*.vert,*.frag set ft=glsl
 
+" @check if this is really necessary and it's only work in django template
+au BufNewFile,BufRead *.html set filetype=htmldjango
+
 set pumblend=15
+
+autocmd CmdlineChanged * lua vim.schedule(function() vim.cmd('redraw') end)
 
 ]])

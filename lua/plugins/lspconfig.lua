@@ -17,15 +17,11 @@ return {
 			vim.keymap.set("n", "gi", vim.lsp.buf.implementation, { buffer = bufnr })
 
 			vim.keymap.set("n", "K", vim.lsp.buf.hover, { buffer = bufnr })
-			vim.keymap.set("n", "<c-;>", vim.lsp.buf.code_action, { buffer = bufnr })
+			vim.keymap.set("n", "<c-a>", vim.lsp.buf.code_action, { buffer = bufnr })
 
 			vim.keymap.set("n", "<leader>r", vim.lsp.buf.rename, { buffer = bufnr })
 			-- vim.keymap.set("n", "<c-3>", "<cmd>lua require('telescope.builtin').lsp_references()<cr>")
 			-- vim.keymap.set("n", "<c-1>", "<cmd>lua require('telescope.builtin').lsp_implementations()<cr>")
-
-			vim.keymap.set("n", "<c-y>", vim.diagnostic.open_float)
-			vim.keymap.set("n", "<c-,>", vim.diagnostic.goto_prev)
-			vim.keymap.set("n", "<c-.>", vim.diagnostic.goto_next)
 
 			-- vim.diagnostic.config({
 			-- 	virtual_text = {
@@ -101,8 +97,13 @@ return {
 			-- capabilities = capabilities,
 		})
 
+		-- @check how to make it work with htmldjango
+		local tailwind_filetypes = lspconfig.tailwindcss.document_config.default_config.filetypes
+		table.insert(tailwind_filetypes, "htmldjango")
+
 		lspconfig.tailwindcss.setup({
 			on_attach = on_attach,
+			filetypes = tailwind_filetypes,
 		})
 
 		lspconfig.sqlls.setup({
@@ -132,6 +133,22 @@ return {
 		lspconfig.gdscript.setup({
 			on_attach = on_attach,
 			cmd = { "nc", "localhost", "6005" },
+		})
+
+		lspconfig.elixirls.setup({
+			cmd = { "C:/apps/elixir-lsp/language_server.bat" },
+			settings = {
+				elixirLS = {
+					-- I choose to disable dialyzer for personal reasons, but
+					-- I would suggest you also disable it unless you are well
+					-- acquainted with dialzyer and know how to use it.
+					dialyzerEnabled = false,
+					-- I also choose to turn off the auto dep fetching feature.
+					-- It often get's into a weird state that requires deleting
+					-- the .elixir_ls directory and restarting your editor.
+					fetchDeps = false,
+				},
+			},
 		})
 	end,
 }

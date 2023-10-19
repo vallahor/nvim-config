@@ -45,13 +45,14 @@ return {
             ]])
 
 			-- Statusline
-			require("mini.statusline").setup({
+			local MiniStatusline = require("mini.statusline")
+			local location = "%S %l/%L C%c"
+			MiniStatusline.setup({
 				use_icons = false,
 				content = {
 					active = function()
 						local mode, mode_hl = MiniStatusline.section_mode({ trunc_width = 120 })
 						local filename = MiniStatusline.section_filename({ trunc_width = 140 })
-						local location = MiniStatusline.section_location({ trunc_width = 75 })
 
 						return MiniStatusline.combine_groups({
 							{ hl = mode_hl, strings = { mode } },
@@ -63,14 +64,13 @@ return {
 					end,
 					inactive = function()
 						local filename = MiniStatusline.section_filename({ trunc_width = 140 })
-						local location = MiniStatusline.section_location({ trunc_width = 75 })
 
 						return MiniStatusline.combine_groups({
-							{ hl = mode_hl, strings = { mode } },
+							-- { hl = mode_hl, strings = { mode } },
 							"%<", -- Mark general truncate point
 							{ hl = "MiniStatuslineFilename", strings = { filename } },
 							"%=", -- End left alignment
-							{ hl = mode_hl, strings = { location } },
+							{ strings = { location } },
 						})
 					end,
 				},
@@ -123,8 +123,8 @@ return {
 			             " hi MiniCursorword        guisp=none guifg=none guibg=#35172B gui=none
 			             " hi MiniCursorwordCurrent guisp=none guifg=none guibg=#35172B gui=none
 
-			             " hi MiniCursorword        guisp=none guifg=none guibg=#1c212f gui=none
-			             " hi MiniCursorwordCurrent guisp=none guifg=none guibg=#1c212f gui=none
+			             hi MiniCursorword        guisp=none guifg=none guibg=#1c212f gui=none
+			             hi MiniCursorwordCurrent guisp=none guifg=none guibg=#1c212f gui=none
 
 			             " hi MiniCursorword        guisp=none guifg=none guibg=#322E2C gui=none
 			             " hi MiniCursorwordCurrent guisp=none guifg=none guibg=#322E2C gui=none
@@ -132,8 +132,8 @@ return {
 			             " hi MiniCursorword        guisp=none guifg=none guibg=#221F1F gui=none
 			             " hi MiniCursorwordCurrent guisp=none guifg=none guibg=#221F1F gui=none
 
-                hi MiniCursorword        guisp=#514A46 gui=underline
-                hi MiniCursorwordCurrent guisp=#514A46 gui=underline
+                " hi MiniCursorword        guisp=#514A46 gui=underline
+                " hi MiniCursorwordCurrent guisp=#514A46 gui=underline
 			 ]])
 		end,
 	},

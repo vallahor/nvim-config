@@ -108,7 +108,8 @@ local t = {
 	-- Pmenu = { fg = p.fg2, bg = p.gray1 },
 	-- Pmenu = { fg = p.fg2, bg = p.menu_bg },
 	-- using blend
-	Pmenu = { fg = p.fg2 },
+	-- Pmenu = { fg = p.fg2 },
+	Pmenu = { fg = p.fg2, bg = p.bg4 },
 	PmenuSel = { bg = p.fg4 },
 	PmenuSbar = { fg = p.fg2, bg = p.bg3 },
 	PmenuThumb = { fg = p.fg2 },
@@ -138,6 +139,7 @@ local t = {
 	Title = { fg = p.fg2 },
 	-- Visual = { bg = p.search },
 	Visual = { bg = p.visual },
+	LinewiseVisual = { bg = p.fg1 },
 	-- VisualNOS = { bg = p.gray1 },
 	VisualNOS = { bg = p.search },
 	WarningMsg = { fg = p.pink2 },

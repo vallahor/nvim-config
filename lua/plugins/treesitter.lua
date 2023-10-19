@@ -22,6 +22,9 @@ return {
 				"c",
 				"cpp",
 				"c_sharp",
+				"elixir",
+				"heex",
+				"eex",
 				"zig",
 				"rust",
 				"go",
@@ -29,6 +32,7 @@ return {
 				"markdown",
 				"markdown_inline",
 				"python",
+				"htmldjango",
 				"json",
 				"typescript",
 				"svelte",
@@ -41,7 +45,7 @@ return {
 			},
 			indent = {
 				enable = true,
-				disable = { "python", "rust", "cpp", "go", "ocaml", "zig" },
+				disable = { "python", "rust", "cpp", "go", "ocaml", "zig", "htmldjango", "elixir" },
 			},
 			incremental_selection = {
 				enable = true,

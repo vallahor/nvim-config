@@ -25,12 +25,23 @@ return {
 		event = "BufEnter *.gd",
 		config = function()
 			vim.cmd([[
-            let g:godot_executable = 'C:/apps/godot/Godot_v4.1.1-stable_mono_win64.exe'
-            setlocal foldmethod=expr
-            setlocal tabstop=4
-            setlocal shiftwidth=4
-            setlocal indentexpr=
+                let g:godot_executable = 'C:/apps/godot/Godot_v4.1.1-stable_mono_win64.exe'
+                setlocal foldmethod=expr
+                setlocal tabstop=4
+                setlocal shiftwidth=4
+                setlocal indentexpr=
             ]])
+		end,
+	},
+	{
+		"mattn/emmet-vim",
+		config = function()
+			vim.api.nvim_create_autocmd("BufEnter", {
+				pattern = { "*.vue", "*.tsx", "*.jsx", "*.html" },
+				command = ":EmmetInstall",
+			})
+			vim.keymap.set("i", "<c-y>", "<nop>")
+			vim.keymap.set("i", "<c-y>", "<Plug>(emmet-expand-abbr)", { nowait = true })
 		end,
 	},
 }

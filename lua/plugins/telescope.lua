@@ -22,7 +22,7 @@ return {
 							["kj"] = actions.close,
 							-- ["fd"] = actions.close,
 							-- ["df"] = actions.close,
-							["<c-d>"] = actions.delete_buffer,
+							["<c-d>"] = actions.delete_buffer, -- delete_buffer delete window too
 						},
 						n = {
 							["<esc>"] = actions.close,
@@ -43,7 +43,7 @@ return {
 						prompt_position = "bottom",
 					},
 					preview = false,
-					file_ignore_patterns = { "node_modules", ".venv" },
+					file_ignore_patterns = { "node_modules", ".venv", "__pycache__", "_build" },
 				},
 			})
 

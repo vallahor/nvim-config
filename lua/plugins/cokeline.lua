@@ -4,11 +4,12 @@ return {
 		config = function()
 			local ok, cokeline = pcall(require, "cokeline")
 			if ok then
-				local utils = require("cokeline/utils")
-				local get_hex = require("cokeline/utils").get_hex
-				local yellow = vim.g.terminal_color_3
+				-- local utils = require("cokeline/utils")
+				local get_hex = require("cokeline.hlgroups").get_hl_attr
+				-- local yellow = vim.g.terminal_color_3
 
 				local errors_fg = get_hex("DiagnosticError", "fg")
+				local warning_fg = get_hex("DiagnosticWarn", "fg")
 
 				cokeline.setup({
 					sidebar = {
@@ -22,7 +23,7 @@ return {
 								fg = get_hex("Normal", "fg"),
 								-- bg = get_hex("Normal", "bg"),
 								bg = get_hex("TabLine", "bg"),
-								style = "bold",
+								bold = true,
 							},
 						},
 					},
@@ -60,27 +61,18 @@ return {
 							text = function(buffer)
 								return buffer.filename
 							end,
-							style = function(buffer)
-								local text_style = "NONE"
-								-- if buffer.is_focused then
-								-- 	text_style = "bold"
-								-- end
-								if buffer.is_modified then
-									text_style = text_style .. "italic"
-								end
-								if buffer.diagnostics.errors > 0 then
-									if text_style ~= "NONE" then
-										text_style = text_style .. ",undercurl"
-									else
-										text_style = "undercurl"
-									end
-								end
-								return text_style
+							italic = function(buffer)
+								return buffer.is_modified
+							end,
+							undercurl = function(buffer)
+								return buffer.diagnostics.errors > 0 or buffer.diagnostics.warnings > 0
 							end,
 							fg = function(buffer)
 								if buffer.diagnostics.errors > 0 then
 									-- return "#a23343"
 									return errors_fg
+								elseif buffer.diagnostics.warnings > 0 then
+									return warning_fg
 								end
 								if buffer.is_focused then
 									return get_hex("Normal", "fg")

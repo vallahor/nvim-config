@@ -16,14 +16,14 @@ return {
 				completion = {
 					completeopt = "menu,menuone,noinsert",
 				},
-				-- window = {
-				-- 	documentation = cmp.config.disable,
-				-- },
-				-- snippet = {
-				-- 	expand = function(args)
-				-- 		require("luasnip").lsp_expand(args.body)
-				-- 	end,
-				-- },
+				window = {
+					documentation = cmp.config.disable,
+				},
+				snippet = {
+					expand = function(args)
+						require("luasnip").lsp_expand(args.body)
+					end,
+				},
 				sources = {
 					{
 						name = "nvim_lsp",
@@ -34,7 +34,7 @@ return {
 					},
 					{ name = "buffer" },
 					{ name = "path" },
-					-- { name = "luasnip" },
+					{ name = "luasnip" },
 				},
 				mapping = {
 					["<C-q>"] = cmp.mapping.close(),
