@@ -40,12 +40,12 @@ return {
 					["<C-q>"] = cmp.mapping.close(),
 					["<c-j>"] = cmp.mapping(function()
 						if cmp.visible() then
-							cmp.select_next_item({ behavior = cmp.SelectBehavior.Insert, select = false })
+							cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
 						end
 					end, { "i", "s", "c" }),
 					["<c-k>"] = cmp.mapping(function()
 						if cmp.visible() then
-							cmp.select_prev_item({ behavior = cmp.SelectBehavior.Insert, select = false })
+							cmp.select_prev_item({ behavior = cmp.SelectBehavior.Select })
 						end
 					end, { "i", "s", "c" }),
 					["<tab>"] = cmp.mapping.confirm({
@@ -65,13 +65,16 @@ return {
 						cmp.config.compare.order,
 					},
 				},
+				experimental = {
+					ghost_text = true,
+				},
 			})
 			cmp.setup.cmdline({ "/", "?" }, {
 				-- preselect = false,
 				-- mapping = cmp.mapping.preset.cmdline(),
 				mapping = cmp.mapping.preset.cmdline({
 					["<Tab>"] = {
-						c = function(fallback)
+						c = function(_)
 							if cmp.visible() then
 								cmp.confirm()
 							else
@@ -94,7 +97,7 @@ return {
 				-- mapping = cmp.mapping.preset.cmdline(),
 				mapping = cmp.mapping.preset.cmdline({
 					["<Tab>"] = {
-						c = function(fallback)
+						c = function(_)
 							if cmp.visible() then
 								cmp.confirm()
 							else
