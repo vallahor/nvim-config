@@ -53,14 +53,20 @@ return {
 				content = {
 					active = function()
 						local mode, mode_hl = MiniStatusline.section_mode({ trunc_width = 120 })
+						local lhs, rhs = mode_hl, mode_hl
+
+						if mode == "Insert" then
+							lhs = "MiniStatuslineInsert"
+						end
+
 						local filename = MiniStatusline.section_filename({ trunc_width = 140 })
 
 						return MiniStatusline.combine_groups({
-							{ hl = mode_hl, strings = { mode } },
+							{ hl = lhs, strings = { mode } },
 							"%<",
 							{ hl = "MiniStatuslineFilename", strings = { filename } },
 							"%=",
-							{ hl = mode_hl, strings = { location } },
+							{ hl = rhs, strings = { location } },
 						})
 					end,
 					inactive = function()

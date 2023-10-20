@@ -77,6 +77,7 @@ local t = {
 	Conceal = { fg = p.fg2 },
 	Cursor = { fg = p.fg3, bg = p.color1 },
 	iCursor = { bg = p.red2 },
+	MiniStatuslineInsert = { fg = p.bg1, bg = p.red2 },
 	-- lCursor = { bg = p.bg3 },
 	CursorIM = { bg = p.bg3 },
 	CursorColumn = { bg = p.bg3 },
