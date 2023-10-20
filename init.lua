@@ -108,6 +108,8 @@ vim.g.python_indent = {
 
 -- MAPPING --
 
+vim.g.mapleader = " "
+
 -- vim.keymap.set("n", "<leader><leader>", "<cmd>nohl<cr><esc>")
 vim.keymap.set("n", "<esc>", "<cmd>nohl<cr><esc>") -- nohighlight
 
@@ -117,6 +119,9 @@ vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>") -- save file
 
 vim.keymap.set({ "n", "v" }, "H", "<c-u>zz") -- page up
 vim.keymap.set({ "n", "v" }, "L", "<c-d>zz") -- page down
+
+vim.keymap.set({ "n", "v" }, "{", "<c-u>zz", { noremap = true }) -- page up
+vim.keymap.set({ "n", "v" }, "}", "<c-d>zz", { noremap = true }) -- page down
 
 vim.keymap.set("n", "<c-\\>", "<cmd>clo<cr>") -- close current window
 vim.keymap.set("n", "<c-=>", "<cmd>vs<cr>") -- split vertical window
@@ -250,8 +255,8 @@ vim.api.nvim_create_autocmd("BufEnter", {
 	pattern = "*",
 	callback = function()
 		-- move paragraphs
-		vim.keymap.set({ "n", "v", "x" }, "[", "{", { nowait = true, buffer = true, remap = true }) -- paragraph up
-		vim.keymap.set({ "n", "v", "x" }, "]", "}", { nowait = true, buffer = true, remap = true }) -- paragraph down
+		vim.keymap.set({ "n", "v", "x" }, "[", "{", { nowait = true, buffer = true }) -- paragraph up
+		vim.keymap.set({ "n", "v", "x" }, "]", "}", { nowait = true, buffer = true }) -- paragraph down
 
 		-- move lines
 		vim.keymap.set("v", "<", "<gv", { nowait = true, buffer = true, remap = true }) -- indent left in visual mode
@@ -323,20 +328,12 @@ hi! ErrorLineBg guifg=#a23343 guibg=#351C1D
 hi! WarningLineBg guifg=#AF7C55 guibg=#3A2717
 hi! InfoLineBg guifg=#A8899C guibg=#2B2627
 hi! HintLineBg guifg=#A98D92 guibg=#2B2627
-" hi! ErrorLineBg guifg=#a23343
-" hi! WarningLineBg guifg=#AF7C55
-" hi! InfoLineBg guifg=#A8899C
-" hi! HintLineBg guifg=#A98D92
 
 " :h diagnostic-signs
 sign define DiagnosticSignError text=E texthl=DiagnosticSignError linehl=ErrorBg numhl=ErrorLineBg
 sign define DiagnosticSignWarn text=W texthl=DiagnosticSignWarn linehl=WarningBg numhl=WarningLineBg
 sign define DiagnosticSignInfo text=I texthl=DiagnosticSignInfo linehl=InforBg numhl=InforLineBg
 sign define DiagnosticSignHint text=H texthl=DiagnosticSignHint linehl=HintBg numhl=HintLineBg
-" sign define DiagnosticSignError text=E numhl=ErrorLineBg
-" sign define DiagnosticSignWarn text=W numhl=WarningLineBg
-" sign define DiagnosticSignInfo text=I numhl=InforLineBg
-" sign define DiagnosticSignHint text=H numhl=HintLineBg
 
 autocmd! BufNewFile,BufRead *.vs,*.fs,*.vert,*.frag set ft=glsl
 
@@ -345,6 +342,7 @@ au BufNewFile,BufRead *.html set filetype=htmldjango
 
 set pumblend=15
 
-autocmd CmdlineChanged * lua vim.schedule(function() vim.cmd('redraw') end)
+autocmd InsertEnter * lua vim.schedule(function() vim.cmd('redraw') end)
+autocmd InsertLeave * lua vim.schedule(function() vim.cmd('redraw') end)
 
 ]])
