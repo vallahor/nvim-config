@@ -35,6 +35,7 @@ return {
 				mappings = {
 					comment = "gc",
 					comment_line = "gc",
+					comment_visual = "gc",
 				},
 			})
 
@@ -46,7 +47,7 @@ return {
 
 			-- Statusline
 			local MiniStatusline = require("mini.statusline")
-			local location = "%S %l/%L C%c"
+			local location = "%S L%l/%L C%c "
 			MiniStatusline.setup({
 				use_icons = false,
 				content = {
@@ -56,9 +57,9 @@ return {
 
 						return MiniStatusline.combine_groups({
 							{ hl = mode_hl, strings = { mode } },
-							"%<", -- Mark general truncate point
+							"%<",
 							{ hl = "MiniStatuslineFilename", strings = { filename } },
-							"%=", -- End left alignment
+							"%=",
 							{ hl = mode_hl, strings = { location } },
 						})
 					end,
@@ -66,10 +67,9 @@ return {
 						local filename = MiniStatusline.section_filename({ trunc_width = 140 })
 
 						return MiniStatusline.combine_groups({
-							-- { hl = mode_hl, strings = { mode } },
-							"%<", -- Mark general truncate point
+							"%<",
 							{ hl = "MiniStatuslineFilename", strings = { filename } },
-							"%=", -- End left alignment
+							"%=",
 							{ strings = { location } },
 						})
 					end,

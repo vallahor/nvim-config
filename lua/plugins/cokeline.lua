@@ -13,16 +13,15 @@ return {
 
 				cokeline.setup({
 					sidebar = {
-						-- filetype = "CHADTree",
 						filetype = "NvimTree",
 						components = {
 							{
-								-- text = "  CHADTree",
-								text = "  AEHO",
+								text = "",
 								-- fg = yellow,
 								fg = get_hex("Normal", "fg"),
 								-- bg = get_hex("Normal", "bg"),
-								bg = get_hex("TabLine", "bg"),
+								-- bg = get_hex("TabLine", "bg"),
+								bg = get_hex("StatusLineNC", "bg"),
 								bold = true,
 							},
 						},
@@ -37,7 +36,8 @@ return {
 								end
 							end,
 							-- bg = get_hex("Normal", "bg"),
-							bg = "#191819",
+							bg = get_hex("StatusLineNC", "bg"),
+							-- bg = "#191819",
 						},
 						{
 							text = " ",
