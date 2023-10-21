@@ -146,7 +146,13 @@ vim.keymap.set("n", "|", "<cmd>bd<cr>") -- close current buffer and window
 -- vim.keymap.set({ "n", "v" }, "<leader>l", "<cmd>wincmd l<cr>")
 
 -- resize windows
-vim.keymap.set("n", "<a-=>", "<c-w>=") -- resize all windows
+vim.keymap.set("n", "<a-=>", "<cmd>wincmd =<cr>") -- resize all windows
+
+vim.keymap.set("n", "<a-s-l>", [[<cmd>vertical resize +5<cr>]]) -- make the window biger vertically
+vim.keymap.set("n", "<a-s-h>", [[<cmd>vertical resize -5<cr>]]) -- make the window smaller vertically
+vim.keymap.set("n", "<a-s-k>", [[<cmd>horizontal resize +2<cr>]]) -- make the window bigger horizontally
+vim.keymap.set("n", "<a-s-j>", [[<cmd>horizontal resize -2<cr>]]) -- make the window smaller horizontally
+
 -- vim.keymap.set("n", "<leader>=", "<c-w>=")
 
 vim.keymap.set({ "n", "v" }, "<c-h>", "<cmd>wincmd h<cr>") -- move to window left
@@ -345,8 +351,6 @@ au BufNewFile,BufRead *.html set filetype=htmldjango
 
 set pumblend=15
 
-" autocmd InsertEnter * lua vim.schedule(function() vim.cmd('redraw') end)
-" autocmd InsertLeave * lua vim.schedule(function() vim.cmd('redraw') end)
 autocmd ModeChanged * lua vim.schedule(function() vim.cmd('redraw') end)
 
 ]])
