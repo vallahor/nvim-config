@@ -14,6 +14,7 @@ local p = {
 	fg2 = "#C0AEA0",
 	fg3 = "#222022",
 	fg4 = "#493441",
+	fg5 = "#696059", -- ghost text
 	bg0 = "#091010",
 	bg1 = "#121112",
 	bg2 = "#c64964",
@@ -77,7 +78,6 @@ local t = {
 	Conceal = { fg = p.fg2 },
 	Cursor = { fg = p.fg3, bg = p.color1 },
 	iCursor = { bg = p.red2 },
-	MiniStatuslineInsert = { fg = p.bg1, bg = p.red2 },
 	-- lCursor = { bg = p.bg3 },
 	CursorIM = { bg = p.bg3 },
 	CursorColumn = { bg = p.bg3 },
@@ -216,6 +216,9 @@ local t = {
 	IndentBlanklineContextSpaceChar = { fg = p.purple_dark },
 	IndentBlanklineContextChar = { fg = p.bg_original },
 	IndentBlanklineContextStart = { fg = p.bg_original },
+
+	MiniStatuslineInsert = { fg = p.bg1, bg = p.red2 },
+	MiniGhostText = { fg = p.fg5 },
 
 	-- NvimTreeVertSplit = { fg = p.fg1, bg = p.bg1 },
 	NvimTreeVertSplit = { bg = p.bg1 },

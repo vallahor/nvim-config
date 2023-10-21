@@ -66,7 +66,9 @@ return {
 					},
 				},
 				experimental = {
-					ghost_text = true,
+					ghost_text = {
+						hl_group = "MiniGhostText",
+					},
 				},
 			})
 			cmp.setup.cmdline({ "/", "?" }, {
