@@ -117,6 +117,9 @@ vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>") -- save file
 
 -- vim.keymap.set({ "n", "v" }, "<leader>fs", "<cmd>w!<CR><esc>")
 
+vim.keymap.set("n", "<c-i>", "<c-i>zz") -- center <c-i>
+vim.keymap.set("n", "<c-o>", "<c-o>zz") -- center <c-o>
+
 vim.keymap.set({ "n", "v" }, "H", "<c-u>zz") -- page up
 vim.keymap.set({ "n", "v" }, "L", "<c-d>zz") -- page down
 
@@ -342,7 +345,8 @@ au BufNewFile,BufRead *.html set filetype=htmldjango
 
 set pumblend=15
 
-autocmd InsertEnter * lua vim.schedule(function() vim.cmd('redraw') end)
-autocmd InsertLeave * lua vim.schedule(function() vim.cmd('redraw') end)
+" autocmd InsertEnter * lua vim.schedule(function() vim.cmd('redraw') end)
+" autocmd InsertLeave * lua vim.schedule(function() vim.cmd('redraw') end)
+autocmd ModeChanged * lua vim.schedule(function() vim.cmd('redraw') end)
 
 ]])
