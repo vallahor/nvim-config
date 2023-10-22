@@ -54,17 +54,18 @@ return {
 					}),
 					["<c-space>"] = cmp.mapping.abort(),
 				},
-				sorting = {
-					comparators = {
-						cmp.config.compare.exact,
-						cmp.config.compare.offset,
-						cmp.config.compare.score,
-						cmp.config.compare.kind,
-						cmp.config.compare.sort_text,
-						cmp.config.compare.length,
-						cmp.config.compare.order,
-					},
-				},
+				-- @check
+				-- sorting = {
+				-- 	comparators = {
+				-- 		cmp.config.compare.exact,
+				-- 		cmp.config.compare.offset,
+				-- 		cmp.config.compare.score,
+				-- 		cmp.config.compare.kind,
+				-- 		cmp.config.compare.sort_text,
+				-- 		cmp.config.compare.length,
+				-- 		cmp.config.compare.order,
+				-- 	},
+				-- },
 				experimental = {
 					ghost_text = {
 						hl_group = "MiniGhostText",
@@ -72,8 +73,6 @@ return {
 				},
 			})
 			cmp.setup.cmdline({ "/", "?" }, {
-				-- preselect = false,
-				-- mapping = cmp.mapping.preset.cmdline(),
 				mapping = cmp.mapping.preset.cmdline({
 					["<Tab>"] = {
 						c = function(_)
@@ -95,9 +94,25 @@ return {
 			})
 
 			cmp.setup.cmdline(":", {
-				-- preselect = false,
-				-- mapping = cmp.mapping.preset.cmdline(),
 				mapping = cmp.mapping.preset.cmdline({
+					["<C-j>"] = {
+						c = function(fallback)
+							if cmp.visible() then
+								cmp.select_next_item()
+							else
+								fallback()
+							end
+						end,
+					},
+					["<C-k>"] = {
+						c = function(fallback)
+							if cmp.visible() then
+								cmp.select_prev_item()
+							else
+								fallback()
+							end
+						end,
+					},
 					["<Tab>"] = {
 						c = function(_)
 							if cmp.visible() then
