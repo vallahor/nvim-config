@@ -21,12 +21,10 @@ require("lazy").setup("plugins", {
 
 -- SETTINGS --
 
-local indent = 4
-
 vim.opt.guifont = { "JetBrains Mono NL:h13" }
-vim.opt.shiftwidth = indent
-vim.opt.tabstop = indent
-vim.opt.softtabstop = indent
+vim.opt.shiftwidth = 4
+vim.opt.tabstop = 4
+vim.opt.softtabstop = 4
 vim.opt.expandtab = true
 vim.opt.smartindent = true
 vim.opt.autoindent = true
@@ -101,9 +99,9 @@ vim.g.python_indent = {
 	disable_parentheses_indenting = false,
 	closed_paren_align_last_line = false,
 	searchpair_timeout = 150,
-	continue = indent,
-	open_paren = indent,
-	nested_paren = indent,
+	continue = 4,
+	open_paren = 4,
+	nested_paren = 4,
 }
 
 -- MAPPING --
@@ -117,11 +115,10 @@ vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>") -- save file
 
 -- vim.keymap.set({ "n", "v" }, "<leader>fs", "<cmd>w!<CR><esc>")
 
+vim.keymap.set("n", "Y", "yg$") -- yank to end of line considering line wrap
+
 vim.keymap.set("n", "<c-i>", "<c-i>zz") -- center <c-i>
 vim.keymap.set("n", "<c-o>", "<c-o>zz") -- center <c-o>
-
-vim.keymap.set({ "n", "v" }, "H", "<c-u>zz") -- page up
-vim.keymap.set({ "n", "v" }, "L", "<c-d>zz") -- page down
 
 vim.keymap.set({ "n", "v" }, "{", "<c-u>zz", { noremap = true }) -- page up
 vim.keymap.set({ "n", "v" }, "}", "<c-d>zz", { noremap = true }) -- page down
@@ -164,8 +161,13 @@ vim.keymap.set("c", "<c-v>", "<c-r>*") -- paste to command line mode
 
 vim.keymap.set("v", "v", "V") -- visual line mode
 
-vim.keymap.set({ "i", "c" }, "<c-bs>", "<c-w>") -- delete previous word
--- vim.keymap.set({ "i", "c" }, "<c-h>", "<c-w>")
+vim.keymap.set("i", "<space>", "<c-g>u<space>") -- add undo capabilities in insert mode
+vim.keymap.set("i", "<bs>", "<c-g>u<bs>") -- add undo capabilities in insert mode
+
+-- @check: if not using wordmotion
+-- vim.keymap.set("i", "<c-bs>", "<c-g>u<c-w>") -- delete previous word
+
+vim.keymap.set("c", "<c-bs>", "<c-w>") -- delete previous word
 
 vim.keymap.set("n", "x", '"_x') -- delete current char without copying
 vim.keymap.set("n", "<c-d>", '"_dd') -- delete line without copying
@@ -218,6 +220,9 @@ end) -- duplicate selection down
 vim.keymap.set("n", "<c-6>", "<C-^>") -- back to last buffer
 
 vim.keymap.set("n", "<f3>", ":Inspect<CR>") -- inspect current token treesitter
+
+vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv") -- move lines down
+vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv") -- move lines up
 
 -- dianostics stuff
 vim.keymap.set("n", "<a-y>", vim.diagnostic.open_float) -- show diagnostic
@@ -303,11 +308,6 @@ filetype on
 
 " @windows: nextjs and sveltkit folder name pattern
 set isfname+=(
-
-" move lines down
-vnoremap J :m '>+1<CR>gv=gv
-" move lines up
-vnoremap K :m '<-2<CR>gv=gv
 
 " visual mode - paste without copying
 vnoremap <expr> p 'pgv"'.v:register.'y`>'
