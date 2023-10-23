@@ -161,19 +161,27 @@ vim.keymap.set("c", "<c-v>", "<c-r>*") -- paste to command line mode
 
 vim.keymap.set("v", "v", "V") -- visual line mode
 
+-- @check if it's really worth
 -- add undo capabilities in insert mode
 vim.keymap.set("i", "<space>", "<c-g>u<space>")
-vim.keymap.set("i", "<bs>", "<c-g>u<bs>")
 vim.keymap.set("i", "[", "[<c-g>u")
 vim.keymap.set("i", "{", "{<c-g>u")
 vim.keymap.set("i", "(", "(<c-g>u")
+vim.keymap.set("i", "<", "<<c-g>u")
 vim.keymap.set("i", "]", "]<c-g>u")
 vim.keymap.set("i", "}", "}<c-g>u")
 vim.keymap.set("i", ")", ")<c-g>u")
+vim.keymap.set("i", ">", "><c-g>u")
 vim.keymap.set("i", ",", ",<c-g>u")
 vim.keymap.set("i", ".", ".<c-g>u")
+vim.keymap.set("i", "/", "/<c-g>u")
+vim.keymap.set("i", "\\", "\\<c-g>u")
 vim.keymap.set("i", "=", "=<c-g>u")
+vim.keymap.set("i", "+", "+<c-g>u")
+vim.keymap.set("i", "-", "-<c-g>u")
+vim.keymap.set("i", "*", "*<c-g>u")
 vim.keymap.set("i", '"', '"<c-g>u')
+vim.keymap.set("i", "'", "'<c-g>u")
 
 -- @check: if not using wordmotion
 -- vim.keymap.set("i", "<c-bs>", "<c-g>u<c-w>") -- delete previous word

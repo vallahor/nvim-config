@@ -30,6 +30,13 @@ return {
 			view = {
 				width = 30,
 			},
+			git = {
+				ignore = false,
+			},
+			filters = {
+				dotfiles = false,
+				custom = { ".venv", "node_modules", "__pycache__" },
+			},
 			renderer = {
 				icons = {
 					show = {
@@ -39,13 +46,6 @@ return {
 			},
 		})
 
-		local api = require("nvim-tree.api")
-
-		local function opts(desc)
-			return { desc = "nvim-tree: " .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
-		end
-
-		-- vim.keymap.set("n", "<c-g>", "<cmd>NvimTreeToggle<cr>")
 		vim.keymap.set("n", "<c-t>", "<cmd>NvimTreeFocus<cr>")
 		vim.keymap.set("n", "<c-b>", "<cmd>NvimTreeClose<cr>")
 	end,
