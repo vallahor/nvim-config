@@ -29,5 +29,5 @@ function Swap_right()
 end
 
 function _G.put(arg)
-	vim.pretty_print(arg)
+	vim.print(arg)
 end
