@@ -4,23 +4,23 @@ return {
 		config = function()
 			local ok, cokeline = pcall(require, "cokeline")
 			if ok then
-				-- local utils = require("cokeline/utils")
 				local get_hex = require("cokeline.hlgroups").get_hl_attr
-				-- local yellow = vim.g.terminal_color_3
 
 				local errors_fg = get_hex("DiagnosticError", "fg")
 				local warning_fg = get_hex("DiagnosticWarn", "fg")
 
 				cokeline.setup({
+					buffers = {
+						filter_valid = function(buffer)
+							return not buffer.filename == "cmd.exe"
+						end,
+					},
 					sidebar = {
 						filetype = "NvimTree",
 						components = {
 							{
 								text = "",
-								-- fg = yellow,
 								fg = get_hex("Normal", "fg"),
-								-- bg = get_hex("Normal", "bg"),
-								-- bg = get_hex("TabLine", "bg"),
 								bg = get_hex("StatusLineNC", "bg"),
 								bold = true,
 							},
@@ -35,9 +35,7 @@ return {
 									return " "
 								end
 							end,
-							-- bg = get_hex("Normal", "bg"),
 							bg = get_hex("StatusLineNC", "bg"),
-							-- bg = "#191819",
 						},
 						{
 							text = " ",
@@ -69,7 +67,6 @@ return {
 							end,
 							fg = function(buffer)
 								if buffer.diagnostics.errors > 0 then
-									-- return "#a23343"
 									return errors_fg
 								elseif buffer.diagnostics.warnings > 0 then
 									return warning_fg

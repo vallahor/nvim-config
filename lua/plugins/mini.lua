@@ -4,20 +4,6 @@ return {
 		"echasnovski/mini.nvim",
 		version = false,
 		config = function()
-			-- -- Move
-			-- require("mini.move").setup({
-			-- 	mappings = {
-			-- 		left = "<",
-			-- 		right = ">",
-			-- 		down = "J",
-			-- 		up = "K",
-			-- 		line_left = ">",
-			-- 		line_right = "<",
-			-- 		line_down = "",
-			-- 		line_up = "",
-			-- 	},
-			-- })
-
 			-- Comment
 			require("mini.comment").setup({
 				options = {
@@ -92,25 +78,6 @@ return {
                 hi MiniStatuslineModeVisual guisp=none guifg=none guibg=#471A37 gui=none
             ]])
 
-			-- -- Indent Scope
-			-- require("mini.indentscope").setup({
-			-- 	draw = {
-			-- 		delay = 0,
-			-- 		animation = require("mini.indentscope").gen_animation.none(),
-			-- 	},
-			-- 	options = {
-			-- 		border = "both",
-			-- 		indent_at_cursor = false,
-			-- 		try_as_border = true,
-			-- 	},
-			-- 	symbol = "│",
-			-- })
-
-			-- vim.api.nvim_create_autocmd(
-			-- 	"FileType",
-			-- 	{ pattern = { "NvimTree", "python" }, command = ":lua vim.b.miniindentscope_disable=true" }
-			-- )
-
 			-- Buf Remove
 			require("mini.bufremove").setup()
 
@@ -128,24 +95,8 @@ return {
 			)
 
 			vim.cmd([[
-			             " hi MiniCursorword        guisp=none guifg=none guibg=#222022 gui=none
-			             " hi MiniCursorword        guisp=none guifg=none guibg=#24141E gui=none
-			             " hi MiniCursorword        guisp=none guifg=none guibg=#2D1625 gui=none
-
-			             " hi MiniCursorword        guisp=none guifg=none guibg=#35172B gui=none
-			             " hi MiniCursorwordCurrent guisp=none guifg=none guibg=#35172B gui=none
-
-			             hi MiniCursorword        guisp=none guifg=none guibg=#1c212f gui=none
-			             hi MiniCursorwordCurrent guisp=none guifg=none guibg=#1c212f gui=none
-
-			             " hi MiniCursorword        guisp=none guifg=none guibg=#322E2C gui=none
-			             " hi MiniCursorwordCurrent guisp=none guifg=none guibg=#322E2C gui=none
-
-			             " hi MiniCursorword        guisp=none guifg=none guibg=#221F1F gui=none
-			             " hi MiniCursorwordCurrent guisp=none guifg=none guibg=#221F1F gui=none
-
-                " hi MiniCursorword        guisp=#514A46 gui=underline
-                " hi MiniCursorwordCurrent guisp=#514A46 gui=underline
+                hi MiniCursorword        guisp=none guifg=none guibg=#1c212f gui=none
+                hi MiniCursorwordCurrent guisp=none guifg=none guibg=#1c212f gui=none
 			 ]])
 		end,
 	},
