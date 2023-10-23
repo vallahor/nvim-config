@@ -12,7 +12,7 @@ return {
 				cokeline.setup({
 					buffers = {
 						filter_valid = function(buffer)
-							return not buffer.filename == "cmd.exe"
+							return buffer.filename ~= "cmd.exe"
 						end,
 					},
 					sidebar = {

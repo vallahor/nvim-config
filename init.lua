@@ -109,9 +109,9 @@ vim.g.python_indent = {
 vim.g.mapleader = " "
 
 -- vim.keymap.set("n", "<leader><leader>", "<cmd>nohl<cr><esc>")
-vim.keymap.set("n", "<esc>", "<cmd>nohl<cr><esc>") -- nohighlight
+vim.keymap.set("n", "<esc>", "<cmd>nohl<cr><esc>", { silent = true }) -- nohighlight
 
-vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>") -- save file
+vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>", { silent = true }) -- save file
 
 -- vim.keymap.set({ "n", "v" }, "<leader>fs", "<cmd>w!<CR><esc>")
 
@@ -123,12 +123,12 @@ vim.keymap.set("n", "<c-o>", "<c-o>zz") -- center <c-o>
 vim.keymap.set({ "n", "v" }, "{", "<c-u>zz", { noremap = true }) -- page up
 vim.keymap.set({ "n", "v" }, "}", "<c-d>zz", { noremap = true }) -- page down
 
-vim.keymap.set("n", "<c-\\>", "<cmd>clo<cr>") -- close current window
-vim.keymap.set("n", "<c-=>", "<cmd>vs<cr>") -- split vertical window
-vim.keymap.set("n", "<c-->", "<cmd>sp<cr>") -- split horizontal window
+vim.keymap.set("n", "<c-\\>", "<cmd>clo<cr>", { silent = true }) -- close current window
+vim.keymap.set("n", "<c-=>", "<cmd>vs<cr>", { silent = true }) -- split vertical window
+vim.keymap.set("n", "<c-->", "<cmd>sp<cr>", { silent = true }) -- split horizontal window
 vim.keymap.set("n", "<c-0>", "<c-w>o") -- close other windows
 vim.keymap.set("n", "<c-9>", "<c-w>r") -- rotate windows
-vim.keymap.set("n", "|", "<cmd>bd<cr>") -- close current buffer and window
+vim.keymap.set("n", "|", "<cmd>bd<cr>", { silent = true }) -- close current buffer and window
 
 -- vim.keymap.set("n", "<leader>bd", "<cmd>bd<cr>")
 -- vim.keymap.set("n", "|", "<cmd>clo<cr>")
@@ -143,19 +143,19 @@ vim.keymap.set("n", "|", "<cmd>bd<cr>") -- close current buffer and window
 -- vim.keymap.set({ "n", "v" }, "<leader>l", "<cmd>wincmd l<cr>")
 
 -- resize windows
-vim.keymap.set("n", "<a-=>", "<cmd>wincmd =<cr>") -- resize all windows
+vim.keymap.set("n", "<a-=>", "<cmd>wincmd =<cr>", { silent = true }) -- resize all windows
 
-vim.keymap.set("n", "<a-s-l>", [[<cmd>vertical resize +5<cr>]]) -- make the window biger vertically
-vim.keymap.set("n", "<a-s-h>", [[<cmd>vertical resize -5<cr>]]) -- make the window smaller vertically
-vim.keymap.set("n", "<a-s-k>", [[<cmd>horizontal resize +2<cr>]]) -- make the window bigger horizontally
-vim.keymap.set("n", "<a-s-j>", [[<cmd>horizontal resize -2<cr>]]) -- make the window smaller horizontally
+vim.keymap.set("n", "<a-s-l>", [[<cmd>vertical resize +5<cr>]], { silent = true }) -- make the window biger vertically
+vim.keymap.set("n", "<a-s-h>", [[<cmd>vertical resize -5<cr>]], { silent = true }) -- make the window smaller vertically
+vim.keymap.set("n", "<a-s-k>", [[<cmd>horizontal resize +2<cr>]], { silent = true }) -- make the window bigger horizontally
+vim.keymap.set("n", "<a-s-j>", [[<cmd>horizontal resize -2<cr>]], { silent = true }) -- make the window smaller horizontally
 
 -- vim.keymap.set("n", "<leader>=", "<c-w>=")
 
-vim.keymap.set({ "n", "v" }, "<c-h>", "<cmd>wincmd h<cr>") -- move to window left
-vim.keymap.set({ "n", "v" }, "<c-j>", "<cmd>wincmd j<cr>") -- move to window down
-vim.keymap.set({ "n", "v" }, "<c-k>", "<cmd>wincmd k<cr>") -- move to window up
-vim.keymap.set({ "n", "v" }, "<c-l>", "<cmd>wincmd l<cr>") -- move to window right
+vim.keymap.set({ "n", "v" }, "<c-h>", "<cmd>wincmd h<cr>", { silent = true }) -- move to window left
+vim.keymap.set({ "n", "v" }, "<c-j>", "<cmd>wincmd j<cr>", { silent = true }) -- move to window down
+vim.keymap.set({ "n", "v" }, "<c-k>", "<cmd>wincmd k<cr>", { silent = true }) -- move to window up
+vim.keymap.set({ "n", "v" }, "<c-l>", "<cmd>wincmd l<cr>", { silent = true }) -- move to window right
 
 vim.keymap.set("c", "<c-v>", "<c-r>*") -- paste to command line mode
 
@@ -212,12 +212,8 @@ vim.keymap.set("n", "-", "$") -- go to end of line
 vim.keymap.set("v", "-", "$h") -- go to end of line (for some reason it's go to wrong place in visual mode)
 
 -- vim.keymap.set("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
-vim.keymap.set("n", "<f4>", "<cmd>:e $MYVIMRC<CR>") -- open config file (vimrc or init.lua)
-vim.keymap.set("n", "<f5>", "<cmd>so %<CR>") -- execute current file (vim or lua)
-
--- move lines
-vim.keymap.set("n", "<", "<<") -- indent left
-vim.keymap.set("n", ">", ">>") -- indent right
+vim.keymap.set("n", "<f4>", "<cmd>:e $MYVIMRC<CR>", { silent = true }) -- open config file (vimrc or init.lua)
+vim.keymap.set("n", "<f5>", "<cmd>so %<CR>", { silent = true }) -- execute current file (vim or lua)
 
 -- duplicate line and lines
 vim.keymap.set("n", "<c-p>", '"0yy"0P') -- duplicate line up
@@ -239,9 +235,6 @@ end) -- duplicate selection down
 vim.keymap.set("n", "<c-6>", "<C-^>") -- back to last buffer
 
 vim.keymap.set("n", "<f3>", ":Inspect<CR>") -- inspect current token treesitter
-
-vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv") -- move lines down
-vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv") -- move lines up
 
 -- dianostics stuff
 vim.keymap.set("n", "<a-y>", vim.diagnostic.open_float) -- show diagnostic
@@ -366,7 +359,7 @@ sign define DiagnosticSignHint text=H texthl=DiagnosticSignHint linehl=HintBg nu
 autocmd! BufNewFile,BufRead *.vs,*.fs,*.vert,*.frag set ft=glsl
 
 " @check if this is really necessary and it's only work in django template
-au BufNewFile,BufRead *.html set filetype=htmldjango
+" au BufNewFile,BufRead *.html set filetype=htmldjango
 
 set pumblend=15
 
