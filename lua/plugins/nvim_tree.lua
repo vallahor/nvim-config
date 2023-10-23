@@ -46,7 +46,7 @@ return {
 			},
 		})
 
-		vim.keymap.set("n", "<c-t>", "<cmd>NvimTreeFocus<cr>")
-		vim.keymap.set("n", "<c-b>", "<cmd>NvimTreeClose<cr>")
+		vim.keymap.set("n", "<c-t>", "<cmd>NvimTreeFocus<cr>", { silent = true })
+		vim.keymap.set("n", "<c-b>", "<cmd>NvimTreeClose<cr>", { silent = true })
 	end,
 }

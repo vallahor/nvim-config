@@ -25,6 +25,6 @@ return {
 			end
 		end
 		-- toggle keymappings for venn using <leader>v
-		vim.keymap.set("n", "<c-space>", ":lua Toggle_venn()<CR>", { noremap = true })
+		vim.keymap.set("n", "<c-space>", ":lua Toggle_venn()<CR>", { noremap = true, silent = true })
 	end,
 }

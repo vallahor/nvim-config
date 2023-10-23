@@ -13,7 +13,7 @@ return {
 	},
 	config = function()
 		local on_attach = function(client, bufnr)
-			vim.keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>zt", { buffer = bufnr })
+			vim.keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>zt", { buffer = bufnr, silent = true })
 			vim.keymap.set("n", "gi", vim.lsp.buf.implementation, { buffer = bufnr })
 
 			vim.keymap.set("n", "K", vim.lsp.buf.hover, { buffer = bufnr })

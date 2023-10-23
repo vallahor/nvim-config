@@ -105,11 +105,11 @@ return {
 				})
 			end
 
-			vim.keymap.set("n", "<c-,>", "<Plug>(cokeline-focus-prev)")
-			vim.keymap.set("n", "<c-.>", "<Plug>(cokeline-focus-next)")
+			vim.keymap.set("n", "<c-,>", "<Plug>(cokeline-focus-prev)", { silent = true })
+			vim.keymap.set("n", "<c-.>", "<Plug>(cokeline-focus-next)", { silent = true })
 			-- Re-order to previous/next
-			vim.keymap.set("n", "<a-,>", "<Plug>(cokeline-switch-prev)")
-			vim.keymap.set("n", "<a-.>", "<Plug>(cokeline-switch-next)")
+			vim.keymap.set("n", "<a-,>", "<Plug>(cokeline-switch-prev)", { silent = true })
+			vim.keymap.set("n", "<a-.>", "<Plug>(cokeline-switch-next)", { silent = true })
 		end,
 	},
 }

@@ -81,8 +81,8 @@ return {
 			-- Buf Remove
 			require("mini.bufremove").setup()
 
-			vim.keymap.set("n", "<c-w>", "<cmd>lua MiniBufremove.delete(0, false)<CR>")
-			vim.keymap.set("n", "<a-w>", "<cmd>lua MiniBufremove.delete(0, true)<CR>")
+			vim.keymap.set("n", "<c-w>", "<cmd>lua MiniBufremove.delete(0, false)<CR>", { silent = true })
+			vim.keymap.set("n", "<a-w>", "<cmd>lua MiniBufremove.delete(0, true)<CR>", { silent = true })
 
 			-- Cursor Word
 			require("mini.cursorword").setup({
