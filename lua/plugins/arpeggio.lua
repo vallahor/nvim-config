@@ -5,8 +5,8 @@ return {
 			vim.cmd([[
                 let g:arpeggio_timeoutlen = 80
 
-                call arpeggio#map('n', '', 0, 'jk', ':noh<cr><Esc>')
-                call arpeggio#map('n', '', 0, 'kj', ':noh<cr><Esc>')
+                call arpeggio#map('n', '', 0, 'jk', ':<c-u>silent! noh<cr><Esc>')
+                call arpeggio#map('n', '', 0, 'kj', ':<c-u>silent! noh<cr><Esc>')
 
                 call arpeggio#map('i', '', 0, 'jk', '<Esc>')
                 call arpeggio#map('v', '', 0, 'jk', '<Esc>')

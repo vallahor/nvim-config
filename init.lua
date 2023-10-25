@@ -233,10 +233,6 @@ vim.keymap.set("n", "<a-]>", vim.diagnostic.goto_next) -- next diagnostic
 vim.keymap.set("n", "<", "<<") -- indent left
 vim.keymap.set("n", ">", ">>") -- indent right
 
--- move
-vim.keymap.set({ "n", "v", "x" }, "k", "gk") -- move up (line wrapped)
-vim.keymap.set({ "n", "v", "x" }, "j", "gj") -- move down (line wrapped)
-
 vim.diagnostic.config({
 	update_in_insert = false,
 	virtual_text = true,
