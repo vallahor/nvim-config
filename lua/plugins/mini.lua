@@ -39,26 +39,21 @@ return {
 				content = {
 					active = function()
 						local mode, mode_hl = MiniStatusline.section_mode({ trunc_width = 120 })
-						local lhs, rhs = mode_hl, mode_hl
 						local venn_enabled = vim.inspect(vim.b.venn_enabled)
 						local venn_mode = ""
 						if venn_enabled ~= "nil" then
 							venn_mode = "Venn Active"
 						end
 
-						if mode == "Insert" then
-							lhs = "MiniStatuslineInsert"
-						end
-
 						local filename = MiniStatusline.section_filename({ trunc_width = 140 })
 
 						return MiniStatusline.combine_groups({
-							{ hl = lhs, strings = { mode } },
+							{ hl = mode_hl, strings = { mode } },
 							"%<",
 							{ hl = "MiniStatuslineFilename", strings = { filename } },
 							"%=",
 							{ strings = { venn_mode } },
-							{ hl = rhs, strings = { location } },
+							{ hl = mode_hl, strings = { location } },
 						})
 					end,
 					inactive = function()
@@ -73,10 +68,6 @@ return {
 					end,
 				},
 			})
-
-			vim.cmd([[
-                hi MiniStatuslineModeVisual guisp=none guifg=none guibg=#471A37 gui=none
-            ]])
 
 			-- Buf Remove
 			require("mini.bufremove").setup()

@@ -90,7 +90,7 @@ local t = {
 	DiffChange = { fg = p.color2, bg = p.green },
 	DiffDelete = { fg = p.red3 },
 	DiffText = { fg = p.fg2 },
-	EndOfBuffer = { fg = p.fg4 },
+	EndOfBuffer = { fg = p.bg1 },
 	ErrorMsg = { fg = p.red4 },
 	VertSplit = { fg = p.bg3 },
 	Folded = { fg = p.fg2 },
@@ -216,7 +216,8 @@ local t = {
 	IndentBlanklineContextChar = { fg = p.bg_original },
 	IndentBlanklineContextStart = { fg = p.bg_original },
 
-	MiniStatuslineInsert = { fg = p.bg1, bg = p.red2 },
+	MiniStatuslineModeInsert = { fg = p.bg1, bg = p.red2 },
+	MiniStatuslineModeVisual = { bg = p.visual },
 	MiniGhostText = { fg = p.fg5 },
 
 	-- NvimTreeVertSplit = { fg = p.fg1, bg = p.bg1 },
