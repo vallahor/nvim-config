@@ -130,23 +130,11 @@ vim.keymap.set("n", "<c-0>", "<c-w>o") -- close other windows
 vim.keymap.set("n", "<c-9>", "<c-w>r") -- rotate windows
 vim.keymap.set("n", "|", "<cmd>bd<cr>", { silent = true }) -- close current buffer and window
 
--- vim.keymap.set("n", "<leader>bd", "<cmd>bd<cr>")
--- vim.keymap.set("n", "|", "<cmd>clo<cr>")
--- vim.keymap.set("n", "+", "<cmd>vs<cr>")
--- vim.keymap.set("n", "_", "<cmd>sp<cr>")
--- vim.keymap.set("n", ")", "<c-w>o")
--- vim.keymap.set("n", "(", "<c-w>r")
-
--- vim.keymap.set({ "n", "v" }, "<leader>h", "<cmd>wincmd h<cr>")
--- vim.keymap.set({ "n", "v" }, "<leader>j", "<cmd>wincmd j<cr>")
--- vim.keymap.set({ "n", "v" }, "<leader>k", "<cmd>wincmd k<cr>")
--- vim.keymap.set({ "n", "v" }, "<leader>l", "<cmd>wincmd l<cr>")
-
 -- resize windows
 vim.keymap.set("n", "<a-=>", "<cmd>wincmd =<cr>", { silent = true }) -- resize all windows
 
-vim.keymap.set("n", "<a-s-l>", [[<cmd>vertical resize +5<cr>]], { silent = true }) -- make the window biger vertically
-vim.keymap.set("n", "<a-s-h>", [[<cmd>vertical resize -5<cr>]], { silent = true }) -- make the window smaller vertically
+vim.keymap.set("n", "<a-s-l>", [[<cmd>vertical resize +2<cr>]], { silent = true }) -- make the window biger vertically
+vim.keymap.set("n", "<a-s-h>", [[<cmd>vertical resize -2<cr>]], { silent = true }) -- make the window smaller vertically
 vim.keymap.set("n", "<a-s-k>", [[<cmd>horizontal resize +2<cr>]], { silent = true }) -- make the window bigger horizontally
 vim.keymap.set("n", "<a-s-j>", [[<cmd>horizontal resize -2<cr>]], { silent = true }) -- make the window smaller horizontally
 
@@ -241,6 +229,14 @@ vim.keymap.set("n", "<a-y>", vim.diagnostic.open_float) -- show diagnostic
 vim.keymap.set("n", "<a-[>", vim.diagnostic.goto_prev) -- prev diagnostic
 vim.keymap.set("n", "<a-]>", vim.diagnostic.goto_next) -- next diagnostic
 
+-- move lines
+vim.keymap.set("n", "<", "<<") -- indent left
+vim.keymap.set("n", ">", ">>") -- indent right
+
+-- move
+vim.keymap.set({ "n", "v", "x" }, "k", "gk") -- move up (line wrapped)
+vim.keymap.set({ "n", "v", "x" }, "j", "gj") -- move down (line wrapped)
+
 vim.diagnostic.config({
 	update_in_insert = false,
 	virtual_text = true,
@@ -277,7 +273,7 @@ vim.api.nvim_create_autocmd("BufEnter", {
 })
 
 -- movements with timeout
-vim.api.nvim_create_autocmd("BufEnter", {
+vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
 	pattern = "*",
 	callback = function()
 		-- move paragraphs
@@ -302,8 +298,6 @@ vim.api.nvim_create_autocmd("RecordingLeave", {
 	pattern = "*",
 	callback = function()
 		local timer = vim.loop.new_timer()
-		-- NOTE: Timer is here because we need to close cmdheight AFTER
-		-- the macro is ended, not during the Leave event
 		timer:start(
 			50,
 			0,
@@ -365,4 +359,6 @@ set pumblend=15
 
 autocmd ModeChanged * lua vim.schedule(function() vim.cmd('redraw') end)
 
+xnoremap K   :<C-u>silent! '<,'>move-2<CR>gv=gv
+xnoremap J :<C-u>silent! '<,'>move'>+<CR>gv=gv
 ]])
