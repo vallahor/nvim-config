@@ -1,8 +1,8 @@
 return {
-	{
-		"kana/vim-arpeggio",
-		config = function()
-			vim.cmd([[
+  {
+    "kana/vim-arpeggio",
+    config = function()
+      vim.cmd([[
                 let g:arpeggio_timeoutlen = 80
 
                 call arpeggio#map('n', '', 0, 'jk', ':<c-u>silent! noh<cr><Esc>')
@@ -62,6 +62,6 @@ return {
                 call arpeggio#map('l', '', 0, 'kJ', '<Esc>')
                 call arpeggio#map('t', '', 0, 'kJ', '<C-\><C-n>')
                 ]])
-		end,
-	},
+    end,
+  },
 }

@@ -1,22 +1,22 @@
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
-	vim.fn.system({
-		"git",
-		"clone",
-		"--filter=blob:none",
-		"https://github.com/folke/lazy.nvim.git",
-		"--branch=stable",
-		lazypath,
-	})
+  vim.fn.system({
+    "git",
+    "clone",
+    "--filter=blob:none",
+    "https://github.com/folke/lazy.nvim.git",
+    "--branch=stable",
+    lazypath,
+  })
 end
 vim.opt.rtp:prepend(lazypath)
 
 vim.g.mapleader = " "
 
 require("lazy").setup("plugins", {
-	change_detection = {
-		notify = false,
-	},
+  change_detection = {
+    notify = false,
+  },
 })
 
 -- SETTINGS --
@@ -78,35 +78,33 @@ vim.g.VM_theme = "iceblue"
 vim.g.VM_default_mappings = 0
 vim.g.VM_custom_remaps = { ["-"] = "$" }
 vim.g.VM_maps = {
-	["Find Under"] = "<a-u>",
-	["Find Subword Under"] = "<a-u>",
-	["Select All"] = "<a-s-u>",
-	["Add Cursor Down"] = "<a-j>",
-	["Add Cursor Up"] = "<a-k>",
-	["Switch Mode"] = "<Tab>",
-	["Align"] = "<a-a>",
-	["Find Next"] = "<a-l>",
-	["Find Prev"] = "<a-h>",
-	["Goto Next"] = "<a-.>",
-	["Goto Prev"] = "<a-,>",
-	["Skip Region"] = "<a-;>",
-	["Remove Region"] = "<a-m>",
-	["I BS"] = "",
+  ["Find Under"] = "<a-u>",
+  ["Find Subword Under"] = "<a-u>",
+  ["Select All"] = "<a-s-u>",
+  ["Add Cursor Down"] = "<a-j>",
+  ["Add Cursor Up"] = "<a-k>",
+  ["Switch Mode"] = "<Tab>",
+  ["Align"] = "<a-a>",
+  ["Find Next"] = "<a-l>",
+  ["Find Prev"] = "<a-h>",
+  ["Goto Next"] = "<a-.>",
+  ["Goto Prev"] = "<a-,>",
+  ["Skip Region"] = "<a-;>",
+  ["Remove Region"] = "<a-m>",
+  ["I BS"] = "",
 }
 
 -- work around on python default configs
 vim.g.python_indent = {
-	disable_parentheses_indenting = false,
-	closed_paren_align_last_line = false,
-	searchpair_timeout = 150,
-	continue = 4,
-	open_paren = 4,
-	nested_paren = 4,
+  disable_parentheses_indenting = false,
+  closed_paren_align_last_line = false,
+  searchpair_timeout = 150,
+  continue = 4,
+  open_paren = 4,
+  nested_paren = 4,
 }
 
 -- MAPPING --
-
-vim.g.mapleader = " "
 
 -- vim.keymap.set("n", "<leader><leader>", "<cmd>nohl<cr><esc>")
 vim.keymap.set("n", "<esc>", "<cmd>nohl<cr><esc>", { silent = true }) -- nohighlight
@@ -187,12 +185,12 @@ vim.keymap.set("n", "*", "*``") -- highlight all occurencies of the current word
 vim.keymap.set("v", "*", '"sy/\\V<c-r>s<cr>``') -- highlight all occurencies of the curren selection
 
 local beginning_of_the_line = function()
-	local old_pos = vim.fn.col(".")
-	vim.fn.setpos(".", { 0, vim.fn.line("."), 0, 0 })
-	vim.fn.execute("normal ^")
-	if old_pos == vim.fn.col(".") then
-		vim.fn.setpos(".", { 0, vim.fn.line("."), 0, 0 })
-	end
+  local old_pos = vim.fn.col(".")
+  vim.fn.setpos(".", { 0, vim.fn.line("."), 0, 0 })
+  vim.fn.execute("normal ^")
+  if old_pos == vim.fn.col(".") then
+    vim.fn.setpos(".", { 0, vim.fn.line("."), 0, 0 })
+  end
 end
 
 vim.keymap.set({ "n", "v" }, "0", beginning_of_the_line) -- go to beginning of the line
@@ -209,15 +207,15 @@ vim.keymap.set("n", "<c-n>", '"0yy"0p') -- duplicate line down
 
 vim.keymap.set("v", "<c-p>", '"0y"0P') -- duplicate selection up
 vim.keymap.set("v", "<c-n>", function()
-	local init_pos = vim.fn.line("v")
-	vim.cmd([[noautocmd normal! "0ygv]])
-	local esc = vim.api.nvim_replace_termcodes("<esc>", true, false, true)
-	vim.api.nvim_feedkeys(esc, "v", false)
-	local end_pos = vim.fn.line(".")
-	vim.fn.setpos(".", { 0, math.max(init_pos, end_pos), 0, 0 })
-	local lines = vim.split(vim.fn.getreg("0"), "\n", { trimempty = true })
-	vim.api.nvim_put(lines, "l", true, false)
-	vim.cmd([[noautocmd normal! gv]])
+  local init_pos = vim.fn.line("v")
+  vim.cmd([[noautocmd normal! "0ygv]])
+  local esc = vim.api.nvim_replace_termcodes("<esc>", true, false, true)
+  vim.api.nvim_feedkeys(esc, "v", false)
+  local end_pos = vim.fn.line(".")
+  vim.fn.setpos(".", { 0, math.max(init_pos, end_pos), 0, 0 })
+  local lines = vim.split(vim.fn.getreg("0"), "\n", { trimempty = true })
+  vim.api.nvim_put(lines, "l", true, false)
+  vim.cmd([[noautocmd normal! gv]])
 end) -- duplicate selection down
 
 vim.keymap.set("n", "<c-6>", "<C-^>") -- back to last buffer
@@ -234,74 +232,74 @@ vim.keymap.set("n", "<", "<<") -- indent left
 vim.keymap.set("n", ">", ">>") -- indent right
 
 vim.diagnostic.config({
-	update_in_insert = false,
-	virtual_text = true,
+  update_in_insert = false,
+  virtual_text = true,
 })
 
 vim.api.nvim_create_autocmd("FocusGained", {
-	pattern = "*",
-	command = "silent! checktime",
+  pattern = "*",
+  command = "silent! checktime",
 })
 
 -- @check: could solve this with djlint indenting 2 spaces instead of 4 (must change the Neoformat command)
 vim.api.nvim_create_autocmd("BufEnter", {
-	pattern = "*.html",
-	callback = function(opts)
-		if vim.bo[opts.buf].filetype == "htmldjango" then
-			vim.opt_local.shiftwidth = 4
-			vim.opt_local.tabstop = 4
-			vim.opt_local.wrap = true
-		else
-			vim.opt_local.shiftwidth = 2
-			vim.opt_local.tabstop = 2
-			vim.opt_local.wrap = true
-		end
-	end,
+  pattern = "*.html",
+  callback = function(opts)
+    if vim.bo[opts.buf].filetype == "htmldjango" then
+      vim.opt_local.shiftwidth = 4
+      vim.opt_local.tabstop = 4
+      vim.opt_local.wrap = true
+    else
+      vim.opt_local.shiftwidth = 2
+      vim.opt_local.tabstop = 2
+      vim.opt_local.wrap = true
+    end
+  end,
 })
 
 vim.api.nvim_create_autocmd("BufEnter", {
-	pattern = { "*.svelte", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.css" },
-	callback = function()
-		vim.opt_local.shiftwidth = 2
-		vim.opt_local.tabstop = 2
-		vim.opt_local.wrap = true
-	end,
+  pattern = { "*.svelte", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.css" },
+  callback = function()
+    vim.opt_local.shiftwidth = 2
+    vim.opt_local.tabstop = 2
+    vim.opt_local.wrap = true
+  end,
 })
 
 -- movements with timeout
 vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
-	pattern = "*",
-	callback = function()
-		-- move paragraphs
-		vim.keymap.set({ "n", "v", "x" }, "[", "{", { nowait = true, buffer = true }) -- paragraph up
-		vim.keymap.set({ "n", "v", "x" }, "]", "}", { nowait = true, buffer = true }) -- paragraph down
+  pattern = "*",
+  callback = function()
+    -- move paragraphs
+    vim.keymap.set({ "n", "v", "x" }, "[", "{", { nowait = true, buffer = true }) -- paragraph up
+    vim.keymap.set({ "n", "v", "x" }, "]", "}", { nowait = true, buffer = true }) -- paragraph down
 
-		-- move lines
-		vim.keymap.set("v", "<", "<gv", { nowait = true, buffer = true, remap = true }) -- indent left in visual mode
-		vim.keymap.set("v", ">", ">gv", { nowait = true, buffer = true, remap = true }) -- indent right in visual mode
-	end,
+    -- move lines
+    vim.keymap.set("v", "<", "<gv", { nowait = true, buffer = true, remap = true }) -- indent left in visual mode
+    vim.keymap.set("v", ">", ">gv", { nowait = true, buffer = true, remap = true }) -- indent right in visual mode
+  end,
 })
 
 -- show macro recording
 vim.api.nvim_create_autocmd("RecordingEnter", {
-	pattern = "*",
-	callback = function()
-		vim.opt_local.cmdheight = 1
-	end,
+  pattern = "*",
+  callback = function()
+    vim.opt_local.cmdheight = 1
+  end,
 })
 
 vim.api.nvim_create_autocmd("RecordingLeave", {
-	pattern = "*",
-	callback = function()
-		local timer = vim.loop.new_timer()
-		timer:start(
-			50,
-			0,
-			vim.schedule_wrap(function()
-				vim.opt_local.cmdheight = 0
-			end)
-		)
-	end,
+  pattern = "*",
+  callback = function()
+    local timer = vim.loop.new_timer()
+    timer:start(
+      50,
+      0,
+      vim.schedule_wrap(function()
+        vim.opt_local.cmdheight = 0
+      end)
+    )
+  end,
 })
 
 vim.cmd([[
@@ -347,9 +345,6 @@ sign define DiagnosticSignInfo text=I texthl=DiagnosticSignInfo linehl=InforBg n
 sign define DiagnosticSignHint text=H texthl=DiagnosticSignHint linehl=HintBg numhl=HintLineBg
 
 autocmd! BufNewFile,BufRead *.vs,*.fs,*.vert,*.frag set ft=glsl
-
-" @check if this is really necessary and it's only work in django template
-" au BufNewFile,BufRead *.html set filetype=htmldjango
 
 set pumblend=15
 
