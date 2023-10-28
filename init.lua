@@ -170,7 +170,7 @@ vim.keymap.set("i", '"', '"<c-g>u')
 vim.keymap.set("i", "'", "'<c-g>u")
 
 -- @check: if not using wordmotion
--- vim.keymap.set("i", "<c-bs>", "<c-g>u<c-w>") -- delete previous word
+vim.keymap.set("i", "<c-bs>", "<c-g>u<c-w>") -- delete previous word
 
 vim.keymap.set("c", "<c-bs>", "<c-w>") -- delete previous word
 
@@ -258,7 +258,7 @@ vim.api.nvim_create_autocmd("BufEnter", {
 })
 
 vim.api.nvim_create_autocmd("BufEnter", {
-  pattern = { "*.svelte", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.css" },
+  pattern = { "*.svelte", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.css", "*.lua" },
   callback = function()
     vim.opt_local.shiftwidth = 2
     vim.opt_local.tabstop = 2
