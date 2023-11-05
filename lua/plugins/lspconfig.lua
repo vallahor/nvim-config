@@ -1,19 +1,19 @@
 return {
   "neovim/nvim-lspconfig",
   event = { "BufReadPre", "BufNewFile" },
-  opts = {
-    inlay_hints = {
-      enabled = true,
+  -- opts = {
+  --   inlay_hints = {
+  --     enabled = true,
 
-      -- this not work, that's not here @check just a reminder
-      variableTypes = true,
-      functionReturnTypes = true,
-      callArgumentNames = true,
-    },
-  },
+  --     -- this not work, that's not here @check just a reminder
+  --     -- variableTypes = true,
+  --     -- functionReturnTypes = true,
+  --     -- callArgumentNames = true,
+  --   },
+  -- },
   config = function()
     local on_attach = function(client, bufnr)
-      vim.keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>zt", { buffer = bufnr, silent = true })
+      vim.keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", { buffer = bufnr, silent = true })
       vim.keymap.set("n", "gi", vim.lsp.buf.implementation, { buffer = bufnr })
 
       vim.keymap.set("n", "K", vim.lsp.buf.hover, { buffer = bufnr })
@@ -23,20 +23,20 @@ return {
       -- vim.keymap.set("n", "<c-3>", "<cmd>lua require('telescope.builtin').lsp_references()<cr>")
       -- vim.keymap.set("n", "<c-1>", "<cmd>lua require('telescope.builtin').lsp_implementations()<cr>")
 
-      -- vim.diagnostic.config({
-      -- 	virtual_text = {
-      -- 		prefix = "",
-      -- 		-- format = function(diagnostic)
-      -- 		-- 	if
-      -- 		-- 		diagnostic.severity == vim.diagnostic.severity.INFO
-      -- 		-- 		or diagnostic.severity == vim.diagnostic.severity.HINT
-      -- 		-- 	then
-      -- 		-- 		return ""
-      -- 		-- 	end
-      -- 		-- 	return diagnostic.message
-      -- 		-- end,
-      -- 	},
-      -- })
+      vim.diagnostic.config({
+        virtual_text = {
+          prefix = "",
+          format = function(diagnostic)
+            if
+              diagnostic.severity == vim.diagnostic.severity.INFO
+              or diagnostic.severity == vim.diagnostic.severity.HINT
+            then
+              return ""
+            end
+            return diagnostic.message
+          end,
+        },
+      })
 
       client.server_capabilities.semanticTokensProvider = nil
     end
@@ -129,26 +129,5 @@ return {
       on_attach = on_attach,
       -- capabilities = capabilities,
     })
-
-    lspconfig.gdscript.setup({
-      on_attach = on_attach,
-      cmd = { "nc", "localhost", "6005" },
-    })
-
-    -- lspconfig.elixirls.setup({
-    -- 	cmd = { "C:/apps/elixir-lsp/language_server.bat" },
-    -- 	-- settings = {
-    -- 	-- 	elixirLS = {
-    -- 	-- 		-- I choose to disable dialyzer for personal reasons, but
-    -- 	-- 		-- I would suggest you also disable it unless you are well
-    -- 	-- 		-- acquainted with dialzyer and know how to use it.
-    -- 	-- 		dialyzerEnabled = false,
-    -- 	-- 		-- I also choose to turn off the auto dep fetching feature.
-    -- 	-- 		-- It often get's into a weird state that requires deleting
-    -- 	-- 		-- the .elixir_ls directory and restarting your editor.
-    -- 	-- 		fetchDeps = false,
-    -- 	-- 	},
-    -- 	-- },
-    -- })
   end,
 }

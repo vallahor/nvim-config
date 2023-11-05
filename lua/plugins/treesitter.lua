@@ -21,14 +21,9 @@ return {
         "vim",
         "c",
         "cpp",
-        "c_sharp",
-        "elixir",
-        "heex",
-        "eex",
         "zig",
         "rust",
         "go",
-        "gdscript",
         "markdown",
         "markdown_inline",
         "python",
@@ -45,7 +40,7 @@ return {
       },
       indent = {
         enable = true,
-        disable = { "python", "rust", "cpp", "go", "ocaml", "zig", "htmldjango", "elixir" },
+        disable = { "python", "rust", "cpp", "go", "ocaml", "zig", "htmldjango" },
       },
       incremental_selection = {
         enable = true,
