@@ -233,7 +233,15 @@ vim.keymap.set("n", ">", ">>") -- indent right
 
 vim.diagnostic.config({
   update_in_insert = false,
-  virtual_text = true,
+  virtual_text = {
+    prefix = "",
+    format = function(diagnostic)
+      if diagnostic.severity == vim.diagnostic.severity.INFO or diagnostic.severity == vim.diagnostic.severity.HINT then
+        return ""
+      end
+      return diagnostic.message
+    end,
+  },
 })
 
 vim.api.nvim_create_autocmd("FocusGained", {
@@ -330,19 +338,21 @@ augroup END
 hi! ErrorBg guibg=#351C1D
 hi! WarningBg guibg=#3A2717
 hi! InfoBg guibg=#2B2627
-hi! HintBg guibg=#2B2627
+" hi! HintBg guibg=#2B2627
 
 " " @check: do we really need the number fg highlight?
 hi! ErrorLineBg guifg=#a23343 guibg=#351C1D
 hi! WarningLineBg guifg=#AF7C55 guibg=#3A2717
 hi! InfoLineBg guifg=#A8899C guibg=#2B2627
-hi! HintLineBg guifg=#A98D92 guibg=#2B2627
+" hi! HintLineBg guifg=#A98D92 guibg=#2B2627
+hi! HintLineBg guifg=#A98D92
 
 " :h diagnostic-signs
 sign define DiagnosticSignError text=E texthl=DiagnosticSignError linehl=ErrorBg numhl=ErrorLineBg
 sign define DiagnosticSignWarn text=W texthl=DiagnosticSignWarn linehl=WarningBg numhl=WarningLineBg
 sign define DiagnosticSignInfo text=I texthl=DiagnosticSignInfo linehl=InforBg numhl=InforLineBg
-sign define DiagnosticSignHint text=H texthl=DiagnosticSignHint linehl=HintBg numhl=HintLineBg
+" sign define DiagnosticSignHint text=H texthl=DiagnosticSignHint linehl=HintBg numhl=HintLineBg
+sign define DiagnosticSignHint text=H numhl=HintLineBg
 
 autocmd! BufNewFile,BufRead *.vs,*.fs,*.vert,*.frag set ft=glsl
 

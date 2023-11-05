@@ -23,21 +23,6 @@ return {
       -- vim.keymap.set("n", "<c-3>", "<cmd>lua require('telescope.builtin').lsp_references()<cr>")
       -- vim.keymap.set("n", "<c-1>", "<cmd>lua require('telescope.builtin').lsp_implementations()<cr>")
 
-      vim.diagnostic.config({
-        virtual_text = {
-          prefix = "",
-          format = function(diagnostic)
-            if
-              diagnostic.severity == vim.diagnostic.severity.INFO
-              or diagnostic.severity == vim.diagnostic.severity.HINT
-            then
-              return ""
-            end
-            return diagnostic.message
-          end,
-        },
-      })
-
       client.server_capabilities.semanticTokensProvider = nil
     end
 
@@ -76,7 +61,6 @@ return {
             typeCheckingMode = "off",
             autoSearchPaths = true,
             useLibraryCodeForTypes = true,
-            -- diagnosticMode = "openFilesOnly",
           },
         },
       },

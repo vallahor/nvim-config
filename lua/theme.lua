@@ -193,13 +193,16 @@ local t = {
   DiagnosticWarn = { fg = p.warning },
   DiagnosticInfo = { fg = p.pink_pastel },
   DiagnosticHint = { fg = p.fg1 },
-  DiagnosticUnnecessary = {},
+  DiagnosticUnnecessary = { fg = p.fg1 },
+  -- DiagnosticUnnecessary = {},
   DiagnosticUnderlineError = { sp = p.red4, effect = undercurl_active },
   DiagnosticUnderlineWarn = { sp = p.yellow2, effect = undercurl_active },
-  DiagnosticUnderlineInfo = { sp = p.pink_pastel, effect = italic_active },
-  -- DiagnosticUnderlineHint = { sp = p.fg1, effect = undercurl_active },
+  -- DiagnosticUnderlineInfo = { sp = p.pink_pastel, effect = italic_active },
+  DiagnosticUnderlineInfo = { sp = p.pink_pastel, effect = undercurl_active },
+  DiagnosticUnderlineHint = { sp = p.fg1, effect = undercurl_active },
+  DiagnosticUnderlineUnnecessary = { sp = p.fg1, effect = undercurl_active },
   -- DiagnosticUnderlineHint = { sp = p.green2, effect = undercurl_active },
-  DiagnosticUnderlineHint = {},
+  -- DiagnosticUnderlineHint = {},
   BufferCurrent = { bg = p.gray2 },
   BufferCurrentIndex = { bg = p.gray2 },
   BufferCurrentMod = { fg = p.pink2, bg = p.gray2 },
@@ -321,9 +324,9 @@ local function highlight(group, style)
   vim.cmd(string.format("highlight %s %s %s %s %s", group, effect, fg, bg, sp))
 
   -- Hide all semantic highlights
-  for _, group in ipairs(vim.fn.getcompletion("@lsp", "highlight")) do
-    vim.api.nvim_set_hl(0, group, {})
-  end
+  -- for _, color_group in ipairs(vim.fn.getcompletion("@lsp", "highlight")) do
+  --   vim.api.nvim_set_hl(0, color_group, {})
+  -- end
 
   -- local links = {
   -- 	["@lsp.type.namespace"] = "@namespace",
