@@ -45,4 +45,18 @@ return {
       vim.keymap.set("n", "<leader>d", "<cmd>call emmet#removeTag()<cr>", { silent = true })
     end,
   },
+  {
+    "habamax/vim-godot",
+    event = "BufEnter *.gd",
+    config = function()
+      vim.cmd([[
+          let g:godot_executable = 'C:/apps/godot/Godot_v4.1.3-stable_win64.exe'
+          setlocal foldmethod=expr
+          set nofoldenable
+          setlocal tabstop=4
+          setlocal shiftwidth=4
+          setlocal indentexpr=
+      ]])
+    end,
+  },
 }

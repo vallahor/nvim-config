@@ -9,7 +9,6 @@ return {
         end,
       },
       { "RRethy/nvim-treesitter-endwise" },
-      { "JoosepAlviste/nvim-ts-context-commentstring" },
     },
     version = false,
     build = ":TSUpdate",
@@ -24,6 +23,7 @@ return {
         "zig",
         "rust",
         "go",
+        "gdscript",
         "markdown",
         "markdown_inline",
         "python",
@@ -40,7 +40,7 @@ return {
       },
       indent = {
         enable = true,
-        disable = { "python", "rust", "cpp", "go", "ocaml", "zig", "htmldjango" },
+        disable = { "python", "rust", "cpp", "go", "ocaml", "zig", "htmldjango", "gdscript" },
       },
       incremental_selection = {
         enable = true,

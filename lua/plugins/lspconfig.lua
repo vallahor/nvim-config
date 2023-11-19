@@ -113,5 +113,10 @@ return {
       on_attach = on_attach,
       -- capabilities = capabilities,
     })
+
+    lspconfig.gdscript.setup({
+      on_attach = on_attach,
+      cmd = { "nc", "localhost", "6005" },
+    })
   end,
 }
