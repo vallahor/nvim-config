@@ -46,17 +46,7 @@ return {
     end,
   },
   {
-    "habamax/vim-godot",
+    "Tetralux/odin.vim",
     event = "BufEnter *.gd",
-    config = function()
-      vim.cmd([[
-          let g:godot_executable = 'C:/apps/godot/Godot_v4.1.3-stable_win64.exe'
-          setlocal foldmethod=expr
-          set nofoldenable
-          setlocal tabstop=4
-          setlocal shiftwidth=4
-          setlocal indentexpr=
-      ]])
-    end,
   },
 }

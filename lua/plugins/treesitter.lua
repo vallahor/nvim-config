@@ -19,6 +19,7 @@ return {
         "lua",
         "vim",
         "c",
+        "c_sharp",
         "cpp",
         "zig",
         "rust",
@@ -31,6 +32,7 @@ return {
         "json",
         "typescript",
         "svelte",
+        "odin",
         "tsx",
         "sql",
         "yaml",
@@ -40,7 +42,7 @@ return {
       },
       indent = {
         enable = true,
-        disable = { "python", "rust", "cpp", "go", "ocaml", "zig", "htmldjango", "gdscript" },
+        -- disable = { "python", "rust", "cpp", "go", "ocaml", "zig", "htmldjango", "gdscript" },
       },
       incremental_selection = {
         enable = true,
@@ -50,10 +52,6 @@ return {
           node_decremental = "M",
           scope_incremental = "<nop>",
         },
-      },
-      context_commentstring = {
-        enable = true,
-        enable_autocmd = false,
       },
       endwise = {
         enable = true,

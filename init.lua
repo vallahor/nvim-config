@@ -21,7 +21,7 @@ require("lazy").setup("plugins", {
 
 -- SETTINGS --
 
-vim.opt.guifont = { "JetBrains Mono NL:h13" }
+vim.opt.guifont = { "JetBrains Mono NL:h12" }
 vim.opt.shiftwidth = 4
 vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
@@ -171,6 +171,8 @@ vim.keymap.set("i", "'", "'<c-g>u")
 
 -- @check: if not using wordmotion
 vim.keymap.set("i", "<c-bs>", "<c-g>u<c-w>") -- delete previous word
+vim.keymap.set("i", "<m-bs>", "<c-g>u<c-w>") -- delete previous word
+vim.keymap.set("i", "Î^Cx", "<c-g>u<c-w>") -- delete previous word
 
 vim.keymap.set("c", "<c-bs>", "<c-w>") -- delete previous word
 
@@ -231,42 +233,13 @@ vim.keymap.set("n", "<a-]>", vim.diagnostic.goto_next) -- next diagnostic
 vim.keymap.set("n", "<", "<<") -- indent left
 vim.keymap.set("n", ">", ">>") -- indent right
 
-vim.diagnostic.config({
-  update_in_insert = false,
-  virtual_text = {
-    prefix = "",
-    -- format = function(diagnostic)
-    --   if diagnostic.severity == vim.diagnostic.severity.INFO or diagnostic.severity == vim.diagnostic.severity.HINT then
-    --     return ""
-    --   end
-    --   return diagnostic.message
-    -- end,
-  },
-})
-
 vim.api.nvim_create_autocmd("FocusGained", {
   pattern = "*",
   command = "silent! checktime",
 })
 
--- @check: could solve this with djlint indenting 2 spaces instead of 4 (must change the Neoformat command)
 vim.api.nvim_create_autocmd("BufEnter", {
-  pattern = "*.html",
-  callback = function(opts)
-    if vim.bo[opts.buf].filetype == "htmldjango" then
-      vim.opt_local.shiftwidth = 4
-      vim.opt_local.tabstop = 4
-      vim.opt_local.wrap = true
-    else
-      vim.opt_local.shiftwidth = 2
-      vim.opt_local.tabstop = 2
-      vim.opt_local.wrap = true
-    end
-  end,
-})
-
-vim.api.nvim_create_autocmd("BufEnter", {
-  pattern = { "*.svelte", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.css", "*.lua" },
+  pattern = { "*.svelte", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.html", "*.css", "*.lua" },
   callback = function()
     vim.opt_local.shiftwidth = 2
     vim.opt_local.tabstop = 2
@@ -299,7 +272,7 @@ vim.api.nvim_create_autocmd("RecordingEnter", {
 vim.api.nvim_create_autocmd("RecordingLeave", {
   pattern = "*",
   callback = function()
-    local timer = vim.loop.new_timer()
+    local timer = vim.uv.new_timer()
     timer:start(
       50,
       0,
@@ -362,6 +335,29 @@ set pumblend=15
 
 autocmd ModeChanged * lua vim.schedule(function() vim.cmd('redraw') end)
 
-xnoremap K   :<C-u>silent! '<,'>move-2<CR>gv=gv
+xnoremap K :<C-u>silent! '<,'>move-2<CR>gv=gv
 xnoremap J :<C-u>silent! '<,'>move'>+<CR>gv=gv
+
+
 ]])
+
+-- windows terminal, works with others terminals
+--
+-- {
+--     "command":
+--     {
+--         "action": "sendInput",
+--         "input": "\u0017"
+--     },
+--     "keys": "ctrl+backspace"
+-- },
+--
+-- 13 is the ascii code the 5u is control 2u is shift
+-- {
+--     "command":
+--     {
+--         "action": "sendInput",
+--         "input": "\u001b[13;5u"
+--     },
+--     "keys": "ctrl+enter"
+-- },

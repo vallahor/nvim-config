@@ -1,16 +1,6 @@
 return {
   "neovim/nvim-lspconfig",
   event = { "BufReadPre", "BufNewFile" },
-  -- opts = {
-  --   inlay_hints = {
-  --     enabled = true,
-
-  --     -- this not work, that's not here @check just a reminder
-  --     -- variableTypes = true,
-  --     -- functionReturnTypes = true,
-  --     -- callArgumentNames = true,
-  --   },
-  -- },
   config = function()
     local on_attach = function(client, bufnr)
       vim.keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", { buffer = bufnr, silent = true })
@@ -25,6 +15,15 @@ return {
 
       client.server_capabilities.semanticTokensProvider = nil
     end
+
+    vim.api.nvim_create_autocmd("LspAttach", {
+      callback = function(args)
+        local client = vim.lsp.get_client_by_id(args.data.client_id)
+        if client then
+          client.server_capabilities.semanticTokensProvider = nil
+        end
+      end,
+    })
 
     local lspconfig = require("lspconfig")
     lspconfig.lua_ls.setup({
@@ -64,21 +63,17 @@ return {
           },
         },
       },
-      -- capabilities = capabilities,
     })
 
     lspconfig.gopls.setup({
       on_attach = on_attach,
-      -- capabilities = capabilities,
     })
 
     lspconfig.tsserver.setup({
       on_attach = on_attach,
-      -- capabilities = capabilities,
     })
     lspconfig.svelte.setup({
       on_attach = on_attach,
-      -- capabilities = capabilities,
     })
 
     -- @check how to make it work with htmldjango
@@ -96,27 +91,31 @@ return {
 
     lspconfig.jsonls.setup({
       on_attach = on_attach,
-      -- capabilities = capabilities,
     })
 
     lspconfig.clangd.setup({
       on_attach = on_attach,
-      -- capabilities = capabilities,
     })
 
     lspconfig.rust_analyzer.setup({
       on_attach = on_attach,
-      -- capabilities = capabilities,
     })
 
     lspconfig.zls.setup({
       on_attach = on_attach,
-      -- capabilities = capabilities,
     })
 
     lspconfig.gdscript.setup({
       on_attach = on_attach,
       cmd = { "nc", "localhost", "6005" },
+    })
+    lspconfig.ols.setup({
+      on_attach = on_attach,
+    })
+
+    lspconfig.omnisharp.setup({
+      on_attach = on_attach,
+      cmd = { "dotnet", "C:/apps/omnisharp/OmniSharp.dll" },
     })
   end,
 }

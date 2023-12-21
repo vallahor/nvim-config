@@ -25,9 +25,11 @@ return {
       })
 
       vim.cmd([[
-                autocmd FileType solidity setlocal commentstring=//\ %s
+                autocmd FileType gdscript setlocal commentstring=#\ %s
                 autocmd FileType c setlocal commentstring=//\ %s
+                autocmd FileType cs setlocal commentstring=//\ %s
                 autocmd FileType cpp setlocal commentstring=//\ %s
+                autocmd FileType odin setlocal commentstring=//\ %s
             ]])
 
       -- Statusline
