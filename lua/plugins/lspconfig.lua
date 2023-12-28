@@ -4,7 +4,7 @@ return {
   config = function()
     local on_attach = function(client, bufnr)
       vim.keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", { buffer = bufnr, silent = true })
-      vim.keymap.set("n", "gi", vim.lsp.buf.implementation, { buffer = bufnr })
+      vim.keymap.set("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>", { buffer = bufnr, silent = true })
 
       vim.keymap.set("n", "K", vim.lsp.buf.hover, { buffer = bufnr })
       vim.keymap.set("n", "<c-a>", vim.lsp.buf.code_action, { buffer = bufnr })
@@ -12,6 +12,8 @@ return {
       vim.keymap.set("n", "<leader>r", vim.lsp.buf.rename, { buffer = bufnr })
       -- vim.keymap.set("n", "<c-3>", "<cmd>lua require('telescope.builtin').lsp_references()<cr>")
       -- vim.keymap.set("n", "<c-1>", "<cmd>lua require('telescope.builtin').lsp_implementations()<cr>")
+      vim.keymap.set("n", "<a-[>", "<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>", { buffer = bufnr, silent = true })
+      vim.keymap.set("n", "<a-]>", "<cmd>lua vim.lsp.diagnostic.goto_next()<CR>", { buffer = bufnr, silent = true })
 
       client.server_capabilities.semanticTokensProvider = nil
     end

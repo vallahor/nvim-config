@@ -53,10 +53,11 @@ vim.opt.backup = false
 vim.opt.writebackup = false
 vim.opt.gdefault = true
 vim.opt.cindent = true
-vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
+-- vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
 -- vim.opt.timeoutlen = 200 -- @check why I'm using that timeoutlen (maybe jk kj escaping thing)
 vim.opt.updatetime = 100
-vim.opt.guicursor = "i-ci:block-iCursor"
+-- vim.opt.guicursor = "i-ci:block-iCursor"
+vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
 
 vim.opt.cmdheight = 0
 vim.opt.laststatus = 2
@@ -84,7 +85,7 @@ vim.g.VM_maps = {
   ["Add Cursor Down"] = "<a-j>",
   ["Add Cursor Up"] = "<a-k>",
   ["Switch Mode"] = "<Tab>",
-  ["Align"] = "<a-a>",
+  Align = "<a-a>",
   ["Find Next"] = "<a-l>",
   ["Find Prev"] = "<a-h>",
   ["Goto Next"] = "<a-.>",
@@ -324,7 +325,7 @@ hi! HintLineBg guifg=#A98D92 guibg=#2B2627
 " :h diagnostic-signs
 sign define DiagnosticSignError text=E texthl=DiagnosticSignError linehl=ErrorBg numhl=ErrorLineBg
 sign define DiagnosticSignWarn text=W texthl=DiagnosticSignWarn linehl=WarningBg numhl=WarningLineBg
-sign define DiagnosticSignInfo text=I texthl=DiagnosticSignInfo linehl=InforBg numhl=InforLineBg
+sign define DiagnosticSignInfo text=I texthl=DiagnosticSignInfo linehl=InforBg numhl=InfoLineBg
 sign define DiagnosticSignHint text=H texthl=DiagnosticSignHint linehl=HintBg numhl=HintLineBg
 " sign define DiagnosticSignHint text=H texthl=DiagnosticSignHint numhl=HintLineBg
 " sign define DiagnosticSignHint text=H numhl=HintLineBg
@@ -338,6 +339,8 @@ autocmd ModeChanged * lua vim.schedule(function() vim.cmd('redraw') end)
 xnoremap K :<C-u>silent! '<,'>move-2<CR>gv=gv
 xnoremap J :<C-u>silent! '<,'>move'>+<CR>gv=gv
 
+
+autocmd BufWinEnter,BufEnter,BufRead *.c,*.cpp,*.h set cino=L0,g0,l1,t0,w1,(0,w4,(s,m1
 
 ]])
 

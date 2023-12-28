@@ -25,12 +25,12 @@ return {
       })
 
       vim.cmd([[
-                autocmd FileType gdscript setlocal commentstring=#\ %s
-                autocmd FileType c setlocal commentstring=//\ %s
-                autocmd FileType cs setlocal commentstring=//\ %s
-                autocmd FileType cpp setlocal commentstring=//\ %s
-                autocmd FileType odin setlocal commentstring=//\ %s
-            ]])
+          autocmd FileType gdscript setlocal commentstring=#\ %s
+          autocmd FileType c setlocal commentstring=//\ %s
+          autocmd FileType cs setlocal commentstring=//\ %s
+          autocmd FileType cpp setlocal commentstring=//\ %s
+          autocmd FileType odin setlocal commentstring=//\ %s
+      ]])
 
       -- Statusline
       local MiniStatusline = require("mini.statusline")
@@ -89,8 +89,10 @@ return {
       )
 
       vim.cmd([[
-                hi MiniCursorword        guisp=none guifg=none guibg=#1c212f gui=none
-                hi MiniCursorwordCurrent guisp=none guifg=none guibg=#1c212f gui=none
+          " hi MiniCursorword        guisp=none guifg=none guibg=#1c212f gui=none
+          " hi MiniCursorwordCurrent guisp=none guifg=none guibg=#1c212f gui=none
+          hi MiniCursorword        guisp=none guifg=none guibg=#2D2829 gui=none
+          hi MiniCursorwordCurrent guisp=none guifg=none guibg=#2D2829 gui=none
 			 ]])
     end,
   },

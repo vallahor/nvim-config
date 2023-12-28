@@ -40,10 +40,10 @@ return {
       highlight = {
         enable = true,
       },
-      indent = {
-        enable = true,
-        -- disable = { "python", "rust", "cpp", "go", "ocaml", "zig", "htmldjango", "gdscript" },
-      },
+      -- indent = {
+      --   enable = true,
+      --   -- disable = { "python", "rust", "cpp", "go", "ocaml", "zig", "htmldjango", "gdscript" },
+      -- },
       incremental_selection = {
         enable = true,
         keymaps = {
