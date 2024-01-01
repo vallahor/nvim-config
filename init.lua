@@ -74,26 +74,6 @@ vim.bo.grepprg = "rg"
 vim.bo.swapfile = false
 
 vim.g.user_emmet_install_global = 0
--- multi-cursors (not work in it's lua file)
-vim.g.VM_theme = "iceblue"
-vim.g.VM_default_mappings = 0
-vim.g.VM_custom_remaps = { ["-"] = "$" }
-vim.g.VM_maps = {
-  ["Find Under"] = "<a-u>",
-  ["Find Subword Under"] = "<a-u>",
-  ["Select All"] = "<a-s-u>",
-  ["Add Cursor Down"] = "<a-j>",
-  ["Add Cursor Up"] = "<a-k>",
-  ["Switch Mode"] = "<Tab>",
-  Align = "<a-a>",
-  ["Find Next"] = "<a-l>",
-  ["Find Prev"] = "<a-h>",
-  ["Goto Next"] = "<a-.>",
-  ["Goto Prev"] = "<a-,>",
-  ["Skip Region"] = "<a-;>",
-  ["Remove Region"] = "<a-m>",
-  ["I BS"] = "",
-}
 
 -- work around on python default configs
 vim.g.python_indent = {
@@ -148,33 +128,6 @@ vim.keymap.set("c", "<c-v>", "<c-r>*") -- paste to command line mode
 
 vim.keymap.set("v", "v", "V") -- visual line mode
 
--- @check if it's really worth
--- add undo capabilities in insert mode
-vim.keymap.set("i", "<space>", "<c-g>u<space>")
-vim.keymap.set("i", "[", "[<c-g>u")
-vim.keymap.set("i", "{", "{<c-g>u")
-vim.keymap.set("i", "(", "(<c-g>u")
-vim.keymap.set("i", "<", "<<c-g>u")
-vim.keymap.set("i", "]", "]<c-g>u")
-vim.keymap.set("i", "}", "}<c-g>u")
-vim.keymap.set("i", ")", ")<c-g>u")
-vim.keymap.set("i", ">", "><c-g>u")
-vim.keymap.set("i", ",", ",<c-g>u")
-vim.keymap.set("i", ".", ".<c-g>u")
-vim.keymap.set("i", "/", "/<c-g>u")
-vim.keymap.set("i", "\\", "\\<c-g>u")
-vim.keymap.set("i", "=", "=<c-g>u")
-vim.keymap.set("i", "+", "+<c-g>u")
-vim.keymap.set("i", "-", "-<c-g>u")
-vim.keymap.set("i", "*", "*<c-g>u")
-vim.keymap.set("i", '"', '"<c-g>u')
-vim.keymap.set("i", "'", "'<c-g>u")
-
--- @check: if not using wordmotion
-vim.keymap.set("i", "<c-bs>", "<c-g>u<c-w>") -- delete previous word
-vim.keymap.set("i", "<m-bs>", "<c-g>u<c-w>") -- delete previous word
-vim.keymap.set("i", "Î^Cx", "<c-g>u<c-w>") -- delete previous word
-
 vim.keymap.set("c", "<c-bs>", "<c-w>") -- delete previous word
 
 vim.keymap.set("n", "x", '"_x') -- delete current char without copying
@@ -187,6 +140,7 @@ vim.keymap.set("n", "dx", '"_d') -- delete without copying to register @check wo
 vim.keymap.set("n", "*", "*``") -- highlight all occurencies of the current word
 vim.keymap.set("v", "*", '"sy/\\V<c-r>s<cr>``') -- highlight all occurencies of the curren selection
 
+-- go to beginning of the line function like DOOM Emacs
 local beginning_of_the_line = function()
   local old_pos = vim.fn.col(".")
   vim.fn.setpos(".", { 0, vim.fn.line("."), 0, 0 })
@@ -230,7 +184,7 @@ vim.keymap.set("n", "<a-y>", vim.diagnostic.open_float) -- show diagnostic
 vim.keymap.set("n", "<a-[>", vim.diagnostic.goto_prev) -- prev diagnostic
 vim.keymap.set("n", "<a-]>", vim.diagnostic.goto_next) -- next diagnostic
 
--- move lines
+-- move lines @note: the visual ones are below
 vim.keymap.set("n", "<", "<<") -- indent left
 vim.keymap.set("n", ">", ">>") -- indent right
 
@@ -244,7 +198,7 @@ vim.api.nvim_create_autocmd("BufEnter", {
   callback = function()
     vim.opt_local.shiftwidth = 2
     vim.opt_local.tabstop = 2
-    vim.opt_local.wrap = true
+    -- vim.opt_local.wrap = true
   end,
 })
 
@@ -273,7 +227,7 @@ vim.api.nvim_create_autocmd("RecordingEnter", {
 vim.api.nvim_create_autocmd("RecordingLeave", {
   pattern = "*",
   callback = function()
-    local timer = vim.uv.new_timer()
+    local timer = vim.loop.new_timer()
     timer:start(
       50,
       0,
@@ -284,6 +238,7 @@ vim.api.nvim_create_autocmd("RecordingLeave", {
   end,
 })
 
+-- vimscript stuff
 vim.cmd([[
 language en_US
 filetype on
@@ -295,6 +250,7 @@ set isfname+=(
 vnoremap <expr> p 'pgv"'.v:register.'y`>'
 xnoremap <expr> p 'pgv"'.v:register.'y`>'
 
+" delete trailing spaces
 fun! TrimWhitespace()
     let l:save = winsaveview()
     keeppatterns %s/\s\+$//e
@@ -302,44 +258,49 @@ fun! TrimWhitespace()
 endfun
 autocmd BufWritePre * :call TrimWhitespace()
 
+" no help
 map <f1> <nop>
 
-
+" highlight when yanking
 augroup highlight_yank
 autocmd!
 au TextYankPost * silent! lua vim.highlight.on_yank({higroup="Visual", timeout=200})
 augroup END
 
-hi! ErrorBg guibg=#351C1D
-hi! WarningBg guibg=#3A2717
-hi! InfoBg guibg=#2B2627
-hi! HintBg guibg=#2B2627
+" @check if I'll used it without LSP
+" hi! ErrorBg guibg=#351C1D
+" hi! WarningBg guibg=#3A2717
+" hi! InfoBg guibg=#2B2627
+" hi! HintBg guibg=#2B2627
 
 " " @check: do we really need the number fg highlight?
-hi! ErrorLineBg guifg=#a23343 guibg=#351C1D
-hi! WarningLineBg guifg=#AF7C55 guibg=#3A2717
-hi! InfoLineBg guifg=#A8899C guibg=#2B2627
-hi! HintLineBg guifg=#A98D92 guibg=#2B2627
+" hi! ErrorLineBg guifg=#a23343 guibg=#351C1D
+" hi! WarningLineBg guifg=#AF7C55 guibg=#3A2717
+" hi! InfoLineBg guifg=#A8899C guibg=#2B2627
+" hi! HintLineBg guifg=#A98D92 guibg=#2B2627
 " hi! HintLineBg guifg=#A98D92
 
 " :h diagnostic-signs
-sign define DiagnosticSignError text=E texthl=DiagnosticSignError linehl=ErrorBg numhl=ErrorLineBg
-sign define DiagnosticSignWarn text=W texthl=DiagnosticSignWarn linehl=WarningBg numhl=WarningLineBg
-sign define DiagnosticSignInfo text=I texthl=DiagnosticSignInfo linehl=InforBg numhl=InfoLineBg
-sign define DiagnosticSignHint text=H texthl=DiagnosticSignHint linehl=HintBg numhl=HintLineBg
+" sign define DiagnosticSignError text=E texthl=DiagnosticSignError linehl=ErrorBg numhl=ErrorLineBg
+" sign define DiagnosticSignWarn text=W texthl=DiagnosticSignWarn linehl=WarningBg numhl=WarningLineBg
+" sign define DiagnosticSignInfo text=I texthl=DiagnosticSignInfo linehl=InforBg numhl=InfoLineBg
+" sign define DiagnosticSignHint text=H texthl=DiagnosticSignHint linehl=HintBg numhl=HintLineBg
 " sign define DiagnosticSignHint text=H texthl=DiagnosticSignHint numhl=HintLineBg
 " sign define DiagnosticSignHint text=H numhl=HintLineBg
 
 autocmd! BufNewFile,BufRead *.vs,*.fs,*.vert,*.frag set ft=glsl
 
+" when autocomplete active it limit the height
 set pumblend=15
 
+" to deal with cmdheight=0
 autocmd ModeChanged * lua vim.schedule(function() vim.cmd('redraw') end)
 
+" move lines
 xnoremap K :<C-u>silent! '<,'>move-2<CR>gv=gv
 xnoremap J :<C-u>silent! '<,'>move'>+<CR>gv=gv
 
-
+" c indent
 autocmd BufWinEnter,BufEnter,BufRead *.c,*.cpp,*.h set cino=L0,g0,l1,t0,w1,(0,w4,(s,m1
 
 ]])

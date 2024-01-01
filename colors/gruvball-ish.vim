@@ -5,7 +5,7 @@ if exists('syntax on')
     syntax reset
 endif
 
-let g:colors_name='gruvball-ish'
+let g:colors_name='caramelo'
 set t_Co=256
 
 hi ColorColumn      guisp=none    guifg=#C0AEA0 guibg=#493441 gui=none

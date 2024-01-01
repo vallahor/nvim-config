@@ -326,7 +326,7 @@ local function highlight(group, style)
   local sp = style.sp and "guisp=" .. style.sp or "guisp=NONE"
 
   vim.cmd(string.format("highlight %s %s %s %s %s", group, effect, fg, bg, sp))
-
+  return string.format("highlight %s %s %s %s %s", group, effect, fg, bg, sp)
   -- Hide all semantic highlights
   -- for _, color_group in ipairs(vim.fn.getcompletion("@lsp", "highlight")) do
   --   vim.api.nvim_set_hl(0, color_group, {})
@@ -365,9 +365,15 @@ function M.colorscheme()
     vim.cmd("highlight clear")
   end
   vim.g.colors_name = "kamarelo"
+  local aeho = ""
   for group, style in pairs(t) do
-    highlight(group, style)
+    local a = highlight(group, style)
+    aeho = aeho .. "\n" .. a
   end
+  -- print(aeho)
+  local file = io.open("AEHO.vim", "w")
+  file:write(aeho)
+  file:close()
 end
 
 return M
