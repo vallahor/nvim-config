@@ -7,8 +7,8 @@ return {
       { "hrsh7th/cmp-path" },
       { "hrsh7th/cmp-cmdline", event = "VeryLazy" },
       { "hrsh7th/cmp-nvim-lsp" },
-      { "hrsh7th/cmp-nvim-lsp-signature-help" },
       { "L3MON4D3/LuaSnip" },
+      { 'saadparwaiz1/cmp_luasnip' },
     },
     config = function()
       local cmp = require("cmp")
@@ -31,7 +31,6 @@ return {
           { name = "buffer" },
           { name = "path" },
           { name = "luasnip" },
-          { name = "nvim_lsp_signature_help" },
         },
         mapping = {
           ["<c-q>"] = cmp.mapping.close(),
@@ -101,7 +100,7 @@ return {
         }),
         sources = cmp.config.sources({
           { name = "path" },
-        }, {
+        -- }, {
           { name = "cmdline" },
         }),
       })

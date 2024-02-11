@@ -1,4 +1,4 @@
-; extends
+; inherits: zig
 [
  "="
  "=>"

@@ -7,10 +7,14 @@ return {
     event = "VeryLazy",
     config = function()
       require("swap_buffer")
-      vim.keymap.set("n", "<leader>h", "<cmd>lua Swap_left()<CR>", { silent = true })
-      vim.keymap.set("n", "<leader>j", "<cmd>lua Swap_down()<CR>", { silent = true })
-      vim.keymap.set("n", "<leader>k", "<cmd>lua Swap_up()<CR>", { silent = true })
-      vim.keymap.set("n", "<leader>l", "<cmd>lua Swap_right()<CR>", { silent = true })
+      -- vim.keymap.set("n", "<leader>h", "<cmd>lua Swap_left()<CR>", { silent = true })
+      -- vim.keymap.set("n", "<leader>j", "<cmd>lua Swap_down()<CR>", { silent = true })
+      -- vim.keymap.set("n", "<leader>k", "<cmd>lua Swap_up()<CR>", { silent = true })
+      -- vim.keymap.set("n", "<leader>l", "<cmd>lua Swap_right()<CR>", { silent = true })
+      vim.keymap.set("n", "<a-h>", "<cmd>lua Swap_left()<CR>", { silent = true })
+      vim.keymap.set("n", "<a-j>", "<cmd>lua Swap_down()<CR>", { silent = true })
+      vim.keymap.set("n", "<a-k>", "<cmd>lua Swap_up()<CR>", { silent = true })
+      vim.keymap.set("n", "<a-l>", "<cmd>lua Swap_right()<CR>", { silent = true })
     end,
   },
   {
@@ -37,6 +41,15 @@ return {
       vim.keymap.set("n", "<leader>gc", "<cmd>call emmet#toggleComment()<cr>", { silent = true })
       vim.keymap.set("v", "<leader>a", '<cmd>call emmet#expandAbbr(2,"")<cr>', { silent = true })
       vim.keymap.set("n", "<leader>d", "<cmd>call emmet#removeTag()<cr>", { silent = true })
+    end,
+  },
+  {
+    "junegunn/vim-easy-align",
+    config = function()
+      vim.cmd([[
+        xmap ga <Plug>(EasyAlign)
+        nmap ga <Plug>(EasyAlign)
+      ]])
     end,
   },
 }

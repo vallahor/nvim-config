@@ -23,6 +23,6 @@ return {
       end
     end
 
-    vim.keymap.set("n", "<c-space>", ":lua Toggle_venn()<CR>", { noremap = true, silent = true })
+    vim.keymap.set("n", "<s-space>", ":lua Toggle_venn()<CR>", { noremap = true, silent = true })
   end,
 }

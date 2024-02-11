@@ -21,7 +21,8 @@ require("lazy").setup("plugins", {
 
 -- SETTINGS --
 
-vim.opt.guifont = { "JetBrains Mono NL:h12" }
+-- vim.opt.guifont = { "JetBrains Mono NL:h12" }
+vim.opt.guifont = { "JetBrains Mono NL:h11" }
 vim.opt.shiftwidth = 4
 vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
@@ -99,11 +100,11 @@ vim.keymap.set("n", "Y", "yg$") -- yank to end of line considering line wrap
 vim.keymap.set("n", "<c-i>", "<c-i>zz") -- center <c-i>
 vim.keymap.set("n", "<c-o>", "<c-o>zz") -- center <c-o>
 
-vim.keymap.set({ "n", "v" }, "{", "<c-u>zz", { noremap = true }) -- page up
-vim.keymap.set({ "n", "v" }, "}", "<c-d>zz", { noremap = true }) -- page down
+vim.keymap.set({ "n", "v" }, "H", "<c-u>zz", { noremap = true }) -- page up
+vim.keymap.set({ "n", "v" }, "L", "<c-d>zz", { noremap = true }) -- page down
 
-vim.keymap.set("n", "<c-\\>", "<cmd>clo<cr>", { silent = true }) -- close current window
-vim.keymap.set("n", "<c-=>", "<cmd>vs<cr>", { silent = true }) -- split vertical window
+vim.keymap.set("n", "<c-\\>", "<cmd>clo<cr>", { silent = true }) -- close current    window
+vim.keymap.set("n", "<c-=>", "<cmd>vs<cr>", { silent = true }) -- split vertical   window
 vim.keymap.set("n", "<c-->", "<cmd>sp<cr>", { silent = true }) -- split horizontal window
 vim.keymap.set("n", "<c-0>", "<c-w>o") -- close other windows
 vim.keymap.set("n", "<c-9>", "<c-w>r") -- rotate windows
@@ -112,9 +113,9 @@ vim.keymap.set("n", "|", "<cmd>bd<cr>", { silent = true }) -- close current buff
 -- resize windows
 vim.keymap.set("n", "<a-=>", "<cmd>wincmd =<cr>", { silent = true }) -- resize all windows
 
-vim.keymap.set("n", "<a-s-l>", [[<cmd>vertical resize +2<cr>]], { silent = true }) -- make the window biger vertically
-vim.keymap.set("n", "<a-s-h>", [[<cmd>vertical resize -2<cr>]], { silent = true }) -- make the window smaller vertically
-vim.keymap.set("n", "<a-s-k>", [[<cmd>horizontal resize +2<cr>]], { silent = true }) -- make the window bigger horizontally
+vim.keymap.set("n", "<a-s-l>", [[<cmd>vertical   resize +2<cr>]], { silent = true }) -- make the window biger   vertically
+vim.keymap.set("n", "<a-s-h>", [[<cmd>vertical   resize -2<cr>]], { silent = true }) -- make the window smaller vertically
+vim.keymap.set("n", "<a-s-k>", [[<cmd>horizontal resize +2<cr>]], { silent = true }) -- make the window bigger  horizontally
 vim.keymap.set("n", "<a-s-j>", [[<cmd>horizontal resize -2<cr>]], { silent = true }) -- make the window smaller horizontally
 
 -- vim.keymap.set("n", "<leader>=", "<c-w>=")
@@ -128,7 +129,7 @@ vim.keymap.set("c", "<c-v>", "<c-r>*") -- paste to command line mode
 
 vim.keymap.set("v", "v", "V") -- visual line mode
 
-vim.keymap.set("c", "<c-bs>", "<c-w>") -- delete previous word
+vim.keymap.set({ "i", "c" }, "<c-bs>", "<c-w>") -- delete previous word
 
 vim.keymap.set("n", "x", '"_x') -- delete current char without copying
 vim.keymap.set("n", "<c-d>", '"_dd') -- delete line without copying
@@ -181,8 +182,8 @@ vim.keymap.set("n", "<f3>", ":Inspect<CR>") -- inspect current token treesitter
 
 -- dianostics stuff
 vim.keymap.set("n", "<a-y>", vim.diagnostic.open_float) -- show diagnostic
-vim.keymap.set("n", "<a-[>", vim.diagnostic.goto_prev) -- prev diagnostic
-vim.keymap.set("n", "<a-]>", vim.diagnostic.goto_next) -- next diagnostic
+vim.keymap.set("n", "{", vim.diagnostic.goto_prev) -- prev diagnostic
+vim.keymap.set("n", "}", vim.diagnostic.goto_next) -- next diagnostic
 
 -- move lines @note: the visual ones are below
 vim.keymap.set("n", "<", "<<") -- indent left
@@ -268,25 +269,25 @@ au TextYankPost * silent! lua vim.highlight.on_yank({higroup="Visual", timeout=2
 augroup END
 
 " @check if I'll used it without LSP
-" hi! ErrorBg guibg=#351C1D
-" hi! WarningBg guibg=#3A2717
-" hi! InfoBg guibg=#2B2627
-" hi! HintBg guibg=#2B2627
+hi! ErrorBg   guibg=#351C1D
+hi! WarningBg guibg=#3A2717
+hi! InfoBg    guibg=#2B2627
+hi! HintBg    guibg=#2B2627
 
 " " @check: do we really need the number fg highlight?
-" hi! ErrorLineBg guifg=#a23343 guibg=#351C1D
-" hi! WarningLineBg guifg=#AF7C55 guibg=#3A2717
-" hi! InfoLineBg guifg=#A8899C guibg=#2B2627
-" hi! HintLineBg guifg=#A98D92 guibg=#2B2627
-" hi! HintLineBg guifg=#A98D92
+hi! ErrorLineBg   guifg=#a23343 guibg=#351C1D
+hi! WarningLineBg guifg=#AF7C55 guibg=#3A2717
+hi! InfoLineBg    guifg=#A8899C guibg=#2B2627
+hi! HintLineBg    guifg=#A98D92 guibg=#2B2627
+hi! HintLineBg    guifg=#A98D92
 
 " :h diagnostic-signs
-" sign define DiagnosticSignError text=E texthl=DiagnosticSignError linehl=ErrorBg numhl=ErrorLineBg
-" sign define DiagnosticSignWarn text=W texthl=DiagnosticSignWarn linehl=WarningBg numhl=WarningLineBg
-" sign define DiagnosticSignInfo text=I texthl=DiagnosticSignInfo linehl=InforBg numhl=InfoLineBg
-" sign define DiagnosticSignHint text=H texthl=DiagnosticSignHint linehl=HintBg numhl=HintLineBg
-" sign define DiagnosticSignHint text=H texthl=DiagnosticSignHint numhl=HintLineBg
-" sign define DiagnosticSignHint text=H numhl=HintLineBg
+sign define DiagnosticSignError text=E texthl=DiagnosticSignError linehl=ErrorBg   numhl=ErrorLineBg
+sign define DiagnosticSignWarn  text=W texthl=DiagnosticSignWarn  linehl=WarningBg numhl=WarningLineBg
+sign define DiagnosticSignInfo  text=I texthl=DiagnosticSignInfo  linehl=InforBg   numhl=InfoLineBg
+sign define DiagnosticSignHint  text=H texthl=DiagnosticSignHint  linehl=HintBg    numhl=HintLineBg
+sign define DiagnosticSignHint  text=H texthl=DiagnosticSignHint  numhl=HintLineBg
+sign define DiagnosticSignHint  text=H numhl=HintLineBg
 
 autocmd! BufNewFile,BufRead *.vs,*.fs,*.vert,*.frag set ft=glsl
 

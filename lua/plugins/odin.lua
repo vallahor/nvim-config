@@ -30,7 +30,7 @@ return {
         endif
 
         " Indent if previous line is a case statement
-        if prevline =~ '^\s*case.*:$'
+        if prevline =~ '^\s*case.*:\s*$'
           let ind += &sw
         endif
 
@@ -39,8 +39,8 @@ return {
         endif
 
         " Un-indent if current line is a case statement
-        if line =~ '^\s*case.*:$'
-          let ind -= &sw
+        if line =~ '^\s*case.*:\s*$'
+            let ind -= &sw
         endif
 
         return ind
