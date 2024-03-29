@@ -54,7 +54,7 @@ vim.opt.backup = false
 vim.opt.writebackup = false
 vim.opt.gdefault = true
 vim.opt.cindent = true
--- vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
+vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
 -- vim.opt.timeoutlen = 200 -- @check why I'm using that timeoutlen (maybe jk kj escaping thing)
 vim.opt.updatetime = 100
 -- vim.opt.guicursor = "i-ci:block-iCursor"
@@ -77,14 +77,15 @@ vim.bo.swapfile = false
 vim.g.user_emmet_install_global = 0
 
 -- work around on python default configs
-vim.g.python_indent = {
-  disable_parentheses_indenting = false,
-  closed_paren_align_last_line = false,
-  searchpair_timeout = 150,
-  continue = 4,
-  open_paren = 4,
-  nested_paren = 4,
-}
+-- check why in the other project indents are a complete mess
+-- vim.g.python_indent = {
+--   disable_parentheses_indenting = false,
+--   closed_paren_align_last_line = false,
+--   searchpair_timeout = 150,
+--   continue = 4,
+--   open_paren = 4,
+--   nested_paren = 4,
+-- }
 
 -- MAPPING --
 
@@ -92,8 +93,6 @@ vim.g.python_indent = {
 vim.keymap.set("n", "<esc>", "<cmd>nohl<cr><esc>", { silent = true }) -- nohighlight
 
 vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>", { silent = true }) -- save file
-
--- vim.keymap.set({ "n", "v" }, "<leader>fs", "<cmd>w!<CR><esc>")
 
 vim.keymap.set("n", "Y", "yg$") -- yank to end of line considering line wrap
 
@@ -103,12 +102,21 @@ vim.keymap.set("n", "<c-o>", "<c-o>zz") -- center <c-o>
 vim.keymap.set({ "n", "v" }, "H", "<c-u>zz", { noremap = true }) -- page up
 vim.keymap.set({ "n", "v" }, "L", "<c-d>zz", { noremap = true }) -- page down
 
-vim.keymap.set("n", "<c-\\>", "<cmd>clo<cr>", { silent = true }) -- close current    window
-vim.keymap.set("n", "<c-=>", "<cmd>vs<cr>", { silent = true }) -- split vertical   window
-vim.keymap.set("n", "<c-->", "<cmd>sp<cr>", { silent = true }) -- split horizontal window
-vim.keymap.set("n", "<c-0>", "<c-w>o") -- close other windows
-vim.keymap.set("n", "<c-9>", "<c-w>r") -- rotate windows
-vim.keymap.set("n", "|", "<cmd>bd<cr>", { silent = true }) -- close current buffer and window
+-- vim.keymap.set("n", "<c-\\>", "<cmd>clo<cr>", { silent = true }) -- close current window
+-- vim.keymap.set("n", "<c-=>", "<cmd>vs<cr>", { silent = true }) -- split vertical window
+-- vim.keymap.set("n", "<c-->", "<cmd>sp<cr>", { silent = true }) -- split horizontal window
+-- vim.keymap.set("n", "<c-0>", "<c-w>o") -- close other windows
+-- vim.keymap.set("n", "<c-9>", "<c-w>r") -- rotate windows
+-- vim.keymap.set("n", "|", "<cmd>bd<cr>", { silent = true }) -- close current buffer and window
+
+vim.keymap.set("n", "\\", "<cmd>clo<cr>", { silent = true }) -- close current window
+vim.keymap.set("n", "|", "<cmd>vs<cr>", { silent = true }) -- split vertical window
+vim.keymap.set("n", "-", "<cmd>sp<cr>", { silent = true }) -- split horizontal window
+vim.keymap.set("n", "<a-)>", "<c-w>o") -- close other windows
+vim.keymap.set("n", "<a-(>", "<c-w>r") -- rotate windows
+
+-- to close the current buffer <c-w> and not the window
+vim.keymap.set("n", "<a-w>", "<cmd>bd<cr>", { silent = true }) -- close current buffer and window
 
 -- resize windows
 vim.keymap.set("n", "<a-=>", "<cmd>wincmd =<cr>", { silent = true }) -- resize all windows
@@ -151,9 +159,13 @@ local beginning_of_the_line = function()
   end
 end
 
-vim.keymap.set({ "n", "v" }, "0", beginning_of_the_line) -- go to beginning of the line
-vim.keymap.set("n", "-", "$") -- go to end of line
-vim.keymap.set("v", "-", "$h") -- go to end of line (for some reason it's go to wrong place in visual mode)
+-- vim.keymap.set({ "n", "v" }, "0", beginning_of_the_line) -- go to beginning of the line
+-- vim.keymap.set("n", "-", "$") -- go to end of line
+-- vim.keymap.set("v", "-", "$h") -- go to end of line (for some reason it's go to wrong place in visual mode)
+
+vim.keymap.set({ "n", "v" }, "(", beginning_of_the_line) -- go to beginning of the line
+vim.keymap.set("n", ")", "$") -- go to end of line
+vim.keymap.set("v", ")", "$h") -- go to end of line (for some reason it's goes to wrong place in visual mode)
 
 -- vim.keymap.set("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
 vim.keymap.set("n", "<f4>", "<cmd>:e $MYVIMRC<CR>", { silent = true }) -- open config file (vimrc or init.lua)
@@ -176,14 +188,9 @@ vim.keymap.set("v", "<c-n>", function()
   vim.cmd([[noautocmd normal! gv]])
 end) -- duplicate selection down
 
-vim.keymap.set("n", "<c-6>", "<C-^>") -- back to last buffer
+vim.keymap.set("n", "_", "<C-^>") -- back to last buffer
 
 vim.keymap.set("n", "<f3>", ":Inspect<CR>") -- inspect current token treesitter
-
--- dianostics stuff
-vim.keymap.set("n", "<a-y>", vim.diagnostic.open_float) -- show diagnostic
-vim.keymap.set("n", "{", vim.diagnostic.goto_prev) -- prev diagnostic
-vim.keymap.set("n", "}", vim.diagnostic.goto_next) -- next diagnostic
 
 -- move lines @note: the visual ones are below
 vim.keymap.set("n", "<", "<<") -- indent left
@@ -207,11 +214,7 @@ vim.api.nvim_create_autocmd("BufEnter", {
 vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
   pattern = "*",
   callback = function()
-    -- move paragraphs
-    vim.keymap.set({ "n", "v", "x" }, "[", "{", { nowait = true, buffer = true }) -- paragraph up
-    vim.keymap.set({ "n", "v", "x" }, "]", "}", { nowait = true, buffer = true }) -- paragraph down
-
-    -- move lines
+    -- move indentation
     vim.keymap.set("v", "<", "<gv", { nowait = true, buffer = true, remap = true }) -- indent left in visual mode
     vim.keymap.set("v", ">", ">gv", { nowait = true, buffer = true, remap = true }) -- indent right in visual mode
   end,
@@ -294,7 +297,7 @@ autocmd! BufNewFile,BufRead *.vs,*.fs,*.vert,*.frag set ft=glsl
 " when autocomplete active it limit the height
 set pumblend=15
 
-" to deal with cmdheight=0
+" workaround cmdheight=0
 autocmd ModeChanged * lua vim.schedule(function() vim.cmd('redraw') end)
 
 " move lines
@@ -302,9 +305,12 @@ xnoremap K :<C-u>silent! '<,'>move-2<CR>gv=gv
 xnoremap J :<C-u>silent! '<,'>move'>+<CR>gv=gv
 
 " c indent
-autocmd BufWinEnter,BufEnter,BufRead *.c,*.cpp,*.h set cino=L0,g0,l1,t0,w1,(0,w4,(s,m1
+" autocmd BufWinEnter,BufEnter,BufRead *.c,*.cpp,*.h set cino=L0,g0,l1,t0,w1,(0,w4,(s,m1
+
+autocmd BufWritePre *.templ lua vim.lsp.buf.format()
 
 ]])
+
 
 -- windows terminal, works with others terminals
 --

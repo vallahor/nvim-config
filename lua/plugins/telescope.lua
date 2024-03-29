@@ -43,7 +43,7 @@ return {
           --   prompt_position = "bottom",
           -- },
           -- preview = false,
-          file_ignore_patterns = { "node_modules", ".venv", "__pycache__", "_build" },
+          file_ignore_patterns = { "node_modules", ".venv", "__pycache__", "_build", "_opam" },
         },
       })
 
