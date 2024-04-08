@@ -112,26 +112,27 @@ vim.keymap.set({ "n", "v" }, "L", "<c-d>zz", { noremap = true }) -- page down
 vim.keymap.set("n", "\\", "<cmd>clo<cr>", { silent = true }) -- close current window
 vim.keymap.set("n", "|", "<cmd>vs<cr>", { silent = true }) -- split vertical window
 vim.keymap.set("n", "-", "<cmd>sp<cr>", { silent = true }) -- split horizontal window
-vim.keymap.set("n", "<a-)>", "<c-w>o") -- close other windows
-vim.keymap.set("n", "<a-(>", "<c-w>r") -- rotate windows
+vim.keymap.set("n", "<c-9>", "<c-w>o") -- close other windows
+vim.keymap.set("n", "<c-8>", "<c-w>r") -- rotate windows
 
+-- closes the current window and buffer
 -- to close the current buffer <c-w> and not the window
 vim.keymap.set("n", "<a-w>", "<cmd>bd<cr>", { silent = true }) -- close current buffer and window
 
 -- resize windows
-vim.keymap.set("n", "<a-=>", "<cmd>wincmd =<cr>", { silent = true }) -- resize all windows
+vim.keymap.set("n", "<c-0>", "<cmd>wincmd =<cr>", { silent = true }) -- resize all windows
 
-vim.keymap.set("n", "<a-s-l>", [[<cmd>vertical   resize +2<cr>]], { silent = true }) -- make the window biger   vertically
-vim.keymap.set("n", "<a-s-h>", [[<cmd>vertical   resize -2<cr>]], { silent = true }) -- make the window smaller vertically
-vim.keymap.set("n", "<a-s-k>", [[<cmd>horizontal resize +2<cr>]], { silent = true }) -- make the window bigger  horizontally
-vim.keymap.set("n", "<a-s-j>", [[<cmd>horizontal resize -2<cr>]], { silent = true }) -- make the window smaller horizontally
+vim.keymap.set("n", "<a-s-right>", [[<cmd>vertical   resize +2<cr>]], { silent = true }) -- make the window biger   vertically
+vim.keymap.set("n", "<a-s-left>", [[<cmd>vertical   resize -2<cr>]], { silent = true }) -- make the window smaller vertically
+vim.keymap.set("n", "<a-s-up>", [[<cmd>horizontal resize +2<cr>]], { silent = true }) -- make the window bigger  horizontally
+vim.keymap.set("n", "<a-s-down>", [[<cmd>horizontal resize -2<cr>]], { silent = true }) -- make the window smaller horizontally
 
 -- vim.keymap.set("n", "<leader>=", "<c-w>=")
 
-vim.keymap.set({ "n", "v" }, "<c-h>", "<cmd>wincmd h<cr>", { silent = true }) -- move to window left
-vim.keymap.set({ "n", "v" }, "<c-j>", "<cmd>wincmd j<cr>", { silent = true }) -- move to window down
-vim.keymap.set({ "n", "v" }, "<c-k>", "<cmd>wincmd k<cr>", { silent = true }) -- move to window up
-vim.keymap.set({ "n", "v" }, "<c-l>", "<cmd>wincmd l<cr>", { silent = true }) -- move to window right
+vim.keymap.set({ "n", "v" }, "<left>", "<cmd>wincmd h<cr>", { silent = true }) -- move to window left
+vim.keymap.set({ "n", "v" }, "<down>", "<cmd>wincmd j<cr>", { silent = true }) -- move to window down
+vim.keymap.set({ "n", "v" }, "<up>", "<cmd>wincmd k<cr>", { silent = true }) -- move to window up
+vim.keymap.set({ "n", "v" }, "<right>", "<cmd>wincmd l<cr>", { silent = true }) -- move to window right
 
 vim.keymap.set("c", "<c-v>", "<c-r>*") -- paste to command line mode
 
@@ -192,7 +193,7 @@ vim.keymap.set("n", "_", "<C-^>") -- back to last buffer
 
 vim.keymap.set("n", "<f3>", ":Inspect<CR>") -- inspect current token treesitter
 
--- move lines @note: the visual ones are below
+-- move lines @note: the visual ones are bellow
 vim.keymap.set("n", "<", "<<") -- indent left
 vim.keymap.set("n", ">", ">>") -- indent right
 

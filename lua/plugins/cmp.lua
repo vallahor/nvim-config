@@ -44,6 +44,16 @@ return {
               cmp.select_prev_item({ behavior = cmp.SelectBehavior.Select })
             end
           end, { "i", "s", "c" }),
+          ["<down>"] = cmp.mapping(function()
+            if cmp.visible() then
+              cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
+            end
+          end, { "i", "s", "c" }),
+          ["<up>"] = cmp.mapping(function()
+            if cmp.visible() then
+              cmp.select_prev_item({ behavior = cmp.SelectBehavior.Select })
+            end
+          end, { "i", "s", "c" }),
           ["<tab>"] = cmp.mapping.confirm({
             select = true,
             -- behavior = cmp.ConfirmBehavior.Replace,

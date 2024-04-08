@@ -139,11 +139,6 @@ return {
       on_attach = on_attach,
     })
 
-    lspconfig.gdscript.setup({
-      on_attach = on_attach,
-      cmd = { "nc", "localhost", "6005" },
-    })
-
     vim.api.nvim_create_autocmd("BufWritePre", {
       pattern = "*.odin",
       callback = function()
@@ -157,11 +152,6 @@ return {
 
     lspconfig.glsl_analyzer.setup({
       on_attach = on_attach,
-    })
-
-    lspconfig.omnisharp.setup({
-      on_attach = on_attach,
-      cmd = { "dotnet", "C:/apps/omnisharp/OmniSharp.dll" },
     })
   end,
 }

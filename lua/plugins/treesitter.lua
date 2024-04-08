@@ -37,13 +37,14 @@ return {
         "tsx",
         "sql",
         "yaml",
+        "dockerfile",
       },
       highlight = {
         enable = true,
       },
       indent = {
-        enable = true,
-        -- disable = { "python", "rust", "cpp", "go", "ocaml", "zig", "htmldjango", "gdscript" },
+        enable = false,
+        -- disable = { "python", "rust", "cpp", "go", "odin"},
       },
       incremental_selection = {
         enable = true,
