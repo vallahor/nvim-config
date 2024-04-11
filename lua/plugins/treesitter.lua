@@ -2,12 +2,6 @@ return {
   {
     "nvim-treesitter/nvim-treesitter",
     dependencies = {
-      {
-        "windwp/nvim-ts-autotag",
-        config = function()
-          require("nvim-ts-autotag").setup({})
-        end,
-      },
       { "RRethy/nvim-treesitter-endwise" },
     },
     version = false,
@@ -19,25 +13,25 @@ return {
         "lua",
         "vim",
         "c",
-        "c_sharp",
         "cpp",
         "zig",
         "rust",
-        "go",
-        "templ",
-        "gdscript",
         "markdown",
         "markdown_inline",
         "python",
         "proto",
         "json",
         "typescript",
+        "javascript",
         "svelte",
         "odin",
         "tsx",
         "sql",
         "yaml",
         "dockerfile",
+        "elixir",
+        "heex",
+        "eex",
       },
       highlight = {
         enable = true,

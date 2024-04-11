@@ -22,7 +22,7 @@ require("lazy").setup("plugins", {
 -- SETTINGS --
 
 -- vim.opt.guifont = { "JetBrains Mono NL:h12" }
-vim.opt.guifont = { "JetBrains Mono NL:h11" }
+vim.opt.guifont = { "JetBrains Mono:h11" }
 vim.opt.shiftwidth = 4
 vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
@@ -58,7 +58,7 @@ vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
 -- vim.opt.timeoutlen = 200 -- @check why I'm using that timeoutlen (maybe jk kj escaping thing)
 vim.opt.updatetime = 100
 -- vim.opt.guicursor = "i-ci:block-iCursor"
-vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
+-- vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
 
 vim.opt.cmdheight = 0
 vim.opt.laststatus = 2
@@ -311,7 +311,6 @@ xnoremap J :<C-u>silent! '<,'>move'>+<CR>gv=gv
 autocmd BufWritePre *.templ lua vim.lsp.buf.format()
 
 ]])
-
 
 -- windows terminal, works with others terminals
 --

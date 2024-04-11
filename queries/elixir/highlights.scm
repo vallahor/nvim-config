@@ -1,0 +1,6 @@
+; inherits: elixir
+
+[
+ "@"
+] @Punctuation.special
+

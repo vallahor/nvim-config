@@ -1,6 +1,10 @@
 return {
   "neovim/nvim-lspconfig",
   event = { "BufReadPre", "BufNewFile" },
+  -- dependencies = {
+  --   "mason.nvim",
+  --   "williamboman/mason-lspconfig.nvim",
+  -- },
   config = function()
     local on_attach = function(client, bufnr)
       vim.keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", { buffer = bufnr, silent = true })
@@ -54,47 +58,7 @@ return {
       end,
     })
 
-    lspconfig.pyright.setup({
-      on_attach = on_attach,
-      settings = {
-        python = {
-          analysis = {
-            typeCheckingMode = "off",
-            autoSearchPaths = true,
-            useLibraryCodeForTypes = true,
-          },
-        },
-      },
-    })
-
-    lspconfig.gopls.setup({
-      on_attach = on_attach,
-    })
-    vim.api.nvim_create_autocmd("BufWritePre", {
-      pattern = "*.go",
-      callback = function()
-        local params = vim.lsp.util.make_range_params()
-        params.context = {only = {"source.organizeImports"}}
-        -- buf_request_sync defaults to a 1000ms timeout. Depending on your
-        -- machine and codebase, you may want longer. Add an additional
-        -- argument after params if you find that you have to write the file
-        -- twice for changes to be saved.
-        -- E.g., vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, 3000)
-        local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params)
-        for cid, res in pairs(result or {}) do
-          for _, r in pairs(res.result or {}) do
-            if r.edit then
-              local enc = (vim.lsp.get_client_by_id(cid) or {}).offset_encoding or "utf-16"
-              vim.lsp.util.apply_workspace_edit(r.edit, enc)
-            end
-          end
-        end
-        vim.lsp.buf.format({async = false})
-      end
-    })
-
-    vim.filetype.add({ extension = { templ = "templ" } })
-    lspconfig.templ.setup({
+    lspconfig.ruff_lsp.setup({
       on_attach = on_attach,
     })
 
@@ -102,28 +66,11 @@ return {
       on_attach = on_attach,
     })
 
-    lspconfig.htmx.setup({
-      on_attach = on_attach,
-      filetypes = { "html", "templ" },
-    })
-
     lspconfig.tsserver.setup({
       on_attach = on_attach,
     })
 
-    lspconfig.svelte.setup({
-      on_attach = on_attach,
-    })
-
     lspconfig.tailwindcss.setup({
-      on_attach = on_attach,
-    })
-
-    lspconfig.sqlls.setup({
-      on_attach = on_attach,
-    })
-
-    lspconfig.jsonls.setup({
       on_attach = on_attach,
     })
 
@@ -135,15 +82,11 @@ return {
       on_attach = on_attach,
     })
 
-    lspconfig.zls.setup({
-      on_attach = on_attach,
-    })
-
     vim.api.nvim_create_autocmd("BufWritePre", {
       pattern = "*.odin",
       callback = function()
-        vim.lsp.buf.format({async = false})
-      end
+        vim.lsp.buf.format({ async = false })
+      end,
     })
 
     lspconfig.ols.setup({
@@ -152,6 +95,17 @@ return {
 
     lspconfig.glsl_analyzer.setup({
       on_attach = on_attach,
+    })
+
+    lspconfig.elixirls.setup({
+      on_attach = on_attach,
+      cmd = { "C:/apps/elixir-ls/language_server.bat" },
+      settings = {
+        elixirLS = {
+          dialyzerEnabled = false,
+          fetchDeps = false,
+        },
+      },
     })
   end,
 }
