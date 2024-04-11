@@ -60,9 +60,9 @@ vim.opt.updatetime = 100
 -- vim.opt.guicursor = "i-ci:block-iCursor"
 -- vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
 
-vim.opt.cmdheight = 0
-vim.opt.laststatus = 2
-vim.opt.showcmdloc = "statusline"
+-- vim.opt.cmdheight = 0
+-- vim.opt.laststatus = 2
+-- vim.opt.showcmdloc = "statusline"
 
 vim.wo.signcolumn = "no"
 vim.wo.relativenumber = true
@@ -101,13 +101,6 @@ vim.keymap.set("n", "<c-o>", "<c-o>zz") -- center <c-o>
 
 vim.keymap.set({ "n", "v" }, "H", "<c-u>zz", { noremap = true }) -- page up
 vim.keymap.set({ "n", "v" }, "L", "<c-d>zz", { noremap = true }) -- page down
-
--- vim.keymap.set("n", "<c-\\>", "<cmd>clo<cr>", { silent = true }) -- close current window
--- vim.keymap.set("n", "<c-=>", "<cmd>vs<cr>", { silent = true }) -- split vertical window
--- vim.keymap.set("n", "<c-->", "<cmd>sp<cr>", { silent = true }) -- split horizontal window
--- vim.keymap.set("n", "<c-0>", "<c-w>o") -- close other windows
--- vim.keymap.set("n", "<c-9>", "<c-w>r") -- rotate windows
--- vim.keymap.set("n", "|", "<cmd>bd<cr>", { silent = true }) -- close current buffer and window
 
 vim.keymap.set("n", "\\", "<cmd>clo<cr>", { silent = true }) -- close current window
 vim.keymap.set("n", "|", "<cmd>vs<cr>", { silent = true }) -- split vertical window
@@ -159,10 +152,6 @@ local beginning_of_the_line = function()
     vim.fn.setpos(".", { 0, vim.fn.line("."), 0, 0 })
   end
 end
-
--- vim.keymap.set({ "n", "v" }, "0", beginning_of_the_line) -- go to beginning of the line
--- vim.keymap.set("n", "-", "$") -- go to end of line
--- vim.keymap.set("v", "-", "$h") -- go to end of line (for some reason it's go to wrong place in visual mode)
 
 vim.keymap.set({ "n", "v" }, "(", beginning_of_the_line) -- go to beginning of the line
 vim.keymap.set("n", ")", "$") -- go to end of line
@@ -221,27 +210,33 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
   end,
 })
 
--- show macro recording
-vim.api.nvim_create_autocmd("RecordingEnter", {
-  pattern = "*",
-  callback = function()
-    vim.opt_local.cmdheight = 1
-  end,
-})
+if vim.opt.cmdheight == 0 then
+  -- show macro recording
+  vim.api.nvim_create_autocmd("RecordingEnter", {
+    pattern = "*",
+    callback = function()
+      vim.opt_local.cmdheight = 1
+    end,
+  })
 
-vim.api.nvim_create_autocmd("RecordingLeave", {
-  pattern = "*",
-  callback = function()
-    local timer = vim.loop.new_timer()
-    timer:start(
-      50,
-      0,
-      vim.schedule_wrap(function()
-        vim.opt_local.cmdheight = 0
-      end)
-    )
-  end,
-})
+  vim.api.nvim_create_autocmd("RecordingLeave", {
+    pattern = "*",
+    callback = function()
+      local timer = vim.loop.new_timer()
+      timer:start(
+        50,
+        0,
+        vim.schedule_wrap(function()
+          vim.opt_local.cmdheight = 0
+        end)
+      )
+    end,
+  })
+  vim.cmd([[
+    " workaround cmdheight=0
+    autocmd ModeChanged * lua vim.schedule(function() vim.cmd('redraw') end)
+  ]])
+end
 
 -- vimscript stuff
 vim.cmd([[
@@ -298,8 +293,6 @@ autocmd! BufNewFile,BufRead *.vs,*.fs,*.vert,*.frag set ft=glsl
 " when autocomplete active it limit the height
 set pumblend=15
 
-" workaround cmdheight=0
-autocmd ModeChanged * lua vim.schedule(function() vim.cmd('redraw') end)
 
 " move lines
 xnoremap K :<C-u>silent! '<,'>move-2<CR>gv=gv
