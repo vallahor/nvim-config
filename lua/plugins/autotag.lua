@@ -10,6 +10,7 @@ filetypes = {
     'markdown',
     'astro', 'glimmer', 'handlebars', 'hbs',
     "heex",
+    "elixir",
 }
           })
         end,
