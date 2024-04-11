@@ -92,8 +92,7 @@ vim.g.user_emmet_install_global = 0
 -- vim.keymap.set("n", "<leader><leader>", "<cmd>nohl<cr><esc>")
 vim.keymap.set("n", "<esc>", "<cmd>nohl<cr><esc>", { silent = true }) -- nohighlight
 
--- vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>", { silent = true }) -- save file
-vim.keymap.set({ "n", "v" }, "<leader>fs", "<cmd>w!<CR><esc>", { silent = true }) -- save file
+vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>", { silent = true }) -- save file
 
 vim.keymap.set("n", "Y", "yg$") -- yank to end of line considering line wrap
 
@@ -142,7 +141,7 @@ vim.keymap.set("v", "v", "V") -- visual line mode
 vim.keymap.set({ "i", "c" }, "<c-bs>", "<c-w>") -- delete previous word
 
 vim.keymap.set("n", "x", '"_x') -- delete current char without copying
-vim.keymap.set("n", "<c-s-d>", '"_dd') -- delete line without copying
+vim.keymap.set("n", "<c-d>", '"_dd') -- delete line without copying
 vim.keymap.set("v", "x", '"_d') -- delete char in visual mode without copying
 vim.keymap.set({ "n", "v" }, "c", '"_c') -- change verb without copying
 
