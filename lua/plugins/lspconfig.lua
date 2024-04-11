@@ -20,6 +20,13 @@ return {
       -- vim.keymap.set("n", "<a-]>", "<cmd>lua vim.lsp.diagnostic.goto_next()<CR>", { buffer = bufnr, silent = true })
 
       client.server_capabilities.semanticTokensProvider = nil
+
+      vim.api.nvim_create_autocmd("BufWritePre", {
+        buffer = bufnr,
+        callback = function()
+          vim.lsp.buf.format({ async = false })
+        end,
+      })
     end
 
     vim.api.nvim_create_autocmd("LspAttach", {
