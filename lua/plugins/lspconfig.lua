@@ -1,10 +1,6 @@
 return {
   "neovim/nvim-lspconfig",
   event = { "BufReadPre", "BufNewFile" },
-  -- dependencies = {
-  --   "mason.nvim",
-  --   "williamboman/mason-lspconfig.nvim",
-  -- },
   config = function()
     local on_attach = function(client, bufnr)
       vim.keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", { buffer = bufnr, silent = true })
@@ -113,6 +109,10 @@ return {
           fetchDeps = false,
         },
       },
+    })
+
+    lspconfig.cssls.setup({
+      on_attach = on_attach,
     })
   end,
 }
