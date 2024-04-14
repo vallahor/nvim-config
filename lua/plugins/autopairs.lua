@@ -12,14 +12,14 @@ return {
       })
       autopairs.add_rules(require("nvim-autopairs.rules.endwise-elixir"))
 
-      local npairs = require("nvim-autopairs")
-      local Rule = require("nvim-autopairs.rule")
-      local cond = require("nvim-autopairs.conds")
+      -- local npairs = require("nvim-autopairs")
+      -- local Rule = require("nvim-autopairs.rule")
+      -- local cond = require("nvim-autopairs.conds")
 
-      npairs.add_rules({
-        Rule("<% ", " %>", { "elixir", "heex", "eelixir" }):with_move(cond.none()):use_regex(true),
-        Rule("<%= ", " %>", { "elixir", "heex", "eelixir" }):with_move(cond.none()):use_regex(true),
-      })
+      -- npairs.add_rules({
+      --   Rule("<%% ", " %>", { "elixir", "heex", "eelixir" }):with_move(cond.none()):use_regex(true),
+      --   Rule("<%%= ", " %>", { "elixir", "heex", "eelixir" }):with_move(cond.none()):use_regex(true),
+      -- })
     end,
   },
 }

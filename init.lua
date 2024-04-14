@@ -21,7 +21,7 @@ require("lazy").setup("plugins", {
 
 -- SETTINGS --
 
--- vim.opt.guifont = { "JetBrains Mono NL:h12" }
+-- vim.opt.guifont = { "JetBrains Mono:h12" }
 vim.opt.guifont = { "JetBrains Mono:h11" }
 vim.opt.shiftwidth = 4
 vim.opt.tabstop = 4
@@ -57,12 +57,12 @@ vim.opt.cindent = true
 vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
 -- vim.opt.timeoutlen = 200 -- @check why I'm using that timeoutlen (maybe jk kj escaping thing)
 vim.opt.updatetime = 100
--- vim.opt.guicursor = "i-ci:block-iCursor"
--- vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
+vim.opt.guicursor = "i-ci:block-iCursor"
+vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
 
--- vim.opt.cmdheight = 0
--- vim.opt.laststatus = 2
--- vim.opt.showcmdloc = "statusline"
+vim.opt.cmdheight = 0
+vim.opt.laststatus = 2
+vim.opt.showcmdloc = "statusline"
 
 vim.wo.signcolumn = "no"
 vim.wo.relativenumber = true
@@ -210,7 +210,7 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
   end,
 })
 
-if vim.opt.cmdheight == 0 then
+if vim.opt.cmdheight:get() == 0 then
   -- show macro recording
   vim.api.nvim_create_autocmd("RecordingEnter", {
     pattern = "*",
@@ -232,10 +232,15 @@ if vim.opt.cmdheight == 0 then
       )
     end,
   })
-  vim.cmd([[
-    " workaround cmdheight=0
-    autocmd ModeChanged * lua vim.schedule(function() vim.cmd('redraw') end)
-  ]])
+
+  vim.api.nvim_create_autocmd("ModeChanged", {
+    pattern = "*",
+    callback = function()
+      vim.schedule(function()
+        vim.cmd("redraw")
+      end)
+    end,
+  })
 end
 
 -- vimscript stuff
@@ -304,6 +309,12 @@ xnoremap J :<C-u>silent! '<,'>move'>+<CR>gv=gv
 autocmd BufWritePre *.templ lua vim.lsp.buf.format()
 
 ]])
+
+if vim.g.neovide then
+  vim.g.neovide_cursor_animation_length = 0.0
+  vim.g.neovide_cursor_trail_size = 0.0
+  vim.opt.linespace = 2
+end
 
 -- windows terminal, works with others terminals
 --

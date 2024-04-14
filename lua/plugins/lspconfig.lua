@@ -17,13 +17,27 @@ return {
 
       client.server_capabilities.semanticTokensProvider = nil
 
-      vim.api.nvim_create_autocmd("BufWritePre", {
-        buffer = bufnr,
-        callback = function()
-          vim.lsp.buf.format({ async = false })
-        end,
-      })
+      -- vim.api.nvim_create_autocmd("BufWritePre", {
+      --   buffer = bufnr,
+      --   callback = function()
+      --     vim.lsp.buf.format({ async = false })
+      --   end,
+      -- })
     end
+
+    -- https://www.mitchellhanberg.com/modern-format-on-save-in-neovim/
+    vim.api.nvim_create_autocmd("LspAttach", {
+      pattern = { "*.odin" },
+      group = vim.api.nvim_create_augroup("lsp", { clear = true }),
+      callback = function(args)
+        vim.api.nvim_create_autocmd("BufWritePre", {
+          buffer = args.buf,
+          callback = function()
+            vim.lsp.buf.format({ async = false, id = args.data.client_id })
+          end,
+        })
+      end,
+    })
 
     vim.api.nvim_create_autocmd("LspAttach", {
       callback = function(args)
@@ -85,12 +99,12 @@ return {
       on_attach = on_attach,
     })
 
-    vim.api.nvim_create_autocmd("BufWritePre", {
-      pattern = "*.odin",
-      callback = function()
-        vim.lsp.buf.format({ async = false })
-      end,
-    })
+    -- vim.api.nvim_create_autocmd("BufWritePre", {
+    --   pattern = "*.odin",
+    --   callback = function()
+    --     vim.lsp.buf.format({ async = false })
+    --   end,
+    -- })
 
     lspconfig.ols.setup({
       on_attach = on_attach,

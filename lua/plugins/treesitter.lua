@@ -18,6 +18,7 @@ return {
         "rust",
         "markdown",
         "markdown_inline",
+        "mermaid",
         "python",
         "proto",
         "json",
