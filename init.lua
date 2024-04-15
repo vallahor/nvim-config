@@ -57,8 +57,10 @@ vim.opt.cindent = true
 vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
 -- vim.opt.timeoutlen = 200 -- @check why I'm using that timeoutlen (maybe jk kj escaping thing)
 vim.opt.updatetime = 100
-vim.opt.guicursor = "i-ci:block-iCursor"
-vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
+-- vim.opt.guicursor = "i-ci:block-iCursor"
+-- vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
+
+vim.opt.linespace = 2
 
 vim.opt.cmdheight = 0
 vim.opt.laststatus = 2
@@ -92,7 +94,7 @@ vim.g.user_emmet_install_global = 0
 -- vim.keymap.set("n", "<leader><leader>", "<cmd>nohl<cr><esc>")
 vim.keymap.set("n", "<esc>", "<cmd>nohl<cr><esc>", { silent = true }) -- nohighlight
 
-vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>", { silent = true }) -- save file
+vim.keymap.set({ "n", "v" }, "<s-enter>", "<cmd>w!<CR><esc>", { silent = true }) -- save file
 
 vim.keymap.set("n", "Y", "yg$") -- yank to end of line considering line wrap
 
@@ -132,6 +134,7 @@ vim.keymap.set("c", "<c-v>", "<c-r>*") -- paste to command line mode
 vim.keymap.set("v", "v", "V") -- visual line mode
 
 vim.keymap.set({ "i", "c" }, "<c-bs>", "<c-w>") -- delete previous word
+vim.keymap.set({ "i", "c" }, "<s-bs>", "<c-w>") -- delete previous word
 
 vim.keymap.set("n", "x", '"_x') -- delete current char without copying
 vim.keymap.set("n", "<c-d>", '"_dd') -- delete line without copying
@@ -162,11 +165,11 @@ vim.keymap.set("n", "<f4>", "<cmd>:e $MYVIMRC<CR>", { silent = true }) -- open c
 vim.keymap.set("n", "<f5>", "<cmd>so %<CR>", { silent = true }) -- execute current file (vim or lua)
 
 -- duplicate line and lines
-vim.keymap.set("n", "<c-p>", '"0yy"0P') -- duplicate line up
-vim.keymap.set("n", "<c-n>", '"0yy"0p') -- duplicate line down
+vim.keymap.set("n", "<leader>p", '"0yy"0P') -- duplicate line up
+vim.keymap.set("n", "<leader>n", '"0yy"0p') -- duplicate line down
 
-vim.keymap.set("v", "<c-p>", '"0y"0P') -- duplicate selection up
-vim.keymap.set("v", "<c-n>", function()
+vim.keymap.set("v", "<leader>p", '"0y"0P') -- duplicate selection up
+vim.keymap.set("v", "<leader>n", function()
   local init_pos = vim.fn.line("v")
   vim.cmd([[noautocmd normal! "0ygv]])
   local esc = vim.api.nvim_replace_termcodes("<esc>", true, false, true)
@@ -181,6 +184,7 @@ end) -- duplicate selection down
 vim.keymap.set("n", "_", "<C-^>") -- back to last buffer
 
 vim.keymap.set("n", "<f3>", ":Inspect<CR>") -- inspect current token treesitter
+vim.keymap.set("n", "<f2>", ":InspectTree<CR>") -- inspect current token treesitter
 
 -- move lines @note: the visual ones are bellow
 vim.keymap.set("n", "<", "<<") -- indent left
@@ -247,6 +251,7 @@ end
 vim.cmd([[
 language en_US
 filetype on
+syntax on
 
 " @windows: nextjs and sveltkit folder name pattern
 set isfname+=(
@@ -298,22 +303,33 @@ autocmd! BufNewFile,BufRead *.vs,*.fs,*.vert,*.frag set ft=glsl
 " when autocomplete active it limit the height
 set pumblend=15
 
-
 " move lines
 xnoremap K :<C-u>silent! '<,'>move-2<CR>gv=gv
 xnoremap J :<C-u>silent! '<,'>move'>+<CR>gv=gv
 
-" c indent
-" autocmd BufWinEnter,BufEnter,BufRead *.c,*.cpp,*.h set cino=L0,g0,l1,t0,w1,(0,w4,(s,m1
-
-autocmd BufWritePre *.templ lua vim.lsp.buf.format()
+if &term =~ '^xterm'
+  " enter vim
+  autocmd VimEnter * silent !echo -ne "\e[3 q"
+  " oherwise
+  let &t_EI .= "\<Esc>[3 q"
+  " insert mode
+  let &t_SI .= "\<Esc>[5 q"
+  " 1 or 0 -> blinking block
+  " 2 -> solid block
+  " 3 -> blinking underscore
+  " 4 -> solid underscore
+  " Recent versions of xterm (282 or above) also support
+  " 5 -> blinking vertical bar
+  " 6 -> solid vertical bar
+  " leave vim
+  autocmd VimLeave * silent !echo -ne "\e[5 q"
+endif
 
 ]])
 
 if vim.g.neovide then
   vim.g.neovide_cursor_animation_length = 0.0
   vim.g.neovide_cursor_trail_size = 0.0
-  vim.opt.linespace = 2
 end
 
 -- windows terminal, works with others terminals
