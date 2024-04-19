@@ -21,6 +21,8 @@ return {
         "markdown_inline",
         "mermaid",
         "python",
+        "go",
+        "templ",
         "proto",
         "json",
         "typescript",

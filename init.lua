@@ -56,9 +56,10 @@ vim.opt.gdefault = true
 vim.opt.cindent = true
 vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
 -- vim.opt.timeoutlen = 200 -- @check why I'm using that timeoutlen (maybe jk kj escaping thing)
+vim.opt.ttimeoutlen = 50
 vim.opt.updatetime = 100
--- vim.opt.guicursor = "i-ci:block-iCursor"
--- vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
+vim.opt.guicursor = "i-ci:block-iCursor"
+vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
 
 vim.opt.linespace = 2
 
@@ -94,7 +95,7 @@ vim.g.user_emmet_install_global = 0
 -- vim.keymap.set("n", "<leader><leader>", "<cmd>nohl<cr><esc>")
 vim.keymap.set("n", "<esc>", "<cmd>nohl<cr><esc>", { silent = true }) -- nohighlight
 
-vim.keymap.set({ "n", "v" }, "<s-enter>", "<cmd>w!<CR><esc>", { silent = true }) -- save file
+vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>", { silent = true }) -- save file
 
 vim.keymap.set("n", "Y", "yg$") -- yank to end of line considering line wrap
 
@@ -112,7 +113,7 @@ vim.keymap.set("n", "<c-8>", "<c-w>r") -- rotate windows
 
 -- closes the current window and buffer
 -- to close the current buffer <c-w> and not the window
-vim.keymap.set("n", "<a-w>", "<cmd>bd<cr>", { silent = true }) -- close current buffer and window
+vim.keymap.set("n", "<c-7>", "<cmd>bd<cr>", { silent = true }) -- close current buffer and window
 
 -- resize windows
 vim.keymap.set("n", "<c-0>", "<cmd>wincmd =<cr>", { silent = true }) -- resize all windows
@@ -165,11 +166,11 @@ vim.keymap.set("n", "<f4>", "<cmd>:e $MYVIMRC<CR>", { silent = true }) -- open c
 vim.keymap.set("n", "<f5>", "<cmd>so %<CR>", { silent = true }) -- execute current file (vim or lua)
 
 -- duplicate line and lines
-vim.keymap.set("n", "<leader>p", '"0yy"0P') -- duplicate line up
-vim.keymap.set("n", "<leader>n", '"0yy"0p') -- duplicate line down
+vim.keymap.set("n", "<c-p>", '"0yy"0P') -- duplicate line up
+vim.keymap.set("n", "<c-n>", '"0yy"0p') -- duplicate line down
 
-vim.keymap.set("v", "<leader>p", '"0y"0P') -- duplicate selection up
-vim.keymap.set("v", "<leader>n", function()
+vim.keymap.set("v", "<c-p>", '"0y"0P') -- duplicate selection up
+vim.keymap.set("v", "<c-n>", function()
   local init_pos = vim.fn.line("v")
   vim.cmd([[noautocmd normal! "0ygv]])
   local esc = vim.api.nvim_replace_termcodes("<esc>", true, false, true)
@@ -307,23 +308,8 @@ set pumblend=15
 xnoremap K :<C-u>silent! '<,'>move-2<CR>gv=gv
 xnoremap J :<C-u>silent! '<,'>move'>+<CR>gv=gv
 
-if &term =~ '^xterm'
-  " enter vim
-  autocmd VimEnter * silent !echo -ne "\e[3 q"
-  " oherwise
-  let &t_EI .= "\<Esc>[3 q"
-  " insert mode
-  let &t_SI .= "\<Esc>[5 q"
-  " 1 or 0 -> blinking block
-  " 2 -> solid block
-  " 3 -> blinking underscore
-  " 4 -> solid underscore
-  " Recent versions of xterm (282 or above) also support
-  " 5 -> blinking vertical bar
-  " 6 -> solid vertical bar
-  " leave vim
-  autocmd VimLeave * silent !echo -ne "\e[5 q"
-endif
+xnoremap <up> :<C-u>silent! '<,'>move-2<CR>gv=gv
+xnoremap <down> :<C-u>silent! '<,'>move'>+<CR>gv=gv
 
 ]])
 

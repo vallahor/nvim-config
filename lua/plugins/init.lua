@@ -22,10 +22,10 @@ return {
     event = "VeryLazy",
     config = function()
       require("close_other_window")
-      vim.keymap.set({ "n", "v" }, "<c-s-h>", "<cmd>lua Close_left()<CR>", { silent = true })
-      vim.keymap.set({ "n", "v" }, "<c-s-j>", "<cmd>lua Close_down()<CR>", { silent = true })
-      vim.keymap.set({ "n", "v" }, "<c-s-k>", "<cmd>lua Close_up()<CR>", { silent = true })
-      vim.keymap.set({ "n", "v" }, "<c-s-l>", "<cmd>lua Close_right()<CR>", { silent = true })
+      vim.keymap.set({ "n", "v" }, "<c-a-left>", "<cmd>lua Close_left()<CR>", { silent = true })
+      vim.keymap.set({ "n", "v" }, "<c-a-down>", "<cmd>lua Close_down()<CR>", { silent = true })
+      vim.keymap.set({ "n", "v" }, "<c-a-up>", "<cmd>lua Close_up()<CR>", { silent = true })
+      vim.keymap.set({ "n", "v" }, "<c-a-right>", "<cmd>lua Close_right()<CR>", { silent = true })
     end,
   },
   {
