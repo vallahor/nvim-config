@@ -22,7 +22,7 @@ require("lazy").setup("plugins", {
 -- SETTINGS --
 
 -- vim.opt.guifont = { "JetBrains Mono:h12" }
-vim.opt.guifont = { "JetBrains Mono:h11" }
+vim.opt.guifont = { "JetBrainsMono Nerd Font:h11" }
 vim.opt.shiftwidth = 4
 vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
@@ -55,9 +55,8 @@ vim.opt.writebackup = false
 vim.opt.gdefault = true
 vim.opt.cindent = true
 vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
--- vim.opt.timeoutlen = 200 -- @check why I'm using that timeoutlen (maybe jk kj escaping thing)
-vim.opt.ttimeoutlen = 50
-vim.opt.updatetime = 100
+vim.opt.timeoutlen = 500
+vim.opt.ttimeoutlen = 10
 vim.opt.guicursor = "i-ci:block-iCursor"
 vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
 
@@ -81,14 +80,14 @@ vim.g.user_emmet_install_global = 0
 
 -- work around on python default configs
 -- check why in the other project indents are a complete mess
--- vim.g.python_indent = {
---   disable_parentheses_indenting = false,
---   closed_paren_align_last_line = false,
---   searchpair_timeout = 150,
---   continue = 4,
---   open_paren = 4,
---   nested_paren = 4,
--- }
+vim.g.python_indent = {
+  disable_parentheses_indenting = false,
+  closed_paren_align_last_line = false,
+  searchpair_timeout = 150,
+  continue = 4,
+  open_paren = 4,
+  nested_paren = 4,
+}
 
 -- MAPPING --
 
@@ -96,6 +95,7 @@ vim.g.user_emmet_install_global = 0
 vim.keymap.set("n", "<esc>", "<cmd>nohl<cr><esc>", { silent = true }) -- nohighlight
 
 vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>", { silent = true }) -- save file
+vim.keymap.set({ "n", "v" }, "d<enter>", "<cmd>w!<CR><esc>", { silent = true }) -- save file
 
 vim.keymap.set("n", "Y", "yg$") -- yank to end of line considering line wrap
 
@@ -188,8 +188,8 @@ vim.keymap.set("n", "<f3>", ":Inspect<CR>") -- inspect current token treesitter
 vim.keymap.set("n", "<f2>", ":InspectTree<CR>") -- inspect current token treesitter
 
 -- move lines @note: the visual ones are bellow
-vim.keymap.set("n", "<", "<<") -- indent left
-vim.keymap.set("n", ">", ">>") -- indent right
+vim.keymap.set("n", "<", "<<", { nowait = true, remap = true }) -- indent left
+vim.keymap.set("n", ">", ">>", { nowait = true, remap = true }) -- indent right
 
 vim.api.nvim_create_autocmd("FocusGained", {
   pattern = "*",
@@ -314,7 +314,8 @@ xnoremap <down> :<C-u>silent! '<,'>move'>+<CR>gv=gv
 ]])
 
 if vim.g.neovide then
-  vim.g.neovide_cursor_animation_length = 0.0
+  vim.g.neovide_cursor_animation_length = 0
+  vim.g.neovide_scroll_animation_length = 0
   vim.g.neovide_cursor_trail_size = 0.0
 end
 

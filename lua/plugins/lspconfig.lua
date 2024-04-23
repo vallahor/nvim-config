@@ -3,8 +3,9 @@ return {
   event = { "BufReadPre", "BufNewFile" },
   config = function()
     local on_attach = function(client, bufnr)
-      vim.keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", { buffer = bufnr, silent = true })
-      vim.keymap.set("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>", { buffer = bufnr, silent = true })
+      vim.keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>zz", { buffer = bufnr, silent = true })
+      vim.keymap.set("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>zz", { buffer = bufnr, silent = true })
+      vim.keymap.set("n", "<a-y>", vim.diagnostic.open_float, { buffer = bufnr, silent = true })
 
       vim.keymap.set("n", "K", vim.lsp.buf.hover, { buffer = bufnr })
       vim.keymap.set("n", "<c-a>", vim.lsp.buf.code_action, { buffer = bufnr })
@@ -27,7 +28,7 @@ return {
 
     -- https://www.mitchellhanberg.com/modern-format-on-save-in-neovim/
     vim.api.nvim_create_autocmd("LspAttach", {
-      pattern = { "*.odin", "*.*ex", "*.exs" },
+      pattern = { "*.odin", "*.zig", "*.*ex", "*.exs" },
       group = vim.api.nvim_create_augroup("lsp", { clear = true }),
       callback = function(args)
         vim.api.nvim_create_autocmd("BufWritePre", {
@@ -142,11 +143,15 @@ return {
       on_attach = on_attach,
     })
 
+    lspconfig.zls.setup({
+      on_attach = on_attach,
+    })
+
     lspconfig.gopls.setup({
       on_attach = on_attach,
     })
     vim.api.nvim_create_autocmd("BufWritePre", {
-      pattern = "*.go",
+      pattern = { "*.go", "*.templ" },
       callback = function()
         local params = vim.lsp.util.make_range_params()
         params.context = { only = { "source.organizeImports" } }

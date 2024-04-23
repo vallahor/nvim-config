@@ -4,6 +4,10 @@
  "=>"
 ] @operator
 
+[
+ "|"
+] @punctuation.bracket
+
 ;; that can be inferred because of the zig conventions
 (
  [

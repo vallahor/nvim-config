@@ -17,6 +17,7 @@ return {
         "cpp",
         "zig",
         "rust",
+        "html",
         "markdown",
         "markdown_inline",
         "mermaid",
