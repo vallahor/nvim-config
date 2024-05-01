@@ -14,6 +14,7 @@ return {
         "vim",
         "vimdoc",
         "c",
+        "c_sharp",
         "cpp",
         "zig",
         "rust",
