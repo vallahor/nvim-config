@@ -52,4 +52,18 @@ return {
       ]])
     end,
   },
+  {
+    "Hoffs/omnisharp-extended-lsp.nvim",
+  },
+  {
+    "habamax/vim-godot",
+    event = "BufEnter *.gd",
+    config = function()
+      vim.cmd([[
+        setlocal tabstop=4
+        setlocal shiftwidth=4
+        setlocal indentexpr=
+      ]])
+    end,
+  },
 }

@@ -105,11 +105,19 @@ return {
         })
       end
 
-      vim.keymap.set("n", "<bs>", "<Plug>(cokeline-focus-prev)", { silent = true })
-      vim.keymap.set("n", "<del>", "<Plug>(cokeline-focus-next)", { silent = true })
-      -- Re-order to previous/next
-      vim.keymap.set("n", "<a-bs>", "<Plug>(cokeline-switch-prev)", { silent = true })
-      vim.keymap.set("n", "<a-del>", "<Plug>(cokeline-switch-next)", { silent = true })
+      if vim.g.skeletyl then
+        vim.keymap.set("n", "<home>", "<Plug>(cokeline-focus-prev)", { silent = true })
+        vim.keymap.set("n", "<end>", "<Plug>(cokeline-focus-next)", { silent = true })
+        -- Re-order to previous/next
+        vim.keymap.set("n", "<c-home>", "<Plug>(cokeline-switch-prev)", { silent = true })
+        vim.keymap.set("n", "<c-end>", "<Plug>(cokeline-switch-next)", { silent = true })
+      else
+        vim.keymap.set("n", "<c-,>", "<Plug>(cokeline-focus-prev)", { silent = true })
+        vim.keymap.set("n", "<c-.>", "<Plug>(cokeline-focus-next)", { silent = true })
+        -- Re-order to previous/next
+        vim.keymap.set("n", "<a-,>", "<Plug>(cokeline-switch-prev)", { silent = true })
+        vim.keymap.set("n", "<a-.>", "<Plug>(cokeline-switch-next)", { silent = true })
+      end
     end,
   },
 }

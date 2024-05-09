@@ -151,6 +151,20 @@ return {
       on_attach = on_attach,
     })
 
+    lspconfig.gdscript.setup({
+      on_attach = on_attach,
+      cmd = { "ncat", "localhost", "6005" },
+    })
+
+    -- local pid = vim.fn.getpid()
+    -- lspconfig.omnisharp.setup({
+    --   cmd = { "C:/apps/omnisharp/OmniSharp.exe", "--languageserver", "--hostPID", tostring(pid) },
+    --   on_attach = on_attach,
+    --   handlers = {
+    --     ["textDocument/definition"] = require("omnisharp_extended").definition_handler,
+    --   },
+    -- })
+
     lspconfig.gopls.setup({
       on_attach = on_attach,
     })
