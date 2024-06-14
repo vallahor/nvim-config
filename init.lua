@@ -23,7 +23,9 @@ require("lazy").setup("plugins", {
 -- SETTINGS --
 
 -- vim.opt.guifont = { "JetBrains Mono:h12" }
-vim.opt.guifont = { "JetBrainsMono Nerd Font:h11" }
+-- vim.opt.guifont = { "JetBrainsMono Nerd Font:h11" }
+vim.opt.guifont = { "JetBrainsMonoNL Nerd Font:h11" }
+-- vim.opt.guifont = { "GeistMono NF:h11.5" }
 vim.opt.shiftwidth = 4
 vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
@@ -57,7 +59,7 @@ vim.opt.gdefault = true
 vim.opt.cindent = true
 -- vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
 -- vim.opt.cino:append("L0,g0,l1,t0,w1,w4,m1")
-vim.opt.timeoutlen = 500
+vim.opt.timeoutlen = 200
 vim.opt.ttimeoutlen = 10
 vim.opt.guicursor = "i-ci:block-iCursor"
 vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
@@ -98,6 +100,9 @@ vim.keymap.set("n", "<esc>", "<cmd>nohl<cr><esc>", { silent = true }) -- nohighl
 
 vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>", { silent = true }) -- save file
 -- vim.keymap.set({ "n", "v" }, "d<enter>", "<cmd>w!<CR><esc>", { silent = true }) -- save file
+
+vim.keymap.set("i", "<c-enter>", "<c-o>o", { silent = true }) -- save file
+vim.keymap.set("i", "<s-enter>", "<c-o>O", { silent = true }) -- save file
 
 vim.keymap.set("n", "Y", "yg$") -- yank to end of line considering line wrap
 
@@ -196,6 +201,7 @@ end
 -- vim.keymap.set("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
 vim.keymap.set("n", "<f4>", "<cmd>:e $MYVIMRC<CR>", { silent = true }) -- open config file (vimrc or init.lua)
 vim.keymap.set("n", "<f5>", "<cmd>so %<CR>", { silent = true }) -- execute current file (vim or lua)
+vim.keymap.set("n", "<f6>", "<cmd>echo wordcount().words<CR>", { silent = true }) -- execute current file (vim or lua)
 
 -- duplicate line and lines
 vim.keymap.set("n", "<c-p>", '"0yy"0P') -- duplicate line up
@@ -231,9 +237,18 @@ vim.api.nvim_create_autocmd("FocusGained", {
 vim.api.nvim_create_autocmd("BufEnter", {
   pattern = { "*.vue", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.html", "*.css", "*.lua" },
   callback = function()
-    vim.opt_local.shiftwidth = 2
-    vim.opt_local.tabstop = 2
-    -- vim.opt_local.wrap = true
+    vim.api.nvim_create_autocmd("BufEnter", {
+      pattern = "*.html",
+      callback = function(opts)
+        if vim.bo[opts.buf].filetype == "htmldjango" then
+          vim.opt_local.shiftwidth = 4
+          vim.opt_local.tabstop = 4
+        else
+          vim.opt_local.shiftwidth = 2
+          vim.opt_local.tabstop = 2
+        end
+      end,
+    })
   end,
 })
 
@@ -247,8 +262,8 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
       vim.keymap.set({ "n", "v", "x" }, "]", "}", { nowait = true, buffer = true }) -- paragraph down
     end
     -- move indentation
-    vim.keymap.set("v", "<", "<gv", { nowait = true, buffer = true, remap = true }) -- indent left in visual mode
-    vim.keymap.set("v", ">", ">gv", { nowait = true, buffer = true, remap = true }) -- indent right in visual mode
+    vim.keymap.set({ "v", "x" }, "<", "<gv", { nowait = true, buffer = true, remap = true }) -- indent left in visual mode
+    vim.keymap.set({ "v", "x" }, ">", ">gv", { nowait = true, buffer = true, remap = true }) -- indent right in visual mode
   end,
 })
 

@@ -23,6 +23,7 @@ return {
         "zig",
         "rust",
         "html",
+        "htmldjango",
         "markdown",
         "markdown_inline",
         "mermaid",
@@ -35,9 +36,13 @@ return {
         "javascript",
         "odin",
         "tsx",
+        "jsdoc",
         "sql",
         "yaml",
         "dockerfile",
+        "elixir",
+        "heex",
+        "eex",
       },
       highlight = {
         enable = true,
@@ -45,7 +50,7 @@ return {
       indent = {
         enable = true,
         -- disable = { "python", "rust", "cpp", "go", "odin"},
-        disable = { "python", "rust", "cpp", "go", "odin" },
+        disable = { "python", "htmldjango", "rust", "cpp", "go", "odin" },
       },
       incremental_selection = {
         enable = true,

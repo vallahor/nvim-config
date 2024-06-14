@@ -7,8 +7,21 @@ return {
 
       vim.api.nvim_create_autocmd("BufWritePre", { pattern = "*.gd", command = ":Neoformat gdformat" })
 
+      vim.api.nvim_create_autocmd("BufWritePre", { pattern = "*.py", command = ":Neoformat" })
+
       vim.api.nvim_create_autocmd("BufWritePre", {
-        pattern = { "*.vue", "*.ts", "*.tsx", "*.js", "*.jsx", "*.html", "*.css", "*.scss", "*.json" },
+        pattern = "*.html",
+        callback = function(opts)
+          if vim.bo[opts.buf].filetype == "htmldjango" then
+            vim.cmd([[Neoformat djlint]])
+          else
+            vim.cmd([[Neoformat prettierd]])
+          end
+        end,
+      })
+
+      vim.api.nvim_create_autocmd("BufWritePre", {
+        pattern = { "*.vue", "*.ts", "*.tsx", "*.js", "*.jsx", "*.css", "*.scss", "*.json" },
         command = ":Neoformat prettierd",
       })
     end,

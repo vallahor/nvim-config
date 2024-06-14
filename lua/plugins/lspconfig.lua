@@ -76,8 +76,17 @@ return {
       end,
     })
 
-    lspconfig.ruff_lsp.setup({
+    lspconfig.pyright.setup({
       on_attach = on_attach,
+      settings = {
+        python = {
+          analysis = {
+            typeCheckingMode = "off",
+            autoSearchPaths = true,
+            useLibraryCodeForTypes = true,
+          },
+        },
+      },
     })
 
     lspconfig.html.setup({
@@ -104,13 +113,6 @@ return {
     lspconfig.rust_analyzer.setup({
       on_attach = on_attach,
     })
-
-    -- vim.api.nvim_create_autocmd("BufWritePre", {
-    --   pattern = "*.odin",
-    --   callback = function()
-    --     vim.lsp.buf.format({ async = false })
-    --   end,
-    -- })
 
     lspconfig.ols.setup({
       on_attach = on_attach,
