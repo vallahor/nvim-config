@@ -89,7 +89,6 @@ vim.wo.wrap = false
 vim.bo.autoread = true
 vim.bo.copyindent = true
 vim.bo.grepprg = "rg"
-vim.bo.swapfile = false
 
 vim.g.user_emmet_install_global = 0
 
@@ -350,6 +349,8 @@ syntax on
 
 " @windows: nextjs and sveltkit folder name pattern
 set isfname+=(
+
+set noswapfile
 
 " visual mode - paste without copying
 vnoremap <expr> p 'pgv"'.v:register.'y`>'
