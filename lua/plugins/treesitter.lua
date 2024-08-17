@@ -15,9 +15,6 @@ return {
         "vimdoc",
         "c",
         "c_sharp",
-        "gdscript",
-        "gdshader",
-        "godot_resource",
         "cpp",
         "css",
         "zig",
@@ -48,7 +45,7 @@ return {
         enable = true,
       },
       indent = {
-        enable = true,
+        enable = false,
         -- disable = { "python", "rust", "cpp", "go", "odin"},
         disable = { "python", "htmldjango", "rust", "cpp", "go", "odin" },
       },
@@ -64,18 +61,14 @@ return {
       endwise = {
         enable = true,
       },
-      autotag = {
-        enable = true,
-        enable_close_on_slash = false,
-      },
     },
     config = function(_, opts)
       require("nvim-treesitter.install").compilers = { "clang" }
       require("nvim-treesitter.configs").setup(opts)
 
       vim.cmd([[
-                autocmd BufRead *.scm set filetype=query
-            ]])
+          autocmd BufRead *.scm set filetype=query
+      ]])
     end,
   },
 }

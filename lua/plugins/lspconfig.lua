@@ -28,7 +28,7 @@ return {
 
     -- https://www.mitchellhanberg.com/modern-format-on-save-in-neovim/
     vim.api.nvim_create_autocmd("LspAttach", {
-      pattern = { "*.odin", "*.zig", "*.cs", "*.*ex", "*.exs" },
+      pattern = { "*.odin", "*.zig", "*.cs", "*.ex", "*.exs", "*.heex" },
       group = vim.api.nvim_create_augroup("lsp", { clear = true }),
       callback = function(args)
         vim.api.nvim_create_autocmd("BufWritePre", {
@@ -93,17 +93,29 @@ return {
       on_attach = on_attach,
     })
 
-    lspconfig.htmx.setup({
-      on_attach = on_attach,
-      filetypes = { "html", "templ" },
-    })
-
     lspconfig.tsserver.setup({
       on_attach = on_attach,
     })
 
     lspconfig.tailwindcss.setup({
       on_attach = on_attach,
+      filetypes = { "html", "elixir", "eelixir", "heex", "htmldjango" },
+      init_options = {
+        userLanguages = {
+          elixir = "html-eex",
+          eelixir = "html-eex",
+          heex = "html-eex",
+        },
+      },
+      settings = {
+        tailwindCSS = {
+          experimental = {
+            classRegex = {
+              'class[:]\\s*"([^"]*)"',
+            },
+          },
+        },
+      },
     })
 
     lspconfig.clangd.setup({
@@ -128,7 +140,6 @@ return {
       settings = {
         elixirLS = {
           dialyzerEnabled = false,
-          fetchDeps = false,
         },
       },
     })

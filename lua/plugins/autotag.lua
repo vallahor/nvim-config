@@ -2,6 +2,8 @@ return {
   "windwp/nvim-ts-autotag",
   config = function()
     require("nvim-ts-autotag").setup({
+      enable = true,
+      lazy = true,
       filetypes = {
         "html",
         "javascript",
@@ -20,8 +22,10 @@ return {
         "glimmer",
         "handlebars",
         "hbs",
-        "heex",
         "elixir",
+        "heex",
+        "eex",
+        "djangohtml",
       },
     })
   end,

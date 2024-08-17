@@ -22,9 +22,10 @@ require("lazy").setup("plugins", {
 
 -- SETTINGS --
 
--- vim.opt.guifont = { "JetBrains Mono:h12" }
+vim.opt.guifont = { "JetBrains Mono NL:h11" }
+-- vim.opt.guifont = { "JetBrains Mono NL:h10.5" }
 -- vim.opt.guifont = { "JetBrainsMono Nerd Font:h11" }
-vim.opt.guifont = { "JetBrainsMonoNL Nerd Font:h11" }
+-- vim.opt.guifont = { "JetBrainsMonoNL Nerd Font:h11" }
 -- vim.opt.guifont = { "GeistMono NF:h11.5" }
 vim.opt.shiftwidth = 4
 vim.opt.tabstop = 4
@@ -64,11 +65,21 @@ vim.opt.ttimeoutlen = 10
 vim.opt.guicursor = "i-ci:block-iCursor"
 vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
 
-vim.opt.linespace = 2
+-- vim.opt.linespace = 2
 
 vim.opt.cmdheight = 0
 vim.opt.laststatus = 2
 vim.opt.showcmdloc = "statusline"
+vim.opt.statusline = " %f %m%=%S %l "
+-- vim.opt.winbar = " %f %m%=%l "
+
+-- vim.cmd([[
+--   set laststatus=0
+--   hi! HorSplit guifg=#382536 guibg=#121112
+--   hi! link StatusLine HorSplit
+--   hi! link StatusLineNC HorSplit
+--   set statusline=%{repeat('─',winwidth('.'))}
+-- ]])
 
 vim.wo.signcolumn = "no"
 vim.wo.relativenumber = true
@@ -93,6 +104,30 @@ vim.g.python_indent = {
   nested_paren = 4,
 }
 
+-- VM --
+vim.g.VM_theme = "iceblue"
+vim.g.VM_default_mappings = 0
+vim.g.VM_silent_exit = 1
+vim.g.VM_custom_remaps = {
+  [")"] = "$",
+  ["("] = "0",
+}
+vim.g.VM_maps = {
+  ["Find Under"] = "<c-u>",
+  ["Find Subword Under"] = "<c-u>",
+  ["Select All"] = "<c-s-u>",
+  ["Add Cursor Down"] = "<c-j>",
+  ["Add Cursor Up"] = "<c-k>",
+  ["Switch Mode"] = "<tab>",
+  ["Align"] = "<c-a>",
+  ["Find Next"] = "]",
+  ["Find Prev"] = "[",
+  ["Goto Next"] = "}",
+  ["Goto Prev"] = "{",
+  ["Skip Region"] = "+",
+  ["Remove Region"] = "-",
+}
+-- let g:VM_maps["Exit"]               = '<C-j>'   " quit VM
 -- MAPPING --
 
 -- vim.keymap.set("n", "<leader><leader>", "<cmd>nohl<cr><esc>")
@@ -111,6 +146,9 @@ vim.keymap.set("n", "<c-o>", "<c-o>zz") -- center <c-o>
 
 vim.keymap.set({ "n", "v" }, "H", "<c-u>zz", { noremap = true }) -- page up
 vim.keymap.set({ "n", "v" }, "L", "<c-d>zz", { noremap = true }) -- page down
+
+vim.keymap.set("i", "<PageUp>", "<nop>", { noremap = true }) -- page up
+vim.keymap.set("i", "<PageDown>", "<nop>", { noremap = true }) -- page down
 
 if vim.g.skeletyl then
   vim.keymap.set("n", "\\", "<cmd>clo<cr>", { silent = true }) -- close current window
@@ -189,6 +227,7 @@ local beginning_of_the_line = function()
 end
 
 if vim.g.skeletyl then
+  vim.keymap.set("i", "<home>", beginning_of_the_line) -- go to beginning of the line
   vim.keymap.set({ "n", "v" }, "(", beginning_of_the_line) -- go to beginning of the line
   vim.keymap.set("n", ")", "$") -- go to end of line
   vim.keymap.set("v", ")", "$h") -- go to end of line (for some reason it's goes to wrong place in visual mode)
@@ -199,9 +238,9 @@ else
 end
 
 -- vim.keymap.set("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
-vim.keymap.set("n", "<f4>", "<cmd>:e $MYVIMRC<CR>", { silent = true }) -- open config file (vimrc or init.lua)
+vim.keymap.set("n", "<f10>", "<cmd>:e $MYVIMRC<CR>", { silent = true }) -- open config file (vimrc or init.lua)
 vim.keymap.set("n", "<f5>", "<cmd>so %<CR>", { silent = true }) -- execute current file (vim or lua)
-vim.keymap.set("n", "<f6>", "<cmd>echo wordcount().words<CR>", { silent = true }) -- execute current file (vim or lua)
+vim.keymap.set("n", "<f11>", "<cmd>echo wordcount().words<CR>", { silent = true }) -- execute current file (vim or lua)
 
 -- duplicate line and lines
 vim.keymap.set("n", "<c-p>", '"0yy"0P') -- duplicate line up
@@ -222,8 +261,8 @@ end) -- duplicate selection down
 
 vim.keymap.set("n", "_", "<C-^>") -- back to last buffer
 
-vim.keymap.set("n", "<f3>", ":Inspect<CR>") -- inspect current token treesitter
-vim.keymap.set("n", "<f2>", ":InspectTree<CR>") -- inspect current token treesitter
+vim.keymap.set("n", "<f1>", ":Inspect<CR>") -- inspect current token treesitter
+vim.keymap.set("n", "<f6>", ":InspectTree<CR>") -- inspect current token treesitter
 
 -- move lines @note: the visual ones are bellow
 vim.keymap.set("n", "<", "<<", { nowait = true, remap = true }) -- indent left
@@ -234,21 +273,24 @@ vim.api.nvim_create_autocmd("FocusGained", {
   command = "silent! checktime",
 })
 
+-- vim.api.nvim_create_autocmd("BufEnter", {
+--   pattern = "*.html",
+--   callback = function(opts)
+--     if vim.bo[opts.buf].filetype == "htmldjango" then
+--       vim.opt_local.shiftwidth = 4
+--       vim.opt_local.tabstop = 4
+--     else
+--       vim.opt_local.shiftwidth = 2
+--       vim.opt_local.tabstop = 2
+--     end
+--   end,
+-- })
+
 vim.api.nvim_create_autocmd("BufEnter", {
-  pattern = { "*.vue", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.html", "*.css", "*.lua" },
+  pattern = { "*.*eex", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.html", "*.css", "*.lua" },
   callback = function()
-    vim.api.nvim_create_autocmd("BufEnter", {
-      pattern = "*.html",
-      callback = function(opts)
-        if vim.bo[opts.buf].filetype == "htmldjango" then
-          vim.opt_local.shiftwidth = 4
-          vim.opt_local.tabstop = 4
-        else
-          vim.opt_local.shiftwidth = 2
-          vim.opt_local.tabstop = 2
-        end
-      end,
-    })
+    vim.opt_local.shiftwidth = 2
+    vim.opt_local.tabstop = 2
   end,
 })
 

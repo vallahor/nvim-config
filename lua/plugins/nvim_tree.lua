@@ -29,7 +29,7 @@ return {
         update_cwd = false,
       },
       view = {
-        width = 30,
+        -- width = 35,
       },
       git = {
         ignore = false,

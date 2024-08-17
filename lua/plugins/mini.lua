@@ -32,53 +32,55 @@ return {
           autocmd FileType odin setlocal commentstring=//\ %s
       ]])
 
-      -- Statusline
-      local MiniStatusline = require("mini.statusline")
-      local location = " L%l/%L C%c "
-      MiniStatusline.setup({
-        use_icons = false,
-        content = {
-          active = function()
-            local mode, mode_hl = MiniStatusline.section_mode({ trunc_width = 120 })
-            local venn_enabled = vim.inspect(vim.b.venn_enabled)
-            local venn_mode = ""
-            if venn_enabled ~= "nil" then
-              venn_mode = "Venn Active"
-            end
+      -- -- Statusline
+      -- local MiniStatusline = require("mini.statusline")
+      -- local location = " L%l/%L C%c "
+      -- MiniStatusline.setup({
+      --   use_icons = false,
+      --   content = {
+      --     active = function()
+      --       local mode, mode_hl = MiniStatusline.section_mode({ trunc_width = 120 })
+      --       local venn_enabled = vim.inspect(vim.b.venn_enabled)
+      --       local venn_mode = ""
+      --       if venn_enabled ~= "nil" then
+      --         venn_mode = "Venn Active"
+      --       end
 
-            local filename = MiniStatusline.section_filename({ trunc_width = 140 })
+      --       local filename = MiniStatusline.section_filename({ trunc_width = 200 })
 
-            return MiniStatusline.combine_groups({
-              { hl = mode_hl, strings = { mode } },
-              "%<",
-              { hl = "MiniStatuslineFilename", strings = { filename } },
-              "%=",
-              { strings = { "%S" } },
-              { strings = { venn_mode } },
-              { strings = { vim.bo.filetype } },
-              { hl = mode_hl, strings = { location } },
-            })
-          end,
-          inactive = function()
-            local filename = MiniStatusline.section_filename({ trunc_width = 140 })
+      --       return MiniStatusline.combine_groups({
+      --         { hl = mode_hl, strings = { mode } },
+      --         "%<",
+      --         { hl = "MiniStatuslineFilename", strings = { filename } },
+      --         "%=",
+      --         { strings = { "%S" } },
+      --         { strings = { venn_mode } },
+      --         { strings = { vim.bo.filetype } },
+      --         { hl = mode_hl, strings = { location } },
+      --       })
+      --     end,
+      --     inactive = function()
+      --       local filename = MiniStatusline.section_filename({ trunc_width = 200 })
 
-            return MiniStatusline.combine_groups({
-              "%<",
-              { hl = "MiniStatuslineFilename", strings = { filename } },
-              "%=",
-              { strings = { location } },
-            })
-          end,
-        },
-      })
+      --       return MiniStatusline.combine_groups({
+      --         "%<",
+      --         { hl = "MiniStatuslineFilename", strings = { filename } },
+      --         "%=",
+      --         { strings = { location } },
+      --       })
+      --     end,
+      --   },
+      -- })
 
       -- Buf Remove
       require("mini.bufremove").setup()
 
-      vim.keymap.set("n", "<c-w>", "<cmd>lua MiniBufremove.delete(0, false)<CR>", { silent = true })
       if vim.g.skeletyl then
-        vim.keymap.set("n", "<c-s-w>", "<cmd>lua MiniBufremove.delete(0, true)<CR>", { silent = true })
+        vim.keymap.set("n", "<c-w>", "<cmd>lua MiniBufremove.delete(0, false)<CR>", { silent = true })
+        vim.keymap.set("n", "<f3>", "<cmd>lua MiniBufremove.delete(0, false)<CR>", { silent = true })
+        vim.keymap.set("n", "<f12>", "<cmd>lua MiniBufremove.delete(0, true)<CR>", { silent = true })
       else
+        vim.keymap.set("n", "<c-w>", "<cmd>lua MiniBufremove.delete(0, false)<CR>", { silent = true })
         vim.keymap.set("n", "<a-w>", "<cmd>lua MiniBufremove.delete(0, true)<CR>", { silent = true })
       end
 

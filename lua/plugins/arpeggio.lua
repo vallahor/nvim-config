@@ -1,5 +1,5 @@
 -- if not vim.g.skeletyl then
-if true then
+if false then
   return {
     {
       "kana/vim-arpeggio",

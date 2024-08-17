@@ -20,9 +20,10 @@ return {
               -- ["<c-space>"] = actions.close,
               ["jk"] = actions.close,
               ["kj"] = actions.close,
+              ["<esc>"] = actions.close,
               -- ["fd"] = actions.close,
               -- ["df"] = actions.close,
-              ["<c-up>"] = actions.delete_buffer, -- delete_buffer delete window too
+              ["<c-w>"] = actions.delete_buffer, -- delete_buffer delete window too
             },
             n = {
               ["<esc>"] = actions.close,
