@@ -19,6 +19,8 @@ return {
         "css",
         "zig",
         "rust",
+        "glsl",
+        "hlsl",
         "html",
         "htmldjango",
         "markdown",

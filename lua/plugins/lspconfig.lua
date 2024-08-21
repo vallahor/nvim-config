@@ -3,18 +3,15 @@ return {
   event = { "BufReadPre", "BufNewFile" },
   config = function()
     local on_attach = function(client, bufnr)
-      vim.keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>zz", { buffer = bufnr, silent = true })
-      vim.keymap.set("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>zz", { buffer = bufnr, silent = true })
-      vim.keymap.set("n", "<a-y>", vim.diagnostic.open_float, { buffer = bufnr, silent = true })
+      -- vim.keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>zz", { buffer = bufnr, silent = true })
+      -- vim.keymap.set("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>zz", { buffer = bufnr, silent = true })
+      -- vim.keymap.set("n", "`", "<cmd>lua vim.diagnostic.open_float()<cr>", { buffer = bufnr, silent = true })
 
-      vim.keymap.set("n", "K", vim.lsp.buf.hover, { buffer = bufnr })
-      vim.keymap.set("n", "<c-a>", vim.lsp.buf.code_action, { buffer = bufnr })
+      -- vim.keymap.set("n", "K", vim.lsp.buf.hover, { buffer = bufnr })
 
-      vim.keymap.set("n", "<leader>r", vim.lsp.buf.rename, { buffer = bufnr })
-      -- vim.keymap.set("n", "<c-3>", "<cmd>lua require('telescope.builtin').lsp_references()<cr>")
-      -- vim.keymap.set("n", "<c-1>", "<cmd>lua require('telescope.builtin').lsp_implementations()<cr>")
-      -- vim.keymap.set("n", "<a-[>", "<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>", { buffer = bufnr, silent = true })
-      -- vim.keymap.set("n", "<a-]>", "<cmd>lua vim.lsp.diagnostic.goto_next()<CR>", { buffer = bufnr, silent = true })
+      -- vim.keymap.set("n", "<leader>r", vim.lsp.buf.rename, { buffer = bufnr })
+      -- vim.keymap.set("n", "<c-,>", "<cmd>lua vim.lsp.diagnostic.goto_prev()<cr>", { buffer = bufnr, silent = true })
+      -- vim.keymap.set("n", "<c-.>", "<cmd>lua vim.lsp.diagnostic.goto_next()<cr>", { buffer = bufnr, silent = true })
 
       client.server_capabilities.semanticTokensProvider = nil
 
@@ -53,27 +50,33 @@ return {
     lspconfig.lua_ls.setup({
       on_init = function(client)
         local path = client.workspace_folders[1].name
-        if not vim.loop.fs_stat(path .. "/.luarc.json") and not vim.loop.fs_stat(path .. "/.luarc.jsonc") then
-          client.config.settings = vim.tbl_deep_extend("force", client.config.settings, {
-            Lua = {
-              runtime = {
-                version = "LuaJIT",
-              },
-              workspace = {
-                checkThirdParty = false,
-                library = {
-                  vim.env.VIMRUNTIME,
-                  -- "${3rd}/luv/library"
-                  -- "${3rd}/busted/library",
-                },
-              },
-            },
-          })
-
-          client.notify("workspace/didChangeConfiguration", { settings = client.config.settings })
+        if vim.uv.fs_stat(path .. "/.luarc.json") or vim.uv.fs_stat(path .. "/.luarc.jsonc") then
+          return
         end
-        return true
+
+        client.config.settings.Lua = vim.tbl_deep_extend("force", client.config.settings.Lua, {
+          runtime = {
+            -- Tell the language server which version of Lua you're using
+            -- (most likely LuaJIT in the case of Neovim)
+            version = "LuaJIT",
+          },
+          -- Make the server aware of Neovim runtime files
+          workspace = {
+            checkThirdParty = false,
+            library = {
+              vim.env.VIMRUNTIME,
+              -- Depending on the usage, you might want to add additional paths here.
+              -- "${3rd}/luv/library"
+              -- "${3rd}/busted/library",
+            },
+            -- or pull in all of 'runtimepath'. NOTE: this is a lot slower
+            -- library = vim.api.nvim_get_runtime_file("", true)
+          },
+        })
       end,
+      settings = {
+        Lua = {},
+      },
     })
 
     lspconfig.pyright.setup({

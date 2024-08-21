@@ -1,5 +1,5 @@
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
+if not vim.uv.fs_stat(lazypath) then
   vim.fn.system({
     "git",
     "clone",
@@ -62,7 +62,7 @@ vim.opt.cindent = true
 -- vim.opt.cino:append("L0,g0,l1,t0,w1,w4,m1")
 vim.opt.timeoutlen = 200
 vim.opt.ttimeoutlen = 10
-vim.opt.guicursor = "i-ci:block-iCursor"
+-- vim.opt.guicursor = "i-ci:block-iCursor"
 vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
 
 -- vim.opt.linespace = 2
@@ -103,6 +103,8 @@ vim.g.python_indent = {
   nested_paren = 4,
 }
 
+-- MAPPING --
+
 -- VM --
 vim.g.VM_theme = "iceblue"
 vim.g.VM_default_mappings = 0
@@ -114,7 +116,7 @@ vim.g.VM_custom_remaps = {
 vim.g.VM_maps = {
   ["Find Under"] = "<c-u>",
   ["Find Subword Under"] = "<c-u>",
-  ["Select All"] = "<c-s-u>",
+  ["Select All"] = "*",
   ["Add Cursor Down"] = "<c-j>",
   ["Add Cursor Up"] = "<c-k>",
   ["Switch Mode"] = "<tab>",
@@ -126,17 +128,12 @@ vim.g.VM_maps = {
   ["Skip Region"] = "+",
   ["Remove Region"] = "-",
 }
--- let g:VM_maps["Exit"]               = '<C-j>'   " quit VM
--- MAPPING --
 
 -- vim.keymap.set("n", "<leader><leader>", "<cmd>nohl<cr><esc>")
 vim.keymap.set("n", "<esc>", "<cmd>nohl<cr><esc>", { silent = true }) -- nohighlight
 
 vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>", { silent = true }) -- save file
 -- vim.keymap.set({ "n", "v" }, "d<enter>", "<cmd>w!<CR><esc>", { silent = true }) -- save file
-
-vim.keymap.set("i", "<c-enter>", "<c-o>o", { silent = true }) -- save file
-vim.keymap.set("i", "<s-enter>", "<c-o>O", { silent = true }) -- save file
 
 vim.keymap.set("n", "Y", "yg$") -- yank to end of line considering line wrap
 
@@ -266,6 +263,16 @@ vim.keymap.set("n", "<f6>", ":InspectTree<CR>") -- inspect current token treesit
 -- move lines @note: the visual ones are bellow
 vim.keymap.set("n", "<", "<<", { nowait = true, remap = true }) -- indent left
 vim.keymap.set("n", ">", ">>", { nowait = true, remap = true }) -- indent right
+
+vim.keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>zz", { silent = true })
+vim.keymap.set("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>zz", { silent = true })
+vim.keymap.set("n", '"', "<cmd>lua vim.diagnostic.open_float()<cr>", { silent = true })
+
+vim.keymap.set("n", "K", vim.lsp.buf.hover)
+
+vim.keymap.set("n", "<leader>r", vim.lsp.buf.rename)
+vim.keymap.set("n", "<c-,>", "<cmd>lua vim.lsp.diagnostic.goto_prev()<cr>", { silent = true })
+vim.keymap.set("n", "<c-.>", "<cmd>lua vim.lsp.diagnostic.goto_next()<cr>", { silent = true })
 
 vim.api.nvim_create_autocmd("FocusGained", {
   pattern = "*",
@@ -424,6 +431,18 @@ if vim.fn.filereadable(vim.fn.getcwd() .. "/project.godot") == 1 then
   end
   vim.fn.serverstart(addr)
 end
+
+vim.diagnostic.config({
+  virtual_text = false,
+  signs = {
+    numhl = {
+      [vim.diagnostic.severity.ERROR] = "ErrorLineBg",
+      [vim.diagnostic.severity.WARN] = "WarningLineBg",
+      [vim.diagnostic.severity.INFO] = "InfoLineBg",
+      [vim.diagnostic.severity.HINT] = "HintLineBg",
+    },
+  },
+})
 
 -- windows terminal, works with others terminals
 --
