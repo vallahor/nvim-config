@@ -62,9 +62,9 @@ return {
               italic = function(buffer)
                 return buffer.is_modified
               end,
-              undercurl = function(buffer)
-                return buffer.diagnostics.errors > 0 or buffer.diagnostics.warnings > 0
-              end,
+              -- undercurl = function(buffer)
+              --   return buffer.diagnostics.errors > 0 or buffer.diagnostics.warnings > 0
+              -- end,
               fg = function(buffer)
                 if buffer.diagnostics.errors > 0 then
                   return errors_fg

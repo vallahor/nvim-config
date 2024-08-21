@@ -255,7 +255,7 @@ vim.keymap.set("v", "<c-n>", function()
   vim.cmd([[noautocmd normal! gv]])
 end) -- duplicate selection down
 
-vim.keymap.set("n", "_", "<C-^>") -- back to last buffer
+vim.keymap.set("n", '"', "<C-^>") -- back to last buffer
 
 vim.keymap.set("n", "<f1>", ":Inspect<CR>") -- inspect current token treesitter
 vim.keymap.set("n", "<f6>", ":InspectTree<CR>") -- inspect current token treesitter
@@ -266,13 +266,13 @@ vim.keymap.set("n", ">", ">>", { nowait = true, remap = true }) -- indent right
 
 vim.keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>zz", { silent = true })
 vim.keymap.set("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>zz", { silent = true })
-vim.keymap.set("n", '"', "<cmd>lua vim.diagnostic.open_float()<cr>", { silent = true })
+vim.keymap.set("n", "_", vim.diagnostic.open_float, { silent = true })
 
 vim.keymap.set("n", "K", vim.lsp.buf.hover)
 
 vim.keymap.set("n", "<leader>r", vim.lsp.buf.rename)
-vim.keymap.set("n", "<c-,>", "<cmd>lua vim.lsp.diagnostic.goto_prev()<cr>", { silent = true })
-vim.keymap.set("n", "<c-.>", "<cmd>lua vim.lsp.diagnostic.goto_next()<cr>", { silent = true })
+vim.keymap.set("n", "<c-,>", vim.diagnostic.goto_prev, { silent = true })
+vim.keymap.set("n", "<c-.>", vim.diagnostic.goto_next, { silent = true })
 
 vim.api.nvim_create_autocmd("FocusGained", {
   pattern = "*",
