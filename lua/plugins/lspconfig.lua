@@ -2,30 +2,14 @@ return {
   "neovim/nvim-lspconfig",
   event = { "BufReadPre", "BufNewFile" },
   config = function()
-    local on_attach = function(client, bufnr)
-      -- vim.keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>zz", { buffer = bufnr, silent = true })
-      -- vim.keymap.set("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>zz", { buffer = bufnr, silent = true })
-      -- vim.keymap.set("n", "`", "<cmd>lua vim.diagnostic.open_float()<cr>", { buffer = bufnr, silent = true })
-
-      -- vim.keymap.set("n", "K", vim.lsp.buf.hover, { buffer = bufnr })
-
-      -- vim.keymap.set("n", "<leader>r", vim.lsp.buf.rename, { buffer = bufnr })
-      -- vim.keymap.set("n", "<c-,>", "<cmd>lua vim.lsp.diagnostic.goto_prev()<cr>", { buffer = bufnr, silent = true })
-      -- vim.keymap.set("n", "<c-.>", "<cmd>lua vim.lsp.diagnostic.goto_next()<cr>", { buffer = bufnr, silent = true })
-
+    local on_attach = function(client, _)
       client.server_capabilities.semanticTokensProvider = nil
-
-      -- vim.api.nvim_create_autocmd("BufWritePre", {
-      --   buffer = bufnr,
-      --   callback = function()
-      --     vim.lsp.buf.format({ async = false })
-      --   end,
-      -- })
     end
 
     -- https://www.mitchellhanberg.com/modern-format-on-save-in-neovim/
     vim.api.nvim_create_autocmd("LspAttach", {
-      pattern = { "*.odin", "*.zig", "*.cs", "*.ex", "*.exs", "*.heex" },
+      -- pattern = { "*.odin", "*.zig", "*.cs", "*.ex", "*.exs", "*.heex" },
+      pattern = { "*.zig", "*.cs", "*.ex", "*.exs", "*.heex" },
       group = vim.api.nvim_create_augroup("lsp", { clear = true }),
       callback = function(args)
         vim.api.nvim_create_autocmd("BufWritePre", {

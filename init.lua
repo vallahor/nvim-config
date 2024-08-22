@@ -130,7 +130,16 @@ vim.g.VM_maps = {
 }
 
 -- vim.keymap.set("n", "<leader><leader>", "<cmd>nohl<cr><esc>")
-vim.keymap.set("n", "<esc>", "<cmd>nohl<cr><esc>", { silent = true }) -- nohighlight
+-- vim.keymap.set("n", "<esc>", "<cmd>nohl<cr><esc>", { silent = true }) -- nohighlight
+vim.keymap.set("n", "<esc>", function()
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    local config = vim.api.nvim_win_get_config(win)
+    if config.relative ~= "" then
+      vim.api.nvim_win_close(win, false)
+    end
+  end
+  vim.cmd([[nohl]])
+end, { silent = true }) -- nohighlight
 
 vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>", { silent = true }) -- save file
 -- vim.keymap.set({ "n", "v" }, "d<enter>", "<cmd>w!<CR><esc>", { silent = true }) -- save file
