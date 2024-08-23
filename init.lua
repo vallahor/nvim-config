@@ -116,7 +116,7 @@ vim.g.VM_custom_remaps = {
 vim.g.VM_maps = {
   ["Find Under"] = "<c-u>",
   ["Find Subword Under"] = "<c-u>",
-  ["Select All"] = "*",
+  ["Select All"] = "&",
   ["Add Cursor Down"] = "<c-j>",
   ["Add Cursor Up"] = "<c-k>",
   ["Switch Mode"] = "<tab>",
@@ -209,7 +209,6 @@ vim.keymap.set("c", "<c-v>", "<c-r>*") -- paste to command line mode
 vim.keymap.set("v", "v", "V") -- visual line mode
 
 vim.keymap.set({ "i", "c" }, "<c-bs>", "<c-w>") -- delete previous word
-vim.keymap.set({ "i", "c" }, "<s-bs>", "<c-w>") -- delete previous word
 
 vim.keymap.set("n", "x", '"_x') -- delete current char without copying
 vim.keymap.set("n", "<c-d>", '"_dd') -- delete line without copying
@@ -424,7 +423,6 @@ xnoremap <down> :<C-u>silent! '<,'>move'>+<CR>gv=gv
 
 " c indent
 autocmd BufWinEnter,BufEnter,BufRead *.c,*.cpp,*.h set cino=L0,g0,l1,t0,w1,(0,w4,(s,m1
-
 ]])
 
 if vim.g.neovide then
@@ -440,6 +438,11 @@ if vim.fn.filereadable(vim.fn.getcwd() .. "/project.godot") == 1 then
   end
   vim.fn.serverstart(addr)
 end
+
+vim.api.nvim_create_autocmd("DiagnosticChanged", {
+  pattern = "*",
+  command = "silent! redrawtabline",
+})
 
 vim.diagnostic.config({
   virtual_text = false,
