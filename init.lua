@@ -208,7 +208,9 @@ vim.keymap.set("c", "<c-v>", "<c-r>*") -- paste to command line mode
 
 vim.keymap.set("v", "v", "V") -- visual line mode
 
-vim.keymap.set({ "i", "c" }, "<c-bs>", "<c-w>") -- delete previous word
+-- @check spider.lua
+-- vim.keymap.set({ "i", "c" }, "<c-bs>", "<c-w>") -- delete previous word
+vim.keymap.set("c", "<c-bs>", "<c-w>") -- delete previous word
 
 vim.keymap.set("n", "x", '"_x') -- delete current char without copying
 vim.keymap.set("n", "<c-d>", '"_dd') -- delete line without copying
