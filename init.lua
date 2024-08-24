@@ -43,7 +43,8 @@ vim.opt.wildmode = "longest,list:longest,full"
 vim.opt.clipboard = "unnamedplus"
 vim.opt.encoding = "utf8"
 vim.opt.pumheight = 10
-vim.opt.switchbuf = "useopen,split"
+-- vim.opt.switchbuf = "useopen,split"
+vim.opt.switchbuf = "uselast,useopen"
 vim.opt.magic = true
 vim.opt.lazyredraw = true
 vim.opt.smartcase = true
@@ -457,7 +458,11 @@ vim.diagnostic.config({
     },
   },
 })
-
+-- close quickfix menu after selecting choice
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "qf" },
+  command = [[nnoremap <buffer> <CR> <CR>:cclose<CR>]],
+})
 -- windows terminal, works with others terminals
 --
 -- {
