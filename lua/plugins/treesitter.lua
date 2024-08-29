@@ -36,6 +36,7 @@ return {
         "odin",
         "tsx",
         "jsdoc",
+        "svelte",
         "sql",
         "yaml",
         "dockerfile",

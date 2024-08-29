@@ -22,18 +22,19 @@ return {
       -- increase the window width by when you hit the keymap
       window_width_change_amount = 2,
       -- keymap to increase the window width
-      increase_width_keymap = "<m-=>",
+      increase_width_keymap = "<s-right>",
       -- keymap to decrease the window width
-      decrease_width_keymap = "<m-->",
+      decrease_width_keymap = "<s-left>",
       -- keymap to increase the window height
-      increase_height_keymap = "<m-+>",
+      increase_height_keymap = "<s-up>",
       -- keymap to decrease the window height
-      decrease_height_keymap = "<m-_>",
+      decrease_height_keymap = "<s-down>",
       terminals = {
         -- keymaps to open nth terminal
         { keymap = "<c-1>" },
         { keymap = "<c-2>" },
       },
     })
+    vim.keymap.set("t", "<ESC>", "<C-\\><C-n>", { noremap = true })
   end,
 }

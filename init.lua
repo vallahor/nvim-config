@@ -282,8 +282,14 @@ vim.keymap.set("n", "_", vim.diagnostic.open_float, { silent = true })
 vim.keymap.set("n", "K", vim.lsp.buf.hover)
 
 vim.keymap.set("n", "<leader>r", vim.lsp.buf.rename)
-vim.keymap.set("n", "<c-,>", vim.diagnostic.goto_prev, { silent = true })
-vim.keymap.set("n", "<c-.>", vim.diagnostic.goto_next, { silent = true })
+
+if vim.g.skeletyl then
+  vim.keymap.set("n", "<c-,>", vim.diagnostic.goto_prev, { silent = true })
+  vim.keymap.set("n", "<c-.>", vim.diagnostic.goto_next, { silent = true })
+else
+  vim.keymap.set("n", "<c-[>", vim.diagnostic.goto_prev, { silent = true })
+  vim.keymap.set("n", "<c-]>", vim.diagnostic.goto_next, { silent = true })
+end
 
 vim.api.nvim_create_autocmd("FocusGained", {
   pattern = "*",
@@ -383,7 +389,7 @@ endfun
 autocmd BufWritePre * :call TrimWhitespace()
 
 " no help
-map <f1> <nop>
+" map <f1> <nop>
 
 " highlight when yanking
 augroup highlight_yank
