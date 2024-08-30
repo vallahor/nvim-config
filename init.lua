@@ -334,14 +334,14 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
 
 if vim.opt.cmdheight:get() == 0 then
   -- show macro recording
-  vim.api.nvim_create_autocmd("RecordingEnter", {
+  vim.api.nvim_create_autocmd({ "RecordingEnter", "CmdlineEnter" }, {
     pattern = "*",
     callback = function()
       vim.opt_local.cmdheight = 1
     end,
   })
 
-  vim.api.nvim_create_autocmd("RecordingLeave", {
+  vim.api.nvim_create_autocmd({ "RecordingLeave", "CmdlineLeave" }, {
     pattern = "*",
     callback = function()
       local timer = vim.loop.new_timer()
@@ -359,7 +359,8 @@ if vim.opt.cmdheight:get() == 0 then
     pattern = "*",
     callback = function()
       vim.schedule(function()
-        vim.cmd("redraw")
+        -- vim.cmd("redraw")
+        vim.cmd("redraws")
       end)
     end,
   })
