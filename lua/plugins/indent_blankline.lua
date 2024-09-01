@@ -13,8 +13,5 @@ return {
         enabled = false,
       },
     },
-    -- config = function()
-    --   local ibl = require("ibl")
-    -- end,
   },
 }

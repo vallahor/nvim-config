@@ -32,6 +32,22 @@ return {
           autocmd FileType odin setlocal commentstring=//\ %s
       ]])
 
+      require("mini.move").setup({
+        mappings = {
+          -- Move visual selection in Visual mode. Defaults are Alt (Meta) + hjkl.
+          left = "",
+          right = "",
+          down = "<down>",
+          up = "<up>",
+
+          -- Move current line in Normal mode
+          line_left = "",
+          line_right = "",
+          line_down = "",
+          line_up = "",
+        },
+      })
+
       -- -- Statusline
       -- local MiniStatusline = require("mini.statusline")
       -- local location = " L%l/%L C%c "
@@ -90,7 +106,7 @@ return {
 
       vim.api.nvim_create_autocmd(
         "FileType",
-        { pattern = { "NvimTree" }, command = ":lua vim.b.minicursorword_disable=true" }
+        { pattern = { "NvimTree" }, command = "lua vim.b.minicursorword_disable=true" }
       )
 
       vim.cmd([[

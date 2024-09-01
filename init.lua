@@ -139,10 +139,10 @@ vim.keymap.set("n", "<esc>", function()
       vim.api.nvim_win_close(win, false)
     end
   end
-  vim.cmd([[nohl]])
+  vim.cmd.nohl()
 end, { silent = true }) -- nohighlight
 
-vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>", { silent = true }) -- save file
+vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>") -- save file
 -- vim.keymap.set({ "n", "v" }, "d<enter>", "<cmd>w!<CR><esc>", { silent = true }) -- save file
 
 vim.keymap.set("n", "Y", "yg$") -- yank to end of line considering line wrap
@@ -157,52 +157,52 @@ vim.keymap.set("i", "<PageUp>", "<nop>", { noremap = true }) -- page up
 vim.keymap.set("i", "<PageDown>", "<nop>", { noremap = true }) -- page down
 
 if vim.g.skeletyl then
-  vim.keymap.set("n", "\\", "<cmd>clo<cr>", { silent = true }) -- close current window
-  vim.keymap.set("n", "|", "<cmd>vs<cr>", { silent = true }) -- split vertical window
-  vim.keymap.set("n", "-", "<cmd>sp<cr>", { silent = true }) -- split horizontal window
+  vim.keymap.set("n", "\\", "<cmd>clo<cr>") -- close current window
+  vim.keymap.set("n", "|", "<cmd>vs<cr>") -- split vertical window
+  vim.keymap.set("n", "-", "<cmd>sp<cr>") -- split horizontal window
   vim.keymap.set("n", "<c-9>", "<c-w>o") -- close other windows
   vim.keymap.set("n", "<c-8>", "<c-w>r") -- rotate windows
 
   -- closes the current window and buffer
   -- to close the current buffer <c-w> and not the window
-  vim.keymap.set("n", "<c-7>", "<cmd>bd<cr>", { silent = true }) -- close current buffer and window
+  vim.keymap.set("n", "<c-7>", "<cmd>bd<cr>") -- close current buffer and window
 
   -- resize windows
-  vim.keymap.set("n", "<c-0>", "<cmd>wincmd =<cr>", { silent = true }) -- resize all windows
+  vim.keymap.set("n", "<c-0>", "<cmd>wincmd =<cr>") -- resize all windows
 
-  vim.keymap.set("n", "<a-s-right>", [[<cmd>vertical   resize +2<cr>]], { silent = true }) -- make the window biger   vertically
-  vim.keymap.set("n", "<a-s-left>", [[<cmd>vertical   resize -2<cr>]], { silent = true }) -- make the window smaller vertically
-  vim.keymap.set("n", "<a-s-up>", [[<cmd>horizontal resize +2<cr>]], { silent = true }) -- make the window bigger  horizontally
-  vim.keymap.set("n", "<a-s-down>", [[<cmd>horizontal resize -2<cr>]], { silent = true }) -- make the window smaller horizontally
+  vim.keymap.set("n", "<a-s-right>", [[<cmd>vertical   resize +2<cr>]]) -- make the window biger   vertically
+  vim.keymap.set("n", "<a-s-left>", [[<cmd>vertical   resize -2<cr>]]) -- make the window smaller vertically
+  vim.keymap.set("n", "<a-s-up>", [[<cmd>horizontal resize +2<cr>]]) -- make the window bigger  horizontally
+  vim.keymap.set("n", "<a-s-down>", [[<cmd>horizontal resize -2<cr>]]) -- make the window smaller horizontally
 
   -- vim.keymap.set("n", "<leader>=", "<c-w>=")
 
-  vim.keymap.set({ "n", "v" }, "<left>", "<cmd>wincmd h<cr>", { silent = true }) -- move to window left
-  vim.keymap.set({ "n", "v" }, "<down>", "<cmd>wincmd j<cr>", { silent = true }) -- move to window down
-  vim.keymap.set({ "n", "v" }, "<up>", "<cmd>wincmd k<cr>", { silent = true }) -- move to window up
-  vim.keymap.set({ "n", "v" }, "<right>", "<cmd>wincmd l<cr>", { silent = true }) -- move to window right
+  vim.keymap.set({ "n" }, "<left>", "<cmd>wincmd h<cr>") -- move to window left
+  vim.keymap.set({ "n" }, "<down>", "<cmd>wincmd j<cr>") -- move to window down
+  vim.keymap.set({ "n" }, "<up>", "<cmd>wincmd k<cr>") -- move to window up
+  vim.keymap.set({ "n" }, "<right>", "<cmd>wincmd l<cr>") -- move to window right
 else
-  vim.keymap.set("n", "<c-\\>", "<cmd>clo<cr>", { silent = true }) -- close current    window
-  vim.keymap.set("n", "<c-=>", "<cmd>vs<cr>", { silent = true }) -- split vertical   window
-  vim.keymap.set("n", "<c-->", "<cmd>sp<cr>", { silent = true }) -- split horizontal window
+  vim.keymap.set("n", "<c-\\>", "<cmd>clo<cr>") -- close current    window
+  vim.keymap.set("n", "<c-=>", "<cmd>vs<cr>") -- split vertical   window
+  vim.keymap.set("n", "<c-->", "<cmd>sp<cr>") -- split horizontal window
   vim.keymap.set("n", "<c-0>", "<c-w>o") -- close other windows
   vim.keymap.set("n", "<c-9>", "<c-w>r") -- rotate windows
-  vim.keymap.set("n", "|", "<cmd>bd<cr>", { silent = true }) -- close current buffer and window
+  vim.keymap.set("n", "|", "<cmd>bd<cr>") -- close current buffer and window
 
   -- resize windows
-  vim.keymap.set("n", "<a-=>", "<cmd>wincmd =<cr>", { silent = true }) -- resize all windows
+  vim.keymap.set("n", "<a-=>", "<cmd>wincmd =<cr>") -- resize all windows
 
-  vim.keymap.set("n", "<a-s-l>", [[<cmd>vertical   resize +2<cr>]], { silent = true }) -- make the window biger   vertically
-  vim.keymap.set("n", "<a-s-h>", [[<cmd>vertical   resize -2<cr>]], { silent = true }) -- make the window smaller vertically
-  vim.keymap.set("n", "<a-s-k>", [[<cmd>horizontal resize +2<cr>]], { silent = true }) -- make the window bigger  horizontally
-  vim.keymap.set("n", "<a-s-j>", [[<cmd>horizontal resize -2<cr>]], { silent = true }) -- make the window smaller horizontally
+  vim.keymap.set("n", "<a-s-l>", [[<cmd>vertical   resize +2<cr>]]) -- make the window biger   vertically
+  vim.keymap.set("n", "<a-s-h>", [[<cmd>vertical   resize -2<cr>]]) -- make the window smaller vertically
+  vim.keymap.set("n", "<a-s-k>", [[<cmd>horizontal resize +2<cr>]]) -- make the window bigger  horizontally
+  vim.keymap.set("n", "<a-s-j>", [[<cmd>horizontal resize -2<cr>]]) -- make the window smaller horizontally
 
   -- vim.keymap.set("n", "<leader>=", "<c-w>=")
 
-  vim.keymap.set({ "n", "v" }, "<c-h>", "<cmd>wincmd h<cr>", { silent = true }) -- move to window left
-  vim.keymap.set({ "n", "v" }, "<c-j>", "<cmd>wincmd j<cr>", { silent = true }) -- move to window down
-  vim.keymap.set({ "n", "v" }, "<c-k>", "<cmd>wincmd k<cr>", { silent = true }) -- move to window up
-  vim.keymap.set({ "n", "v" }, "<c-l>", "<cmd>wincmd l<cr>", { silent = true }) -- move to window right
+  vim.keymap.set({ "n", "v" }, "<c-h>", "<cmd>wincmd h<cr>") -- move to window left
+  vim.keymap.set({ "n", "v" }, "<c-j>", "<cmd>wincmd j<cr>") -- move to window down
+  vim.keymap.set({ "n", "v" }, "<c-k>", "<cmd>wincmd k<cr>") -- move to window up
+  vim.keymap.set({ "n", "v" }, "<c-l>", "<cmd>wincmd l<cr>") -- move to window right
 end
 
 vim.keymap.set("c", "<c-v>", "<c-r>*") -- paste to command line mode
@@ -245,9 +245,9 @@ else
 end
 
 -- vim.keymap.set("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
-vim.keymap.set("n", "<f10>", "<cmd>:e $MYVIMRC<CR>", { silent = true }) -- open config file (vimrc or init.lua)
-vim.keymap.set("n", "<f5>", "<cmd>so %<CR>", { silent = true }) -- execute current file (vim or lua)
-vim.keymap.set("n", "<f11>", "<cmd>echo wordcount().words<CR>", { silent = true }) -- execute current file (vim or lua)
+vim.keymap.set("n", "<f10>", "<cmd>:e $MYVIMRC<CR>") -- open config file (vimrc or init.lua)
+vim.keymap.set("n", "<f5>", "<cmd>so %<CR>") -- execute current file (vim or lua)
+vim.keymap.set("n", "<f11>", "<cmd>echo wordcount().words<CR>") -- execute current file (vim or lua)
 
 -- duplicate line and lines
 vim.keymap.set("n", "<c-p>", '"0yy"0P') -- duplicate line up
@@ -263,32 +263,38 @@ vim.keymap.set("v", "<c-n>", function()
   vim.fn.setpos(".", { 0, math.max(init_pos, end_pos), 0, 0 })
   local lines = vim.split(vim.fn.getreg("0"), "\n", { trimempty = true })
   vim.api.nvim_put(lines, "l", true, false)
-  vim.cmd([[noautocmd normal! gv]])
+  -- vim.cmd([[noautocmd normal! gv]]) -- @check
 end) -- duplicate selection down
 
 vim.keymap.set("n", '"', "<C-^>") -- back to last buffer
 
-vim.keymap.set("n", "<f1>", ":Inspect<CR>") -- inspect current token treesitter
-vim.keymap.set("n", "<f6>", ":InspectTree<CR>") -- inspect current token treesitter
+vim.keymap.set("n", "<f1>", "<cmd>Inspect<CR>") -- inspect current token treesitter
+vim.keymap.set("n", "<f6>", "<cmd>InspectTree<CR>") -- inspect current token treesitter
 
 -- move lines @note: the visual ones are bellow
 vim.keymap.set("n", "<", "<<", { nowait = true, remap = true }) -- indent left
 vim.keymap.set("n", ">", ">>", { nowait = true, remap = true }) -- indent right
 
-vim.keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>zz", { silent = true })
-vim.keymap.set("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>zz", { silent = true })
-vim.keymap.set("n", "_", vim.diagnostic.open_float, { silent = true })
+vim.keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>zz")
+vim.keymap.set("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>zz")
+vim.keymap.set("n", "_", vim.diagnostic.open_float)
 
 vim.keymap.set("n", "K", vim.lsp.buf.hover)
 
 vim.keymap.set("n", "<leader>r", vim.lsp.buf.rename)
 
+-- vim.keymap.set("v", "<up>", [[:'<,'>move '<-2<CR>gv=gv]], { noremap = true, silent = true }) -- Move selected lines up
+-- vim.keymap.set("v", "<down>", [[:'<,'>move '>+1<CR>gv=gv]], { noremap = true, silent = true }) -- Move selected lines down
+
+vim.keymap.set("v", "<K>", [[:'<,'>move '<-2<CR>gv=gv]], { noremap = true, silent = true }) -- Move selected lines up
+vim.keymap.set("v", "<J>", [[:'<,'>move '>+1<CR>gv=gv]], { noremap = true, silent = true }) -- Move selected lines down
+
 if vim.g.skeletyl then
-  vim.keymap.set("n", "<c-,>", vim.diagnostic.goto_prev, { silent = true })
-  vim.keymap.set("n", "<c-.>", vim.diagnostic.goto_next, { silent = true })
+  vim.keymap.set("n", "<c-,>", vim.diagnostic.goto_prev)
+  vim.keymap.set("n", "<c-.>", vim.diagnostic.goto_next)
 else
-  vim.keymap.set("n", "<c-[>", vim.diagnostic.goto_prev, { silent = true })
-  vim.keymap.set("n", "<c-]>", vim.diagnostic.goto_next, { silent = true })
+  vim.keymap.set("n", "<c-[>", vim.diagnostic.goto_prev)
+  vim.keymap.set("n", "<c-]>", vim.diagnostic.goto_next)
 end
 
 vim.api.nvim_create_autocmd("FocusGained", {
@@ -344,7 +350,7 @@ if vim.opt.cmdheight:get() == 0 then
   vim.api.nvim_create_autocmd({ "RecordingLeave", "CmdlineLeave" }, {
     pattern = "*",
     callback = function()
-      local timer = vim.loop.new_timer()
+      local timer = vim.uv.new_timer()
       timer:start(
         50,
         0,
@@ -359,8 +365,7 @@ if vim.opt.cmdheight:get() == 0 then
     pattern = "*",
     callback = function()
       vim.schedule(function()
-        -- vim.cmd("redraw")
-        vim.cmd("redraws")
+        vim.cmd.redrawstatus()
       end)
     end,
   })
@@ -424,12 +429,12 @@ autocmd! BufNewFile,BufRead *.vs,*.fs,*.vert,*.frag set ft=glsl
 " when autocomplete active it limit the height
 set pumblend=15
 
-" move lines
-xnoremap K :<C-u>silent! '<,'>move-2<CR>gv=gv
-xnoremap J :<C-u>silent! '<,'>move'>+<CR>gv=gv
+" move lines @check: not working
+" xnoremap K :<C-u>silent! '<,'>move-2<CR>gv=gv
+" xnoremap J :<C-u>silent! '<,'>move'>+<CR>gv=gv
 
-xnoremap <up> :<C-u>silent! '<,'>move-2<CR>gv=gv
-xnoremap <down> :<C-u>silent! '<,'>move'>+<CR>gv=gv
+" xnoremap <up> :<C-u>silent! '<,'>move-2<CR>gv=gv
+" xnoremap <down> :<C-u>silent! '<,'>move'>+<CR>gv=gv
 
 " c indent
 autocmd BufWinEnter,BufEnter,BufRead *.c,*.cpp,*.h set cino=L0,g0,l1,t0,w1,(0,w4,(s,m1

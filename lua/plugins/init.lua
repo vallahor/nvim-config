@@ -22,10 +22,10 @@ return {
     event = "VeryLazy",
     config = function()
       require("close_other_window")
-      vim.keymap.set({ "n", "v" }, "<c-a-left>", "<cmd>lua Close_left()<CR>", { silent = true })
-      vim.keymap.set({ "n", "v" }, "<c-a-down>", "<cmd>lua Close_down()<CR>", { silent = true })
-      vim.keymap.set({ "n", "v" }, "<c-a-up>", "<cmd>lua Close_up()<CR>", { silent = true })
-      vim.keymap.set({ "n", "v" }, "<c-a-right>", "<cmd>lua Close_right()<CR>", { silent = true })
+      vim.keymap.set({ "n", "v" }, "<c-left>", "<cmd>lua Close_left()<CR>", { silent = true })
+      vim.keymap.set({ "n", "v" }, "<c-down>", "<cmd>lua Close_down()<CR>", { silent = true })
+      vim.keymap.set({ "n", "v" }, "<c-up>", "<cmd>lua Close_up()<CR>", { silent = true })
+      vim.keymap.set({ "n", "v" }, "<c-right>", "<cmd>lua Close_right()<CR>", { silent = true })
     end,
   },
   {
@@ -33,7 +33,7 @@ return {
     config = function()
       vim.api.nvim_create_autocmd("BufEnter", {
         pattern = { "*.svelte", "*.vue", "*.tsx", "*.jsx", "*.html", ".*ex" },
-        command = ":EmmetInstall",
+        command = "EmmetInstall",
       })
       vim.keymap.set("i", "<c-y>", "<nop>")
       vim.keymap.set("i", "<c-y>", "<Plug>(emmet-expand-abbr)", { nowait = true, silent = true })
