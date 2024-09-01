@@ -59,7 +59,7 @@ vim.opt.backup = false
 vim.opt.writebackup = false
 vim.opt.gdefault = true
 vim.opt.cindent = true
-vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
+-- vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
 -- vim.opt.cino:append("L0,g0,l1,t0,w1,w4,m1")
 vim.opt.timeoutlen = 200
 vim.opt.ttimeoutlen = 10
@@ -223,6 +223,10 @@ vim.keymap.set("i", "<c-bs>", function()
     return
   end
 
+  -- mark undo system
+  local mark = vim.api.nvim_replace_termcodes("<c-g>u", true, false, true)
+  vim.api.nvim_feedkeys(mark, "i", false)
+
   local current_col = end_col
   local current_char = vim.fn.getline("."):sub(current_col, current_col)
 
@@ -365,6 +369,40 @@ vim.keymap.set("n", "<leader>r", vim.lsp.buf.rename)
 
 vim.keymap.set("v", "<K>", [[:'<,'>move '<-2<CR>gv=gv]], { noremap = true, silent = true }) -- Move selected lines up
 vim.keymap.set("v", "<J>", [[:'<,'>move '>+1<CR>gv=gv]], { noremap = true, silent = true }) -- Move selected lines down
+
+-- add undo capabilities in insert mode
+vim.keymap.set("i", "<space>", "<c-g>u<space>")
+vim.keymap.set("i", "[", "[<c-g>u")
+vim.keymap.set("i", "{", "{<c-g>u")
+vim.keymap.set("i", "(", "(<c-g>u")
+vim.keymap.set("i", "]", "]<c-g>u")
+vim.keymap.set("i", "}", "}<c-g>u")
+vim.keymap.set("i", ")", ")<c-g>u")
+vim.keymap.set("i", ",", ",<c-g>u")
+vim.keymap.set("i", ".", ".<c-g>u")
+vim.keymap.set("i", "=", "=<c-g>u")
+vim.keymap.set("i", "-", "-<c-g>u")
+vim.keymap.set("i", "+", "+<c-g>u")
+vim.keymap.set("i", '"', '"<c-g>u')
+vim.keymap.set("i", "'", "'<c-g>u")
+vim.keymap.set("i", "/", "/<c-g>u")
+vim.keymap.set("i", ":", ":<c-g>u")
+vim.keymap.set("i", "?", "?<c-g>u")
+vim.keymap.set("i", "^", "^<c-g>u")
+vim.keymap.set("i", "!", "!<c-g>u")
+vim.keymap.set("i", "@", "@<c-g>u")
+vim.keymap.set("i", "_", "_<c-g>u")
+vim.keymap.set("i", "&", "&<c-g>u")
+vim.keymap.set("i", "*", "*<c-g>u")
+vim.keymap.set("i", "%", "%<c-g>u")
+vim.keymap.set("i", "|", "|<c-g>u")
+vim.keymap.set("i", "#", "#<c-g>u")
+vim.keymap.set("i", "<", "<<c-g>u")
+vim.keymap.set("i", ">", "><c-g>u")
+vim.keymap.set("i", ";", ";<c-g>u")
+vim.keymap.set("i", "<enter>", "<c-g>u<enter>")
+vim.keymap.set("i", "<space>", "<space><c-g>u")
+vim.keymap.set("i", "<tab>", "<tab><c-g>u")
 
 if vim.g.skeletyl then
   vim.keymap.set("n", "<c-,>", vim.diagnostic.goto_prev)
@@ -514,7 +552,7 @@ set pumblend=15
 " xnoremap <down> :<C-u>silent! '<,'>move'>+<CR>gv=gv
 
 " c indent
-" autocmd BufWinEnter,BufEnter,BufRead *.c,*.cpp,*.h,*.odin set cino=L0,g0,l1,t0,w1,(0,w4,(s,m1
+autocmd BufWinEnter,BufEnter,BufRead *.c,*.cpp,*.h,*.odin,*.zig,*.cs set cino=L0,g0,l1,t0,w1,(0,w4,(s,m1
 ]])
 
 if vim.g.neovide then
