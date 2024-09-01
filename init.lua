@@ -215,16 +215,18 @@ vim.keymap.set("c", "<c-bs>", "<c-w>") -- delete previous word
 
 vim.keymap.set("i", "<c-bs>", function()
   local end_col = vim.fn.col(".") - 1
-  if end_col == 0 then
-    vim.cmd([[noautocmd norm k$]])
-    end_col = vim.fn.col("$") - 1
-  end
   local row = vim.fn.line(".") - 1
+
+  if end_col == 0 then
+    local bs = vim.api.nvim_replace_termcodes("<bs>", true, false, true)
+    vim.api.nvim_feedkeys(bs, "i", false)
+    return
+  end
 
   local current_col = end_col
   local current_char = vim.fn.getline("."):sub(current_col, current_col)
 
-  local match_symbols = " _\")(}{][,./\\!@&*^#%='~-+$|<>?:`"
+  local match_symbols = " _\")(}{][,./\\!@&*^#%='~-+$|<>?;:`"
 
   -- eat whitespaces
   while current_char == " " and current_col > 0 do
