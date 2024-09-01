@@ -376,6 +376,7 @@ end
 vim.keymap.set("i", "<space>", "<c-g>u<space>")
 vim.keymap.set("i", "<enter>", "<c-g>u<enter>")
 vim.keymap.set("i", "<tab>", "<c-g>u<tab>")
+vim.keymap.set("i", "<bs>", "<c-g>u<bs>")
 vim.keymap.set("i", "[", "[<c-g>u")
 vim.keymap.set("i", "{", "{<c-g>u")
 vim.keymap.set("i", "(", "(<c-g>u")
