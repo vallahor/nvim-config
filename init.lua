@@ -240,6 +240,30 @@ vim.keymap.set("i", "<c-bs>", function()
   end
   -- eat whitespaces
 
+  -- eat digits
+  while string.match(current_char, "%d") and current_col > 0 do
+    current_col = current_col - 1
+    current_char = vim.fn.getline("."):sub(current_col, current_col)
+  end
+
+  if end_col - current_col > 0 then
+    vim.api.nvim_buf_set_text(0, row, current_col, row, end_col, {})
+    return
+  end
+  -- eat digits
+
+  -- eat upper
+  while string.match(current_char, "%u") and current_col > 0 do
+    current_col = current_col - 1
+    current_char = vim.fn.getline("."):sub(current_col, current_col)
+  end
+
+  if end_col - current_col > 0 then
+    vim.api.nvim_buf_set_text(0, row, current_col, row, end_col, {})
+    return
+  end
+  -- eat upper
+
   while current_col > 0 do
     current_char = vim.fn.getline("."):sub(current_col, current_col)
 
