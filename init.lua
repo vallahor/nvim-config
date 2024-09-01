@@ -387,6 +387,8 @@ vim.keymap.set("i", ".", ".<c-g>u")
 vim.keymap.set("i", "=", "=<c-g>u")
 vim.keymap.set("i", "-", "-<c-g>u")
 vim.keymap.set("i", "+", "+<c-g>u")
+vim.keymap.set("i", "~", "~<c-g>u")
+vim.keymap.set("i", "$", "$<c-g>u")
 vim.keymap.set("i", '"', '"<c-g>u')
 vim.keymap.set("i", "'", "'<c-g>u")
 vim.keymap.set("i", "/", "/<c-g>u")
@@ -545,13 +547,6 @@ autocmd! BufNewFile,BufRead *.vs,*.fs,*.vert,*.frag set ft=glsl
 " when autocomplete active it limit the height
 set pumblend=15
 
-" move lines @check: not working
-" xnoremap K :<C-u>silent! '<,'>move-2<CR>gv=gv
-" xnoremap J :<C-u>silent! '<,'>move'>+<CR>gv=gv
-
-" xnoremap <up> :<C-u>silent! '<,'>move-2<CR>gv=gv
-" xnoremap <down> :<C-u>silent! '<,'>move'>+<CR>gv=gv
-
 " c indent
 autocmd BufWinEnter,BufEnter,BufRead *.c,*.cpp,*.h,*.odin,*.zig,*.cs set cino=L0,g0,l1,t0,w1,(0,w4,(s,m1
 ]])
@@ -563,6 +558,7 @@ if vim.g.neovide then
 end
 
 if vim.fn.filereadable(vim.fn.getcwd() .. "/project.godot") == 1 then
+  -- --server 127.0.0.1:6004 --remote-send "<esc>:n {file}<CR>:call cursor({line},{col})<CR>"
   local addr = "./godot.pipe"
   if vim.fn.has("win32") == 1 then
     addr = "127.0.0.1:6004"
