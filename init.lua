@@ -59,7 +59,7 @@ vim.opt.backup = false
 vim.opt.writebackup = false
 vim.opt.gdefault = true
 vim.opt.cindent = true
--- vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
+vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
 -- vim.opt.cino:append("L0,g0,l1,t0,w1,w4,m1")
 vim.opt.timeoutlen = 200
 vim.opt.ttimeoutlen = 10
@@ -212,6 +212,53 @@ vim.keymap.set("v", "v", "V") -- visual line mode
 -- @check spider.lua
 -- vim.keymap.set({ "i", "c" }, "<c-bs>", "<c-w>") -- delete previous word
 vim.keymap.set("c", "<c-bs>", "<c-w>") -- delete previous word
+
+vim.keymap.set("i", "<c-bs>", function()
+  local end_col = vim.fn.col(".") - 1
+  local row = vim.fn.line(".") - 1
+
+  local current_col = end_col
+  local current_char = vim.fn.getline("."):sub(current_col, current_col)
+
+  local match_symbols = " _\")(}{][,./\\!@&*^#%='~-+$|<>?:`"
+
+  -- eat whitespaces
+  while current_char == " " and current_col > 0 do
+    current_col = current_col - 1
+    current_char = vim.fn.getline("."):sub(current_col, current_col)
+  end
+
+  if end_col - current_col > 0 then
+    vim.api.nvim_buf_set_text(0, row, current_col, row, end_col, {})
+    return
+  end
+  -- eat whitespaces
+
+  while current_col > 0 do
+    current_char = vim.fn.getline("."):sub(current_col, current_col)
+
+    local found = false
+    for i = 1, #match_symbols do
+      if match_symbols:sub(i, i) == current_char then
+        found = true
+        break
+      end
+    end
+
+    if found and current_col ~= end_col then
+      break
+    end
+
+    if string.upper(current_char) == current_char then
+      current_col = current_col - 1
+      break
+    end
+
+    current_col = current_col - 1
+  end
+
+  vim.api.nvim_buf_set_text(0, row, current_col, row, end_col, {})
+end, { silent = true })
 
 vim.keymap.set("n", "x", '"_x') -- delete current char without copying
 vim.keymap.set("n", "<c-d>", '"_dd') -- delete line without copying
@@ -437,7 +484,7 @@ set pumblend=15
 " xnoremap <down> :<C-u>silent! '<,'>move'>+<CR>gv=gv
 
 " c indent
-autocmd BufWinEnter,BufEnter,BufRead *.c,*.cpp,*.h set cino=L0,g0,l1,t0,w1,(0,w4,(s,m1
+" autocmd BufWinEnter,BufEnter,BufRead *.c,*.cpp,*.h,*.odin set cino=L0,g0,l1,t0,w1,(0,w4,(s,m1
 ]])
 
 if vim.g.neovide then
