@@ -215,6 +215,10 @@ vim.keymap.set("c", "<c-bs>", "<c-w>") -- delete previous word
 
 vim.keymap.set("i", "<c-bs>", function()
   local end_col = vim.fn.col(".") - 1
+  if end_col == 0 then
+    vim.cmd([[noautocmd norm k$]])
+    end_col = vim.fn.col("$") - 1
+  end
   local row = vim.fn.line(".") - 1
 
   local current_col = end_col
