@@ -367,11 +367,15 @@ vim.keymap.set("n", "<leader>r", vim.lsp.buf.rename)
 -- vim.keymap.set("v", "<up>", [[:'<,'>move '<-2<CR>gv=gv]], { noremap = true, silent = true }) -- Move selected lines up
 -- vim.keymap.set("v", "<down>", [[:'<,'>move '>+1<CR>gv=gv]], { noremap = true, silent = true }) -- Move selected lines down
 
-vim.keymap.set("v", "<K>", [[:'<,'>move '<-2<CR>gv=gv]], { noremap = true, silent = true }) -- Move selected lines up
-vim.keymap.set("v", "<J>", [[:'<,'>move '>+1<CR>gv=gv]], { noremap = true, silent = true }) -- Move selected lines down
+if not vim.g.skeletyl then
+  vim.keymap.set("v", "<K>", [[:'<,'>move '<-2<CR>gv=gv]], { noremap = true, silent = true }) -- Move selected lines up
+  vim.keymap.set("v", "<J>", [[:'<,'>move '>+1<CR>gv=gv]], { noremap = true, silent = true }) -- Move selected lines down
+end
 
 -- add undo capabilities in insert mode
 vim.keymap.set("i", "<space>", "<c-g>u<space>")
+vim.keymap.set("i", "<enter>", "<c-g>u<enter>")
+vim.keymap.set("i", "<tab>", "<c-g>u<tab>")
 vim.keymap.set("i", "[", "[<c-g>u")
 vim.keymap.set("i", "{", "{<c-g>u")
 vim.keymap.set("i", "(", "(<c-g>u")
@@ -400,9 +404,6 @@ vim.keymap.set("i", "#", "#<c-g>u")
 vim.keymap.set("i", "<", "<<c-g>u")
 vim.keymap.set("i", ">", "><c-g>u")
 vim.keymap.set("i", ";", ";<c-g>u")
-vim.keymap.set("i", "<enter>", "<c-g>u<enter>")
-vim.keymap.set("i", "<space>", "<space><c-g>u")
-vim.keymap.set("i", "<tab>", "<tab><c-g>u")
 
 if vim.g.skeletyl then
   vim.keymap.set("n", "<c-,>", vim.diagnostic.goto_prev)
