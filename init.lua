@@ -185,16 +185,14 @@ vim.keymap.set("c", "<c-v>", "<c-r>*") -- paste to command line mode
 
 vim.keymap.set("v", "v", "V") -- visual line mode
 
--- @check spider.lua
--- vim.keymap.set({ "i", "c" }, "<c-bs>", "<c-w>") -- delete previous word
 vim.keymap.set("c", "<c-bs>", "<c-w>") -- delete previous word
-
+-- delete previous word
 vim.keymap.set("i", "<c-bs>", function()
   local end_col = vim.fn.col(".") - 1
   local row = vim.fn.line(".") - 1
 
   if end_col == 0 then
-    local bs = vim.api.nvim_replace_termcodes("<bs>", true, false, true)
+    local bs = vim.api.nvim_replace_termcodes("<c-g>u<bs>", true, false, true)
     vim.api.nvim_feedkeys(bs, "i", false)
     return
   end
@@ -206,7 +204,7 @@ vim.keymap.set("i", "<c-bs>", function()
   local current_col = end_col
   local current_char = vim.fn.getline("."):sub(current_col, current_col)
 
-  local match_symbols = " _\")(}{][,./\\!@&*^#%='~-+$|<>?;:`"
+  local match_symbols = "_\")(}{][,./\\!@&*^#%='~-+$|<>?;:`"
 
   -- eat whitespaces
   while current_char == " " and current_col > 0 do
@@ -214,7 +212,7 @@ vim.keymap.set("i", "<c-bs>", function()
     current_char = vim.fn.getline("."):sub(current_col, current_col)
   end
 
-  if end_col - current_col > 0 then
+  if end_col - current_col > 1 then
     vim.api.nvim_buf_set_text(0, row, current_col, row, end_col, {})
     return
   end
@@ -226,7 +224,7 @@ vim.keymap.set("i", "<c-bs>", function()
     current_char = vim.fn.getline("."):sub(current_col, current_col)
   end
 
-  if end_col - current_col > 0 then
+  if end_col - current_col > 1 then
     vim.api.nvim_buf_set_text(0, row, current_col, row, end_col, {})
     return
   end
@@ -238,16 +236,20 @@ vim.keymap.set("i", "<c-bs>", function()
     current_char = vim.fn.getline("."):sub(current_col, current_col)
   end
 
-  if end_col - current_col > 0 then
+  if end_col - current_col > 1 then
     vim.api.nvim_buf_set_text(0, row, current_col, row, end_col, {})
     return
   end
   -- eat upper
 
   while current_col > 0 do
+    local found = false
     current_char = vim.fn.getline("."):sub(current_col, current_col)
 
-    local found = false
+    if current_char == " " and end_col - current_col > 1 then
+      break
+    end
+
     for i = 1, #match_symbols do
       if match_symbols:sub(i, i) == current_char then
         found = true
@@ -295,6 +297,11 @@ if vim.g.skeletyl then
   vim.keymap.set({ "n", "v" }, "(", beginning_of_the_line) -- go to beginning of the line
   vim.keymap.set("n", ")", "$") -- go to end of line
   vim.keymap.set("v", ")", "$h") -- go to end of line (for some reason it's goes to wrong place in visual mode)
+
+  -- -- @check: this make sense because I don't use f/t anymore
+  -- vim.keymap.set({ "n", "v" }, ",", beginning_of_the_line) -- go to beginning of the line
+  -- vim.keymap.set("n", ";", "$") -- go to end of line
+  -- vim.keymap.set("v", ";", "$h") -- go to end of line (for some reason it's goes to wrong place in visual mode)
 else
   vim.keymap.set({ "n", "v" }, "0", beginning_of_the_line) -- go to beginning of the line
   vim.keymap.set("n", "-", "$") -- go to end of line
@@ -519,13 +526,13 @@ sign define DiagnosticSignHint  text=H texthl=DiagnosticSignHint  linehl=HintBg 
 sign define DiagnosticSignHint  text=H texthl=DiagnosticSignHint  numhl=HintLineBg
 sign define DiagnosticSignHint  text=H numhl=HintLineBg
 
-autocmd! BufNewFile,BufRead *.vs,*.fs,*.vert,*.frag set ft=glsl
+autocmd! BufNewFile,BufRead *.gs,*.vs,*.fs,*.vert,*.frag,*.geom set ft=glsl
 
 " when autocomplete active it limit the height
 set pumblend=15
 
 " c indent
-autocmd BufWinEnter,BufEnter,BufRead *.c,*.cpp,*.h,*.odin,*.zig,*.cs set cino=L0,g0,l1,t0,w1,(0,w4,(s,m1
+autocmd BufWinEnter,BufEnter,BufRead *.c,*.cpp,*.h,*.odin,*.zig,*.cs set cino=Ls,g0,l1,t0,w1,(0,w4
 ]])
 
 if vim.g.neovide then
