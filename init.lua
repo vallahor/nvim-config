@@ -185,8 +185,8 @@ vim.keymap.set("c", "<c-v>", "<c-r>*") -- paste to command line mode
 
 vim.keymap.set("v", "v", "V") -- visual line mode
 
-vim.keymap.set("c", "<c-bs>", "<c-w>") -- delete previous word
--- delete previous word
+vim.keymap.set("c", "<c-bs>", "<c-w>") -- delete previous word (cmd)
+-- delete previous word (insert)
 vim.keymap.set("i", "<c-bs>", function()
   local end_col = vim.fn.col(".") - 1
   local row = vim.fn.line(".") - 1
@@ -246,7 +246,7 @@ vim.keymap.set("i", "<c-bs>", function()
     local found = false
     current_char = vim.fn.getline("."):sub(current_col, current_col)
 
-    if current_char == " " and end_col - current_col > 1 then
+    if current_char == " " and end_col - current_col > 0 then
       break
     end
 
