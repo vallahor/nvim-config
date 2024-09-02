@@ -207,36 +207,42 @@ vim.keymap.set("i", "<c-bs>", function()
   local match_symbols = "_\")(}{][,./\\!@&*^#%='~-+$|<>?;:`"
 
   -- eat whitespaces
+  local whitespace_count = 0
   while current_char == " " and current_col > 0 do
     current_col = current_col - 1
+    whitespace_count = whitespace_count + 1
     current_char = vim.fn.getline("."):sub(current_col, current_col)
   end
 
-  if end_col - current_col > 1 then
+  if whitespace_count > 1 then
     vim.api.nvim_buf_set_text(0, row, current_col, row, end_col, {})
     return
   end
   -- eat whitespaces
 
   -- eat digits
+  local digit_count = 0
   while string.match(current_char, "%d") and current_col > 0 do
     current_col = current_col - 1
+    digit_count = digit_count + 1
     current_char = vim.fn.getline("."):sub(current_col, current_col)
   end
 
-  if end_col - current_col > 1 then
+  if digit_count > 0 then
     vim.api.nvim_buf_set_text(0, row, current_col, row, end_col, {})
     return
   end
   -- eat digits
 
   -- eat upper
+  local upper_count = 0
   while string.match(current_char, "%u") and current_col > 0 do
     current_col = current_col - 1
+    upper_count = upper_count + 1
     current_char = vim.fn.getline("."):sub(current_col, current_col)
   end
 
-  if end_col - current_col > 1 then
+  if upper_count > 0 then
     vim.api.nvim_buf_set_text(0, row, current_col, row, end_col, {})
     return
   end
@@ -257,7 +263,7 @@ vim.keymap.set("i", "<c-bs>", function()
       end
     end
 
-    if found and current_col ~= end_col then
+    if found and current_col ~= end_col or string.match(current_char, "%d") then
       break
     end
 
