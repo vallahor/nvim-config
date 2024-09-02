@@ -64,7 +64,7 @@ vim.opt.cindent = true
 vim.opt.timeoutlen = 200
 vim.opt.ttimeoutlen = 10
 -- vim.opt.guicursor = "i-ci:block-iCursor"
-vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
+-- vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
 
 -- vim.opt.linespace = 2
 
@@ -105,30 +105,6 @@ vim.g.python_indent = {
 }
 
 -- MAPPING --
-
--- VM --
-vim.g.VM_theme = "iceblue"
-vim.g.VM_default_mappings = 0
-vim.g.VM_silent_exit = 1
-vim.g.VM_custom_remaps = {
-  [")"] = "$",
-  ["("] = "0",
-}
-vim.g.VM_maps = {
-  ["Find Under"] = "<c-u>",
-  ["Find Subword Under"] = "<c-u>",
-  ["Select All"] = "&",
-  ["Add Cursor Down"] = "<c-j>",
-  ["Add Cursor Up"] = "<c-k>",
-  ["Switch Mode"] = "<tab>",
-  ["Align"] = "<c-a>",
-  ["Find Next"] = "]",
-  ["Find Prev"] = "[",
-  ["Goto Next"] = "}",
-  ["Goto Prev"] = "{",
-  ["Skip Region"] = "+",
-  ["Remove Region"] = "-",
-}
 
 -- vim.keymap.set("n", "<leader><leader>", "<cmd>nohl<cr><esc>")
 -- vim.keymap.set("n", "<esc>", "<cmd>nohl<cr><esc>", { silent = true }) -- nohighlight
@@ -556,6 +532,10 @@ if vim.g.neovide then
   vim.g.neovide_cursor_animation_length = 0
   vim.g.neovide_scroll_animation_length = 0
   vim.g.neovide_cursor_trail_size = 0.0
+  vim.g.neovide_position_animation_length = 0.0
+  vim.g.neovide_refresh_rate = 144
+  vim.g.neovide_cursor_animate_in_insert_mode = false
+  vim.g.neovide_cursor_animate_in_command_line = false
 end
 
 if vim.fn.filereadable(vim.fn.getcwd() .. "/project.godot") == 1 then
