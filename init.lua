@@ -87,6 +87,11 @@ vim.wo.relativenumber = true
 -- vim.wo.number = true
 vim.wo.wrap = false
 
+if vim.wo.wrap then
+  vim.keymap.set({ "n", "v" }, "j", "gj", { noremap = true }) -- wrap up
+  vim.keymap.set({ "n", "v" }, "k", "gk", { noremap = true }) -- wrap up
+end
+
 vim.bo.autoread = true
 vim.bo.copyindent = true
 vim.bo.grepprg = "rg"
@@ -579,7 +584,7 @@ vim.diagnostic.config({
 -- close quickfix menu after selecting choice
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "qf" },
-  command = [[nnoremap <buffer> <CR> <CR>:cclose<CR>]],
+  command = [[nnoremap <buffer> <CR> <CR><cmd>cclose<CR>]],
 })
 -- windows terminal, works with others terminals
 --
