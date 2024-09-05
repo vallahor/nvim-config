@@ -209,8 +209,6 @@ vim.keymap.set("i", "<c-bs>", function()
   local current_col = end_col
   local current_char = vim.fn.getline("."):sub(current_col, current_col)
 
-  local match_symbols = "_\")(}{][,./\\!@&*^#%='~-+$|<>?;:`"
-
   -- eat whitespaces
   local whitespace_count = 0
   while current_char == " " and current_col > 0 do
@@ -261,14 +259,7 @@ vim.keymap.set("i", "<c-bs>", function()
       break
     end
 
-    for i = 1, #match_symbols do
-      if match_symbols:sub(i, i) == current_char then
-        found = true
-        break
-      end
-    end
-
-    if found and current_col ~= end_col or string.match(current_char, "%d") then
+    if string.match(current_char, "%p") and current_col ~= end_col or string.match(current_char, "%d") then
       break
     end
 
@@ -308,11 +299,6 @@ if vim.g.skeletyl then
   vim.keymap.set({ "n", "v" }, "(", beginning_of_the_line) -- go to beginning of the line
   vim.keymap.set("n", ")", "$") -- go to end of line
   vim.keymap.set("v", ")", "$h") -- go to end of line (for some reason it's goes to wrong place in visual mode)
-
-  -- -- @check: this make sense because I don't use f/t anymore
-  -- vim.keymap.set({ "n", "v" }, ",", beginning_of_the_line) -- go to beginning of the line
-  -- vim.keymap.set("n", ";", "$") -- go to end of line
-  -- vim.keymap.set("v", ";", "$h") -- go to end of line (for some reason it's goes to wrong place in visual mode)
 else
   vim.keymap.set({ "n", "v" }, "0", beginning_of_the_line) -- go to beginning of the line
   vim.keymap.set("n", "-", "$") -- go to end of line

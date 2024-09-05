@@ -6,12 +6,12 @@ return {
       require("spider").setup({
         skipInsignificantPunctuation = false,
         subwordMovement = true,
-        -- customPatterns = {
-        --   patterns = {
-        --     "%w+ ",
-        --   },
-        --   overrideDefault = false,
-        -- },
+        customPatterns = {
+          patterns = {
+            "%p",
+          },
+          overrideDefault = false,
+        },
       })
 
       vim.keymap.set({ "n", "o", "x", "v" }, "w", "<cmd>lua require('spider').motion('w')<CR>")
