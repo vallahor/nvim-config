@@ -39,6 +39,9 @@ return {
         custom = { ".venv", "node_modules", "__pycache__" },
       },
       renderer = {
+        indent_markers = {
+          enable = true,
+        },
         icons = {
           show = {
             git = false,

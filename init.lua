@@ -12,7 +12,7 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 vim.g.mapleader = " "
-vim.g.skeletyl = true
+vim.g.skeletyl = false
 
 require("lazy").setup("plugins", {
   change_detection = {
@@ -22,11 +22,9 @@ require("lazy").setup("plugins", {
 
 -- SETTINGS --
 
-vim.opt.guifont = { "JetBrains Mono NL:h11" }
--- vim.opt.guifont = { "JetBrains Mono NL:h10.5" }
--- vim.opt.guifont = { "JetBrainsMono Nerd Font:h11" }
+-- vim.opt.guifont = { "JetBrains Mono NL:h11" }
+vim.opt.guifont = { "JetBrainsMono Nerd Font:h11" }
 -- vim.opt.guifont = { "JetBrainsMonoNL Nerd Font:h11" }
--- vim.opt.guifont = { "GeistMono NF:h11.5" }
 vim.opt.shiftwidth = 4
 vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
@@ -62,7 +60,7 @@ vim.opt.cindent = true
 -- vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
 -- vim.opt.cino:append("L0,g0,l1,t0,w1,w4,m1")
 vim.opt.timeoutlen = 200
-vim.opt.ttimeoutlen = 10
+vim.opt.ttimeoutlen = 100
 -- vim.opt.guicursor = "i-ci:block-iCursor"
 -- vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
 
@@ -71,7 +69,7 @@ vim.opt.ttimeoutlen = 10
 vim.opt.cmdheight = 0
 vim.opt.laststatus = 2
 vim.opt.showcmdloc = "statusline"
-vim.opt.statusline = " %f %m%=%S %l "
+vim.opt.statusline = " %f %m%=%S L%l,C%c "
 -- vim.opt.winbar = " %f %m%=%l "
 
 -- vim.cmd([[
@@ -108,6 +106,52 @@ vim.g.python_indent = {
   open_paren = 4,
   nested_paren = 4,
 }
+
+if vim.g.skeletyl then
+  -- VM --
+  vim.g.VM_theme = "iceblue"
+  vim.g.VM_default_mappings = 0
+  vim.g.VM_custom_remaps = {
+    [")"] = "$",
+    ["("] = "0",
+  }
+  vim.g.VM_maps = {
+    ["Find Under"] = "<c-u>",
+    ["Find Subword Under"] = "<c-u>",
+    ["Select All"] = "<c-s-u>",
+    ["Add Cursor Down"] = "<c-j>",
+    ["Add Cursor Up"] = "<c-k>",
+    ["Switch Mode"] = "<tab>",
+    ["Align"] = "<c-a>",
+    ["Find Next"] = "]",
+    ["Find Prev"] = "[",
+    ["Goto Next"] = "}",
+    ["Goto Prev"] = "{",
+    ["Skip Region"] = "+",
+    ["Remove Region"] = "-",
+  }
+else
+  -- VM --
+  vim.g.VM_theme = "iceblue"
+  vim.g.VM_default_mappings = 0
+  vim.g.VM_custom_remaps = { ["-"] = "$" }
+  vim.g.VM_maps = {
+    ["Find Under"] = "<a-u>",
+    ["Find Subword Under"] = "<a-u>",
+    ["Select All"] = "<a-s-u>",
+    ["Add Cursor Down"] = "<a-j>",
+    ["Add Cursor Up"] = "<a-k>",
+    ["Switch Mode"] = "<Tab>",
+    ["Align"] = "<a-a>",
+    ["Find Next"] = "<a-l>",
+    ["Find Prev"] = "<a-h>",
+    ["Goto Next"] = "<a-.>",
+    ["Goto Prev"] = "<a-,>",
+    ["Skip Region"] = "<a-;>",
+    ["Remove Region"] = "<a-m>",
+    ["I BS"] = "",
+  }
+end
 
 -- MAPPING --
 
@@ -255,11 +299,11 @@ vim.keymap.set("i", "<c-bs>", function()
     local found = false
     current_char = vim.fn.getline("."):sub(current_col, current_col)
 
-    if current_char == " " and end_col - current_col > 0 then
+    if current_char == " " or current_char == "\t" and end_col - current_col > 0 then
       break
     end
 
-    if string.match(current_char, "%p") and current_col ~= end_col or string.match(current_char, "%d") then
+    if string.match(current_char, "%p") and current_col ~= end_col then
       break
     end
 
@@ -305,10 +349,19 @@ else
   vim.keymap.set("v", "-", "$h") -- go to end of line (for some reason it's go to wrong place in visual mode)
 end
 
--- vim.keymap.set("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
-vim.keymap.set("n", "<f10>", "<cmd>:e $MYVIMRC<CR>") -- open config file (vimrc or init.lua)
-vim.keymap.set("n", "<f5>", "<cmd>so %<CR>") -- execute current file (vim or lua)
-vim.keymap.set("n", "<f11>", "<cmd>echo wordcount().words<CR>") -- execute current file (vim or lua)
+if vim.g.skeletyl then
+  -- vim.keymap.set("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
+  vim.keymap.set("n", "<f4>", "<cmd>:e $MYVIMRC<CR>") -- open config file (vimrc or init.lua)
+  vim.keymap.set("n", "<f12>", "<cmd>:e c:/projects/gruvballish/colors/gruvballish.vim<CR>") -- open config file (vimrc or init.lua)
+  vim.keymap.set("n", "<f5>", "<cmd>so %<CR>") -- execute current file (vim or lua)
+  vim.keymap.set("n", "<f11>", "<cmd>echo wordcount().words<CR>") -- execute current file (vim or lua)
+else
+  -- vim.keymap.set("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
+  vim.keymap.set("n", "<f10>", "<cmd>:e $MYVIMRC<CR>") -- open config file (vimrc or init.lua)
+  vim.keymap.set("n", "<f9>", "<cmd>:e c:/projects/gruvballish/colors/gruvballish.vim<CR>") -- open config file (vimrc or init.lua)
+  vim.keymap.set("n", "<f5>", "<cmd>so %<CR>") -- execute current file (vim or lua)
+  vim.keymap.set("n", "<f11>", "<cmd>echo wordcount().words<CR>") -- execute current file (vim or lua)
+end
 
 -- duplicate line and lines
 vim.keymap.set("n", "<c-p>", '"0yy"0P') -- duplicate line up
@@ -475,6 +528,7 @@ vim.cmd([[
 language en_US
 filetype on
 syntax on
+filetype plugin indent on
 
 " @windows: nextjs and sveltkit folder name pattern
 set isfname+=(
@@ -529,7 +583,7 @@ autocmd! BufNewFile,BufRead *.gs,*.vs,*.fs,*.vert,*.frag,*.geom set ft=glsl
 set pumblend=15
 
 " c indent
-autocmd BufWinEnter,BufEnter,BufRead *.c,*.cpp,*.h,*.odin,*.zig,*.cs set cino=Ls,g0,l1,t0,w1,(0,w4
+autocmd BufWinEnter,BufEnter,BufRead *.c,*.cpp,*.h set cino=Ls,g0,l1,t0,w1,(0,w4
 ]])
 
 if vim.g.neovide then

@@ -30,8 +30,12 @@ return {
       end,
     })
 
+    local capabilities = require("cmp_nvim_lsp").default_capabilities()
+
     local lspconfig = require("lspconfig")
+
     lspconfig.lua_ls.setup({
+      capabilities = capabilities,
       on_init = function(client)
         local path = client.workspace_folders[1].name
         if vim.uv.fs_stat(path .. "/.luarc.json") or vim.uv.fs_stat(path .. "/.luarc.jsonc") then
@@ -64,6 +68,7 @@ return {
     })
 
     lspconfig.pyright.setup({
+      capabilities = capabilities,
       on_attach = on_attach,
       settings = {
         python = {
@@ -77,14 +82,17 @@ return {
     })
 
     lspconfig.html.setup({
+      capabilities = capabilities,
       on_attach = on_attach,
     })
 
-    lspconfig.tsserver.setup({
+    lspconfig.ts_ls.setup({
+      capabilities = capabilities,
       on_attach = on_attach,
     })
 
     lspconfig.tailwindcss.setup({
+      capabilities = capabilities,
       on_attach = on_attach,
       filetypes = { "html", "elixir", "eelixir", "heex", "htmldjango" },
       init_options = {
@@ -106,22 +114,27 @@ return {
     })
 
     lspconfig.clangd.setup({
+      capabilities = capabilities,
       on_attach = on_attach,
     })
 
     lspconfig.rust_analyzer.setup({
+      capabilities = capabilities,
       on_attach = on_attach,
     })
 
     lspconfig.ols.setup({
+      capabilities = capabilities,
       on_attach = on_attach,
     })
 
     lspconfig.glsl_analyzer.setup({
+      capabilities = capabilities,
       on_attach = on_attach,
     })
 
     lspconfig.elixirls.setup({
+      capabilities = capabilities,
       on_attach = on_attach,
       cmd = { "C:/apps/elixir-ls/language_server.bat" },
       settings = {
@@ -132,40 +145,47 @@ return {
     })
 
     lspconfig.sqlls.setup({
+      capabilities = capabilities,
       on_attach = on_attach,
     })
 
     lspconfig.jsonls.setup({
+      capabilities = capabilities,
       on_attach = on_attach,
     })
 
     lspconfig.cssls.setup({
+      capabilities = capabilities,
       on_attach = on_attach,
     })
 
     lspconfig.zls.setup({
+      capabilities = capabilities,
       on_attach = on_attach,
     })
 
     lspconfig.csharp_ls.setup({
+      capabilities = capabilities,
       on_attach = on_attach,
+      init_options = {
+        AutomaticWorkspaceInit = true,
+      },
     })
 
+    local port = os.getenv("GDScript_Port") or "6005"
     lspconfig.gdscript.setup({
+      capabilities = capabilities,
       on_attach = on_attach,
-      cmd = { "ncat", "localhost", "6005" },
+      cmd = { "ncat", "localhost", port },
     })
 
-    -- local pid = vim.fn.getpid()
-    -- lspconfig.omnisharp.setup({
-    --   cmd = { "C:/apps/omnisharp/OmniSharp.exe", "--languageserver", "--hostPID", tostring(pid) },
-    --   on_attach = on_attach,
-    --   handlers = {
-    --     ["textDocument/definition"] = require("omnisharp_extended").definition_handler,
-    --   },
-    -- })
+    lspconfig.gdshader_lsp.setup({
+      capabilities = capabilities,
+      on_attach = on_attach,
+    })
 
     lspconfig.gopls.setup({
+      capabilities = capabilities,
       on_attach = on_attach,
     })
     vim.api.nvim_create_autocmd("BufWritePre", {
@@ -193,6 +213,7 @@ return {
 
     vim.filetype.add({ extension = { templ = "templ" } })
     lspconfig.templ.setup({
+      capabilities = capabilities,
       on_attach = on_attach,
     })
   end,

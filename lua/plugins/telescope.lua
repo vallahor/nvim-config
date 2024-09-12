@@ -14,8 +14,8 @@ return {
               ["<C-bs>"] = function()
                 vim.api.nvim_input("<c-s-w>")
               end,
-              -- ["<c-k>"] = "move_selection_previous",
-              -- ["<c-j>"] = "move_selection_next",
+              ["<c-k>"] = "move_selection_previous",
+              ["<c-j>"] = "move_selection_next",
               -- ["<esc>"] = actions.close,
               -- ["<c-space>"] = actions.close,
               ["jk"] = actions.close,

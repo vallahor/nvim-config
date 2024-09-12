@@ -32,21 +32,39 @@ return {
           autocmd FileType odin setlocal commentstring=//\ %s
       ]])
 
-      require("mini.move").setup({
-        mappings = {
-          -- Move visual selection in Visual mode. Defaults are Alt (Meta) + hjkl.
-          left = "",
-          right = "",
-          down = "<down>",
-          up = "<up>",
+      if vim.g.skeletyl then
+        require("mini.move").setup({
+          mappings = {
+            -- Move visual selection in Visual mode. Defaults are Alt (Meta) + hjkl.
+            left = "",
+            right = "",
+            down = "J",
+            up = "K",
 
-          -- Move current line in Normal mode
-          line_left = "",
-          line_right = "",
-          line_down = "",
-          line_up = "",
-        },
-      })
+            -- Move current line in Normal mode
+            line_left = "",
+            line_right = "",
+            line_down = "",
+            line_up = "",
+          },
+        })
+      else
+        require("mini.move").setup({
+          mappings = {
+            -- Move visual selection in Visual mode. Defaults are Alt (Meta) + hjkl.
+            left = "",
+            right = "",
+            down = "<down>",
+            up = "<up>",
+
+            -- Move current line in Normal mode
+            line_left = "",
+            line_right = "",
+            line_down = "",
+            line_up = "",
+          },
+        })
+      end
 
       -- -- Statusline
       -- local MiniStatusline = require("mini.statusline")

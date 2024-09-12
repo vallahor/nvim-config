@@ -1,7 +1,6 @@
 return {
   { "folke/lazy.nvim", version = "*" },
-  -- { "tpope/vim-repeat", event = "VeryLazy" },
-
+  { "tpope/vim-repeat", event = "VeryLazy" },
   {
     dir = "../swap_buffer.lua",
     event = "VeryLazy",
@@ -22,10 +21,17 @@ return {
     event = "VeryLazy",
     config = function()
       require("close_other_window")
-      vim.keymap.set({ "n", "v" }, "<c-left>", "<cmd>lua Close_left()<CR>")
-      vim.keymap.set({ "n", "v" }, "<c-down>", "<cmd>lua Close_down()<CR>")
-      vim.keymap.set({ "n", "v" }, "<c-up>", "<cmd>lua Close_up()<CR>")
-      vim.keymap.set({ "n", "v" }, "<c-right>", "<cmd>lua Close_right()<CR>")
+      if not vim.g.skeletyl then
+        vim.keymap.set({ "n", "v" }, "<c-s-h>", "<cmd>lua Close_left()<CR>")
+        vim.keymap.set({ "n", "v" }, "<c-s-j>", "<cmd>lua Close_down()<CR>")
+        vim.keymap.set({ "n", "v" }, "<c-s-k>", "<cmd>lua Close_up()<CR>")
+        vim.keymap.set({ "n", "v" }, "<c-s-l>", "<cmd>lua Close_right()<CR>")
+      else
+        vim.keymap.set({ "n", "v" }, "<c-left>", "<cmd>lua Close_left()<CR>")
+        vim.keymap.set({ "n", "v" }, "<c-down>", "<cmd>lua Close_down()<CR>")
+        vim.keymap.set({ "n", "v" }, "<c-up>", "<cmd>lua Close_up()<CR>")
+        vim.keymap.set({ "n", "v" }, "<c-right>", "<cmd>lua Close_right()<CR>")
+      end
     end,
   },
   {
@@ -50,11 +56,8 @@ return {
     end,
   },
   {
-    "Hoffs/omnisharp-extended-lsp.nvim",
-  },
-  {
     "habamax/vim-godot",
-    event = "BufEnter *.gd",
+    -- event = "BufEnter *.gd",
     config = function()
       vim.cmd([[
         setlocal tabstop=4
