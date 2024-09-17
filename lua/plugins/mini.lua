@@ -32,7 +32,7 @@ return {
           autocmd FileType odin setlocal commentstring=//\ %s
       ]])
 
-      if vim.g.skeletyl then
+      if not vim.g.skeletyl then
         require("mini.move").setup({
           mappings = {
             -- Move visual selection in Visual mode. Defaults are Alt (Meta) + hjkl.

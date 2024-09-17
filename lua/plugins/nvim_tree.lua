@@ -30,6 +30,7 @@ return {
       },
       view = {
         -- width = 35,
+        width = 33,
       },
       git = {
         ignore = false,

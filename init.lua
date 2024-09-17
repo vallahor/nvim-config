@@ -12,7 +12,7 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 vim.g.mapleader = " "
-vim.g.skeletyl = false
+vim.g.skeletyl = true
 
 require("lazy").setup("plugins", {
   change_detection = {
@@ -23,8 +23,8 @@ require("lazy").setup("plugins", {
 -- SETTINGS --
 
 -- vim.opt.guifont = { "JetBrains Mono NL:h11" }
-vim.opt.guifont = { "JetBrainsMono Nerd Font:h11" }
--- vim.opt.guifont = { "JetBrainsMonoNL Nerd Font:h11" }
+-- vim.opt.guifont = { "JetBrainsMono Nerd Font:h11" }
+vim.opt.guifont = { "JetBrainsMonoNL Nerd Font:h11" }
 vim.opt.shiftwidth = 4
 vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
@@ -62,7 +62,7 @@ vim.opt.cindent = true
 vim.opt.timeoutlen = 200
 vim.opt.ttimeoutlen = 100
 -- vim.opt.guicursor = "i-ci:block-iCursor"
--- vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
+vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
 
 -- vim.opt.linespace = 2
 
@@ -202,10 +202,10 @@ if vim.g.skeletyl then
 
   -- vim.keymap.set("n", "<leader>=", "<c-w>=")
 
-  vim.keymap.set({ "n" }, "<left>", "<cmd>wincmd h<cr>") -- move to window left
-  vim.keymap.set({ "n" }, "<down>", "<cmd>wincmd j<cr>") -- move to window down
-  vim.keymap.set({ "n" }, "<up>", "<cmd>wincmd k<cr>") -- move to window up
-  vim.keymap.set({ "n" }, "<right>", "<cmd>wincmd l<cr>") -- move to window right
+  vim.keymap.set("n", "<left>", "<cmd>wincmd h<cr>") -- move to window left
+  vim.keymap.set("n", "<down>", "<cmd>wincmd j<cr>") -- move to window down
+  vim.keymap.set("n", "<up>", "<cmd>wincmd k<cr>") -- move to window up
+  vim.keymap.set("n", "<right>", "<cmd>wincmd l<cr>") -- move to window right
 else
   vim.keymap.set("n", "<c-\\>", "<cmd>clo<cr>") -- close current    window
   vim.keymap.set("n", "<c-=>", "<cmd>vs<cr>") -- split vertical   window
@@ -351,14 +351,14 @@ end
 
 if vim.g.skeletyl then
   -- vim.keymap.set("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
-  vim.keymap.set("n", "<f4>", "<cmd>:e $MYVIMRC<CR>") -- open config file (vimrc or init.lua)
-  vim.keymap.set("n", "<f12>", "<cmd>:e c:/projects/gruvballish/colors/gruvballish.vim<CR>") -- open config file (vimrc or init.lua)
+  vim.keymap.set("n", "<f10>", "<cmd>:e $MYVIMRC<CR>") -- open config file (vimrc or init.lua)
+  vim.keymap.set("n", "<f9>", "<cmd>:e c:/projects/gruvballish/colors/gruvballish.vim<CR>") -- open config file (vimrc or init.lua)
   vim.keymap.set("n", "<f5>", "<cmd>so %<CR>") -- execute current file (vim or lua)
   vim.keymap.set("n", "<f11>", "<cmd>echo wordcount().words<CR>") -- execute current file (vim or lua)
 else
   -- vim.keymap.set("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
-  vim.keymap.set("n", "<f10>", "<cmd>:e $MYVIMRC<CR>") -- open config file (vimrc or init.lua)
-  vim.keymap.set("n", "<f9>", "<cmd>:e c:/projects/gruvballish/colors/gruvballish.vim<CR>") -- open config file (vimrc or init.lua)
+  vim.keymap.set("n", "<f4>", "<cmd>:e $MYVIMRC<CR>") -- open config file (vimrc or init.lua)
+  vim.keymap.set("n", "<f12>", "<cmd>:e c:/projects/gruvballish/colors/gruvballish.vim<CR>") -- open config file (vimrc or init.lua)
   vim.keymap.set("n", "<f5>", "<cmd>so %<CR>") -- execute current file (vim or lua)
   vim.keymap.set("n", "<f11>", "<cmd>echo wordcount().words<CR>") -- execute current file (vim or lua)
 end
@@ -377,7 +377,7 @@ vim.keymap.set("v", "<c-n>", function()
   vim.fn.setpos(".", { 0, math.max(init_pos, end_pos), 0, 0 })
   local lines = vim.split(vim.fn.getreg("0"), "\n", { trimempty = true })
   vim.api.nvim_put(lines, "l", true, false)
-  -- vim.cmd([[noautocmd normal! gv]]) -- @check
+  vim.cmd([[noautocmd normal! gv]])
 end) -- duplicate selection down
 
 vim.keymap.set("n", '"', "<C-^>") -- back to last buffer
@@ -400,10 +400,10 @@ vim.keymap.set("n", "<leader>r", vim.lsp.buf.rename)
 -- vim.keymap.set("v", "<up>", [[:'<,'>move '<-2<CR>gv=gv]], { noremap = true, silent = true }) -- Move selected lines up
 -- vim.keymap.set("v", "<down>", [[:'<,'>move '>+1<CR>gv=gv]], { noremap = true, silent = true }) -- Move selected lines down
 
-if not vim.g.skeletyl then
-  vim.keymap.set("v", "<K>", [[:'<,'>move '<-2<CR>gv=gv]], { noremap = true, silent = true }) -- Move selected lines up
-  vim.keymap.set("v", "<J>", [[:'<,'>move '>+1<CR>gv=gv]], { noremap = true, silent = true }) -- Move selected lines down
-end
+-- if not vim.g.skeletyl then
+--   vim.keymap.set("v", "<K>", [[:'<,'>move '<-2<CR>gv=gv]], { noremap = true, silent = true }) -- Move selected lines up
+--   vim.keymap.set("v", "<J>", [[:'<,'>move '>+1<CR>gv=gv]], { noremap = true, silent = true }) -- Move selected lines down
+-- end
 
 -- add undo capabilities in insert mode
 vim.keymap.set("i", "<space>", "<c-g>u<space>")
@@ -526,14 +526,16 @@ end
 -- vimscript stuff
 vim.cmd([[
 language en_US
-filetype on
-syntax on
-filetype plugin indent on
+" filetype on
+" syntax on
+" filetype plugin indent on
 
 " @windows: nextjs and sveltkit folder name pattern
 set isfname+=(
 
 set noswapfile
+
+set history=20
 
 " visual mode - paste without copying
 vnoremap <expr> p 'pgv"'.v:register.'y`>'

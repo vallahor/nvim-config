@@ -81,26 +81,38 @@ return {
         },
       })
 
+      -- https://github.com/hrsh7th/cmp-cmdline/issues/108#issuecomment-2003410847
+      local cmdline_cmp_state = "has_not_typed"
+      vim.api.nvim_create_autocmd({ "CmdlineEnter" }, {
+        command = "lua cmdline_cmp_state = 'has_not_typed'",
+      })
+      vim.api.nvim_create_autocmd({ "CmdlineChanged" }, {
+        callback = function()
+          if cmdline_cmp_state == "has_not_typed" then
+            cmdline_cmp_state = "has_typed"
+          elseif cmdline_cmp_state == "has_browsed_history" then
+            cmdline_cmp_state = "has_not_typed"
+          end
+        end,
+      })
+      local function select_or_fallback(select_action)
+        return cmp.mapping(function(fallback)
+          if cmdline_cmp_state == "has_typed" and cmp.visible() then
+            select_action()
+          else
+            cmdline_cmp_state = "has_browsed_history"
+            cmp.close()
+            fallback()
+          end
+        end, { "i", "c" })
+      end
+
       cmp.setup.cmdline(":", {
         mapping = cmp.mapping.preset.cmdline({
-          ["<C-j>"] = {
-            c = function(fallback)
-              if cmp.visible() then
-                cmp.select_next_item()
-              else
-                fallback()
-              end
-            end,
-          },
-          ["<C-k>"] = {
-            c = function(fallback)
-              if cmp.visible() then
-                cmp.select_prev_item()
-              else
-                fallback()
-              end
-            end,
-          },
+          ["<C-n>"] = select_or_fallback(cmp.select_next_item),
+          ["<C-p>"] = select_or_fallback(cmp.select_prev_item),
+          ["<Down>"] = select_or_fallback(cmp.select_next_item),
+          ["<Up>"] = select_or_fallback(cmp.select_prev_item),
           ["<Tab>"] = {
             c = function(_)
               if cmp.visible() then
