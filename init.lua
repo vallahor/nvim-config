@@ -11,7 +11,7 @@ if not vim.uv.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
-vim.g.mapleader = " "
+-- vim.g.mapleader = " "
 vim.g.skeletyl = true
 
 require("lazy").setup("plugins", {
@@ -25,6 +25,7 @@ require("lazy").setup("plugins", {
 -- vim.opt.guifont = { "JetBrains Mono NL:h11" }
 -- vim.opt.guifont = { "JetBrainsMono Nerd Font:h11" }
 vim.opt.guifont = { "JetBrainsMonoNL Nerd Font:h11" }
+-- vim.opt.guifont = { "GeistMono Nerd Font:h11" }
 vim.opt.shiftwidth = 4
 vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
@@ -56,20 +57,21 @@ vim.opt.scrolloff = 3
 vim.opt.backup = false
 vim.opt.writebackup = false
 vim.opt.gdefault = true
-vim.opt.cindent = true
+vim.opt.cindent = false -- check
 -- vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
 -- vim.opt.cino:append("L0,g0,l1,t0,w1,w4,m1")
 vim.opt.timeoutlen = 200
-vim.opt.ttimeoutlen = 100
+vim.opt.ttimeoutlen = 0
+vim.opt.updatetime = 50
 -- vim.opt.guicursor = "i-ci:block-iCursor"
-vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
+-- vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
 
 -- vim.opt.linespace = 2
 
 vim.opt.cmdheight = 0
 vim.opt.laststatus = 2
 vim.opt.showcmdloc = "statusline"
-vim.opt.statusline = " %f %m%=%S L%l,C%c "
+vim.opt.statusline = " %f %m%=%S %y L%l,C%c "
 -- vim.opt.winbar = " %f %m%=%l "
 
 -- vim.cmd([[
@@ -167,6 +169,20 @@ vim.keymap.set("n", "<esc>", function()
   vim.cmd.nohl()
 end, { silent = true }) -- nohighlight
 
+if true or not vim.g.skeletyl then
+  vim.keymap.set("n", "<space>", function()
+    for _, win in ipairs(vim.api.nvim_list_wins()) do
+      local config = vim.api.nvim_win_get_config(win)
+      if config.relative ~= "" then
+        vim.api.nvim_win_close(win, false)
+      end
+    end
+    vim.cmd.nohl()
+  end, { silent = true }) -- nohighlight
+
+  vim.keymap.set("v", "<space>", "<esc>")
+end
+
 vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>") -- save file
 -- vim.keymap.set({ "n", "v" }, "d<enter>", "<cmd>w!<CR><esc>", { silent = true }) -- save file
 
@@ -195,10 +211,10 @@ if vim.g.skeletyl then
   -- resize windows
   vim.keymap.set("n", "<c-0>", "<cmd>wincmd =<cr>") -- resize all windows
 
-  vim.keymap.set("n", "<a-s-right>", [[<cmd>vertical   resize +2<cr>]]) -- make the window biger   vertically
-  vim.keymap.set("n", "<a-s-left>", [[<cmd>vertical   resize -2<cr>]]) -- make the window smaller vertically
-  vim.keymap.set("n", "<a-s-up>", [[<cmd>horizontal resize +2<cr>]]) -- make the window bigger  horizontally
-  vim.keymap.set("n", "<a-s-down>", [[<cmd>horizontal resize -2<cr>]]) -- make the window smaller horizontally
+  vim.keymap.set("n", "<a-6>", [[<cmd>vertical   resize +2<cr>]]) -- make the window biger   vertically
+  vim.keymap.set("n", "<a-4>", [[<cmd>vertical   resize -2<cr>]]) -- make the window smaller vertically
+  vim.keymap.set("n", "<a-8>", [[<cmd>horizontal resize +2<cr>]]) -- make the window bigger  horizontally
+  vim.keymap.set("n", "<a-5>", [[<cmd>horizontal resize -2<cr>]]) -- make the window smaller horizontally
 
   -- vim.keymap.set("n", "<leader>=", "<c-w>=")
 
@@ -296,7 +312,6 @@ vim.keymap.set("i", "<c-bs>", function()
   -- eat upper
 
   while current_col > 0 do
-    local found = false
     current_char = vim.fn.getline("."):sub(current_col, current_col)
 
     if current_char == " " or current_char == "\t" and end_col - current_col > 0 then
@@ -316,7 +331,7 @@ vim.keymap.set("i", "<c-bs>", function()
   end
 
   vim.api.nvim_buf_set_text(0, row, current_col, row, end_col, {})
-end, { silent = true })
+end)
 
 vim.keymap.set("n", "x", '"_x') -- delete current char without copying
 vim.keymap.set("n", "<c-d>", '"_dd') -- delete line without copying
@@ -395,7 +410,7 @@ vim.keymap.set("n", "_", vim.diagnostic.open_float)
 
 vim.keymap.set("n", "K", vim.lsp.buf.hover)
 
-vim.keymap.set("n", "<leader>r", vim.lsp.buf.rename)
+-- vim.keymap.set("n", "<leader>r", vim.lsp.buf.rename)
 
 -- vim.keymap.set("v", "<up>", [[:'<,'>move '<-2<CR>gv=gv]], { noremap = true, silent = true }) -- Move selected lines up
 -- vim.keymap.set("v", "<down>", [[:'<,'>move '>+1<CR>gv=gv]], { noremap = true, silent = true }) -- Move selected lines down
@@ -526,9 +541,9 @@ end
 -- vimscript stuff
 vim.cmd([[
 language en_US
-" filetype on
-" syntax on
-" filetype plugin indent on
+filetype on
+syntax on
+filetype plugin indent on
 
 " @windows: nextjs and sveltkit folder name pattern
 set isfname+=(
@@ -612,17 +627,22 @@ vim.api.nvim_create_autocmd("DiagnosticChanged", {
   command = "silent! redrawtabline",
 })
 
-vim.diagnostic.config({
-  virtual_text = false,
-  signs = {
-    numhl = {
-      [vim.diagnostic.severity.ERROR] = "ErrorLineBg",
-      [vim.diagnostic.severity.WARN] = "WarningLineBg",
-      [vim.diagnostic.severity.INFO] = "InfoLineBg",
-      [vim.diagnostic.severity.HINT] = "HintLineBg",
-    },
-  },
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "elixir", "heex", "eex" },
+  command = [[set nocindent]],
 })
+
+-- vim.diagnostic.config({
+--   virtual_text = false,
+--   signs = {
+--     numhl = {
+--       [vim.diagnostic.severity.ERROR] = "ErrorLineBg",
+--       [vim.diagnostic.severity.WARN] = "WarningLineBg",
+--       [vim.diagnostic.severity.INFO] = "InfoLineBg",
+--       [vim.diagnostic.severity.HINT] = "HintLineBg",
+--     },
+--   },
+-- })
 -- close quickfix menu after selecting choice
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "qf" },
