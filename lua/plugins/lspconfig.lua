@@ -8,8 +8,7 @@ return {
 
     -- https://www.mitchellhanberg.com/modern-format-on-save-in-neovim/
     vim.api.nvim_create_autocmd("LspAttach", {
-      -- pattern = { "*.odin", "*.zig", "*.cs", "*.ex", "*.exs", "*.heex" },
-      pattern = { "*.zig", "*.cs", "*.ex", "*.exs", "*.heex" },
+      pattern = { "*.svelte", "*.odin", "*.zig", "*.cs", "*.ex", "*.exs", "*.heex" },
       group = vim.api.nvim_create_augroup("lsp", { clear = true }),
       callback = function(args)
         vim.api.nvim_create_autocmd("BufWritePre", {
@@ -31,7 +30,6 @@ return {
     })
 
     local capabilities = require("cmp_nvim_lsp").default_capabilities()
-
     local lspconfig = require("lspconfig")
 
     lspconfig.lua_ls.setup({
@@ -94,23 +92,23 @@ return {
     lspconfig.tailwindcss.setup({
       capabilities = capabilities,
       on_attach = on_attach,
-      filetypes = { "html", "elixir", "eelixir", "heex", "htmldjango" },
-      init_options = {
-        userLanguages = {
-          elixir = "html-eex",
-          eelixir = "html-eex",
-          heex = "html-eex",
-        },
-      },
-      settings = {
-        tailwindCSS = {
-          experimental = {
-            classRegex = {
-              'class[:]\\s*"([^"]*)"',
-            },
-          },
-        },
-      },
+      -- filetypes = { "html", "elixir", "eelixir", "heex", "htmldjango" },
+      -- init_options = {
+      --   userLanguages = {
+      --     elixir = "html-eex",
+      --     eelixir = "html-eex",
+      --     heex = "html-eex",
+      --   },
+      -- },
+      -- settings = {
+      --   tailwindCSS = {
+      --     experimental = {
+      --       classRegex = {
+      --         'class[:]\\s*"([^"]*)"',
+      --       },
+      --     },
+      --   },
+      -- },
     })
 
     lspconfig.clangd.setup({
@@ -140,8 +138,16 @@ return {
       settings = {
         elixirLS = {
           dialyzerEnabled = false,
+          fetchDeps = false,
+          enableTestLenses = false,
+          suggestSpecs = false,
         },
       },
+    })
+
+    lspconfig.svelte.setup({
+      capabilities = capabilities,
+      on_attach = on_attach,
     })
 
     lspconfig.sqlls.setup({

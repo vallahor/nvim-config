@@ -4,7 +4,7 @@ return {
   build = "cd formatter && npm i && npm run build",
   config = function()
     require("tailwind-sorter").setup({
-      on_save_enabled = false,
+      on_save_enabled = true,
       on_save_pattern = {
         "*.templ",
         "*.svelte",

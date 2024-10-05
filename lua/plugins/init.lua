@@ -66,4 +66,7 @@ return {
       ]])
     end,
   },
+  {
+    "ziglang/zig.vim",
+  },
 }

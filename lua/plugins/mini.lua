@@ -84,6 +84,7 @@ return {
 
       --       return MiniStatusline.combine_groups({
       --         { hl = mode_hl, strings = { mode } },
+      --         -- { hl = mode_hl, strings = { mode:sub(1, 1) } },
       --         "%<",
       --         { hl = "MiniStatuslineFilename", strings = { filename } },
       --         "%=",
@@ -132,8 +133,8 @@ return {
         " hi MiniCursorwordCurrent guisp=none guifg=none guibg=#1c212f gui=none
         " hi MiniCursorword        guisp=none guifg=none guibg=#2D2829 gui=none
         " hi MiniCursorwordCurrent guisp=none guifg=none guibg=#2D2829 gui=none
-        hi MiniCursorword        guisp=#87787b guifg=none guibg=none gui=underline
-        hi MiniCursorwordCurrent guisp=#87787b guifg=none guibg=none gui=underline
+        " hi MiniCursorword        guisp=#87787b guifg=none guibg=none gui=underline
+        " hi MiniCursorwordCurrent guisp=#87787b guifg=none guibg=none gui=underline
       ]])
     end,
   },

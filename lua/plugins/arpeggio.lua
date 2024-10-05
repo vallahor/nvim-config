@@ -2,7 +2,7 @@ return {
   {
     "kana/vim-arpeggio",
     config = function()
-      if not vim.g.skeletyl then
+      if true or not vim.g.skeletyl then
         function EscNormalMode()
           for _, win in ipairs(vim.api.nvim_list_wins()) do
             local config = vim.api.nvim_win_get_config(win)
@@ -14,26 +14,27 @@ return {
         end
 
         vim.cmd([[
-          let g:arpeggio_timeoutlen = 80
+          " let g:arpeggio_timeoutlen = 80
+          let g:arpeggio_timeoutlen = 150
 
-          call arpeggio#map('n', '', 0, 'jk', '<cmd>lua EscNormalMode()<cr>')
-          call arpeggio#map('n', '', 0, 'kj', '<cmd>lua EscNormalMode()<cr>')
+          " call arpeggio#map('n', '', 0, 'jk', '<cmd>lua EscNormalMode()<cr>')
+          " call arpeggio#map('n', '', 0, 'kj', '<cmd>lua EscNormalMode()<cr>')
           " call arpeggio#map('n', '', 0, 'jk', '<Esc>')
           " call arpeggio#map('n', '', 0, 'kj', '<Esc>')
 
           call arpeggio#map('i', '', 0, 'jk', '<Esc>')
-          call arpeggio#map('v', '', 0, 'jk', '<Esc>')
-          call arpeggio#map('s', '', 0, 'jk', '<Esc>')
-          call arpeggio#map('x', '', 0, 'jk', '<Esc>')
+          " call arpeggio#map('v', '', 0, 'jk', '<Esc>')
+          " call arpeggio#map('s', '', 0, 'jk', '<Esc>')
+          " call arpeggio#map('x', '', 0, 'jk', '<Esc>')
           call arpeggio#map('c', '', 0, 'jk', '<c-c>')
           call arpeggio#map('l', '', 0, 'jk', '<Esc>')
           call arpeggio#map('t', '', 0, 'jk', '<C-\><C-n>')
           call arpeggio#map('o', '', 0, 'jk', '<Esc>')
 
           call arpeggio#map('i', '', 0, 'kj', '<Esc>')
-          call arpeggio#map('v', '', 0, 'kj', '<Esc>')
-          call arpeggio#map('s', '', 0, 'kj', '<Esc>')
-          call arpeggio#map('x', '', 0, 'kj', '<Esc>')
+          " call arpeggio#map('v', '', 0, 'kj', '<Esc>')
+          " call arpeggio#map('s', '', 0, 'kj', '<Esc>')
+          " call arpeggio#map('x', '', 0, 'kj', '<Esc>')
           call arpeggio#map('c', '', 0, 'kj', '<c-c>')
           call arpeggio#map('l', '', 0, 'kj', '<Esc>')
           call arpeggio#map('t', '', 0, 'kj', '<C-\><C-n>')

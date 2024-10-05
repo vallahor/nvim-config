@@ -42,6 +42,12 @@ return {
       renderer = {
         indent_markers = {
           enable = true,
+          icons = {
+            corner = "│",
+            edge = "│",
+            item = "│",
+            bottom = "│",
+          },
         },
         icons = {
           show = {

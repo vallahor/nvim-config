@@ -1,25 +1,61 @@
 return {
-  {
-    "windwp/nvim-autopairs",
-    event = "InsertEnter",
-    config = function()
-      local autopairs = require("nvim-autopairs")
-      autopairs.setup({
-        disable_filetype = { "TelescopePrompt", "vim" },
-        ignored_next_char = [=[[
-            %w%.%w%_%w%-%w%*%w%&%w%(%w%[%w%{%w%"%w%'%w%`%w%%%
-          ]]=],
-      })
-      autopairs.add_rules(require("nvim-autopairs.rules.endwise-elixir"))
+  -- {
+  --   "windwp/nvim-autopairs",
+  --   event = "InsertEnter",
+  --   config = function()
+  --     local autopairs = require("nvim-autopairs")
+  --     autopairs.setup({
+  --       disable_filetype = { "TelescopePrompt", "vim" },
+  --       ignored_next_char = [=[[
+  --           %w%.%w%_%w%-%w%*%w%&%w%(%w%[%w%{%w%"%w%'%w%`%w%%%
+  --         ]]=],
+  --     })
+  --     autopairs.add_rules(require("nvim-autopairs.rules.endwise-elixir"))
 
-      -- local npairs = require("nvim-autopairs")
-      -- local Rule = require("nvim-autopairs.rule")
-      -- local cond = require("nvim-autopairs.conds")
+  --     -- local npairs = require("nvim-autopairs")
+  --     -- local Rule = require("nvim-autopairs.rule")
+  --     -- local cond = require("nvim-autopairs.conds")
+  --     -- function Rule2(a1, ins, a2, lang)
+  --     --   npairs.add_rule(Rule(ins, ins, lang)
+  --     --     :with_pair(function(opts)
+  --     --       return a1 .. a2 == opts.line:sub(opts.col - #a1, opts.col + #a2 - 1)
+  --     --     end)
+  --     --     :with_move(cond.none())
+  --     --     :with_cr(cond.none())
+  --     --     :with_del(function(opts)
+  --     --       local col = vim.api.nvim_win_get_cursor(0)[2]
+  --     --       return a1 .. ins .. ins .. a2 == opts.line:sub(col - #a1 - #ins + 1, col + #ins + #a2) -- insert only works for #ins == 1 anyway
+  --     --     end))
+  --     -- end
 
-      -- npairs.add_rules({
-      --   Rule("<%% ", " %>", { "elixir", "heex", "eelixir" }):with_move(cond.none()):use_regex(true),
-      --   Rule("<%%= ", " %>", { "elixir", "heex", "eelixir" }):with_move(cond.none()):use_regex(true),
-      -- })
-    end,
-  },
+  --     -- Rule2("<%", " ", "%>", { "heex", "elixir", "eex" })
+  --     -- Rule2("<%=", " ", "%>", { "heex", "elixir", "eex" })
+
+  --     -- local npairs = require("nvim-autopairs")
+  --     -- local Rule = require("nvim-autopairs.rule")
+  --     -- local cond = require("nvim-autopairs.conds")
+
+  --     -- npairs.add_rules({
+  --     --   Rule("<%% ", " %>", { "elixir", "heex", "eelixir" }):with_move(cond.none()):use_regex(true),
+  --     --   Rule("<%%= ", " %>", { "elixir", "heex", "eelixir" }):with_move(cond.none()):use_regex(true),
+  --     -- })
+  --   end,
+  -- },
+  -- {
+  --   "m4xshen/autoclose.nvim",
+  --   event = "InsertEnter",
+  --   config = function()
+  --     require("autoclose").setup({
+  --       options = {
+  --         disabled_filetypes = { "text", "terminal" },
+  --         disable_when_touch = true,
+  --         disable_command_mode = true,
+  --       },
+  --       keys = {
+  --         -- ['"""'] = { escape = false, close = true, pair = '""""""', disabled_filetypes = {} },
+  --         --   ["<%"] = { escape = false, close = true, pair = "%>", disabled_filetypes = {} },
+  --       },
+  --     })
+  --   end,
+  -- },
 }
