@@ -131,6 +131,7 @@ if vim.g.skeletyl then
     ["Goto Prev"] = "{",
     ["Skip Region"] = "+",
     ["Remove Region"] = "-",
+    ["Exit"] = "<space>",
   }
 else
   -- VM --
@@ -152,6 +153,7 @@ else
     ["Skip Region"] = "<a-;>",
     ["Remove Region"] = "<a-m>",
     ["I BS"] = "",
+    ["Exit"] = "<space>",
   }
 end
 

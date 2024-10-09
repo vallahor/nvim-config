@@ -55,13 +55,13 @@ return {
         -- disable = { "python", "rust", "cpp", "go", "odin" },
       },
       incremental_selection = {
-        enable = true,
-        keymaps = {
-          init_selection = "m",
-          node_incremental = "m",
-          node_decremental = "M",
-          scope_incremental = "<nop>",
-        },
+        enable = false,
+        -- keymaps = {
+        --   init_selection = "m",
+        --   node_incremental = "m",
+        --   node_decremental = "M",
+        --   scope_incremental = "<nop>",
+        -- },
       },
       endwise = {
         enable = true,

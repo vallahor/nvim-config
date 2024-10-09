@@ -6,14 +6,21 @@ return {
     event = "VeryLazy",
     config = function()
       require("swap_buffer")
-      vim.keymap.set("n", "<leader>h", "<cmd>lua Swap_left()<CR>")
-      vim.keymap.set("n", "<leader>j", "<cmd>lua Swap_down()<CR>")
-      vim.keymap.set("n", "<leader>k", "<cmd>lua Swap_up()<CR>")
-      vim.keymap.set("n", "<leader>l", "<cmd>lua Swap_right()<CR>")
-      -- vim.keymap.set("n", "<a-h>", "<cmd>lua Swap_left()<CR>", { silent = true })
-      -- vim.keymap.set("n", "<a-j>", "<cmd>lua Swap_down()<CR>", { silent = true })
-      -- vim.keymap.set("n", "<a-k>", "<cmd>lua Swap_up()<CR>", { silent = true })
-      -- vim.keymap.set("n", "<a-l>", "<cmd>lua Swap_right()<CR>", { silent = true })
+      -- vim.keymap.set("n", "<leader>h", "<cmd>lua Swap_left()<CR>")
+      -- vim.keymap.set("n", "<leader>j", "<cmd>lua Swap_down()<CR>")
+      -- vim.keymap.set("n", "<leader>k", "<cmd>lua Swap_up()<CR>")
+      -- vim.keymap.set("n", "<leader>l", "<cmd>lua Swap_right()<CR>")
+      if vim.g.skeletyl then
+        vim.keymap.set("n", "<a-H>", "<cmd>lua Swap_left()<CR>")
+        vim.keymap.set("n", "<a-J>", "<cmd>lua Swap_down()<CR>")
+        vim.keymap.set("n", "<a-K>", "<cmd>lua Swap_up()<CR>")
+        vim.keymap.set("n", "<a-L>", "<cmd>lua Swap_right()<CR>")
+      else
+        vim.keymap.set("n", "<a-h>", "<cmd>lua Swap_left()<CR>")
+        vim.keymap.set("n", "<a-j>", "<cmd>lua Swap_down()<CR>")
+        vim.keymap.set("n", "<a-k>", "<cmd>lua Swap_up()<CR>")
+        vim.keymap.set("n", "<a-l>", "<cmd>lua Swap_right()<CR>")
+      end
     end,
   },
   {
@@ -34,21 +41,21 @@ return {
       end
     end,
   },
-  {
-    "mattn/emmet-vim",
-    config = function()
-      vim.api.nvim_create_autocmd("BufEnter", {
-        pattern = { "*.svelte", "*.vue", "*.tsx", "*.jsx", "*.html", ".*ex" },
-        command = "EmmetInstall",
-      })
-      vim.keymap.set("i", "<c-y>", "<nop>")
-      vim.keymap.set("i", "<c-y>", "<Plug>(emmet-expand-abbr)", { nowait = true, silent = true })
+  -- {
+  --   "mattn/emmet-vim",
+  --   config = function()
+  --     vim.api.nvim_create_autocmd("BufEnter", {
+  --       pattern = { "*.svelte", "*.vue", "*.tsx", "*.jsx", "*.html", ".*ex" },
+  --       command = "EmmetInstall",
+  --     })
+  --     vim.keymap.set("i", "<c-y>", "<nop>")
+  --     vim.keymap.set("i", "<c-y>", "<Plug>(emmet-expand-abbr)", { nowait = true, silent = true })
 
-      vim.keymap.set("n", "<leader>mc", "<cmd>call emmet#toggleComment()<cr>")
-      vim.keymap.set("v", "<leader>ma", '<cmd>call emmet#expandAbbr(2,"")<cr>')
-      vim.keymap.set("n", "<leader>md", "<cmd>call emmet#removeTag()<cr>")
-    end,
-  },
+  --     vim.keymap.set("n", "<leader>mc", "<cmd>call emmet#toggleComment()<cr>")
+  --     vim.keymap.set("v", "<leader>ma", '<cmd>call emmet#expandAbbr(2,"")<cr>')
+  --     vim.keymap.set("n", "<leader>md", "<cmd>call emmet#removeTag()<cr>")
+  --   end,
+  -- },
   {
     "junegunn/vim-easy-align",
     config = function()
@@ -57,7 +64,6 @@ return {
   },
   {
     "habamax/vim-godot",
-    -- event = "BufEnter *.gd",
     config = function()
       vim.cmd([[
         setlocal tabstop=4
@@ -68,5 +74,10 @@ return {
   },
   {
     "ziglang/zig.vim",
+    config = function()
+      vim.cmd([[
+        let g:zig_fmt_autosave = 0
+      ]])
+    end,
   },
 }
