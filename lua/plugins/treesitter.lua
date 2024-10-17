@@ -9,6 +9,7 @@ return {
     event = { "BufRead", "BufEnter" },
     opts = {
       ensure_installed = {
+        "asm",
         "bash",
         "lua",
         "vim",

@@ -119,6 +119,13 @@ return {
     lspconfig.rust_analyzer.setup({
       capabilities = capabilities,
       on_attach = on_attach,
+      settings = {
+        ["rust-analyzer"] = {
+          cargo = {
+            allTargets = false,
+          },
+        },
+      },
     })
 
     lspconfig.ols.setup({

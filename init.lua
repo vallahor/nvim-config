@@ -171,7 +171,7 @@ vim.keymap.set("n", "<esc>", function()
   vim.cmd.nohl()
 end, { silent = true }) -- nohighlight
 
-if true or not vim.g.skeletyl then
+if not vim.g.skeletyl then
   vim.keymap.set("n", "<space>", function()
     for _, win in ipairs(vim.api.nvim_list_wins()) do
       local config = vim.api.nvim_win_get_config(win)
