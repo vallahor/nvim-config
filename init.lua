@@ -12,7 +12,7 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 -- vim.g.mapleader = " "
-vim.g.skeletyl = true
+vim.g.skeletyl = false
 
 require("lazy").setup("plugins", {
   change_detection = {
@@ -159,6 +159,32 @@ end
 
 -- MAPPING --
 
+-- check if that's the best approach
+-- the issue is the timing differs from arpeggio
+-- so that's could be an issue in day to day usage
+vim.keymap.set("i", "jk", "<esc>")
+vim.keymap.set("i", "kj", "<esc>")
+
+if vim.g.skeletyl then
+  vim.keymap.set("i", "_{", "<esc>")
+  vim.keymap.set("i", "{_", "<esc>")
+else
+  vim.keymap.set("i", "jK", "<esc>")
+  vim.keymap.set("i", "kJ", "<esc>")
+
+  vim.keymap.set("i", "Jk", "<esc>")
+  vim.keymap.set("i", "Kj", "<esc>")
+
+  vim.keymap.set("i", "JK", "<esc>")
+  vim.keymap.set("i", "KJ", "<esc>")
+end
+
+vim.keymap.set("c", "jk", "<c-c><Esc>")
+vim.keymap.set("c", "kj", "<c-c><Esc>")
+
+vim.keymap.set("t", "jk", "<C-\\><C-n>")
+vim.keymap.set("t", "kj", "<C-\\><C-n>")
+
 -- vim.keymap.set("n", "<leader><leader>", "<cmd>nohl<cr><esc>")
 -- vim.keymap.set("n", "<esc>", "<cmd>nohl<cr><esc>", { silent = true }) -- nohighlight
 vim.keymap.set("n", "<esc>", function()
@@ -171,7 +197,7 @@ vim.keymap.set("n", "<esc>", function()
   vim.cmd.nohl()
 end, { silent = true }) -- nohighlight
 
-if not vim.g.skeletyl then
+if false and not vim.g.skeletyl then
   vim.keymap.set("n", "<space>", function()
     for _, win in ipairs(vim.api.nvim_list_wins()) do
       local config = vim.api.nvim_win_get_config(win)
@@ -320,7 +346,7 @@ vim.keymap.set("i", "<c-bs>", function()
       break
     end
 
-    if string.match(current_char, "%p") and current_col ~= end_col then
+    if string.match(current_char, "%p") or string.match(current_char, "%d") and current_col ~= end_col then
       break
     end
 
