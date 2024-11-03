@@ -112,7 +112,7 @@ return {
 
       if vim.g.skeletyl then
         vim.keymap.set("n", "<c-w>", "<cmd>lua MiniBufremove.delete(0, false)<CR>", { silent = true })
-        vim.keymap.set("n", "<f12>", "<cmd>lua MiniBufremove.delete(0, true)<CR>", { silent = true })
+        vim.keymap.set("n", "<c-x>", "<cmd>lua MiniBufremove.delete(0, true)<CR>", { silent = true })
       else
         vim.keymap.set("n", "<c-w>", "<cmd>lua MiniBufremove.delete(0, false)<CR>", { silent = true })
         vim.keymap.set("n", "<a-w>", "<cmd>lua MiniBufremove.delete(0, true)<CR>", { silent = true })

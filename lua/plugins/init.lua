@@ -41,21 +41,21 @@ return {
       end
     end,
   },
-  {
-    "mattn/emmet-vim",
-    config = function()
-      vim.api.nvim_create_autocmd("BufEnter", {
-        pattern = { "*.svelte", "*.vue", "*.tsx", "*.jsx", "*.html", ".*ex" },
-        command = "EmmetInstall",
-      })
-      vim.keymap.set("i", "<c-y>", "<nop>")
-      vim.keymap.set("i", "<c-y>", "<Plug>(emmet-expand-abbr)", { nowait = true, silent = true })
+  -- {
+  --   "mattn/emmet-vim",
+  --   config = function()
+  --     vim.api.nvim_create_autocmd("BufEnter", {
+  --       pattern = { "*.svelte", "*.vue", "*.tsx", "*.jsx", "*.html", ".*ex" },
+  --       command = "EmmetInstall",
+  --     })
+  --     vim.keymap.set("i", "<c-y>", "<nop>")
+  --     vim.keymap.set("i", "<c-y>", "<Plug>(emmet-expand-abbr)", { nowait = true, silent = true })
 
-      vim.keymap.set("n", "<leader>mc", "<cmd>call emmet#toggleComment()<cr>")
-      vim.keymap.set("v", "<leader>ma", '<cmd>call emmet#expandAbbr(2,"")<cr>')
-      vim.keymap.set("n", "<leader>md", "<cmd>call emmet#removeTag()<cr>")
-    end,
-  },
+  --     vim.keymap.set("n", "<leader>mc", "<cmd>call emmet#toggleComment()<cr>")
+  --     vim.keymap.set("v", "<leader>ma", '<cmd>call emmet#expandAbbr(2,"")<cr>')
+  --     vim.keymap.set("n", "<leader>md", "<cmd>call emmet#removeTag()<cr>")
+  --   end,
+  -- },
   {
     "junegunn/vim-easy-align",
     config = function()
@@ -63,21 +63,24 @@ return {
     end,
   },
   {
-    "habamax/vim-godot",
-    config = function()
-      vim.cmd([[
-        setlocal tabstop=4
-        setlocal shiftwidth=4
-        setlocal indentexpr=
-      ]])
-    end,
+    "sheerun/vim-polyglot",
   },
-  {
-    "ziglang/zig.vim",
-    config = function()
-      vim.cmd([[
-        let g:zig_fmt_autosave = 0
-      ]])
-    end,
-  },
+  -- {
+  --   "habamax/vim-godot",
+  --   config = function()
+  --     vim.cmd([[
+  --       setlocal tabstop=4
+  --       setlocal shiftwidth=4
+  --       setlocal indentexpr=
+  --     ]])
+  --   end,
+  -- },
+  -- {
+  --   "ziglang/zig.vim",
+  --   config = function()
+  --     vim.cmd([[
+  --       let g:zig_fmt_autosave = 0
+  --     ]])
+  --   end,
+  -- },
 }

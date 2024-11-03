@@ -1,5 +1,5 @@
 return {
-  "elixir-editors/vim-elixir",
+  -- "elixir-editors/vim-elixir",
   -- config = function()
   -- vim.api.nvim_create_autocmd({ "BufEnter", "BufRead", "BufWinEnter" }, {
   --   pattern = { "*.*ex", "*.*exs" },

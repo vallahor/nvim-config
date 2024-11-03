@@ -12,7 +12,7 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 -- vim.g.mapleader = " "
-vim.g.skeletyl = false
+vim.g.skeletyl = true
 
 require("lazy").setup("plugins", {
   change_detection = {
@@ -23,8 +23,8 @@ require("lazy").setup("plugins", {
 -- SETTINGS --
 
 -- vim.opt.guifont = { "JetBrains Mono NL:h11" }
--- vim.opt.guifont = { "JetBrainsMono Nerd Font:h11" }
-vim.opt.guifont = { "JetBrainsMonoNL Nerd Font:h11" }
+vim.opt.guifont = { "JetBrainsMono Nerd Font:h11" }
+-- vim.opt.guifont = { "JetBrainsMonoNL Nerd Font:h11" }
 -- vim.opt.guifont = { "GeistMono Nerd Font:h11" }
 vim.opt.shiftwidth = 4
 vim.opt.tabstop = 4
@@ -98,21 +98,21 @@ vim.bo.grepprg = "rg"
 
 vim.g.user_emmet_install_global = 0
 
--- work around on python default configs
--- check why in the other project indents are a complete mess
-vim.g.python_indent = {
-  disable_parentheses_indenting = false,
-  closed_paren_align_last_line = false,
-  searchpair_timeout = 150,
-  continue = 4,
-  open_paren = 4,
-  nested_paren = 4,
-}
+-- -- work around on python default configs
+-- -- check why in the other project indents are a complete mess
+-- vim.g.python_indent = {
+--   disable_parentheses_indenting = false,
+--   closed_paren_align_last_line = false,
+--   searchpair_timeout = 150,
+--   continue = 4,
+--   open_paren = 4,
+--   nested_paren = 4,
+-- }
 
+-- VM --
+vim.g.VM_theme = "iceblue"
+vim.g.VM_default_mappings = 0
 if vim.g.skeletyl then
-  -- VM --
-  vim.g.VM_theme = "iceblue"
-  vim.g.VM_default_mappings = 0
   vim.g.VM_custom_remaps = {
     [")"] = "$",
     ["("] = "0",
@@ -131,12 +131,8 @@ if vim.g.skeletyl then
     ["Goto Prev"] = "{",
     ["Skip Region"] = "+",
     ["Remove Region"] = "-",
-    ["Exit"] = "<space>",
   }
 else
-  -- VM --
-  vim.g.VM_theme = "iceblue"
-  vim.g.VM_default_mappings = 0
   vim.g.VM_custom_remaps = { ["-"] = "$" }
   vim.g.VM_maps = {
     ["Find Under"] = "<a-u>",
@@ -159,16 +155,26 @@ end
 
 -- MAPPING --
 
--- check if that's the best approach
--- the issue is the timing differs from arpeggio
--- so that's could be an issue in day to day usage
-vim.keymap.set("i", "jk", "<esc>")
-vim.keymap.set("i", "kj", "<esc>")
+function EscNormalMode()
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    local config = vim.api.nvim_win_get_config(win)
+    if config.relative ~= "" then
+      vim.api.nvim_win_close(win, false)
+    end
+  end
+  vim.cmd.nohl()
+end
 
-if vim.g.skeletyl then
-  vim.keymap.set("i", "_{", "<esc>")
-  vim.keymap.set("i", "{_", "<esc>")
-else
+vim.keymap.set("n", "<esc>", "<cmd>lua EscNormalMode()<cr>")
+
+if false then
+  if vim.g.skeletyl then
+    -- vim.keymap.set("i", "_{", "<esc>")
+    -- vim.keymap.set("i", "{_", "<esc>")
+  end
+  vim.keymap.set("i", "jk", "<esc>")
+  vim.keymap.set("i", "kj", "<esc>")
+
   vim.keymap.set("i", "jK", "<esc>")
   vim.keymap.set("i", "kJ", "<esc>")
 
@@ -177,38 +183,12 @@ else
 
   vim.keymap.set("i", "JK", "<esc>")
   vim.keymap.set("i", "KJ", "<esc>")
-end
 
-vim.keymap.set("c", "jk", "<c-c><Esc>")
-vim.keymap.set("c", "kj", "<c-c><Esc>")
+  vim.keymap.set("c", "jk", "<c-c><Esc>")
+  vim.keymap.set("c", "kj", "<c-c><Esc>")
 
-vim.keymap.set("t", "jk", "<C-\\><C-n>")
-vim.keymap.set("t", "kj", "<C-\\><C-n>")
-
--- vim.keymap.set("n", "<leader><leader>", "<cmd>nohl<cr><esc>")
--- vim.keymap.set("n", "<esc>", "<cmd>nohl<cr><esc>", { silent = true }) -- nohighlight
-vim.keymap.set("n", "<esc>", function()
-  for _, win in ipairs(vim.api.nvim_list_wins()) do
-    local config = vim.api.nvim_win_get_config(win)
-    if config.relative ~= "" then
-      vim.api.nvim_win_close(win, false)
-    end
-  end
-  vim.cmd.nohl()
-end, { silent = true }) -- nohighlight
-
-if false and not vim.g.skeletyl then
-  vim.keymap.set("n", "<space>", function()
-    for _, win in ipairs(vim.api.nvim_list_wins()) do
-      local config = vim.api.nvim_win_get_config(win)
-      if config.relative ~= "" then
-        vim.api.nvim_win_close(win, false)
-      end
-    end
-    vim.cmd.nohl()
-  end, { silent = true }) -- nohighlight
-
-  vim.keymap.set("v", "<space>", "<esc>")
+  vim.keymap.set("t", "jk", "<C-\\><C-n>")
+  vim.keymap.set("t", "kj", "<C-\\><C-n>")
 end
 
 vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>") -- save file
@@ -346,7 +326,7 @@ vim.keymap.set("i", "<c-bs>", function()
       break
     end
 
-    if string.match(current_char, "%p") or string.match(current_char, "%d") and current_col ~= end_col then
+    if (string.match(current_char, "%p") or string.match(current_char, "%d")) and current_col ~= end_col then
       break
     end
 
@@ -628,7 +608,7 @@ autocmd! BufNewFile,BufRead *.gs,*.vs,*.fs,*.vert,*.frag,*.geom set ft=glsl
 set pumblend=15
 
 " c indent
-autocmd BufWinEnter,BufEnter,BufRead *.c,*.cpp,*.h set cino=Ls,g0,l1,t0,w1,(0,w4
+" autocmd BufWinEnter,BufEnter,BufRead *.c,*.cpp,*.h set cino=Ls,g0,l1,t0,w1,(0,w4
 ]])
 
 if vim.g.neovide then

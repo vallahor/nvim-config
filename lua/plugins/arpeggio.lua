@@ -2,7 +2,7 @@ return {
   {
     "kana/vim-arpeggio",
     config = function()
-      if true or not vim.g.skeletyl then
+      if not vim.g.skeletyl then
         function EscNormalMode()
           for _, win in ipairs(vim.api.nvim_list_wins()) do
             local config = vim.api.nvim_win_get_config(win)
