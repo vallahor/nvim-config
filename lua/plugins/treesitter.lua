@@ -37,19 +37,25 @@ return {
         "tsx",
         "jsdoc",
         "svelte",
+        "vue",
         "sql",
         "yaml",
         "dockerfile",
-        "elixir",
-        "heex",
         "eex",
+        "heex",
+        "elixir",
+        "ocaml",
+        "ocaml_interface",
+        "php",
+        "php_only",
+        "phpdoc",
       },
       highlight = {
         enable = true,
       },
       indent = {
         enable = true,
-        -- disable = { "python", "rust", "cpp", "go", "odin" },
+        disable = { "python", "rust", "cpp", "go", "odin", "ocaml", "ocaml_interface" },
       },
       incremental_selection = {
         enable = true,
@@ -66,11 +72,28 @@ return {
     },
     config = function(_, opts)
       require("nvim-treesitter.install").compilers = { "clang" }
-      require("nvim-treesitter.configs").setup(opts)
 
       vim.cmd([[
           autocmd BufRead *.scm set filetype=query
       ]])
+
+      ---@class ParserInfo[]
+      local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
+      parser_config.blade = {
+        install_info = {
+          url = "https://github.com/EmranMR/tree-sitter-blade",
+          files = {
+            "src/parser.c",
+            -- 'src/scanner.cc',
+          },
+          branch = "main",
+          generate_requires_npm = true,
+          requires_generate_from_grammar = true,
+        },
+        filetype = "blade",
+      }
+
+      require("nvim-treesitter.configs").setup(opts)
     end,
   },
 }

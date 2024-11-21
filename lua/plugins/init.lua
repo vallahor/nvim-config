@@ -1,6 +1,7 @@
 return {
   { "folke/lazy.nvim", version = "*" },
   { "tpope/vim-repeat", event = "VeryLazy" },
+  -- { "sheerun/vim-polyglot" },
   {
     dir = "../swap_buffer.lua",
     event = "VeryLazy",
@@ -61,9 +62,6 @@ return {
     config = function()
       vim.keymap.set({ "n", "x" }, "ga", "<Plug>(EasyAlign)")
     end,
-  },
-  {
-    "sheerun/vim-polyglot",
   },
   -- {
   --   "habamax/vim-godot",

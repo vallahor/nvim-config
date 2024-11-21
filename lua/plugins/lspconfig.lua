@@ -8,7 +8,7 @@ return {
 
     -- https://www.mitchellhanberg.com/modern-format-on-save-in-neovim/
     vim.api.nvim_create_autocmd("LspAttach", {
-      pattern = { "*.svelte", "*.odin", "*.zig", "*.cs", "*.ex", "*.exs", "*.heex" },
+      pattern = { "*.svelte", "*.odin", "*.zig", "*.cs", "*.ex", "*.exs", "*.heex", "*.php", "*.vue" },
       group = vim.api.nvim_create_augroup("lsp", { clear = true }),
       callback = function(args)
         vim.api.nvim_create_autocmd("BufWritePre", {
@@ -72,8 +72,6 @@ return {
         python = {
           analysis = {
             typeCheckingMode = "off",
-            autoSearchPaths = true,
-            useLibraryCodeForTypes = true,
           },
         },
       },
@@ -157,6 +155,19 @@ return {
       on_attach = on_attach,
     })
 
+    lspconfig.volar.setup({
+      capabilities = capabilities,
+      on_attach = on_attach,
+      filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue", "json" },
+      init_options = {
+        typescript = {
+          tsdk = "C:/Users/Vallahor/AppData/Roaming/npm/node_modules/typescript/lib",
+          -- Alternative location if installed as root:
+          -- tsdk = '/usr/local/lib/node_modules/typescript/lib'
+        },
+      },
+    })
+
     lspconfig.sqlls.setup({
       capabilities = capabilities,
       on_attach = on_attach,
@@ -195,6 +206,37 @@ return {
     lspconfig.gdshader_lsp.setup({
       capabilities = capabilities,
       on_attach = on_attach,
+    })
+
+    lspconfig.intelephense.setup({
+      capabilities = capabilities,
+      on_attach = on_attach,
+      filetypes = { "php", "blade", "php_only" },
+      files = {
+        associations = { "*.php", "*.blade.php" }, -- Associating .blade.php files as well
+        maxSize = 5000000,
+      },
+    })
+
+    lspconfig.emmet_ls.setup({
+      capabilities = capabilities,
+      on_attach = on_attach,
+      filetypes = {
+        "astro",
+        "blade",
+        "css",
+        "eruby",
+        "html",
+        "htmldjango",
+        "javascriptreact",
+        "less",
+        "pug",
+        "sass",
+        "scss",
+        "svelte",
+        "typescriptreact",
+        "vue",
+      },
     })
 
     lspconfig.gopls.setup({

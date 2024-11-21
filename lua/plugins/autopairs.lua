@@ -2,7 +2,6 @@ return {
   {
     "windwp/nvim-autopairs",
     event = "InsertEnter",
-    enable = false,
     config = function()
       local autopairs = require("nvim-autopairs")
       autopairs.setup({
@@ -10,9 +9,9 @@ return {
         enable_check_bracket_line = true,
       })
       autopairs.add_rules(require("nvim-autopairs.rules.endwise-elixir"))
-      autopairs.remove_rule("'")
+      -- autopairs.remove_rule("'")
       -- or
-      -- autopairs.get_rules("'")[1].not_filetypes = { "scheme", "lisp", "rust" }
+      autopairs.get_rules("'")[1].not_filetypes = { "scheme", "lisp", "rust" }
     end,
   },
   -- {
@@ -26,7 +25,7 @@ return {
   --         disable_command_mode = true,
   --       },
   --       keys = {
-  --         ["'"] = { escape = false, close = false, pair = "''", disabled_filetypes = {} },
+  --         ["'"] = { escape = false, close = false, pair = "''", disabled_filetypes = {"rust"} },
   --         -- ["<%="] = { escape = false, close = true, pair = "<%= %>", disabled_filetypes = {} },
   --         -- ['"""'] = { escape = false, close = true, pair = '""""""', disabled_filetypes = {} },
   --       },

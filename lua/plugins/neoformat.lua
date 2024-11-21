@@ -7,6 +7,8 @@ return {
 
       vim.api.nvim_create_autocmd("BufWritePre", { pattern = "*.gd", command = ":Neoformat gdformat" })
 
+      vim.api.nvim_create_autocmd("BufWritePre", { pattern = "*.blade.php", command = ":Neoformat blade_formatter" })
+
       -- vim.api.nvim_create_autocmd("BufWritePre", { pattern = "*.py", command = ":Neoformat" })
 
       -- vim.api.nvim_create_autocmd("BufWritePre", {

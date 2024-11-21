@@ -25,7 +25,6 @@ require("lazy").setup("plugins", {
 -- vim.opt.guifont = { "JetBrains Mono NL:h11" }
 vim.opt.guifont = { "JetBrainsMono Nerd Font:h11" }
 -- vim.opt.guifont = { "JetBrainsMonoNL Nerd Font:h11" }
--- vim.opt.guifont = { "GeistMono Nerd Font:h11" }
 vim.opt.shiftwidth = 4
 vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
@@ -66,7 +65,8 @@ vim.opt.updatetime = 50
 -- vim.opt.guicursor = "i-ci:block-iCursor"
 -- vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
 
--- vim.opt.linespace = 2
+-- make sure that's work in all terminal emulators
+vim.opt.linespace = 6
 
 vim.opt.cmdheight = 0
 vim.opt.laststatus = 2
@@ -100,14 +100,14 @@ vim.g.user_emmet_install_global = 0
 
 -- -- work around on python default configs
 -- -- check why in the other project indents are a complete mess
--- vim.g.python_indent = {
---   disable_parentheses_indenting = false,
---   closed_paren_align_last_line = false,
---   searchpair_timeout = 150,
---   continue = 4,
---   open_paren = 4,
---   nested_paren = 4,
--- }
+vim.g.python_indent = {
+  disable_parentheses_indenting = false,
+  closed_paren_align_last_line = false,
+  searchpair_timeout = 150,
+  continue = 4,
+  open_paren = 4,
+  nested_paren = 4,
+}
 
 -- VM --
 vim.g.VM_theme = "iceblue"
@@ -131,6 +131,7 @@ if vim.g.skeletyl then
     ["Goto Prev"] = "{",
     ["Skip Region"] = "+",
     ["Remove Region"] = "-",
+    ["Exit"] = "<space>",
   }
 else
   vim.g.VM_custom_remaps = { ["-"] = "$" }
@@ -168,10 +169,15 @@ end
 vim.keymap.set("n", "<esc>", "<cmd>lua EscNormalMode()<cr>")
 
 if false then
-  if vim.g.skeletyl then
-    -- vim.keymap.set("i", "_{", "<esc>")
-    -- vim.keymap.set("i", "{_", "<esc>")
-  end
+  vim.keymap.set("n", "<space>", "<cmd>lua EscNormalMode()<cr>")
+  vim.keymap.set({ "v", "x" }, "<space>", "<esc>")
+end
+
+if false then
+  -- if vim.g.skeletyl then
+  --   vim.keymap.set("i", "_{", "<esc>")
+  --   vim.keymap.set("i", "{_", "<esc>")
+  -- end
   vim.keymap.set("i", "jk", "<esc>")
   vim.keymap.set("i", "kj", "<esc>")
 
@@ -253,6 +259,14 @@ else
   vim.keymap.set({ "n", "v" }, "<c-k>", "<cmd>wincmd k<cr>") -- move to window up
   vim.keymap.set({ "n", "v" }, "<c-l>", "<cmd>wincmd l<cr>") -- move to window right
 end
+
+-- insert semicolumn `;` to the end of line
+-- without losing cursor position
+vim.keymap.set("i", "<c-;>", function()
+  local end_col = #vim.fn.getline(".")
+  local row = vim.fn.line(".") - 1
+  vim.api.nvim_buf_set_text(0, row, end_col, row, end_col, { ";" })
+end)
 
 vim.keymap.set("c", "<c-v>", "<c-r>*") -- paste to command line mode
 
@@ -391,17 +405,28 @@ vim.keymap.set("n", "<c-p>", '"0yy"0P') -- duplicate line up
 vim.keymap.set("n", "<c-n>", '"0yy"0p') -- duplicate line down
 
 vim.keymap.set("v", "<c-p>", '"0y"0P') -- duplicate selection up
-vim.keymap.set("v", "<c-n>", function()
-  local init_pos = vim.fn.line("v")
-  vim.cmd([[noautocmd normal! "0ygv]])
-  local esc = vim.api.nvim_replace_termcodes("<esc>", true, false, true)
-  vim.api.nvim_feedkeys(esc, "v", false)
-  local end_pos = vim.fn.line(".")
-  vim.fn.setpos(".", { 0, math.max(init_pos, end_pos), 0, 0 })
-  local lines = vim.split(vim.fn.getreg("0"), "\n", { trimempty = true })
-  vim.api.nvim_put(lines, "l", true, false)
-  vim.cmd([[noautocmd normal! gv]])
-end) -- duplicate selection down
+vim.keymap.set("v", "<c-n>", '"0y"0Pgv') -- like sublime duplicate line
+-- vim.keymap.set("v", "<c-n>", function()
+--   local init_pos = vim.fn.line("v")
+--   vim.cmd([[noautocmd normal! "0ygv]])
+--   local esc = vim.api.nvim_replace_termcodes("<esc>", true, false, true)
+--   vim.api.nvim_feedkeys(esc, "v", false)
+--   local end_pos = vim.fn.line(".")
+--   vim.fn.setpos(".", { 0, math.max(init_pos, end_pos), 0, 0 })
+--   local lines = vim.split(vim.fn.getreg("0"), "\n", { trimempty = true })
+--   vim.api.nvim_put(lines, "l", true, false)
+--   vim.cmd([[noautocmd normal! gv]])
+--   -- match sublime duplicate lines
+--   vim.cmd([[noautocmd normal! j]])
+--   local visual_key = vim.api.nvim_replace_termcodes("V", true, false, true)
+--   vim.api.nvim_feedkeys(visual_key, "v", false)
+--   local j_key = vim.api.nvim_replace_termcodes("j", true, false, true)
+--   for _ = 0, end_pos - init_pos - 1 do
+--     vim.api.nvim_feedkeys(j_key, "v", false)
+--   end
+--   -- indent reselect
+--   vim.cmd([[noautocmd normal! =gv]])
+-- end) -- duplicate selection down
 
 vim.keymap.set("n", '"', "<C-^>") -- back to last buffer
 
@@ -490,8 +515,8 @@ vim.api.nvim_create_autocmd("FocusGained", {
 --   end,
 -- })
 
-vim.api.nvim_create_autocmd("BufEnter", {
-  pattern = { "*.*eex", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.html", "*.css", "*.lua" },
+vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
+  pattern = { "*.vue", "*.*eex", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.html", "*.css", "*.lua" },
   callback = function()
     vim.opt_local.shiftwidth = 2
     vim.opt_local.tabstop = 2
@@ -549,9 +574,9 @@ end
 -- vimscript stuff
 vim.cmd([[
 language en_US
-filetype on
-syntax on
-filetype plugin indent on
+" filetype on
+" syntax on
+" filetype plugin indent on
 
 " @windows: nextjs and sveltkit folder name pattern
 set isfname+=(
