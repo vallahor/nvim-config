@@ -9,7 +9,6 @@ return {
         customPatterns = {
           patterns = {
             "%p",
-            "[%u][%p]?",
           },
           overrideDefault = false,
         },

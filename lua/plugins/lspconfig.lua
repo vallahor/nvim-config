@@ -218,26 +218,26 @@ return {
       },
     })
 
-    lspconfig.emmet_ls.setup({
-      capabilities = capabilities,
-      on_attach = on_attach,
-      filetypes = {
-        "astro",
-        "blade",
-        "css",
-        "eruby",
-        "html",
-        "htmldjango",
-        "javascriptreact",
-        "less",
-        "pug",
-        "sass",
-        "scss",
-        "svelte",
-        "typescriptreact",
-        "vue",
-      },
-    })
+    -- lspconfig.emmet_ls.setup({
+    --   capabilities = capabilities,
+    --   on_attach = on_attach,
+    --   filetypes = {
+    --     "astro",
+    --     "blade",
+    --     "css",
+    --     "eruby",
+    --     "html",
+    --     "htmldjango",
+    --     "javascriptreact",
+    --     "less",
+    --     "pug",
+    --     "sass",
+    --     "scss",
+    --     "svelte",
+    --     "typescriptreact",
+    --     "vue",
+    --   },
+    -- })
 
     lspconfig.gopls.setup({
       capabilities = capabilities,

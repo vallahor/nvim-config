@@ -25,9 +25,7 @@ return {
   --         disable_command_mode = true,
   --       },
   --       keys = {
-  --         ["'"] = { escape = false, close = false, pair = "''", disabled_filetypes = {"rust"} },
-  --         -- ["<%="] = { escape = false, close = true, pair = "<%= %>", disabled_filetypes = {} },
-  --         -- ['"""'] = { escape = false, close = true, pair = '""""""', disabled_filetypes = {} },
+  --         ["'"] = { escape = false, close = false, pair = "''", disabled_filetypes = { "rust" } },
   --       },
   --     })
   --   end,

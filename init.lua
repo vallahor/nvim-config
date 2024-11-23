@@ -268,6 +268,17 @@ vim.keymap.set("i", "<c-;>", function()
   vim.api.nvim_buf_set_text(0, row, end_col, row, end_col, { ";" })
 end)
 
+-- insert comma `,` to the end of line
+-- without losing cursor position
+vim.keymap.set("i", "<c-,>", function()
+  local end_col = #vim.fn.getline(".")
+  local row = vim.fn.line(".") - 1
+  vim.api.nvim_buf_set_text(0, row, end_col, row, end_col, { "," })
+end)
+
+vim.keymap.set("i", "<c-enter>", "<c-o>o")
+vim.keymap.set("i", "<s-enter>", "<c-o>O")
+
 vim.keymap.set("c", "<c-v>", "<c-r>*") -- paste to command line mode
 
 vim.keymap.set("v", "v", "V") -- visual line mode
@@ -437,11 +448,12 @@ vim.keymap.set("n", "<f6>", "<cmd>InspectTree<CR>") -- inspect current token tre
 vim.keymap.set("n", "<", "<<", { nowait = true, remap = true }) -- indent left
 vim.keymap.set("n", ">", ">>", { nowait = true, remap = true }) -- indent right
 
+-- @check this should be in the lspconfig file
 vim.keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>zz")
 vim.keymap.set("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>zz")
-vim.keymap.set("n", "_", vim.diagnostic.open_float)
-
+vim.keymap.set("n", "<c-a>", "<cmd>lua vim.lsp.buf.code_action()<CR>")
 vim.keymap.set("n", "K", vim.lsp.buf.hover)
+vim.keymap.set("n", "_", vim.diagnostic.open_float)
 
 -- vim.keymap.set("n", "<leader>r", vim.lsp.buf.rename)
 
