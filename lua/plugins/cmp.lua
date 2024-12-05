@@ -61,6 +61,9 @@ return {
             select = true,
             -- behavior = cmp.ConfirmBehavior.Replace,
           }),
+          ["<c-tab>"] = cmp.mapping(function()
+            cmp.complete()
+          end, { "i", "s", "c" }),
           ["<c-space>"] = cmp.mapping.abort(),
         },
       })

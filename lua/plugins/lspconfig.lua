@@ -218,6 +218,16 @@ return {
       },
     })
 
+    -- lspconfig.phpactor.setup({
+    --   on_attach = on_attach,
+    --   capabilities = capabilities,
+    --   filetypes = { "php", "blade" },
+    --   init_options = {
+    --     ["language_server_phpstan.enabled"] = true,
+    --     ["language_server_phpstan.level"] = "8",
+    --   },
+    -- })
+
     -- lspconfig.emmet_ls.setup({
     --   capabilities = capabilities,
     --   on_attach = on_attach,

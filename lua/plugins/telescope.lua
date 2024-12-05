@@ -26,6 +26,7 @@ return {
               -- ["fd"] = actions.close,
               -- ["df"] = actions.close,
               ["<c-w>"] = actions.delete_buffer, -- delete_buffer delete window too
+              ["<tab>"] = actions.delete_buffer, -- delete_buffer delete window too
             },
             n = {
               ["<esc>"] = actions.close,
@@ -46,7 +47,7 @@ return {
           --   prompt_position = "bottom",
           -- },
           -- preview = false,
-          file_ignore_patterns = { "node_modules", ".venv", "__pycache__", "_build", "_opam" },
+          file_ignore_patterns = { "node_modules", ".venv", "__pycache__", "_build", "_opam", "vendor" },
         },
       })
 
@@ -55,10 +56,11 @@ return {
       -- vim.keymap.set("n", "<tab>", "<cmd>lua require('telescope.builtin').buffers()<cr>", { silent = true })
 
       if vim.g.skeletyl then
-        vim.keymap.set("n", "<tab>", "<cmd>lua require('telescope.builtin').buffers()<cr>", { silent = true })
+        -- vim.keymap.set("n", "<tab>", "<cmd>lua require('telescope.builtin').buffers()<cr>", { silent = true })
       else
         vim.keymap.set("n", "<c-space>", "<cmd>lua require('telescope.builtin').buffers()<cr>", { silent = true })
       end
+      vim.keymap.set("n", "<leader><leader>", "<cmd>lua require('telescope.builtin').buffers()<cr>", { silent = true })
     end,
   },
 }

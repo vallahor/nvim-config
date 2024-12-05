@@ -41,13 +41,13 @@ return {
       },
       renderer = {
         indent_markers = {
-          enable = false,
-          icons = {
-            corner = "│",
-            edge = "│",
-            item = "│",
-            bottom = "│",
-          },
+          enable = true,
+          -- icons = {
+          --   corner = "│",
+          --   edge = "│",
+          --   item = "│",
+          --   bottom = "│",
+          -- },
         },
         icons = {
           show = {

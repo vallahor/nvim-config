@@ -1,3 +1,6 @@
+vim.cmd([[
+set termguicolors
+]])
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.uv.fs_stat(lazypath) then
   vim.fn.system({
@@ -11,7 +14,7 @@ if not vim.uv.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
--- vim.g.mapleader = " "
+vim.g.mapleader = " "
 vim.g.skeletyl = true
 
 require("lazy").setup("plugins", {
@@ -36,7 +39,7 @@ vim.opt.ignorecase = true
 vim.opt.shiftround = true
 vim.opt.splitright = true
 vim.opt.splitbelow = true
-vim.opt.termguicolors = true
+-- vim.opt.termguicolors = true
 vim.opt.wildmode = "longest,list:longest,full"
 vim.opt.clipboard = "unnamedplus"
 vim.opt.encoding = "utf8"
@@ -59,8 +62,8 @@ vim.opt.gdefault = true
 vim.opt.cindent = false -- check
 -- vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
 -- vim.opt.cino:append("L0,g0,l1,t0,w1,w4,m1")
-vim.opt.timeoutlen = 200
-vim.opt.ttimeoutlen = 0
+vim.opt.timeoutlen = 500
+vim.opt.ttimeoutlen = 500
 vim.opt.updatetime = 50
 -- vim.opt.guicursor = "i-ci:block-iCursor"
 -- vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
@@ -131,7 +134,7 @@ if vim.g.skeletyl then
     ["Goto Prev"] = "{",
     ["Skip Region"] = "+",
     ["Remove Region"] = "-",
-    ["Exit"] = "<space>",
+    -- ["Exit"] = "<space>",
   }
 else
   vim.g.VM_custom_remaps = { ["-"] = "$" }
@@ -198,6 +201,8 @@ if false then
 end
 
 vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>") -- save file
+vim.keymap.set({ "n", "v" }, "<c-s>", "<cmd>w!<CR><esc>") -- save file
+-- vim.keymap.set({ "n", "v" }, "<leader>fs", "<cmd>w!<CR><esc>") -- save file
 -- vim.keymap.set({ "n", "v" }, "d<enter>", "<cmd>w!<CR><esc>", { silent = true }) -- save file
 
 vim.keymap.set("n", "Y", "yg$") -- yank to end of line considering line wrap
@@ -224,13 +229,12 @@ if vim.g.skeletyl then
 
   -- resize windows
   vim.keymap.set("n", "<c-0>", "<cmd>wincmd =<cr>") -- resize all windows
+  -- vim.keymap.set("n", "<leader>=", "<cmd>wincmd =<cr>")
 
   vim.keymap.set("n", "<a-6>", [[<cmd>vertical   resize +2<cr>]]) -- make the window biger   vertically
   vim.keymap.set("n", "<a-4>", [[<cmd>vertical   resize -2<cr>]]) -- make the window smaller vertically
   vim.keymap.set("n", "<a-8>", [[<cmd>horizontal resize +2<cr>]]) -- make the window bigger  horizontally
   vim.keymap.set("n", "<a-5>", [[<cmd>horizontal resize -2<cr>]]) -- make the window smaller horizontally
-
-  -- vim.keymap.set("n", "<leader>=", "<c-w>=")
 
   vim.keymap.set("n", "<left>", "<cmd>wincmd h<cr>") -- move to window left
   vim.keymap.set("n", "<down>", "<cmd>wincmd j<cr>") -- move to window down
@@ -275,9 +279,6 @@ vim.keymap.set("i", "<c-,>", function()
   local row = vim.fn.line(".") - 1
   vim.api.nvim_buf_set_text(0, row, end_col, row, end_col, { "," })
 end)
-
-vim.keymap.set("i", "<c-enter>", "<c-o>o")
-vim.keymap.set("i", "<s-enter>", "<c-o>O")
 
 vim.keymap.set("c", "<c-v>", "<c-r>*") -- paste to command line mode
 
@@ -450,12 +451,15 @@ vim.keymap.set("n", ">", ">>", { nowait = true, remap = true }) -- indent right
 
 -- @check this should be in the lspconfig file
 vim.keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>zz")
-vim.keymap.set("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>zz")
-vim.keymap.set("n", "<c-a>", "<cmd>lua vim.lsp.buf.code_action()<CR>")
+vim.keymap.set("n", "gi", "<cmd>Telescope lsp_implementations<CR>")
+vim.keymap.set("n", "gr", "<cmd>Telescope lsp_references<CR>")
+-- vim.keymap.set("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>zz")
+-- vim.keymap.set("n", "<leader>a", "<cmd>lua vim.lsp.buf.code_action()<CR>")
 vim.keymap.set("n", "K", vim.lsp.buf.hover)
 vim.keymap.set("n", "_", vim.diagnostic.open_float)
 
 -- vim.keymap.set("n", "<leader>r", vim.lsp.buf.rename)
+vim.keymap.set("n", "<c-*>", vim.lsp.buf.rename)
 
 -- vim.keymap.set("v", "<up>", [[:'<,'>move '<-2<CR>gv=gv]], { noremap = true, silent = true }) -- Move selected lines up
 -- vim.keymap.set("v", "<down>", [[:'<,'>move '>+1<CR>gv=gv]], { noremap = true, silent = true }) -- Move selected lines down
@@ -508,6 +512,12 @@ else
   vim.keymap.set("n", "<c-[>", vim.diagnostic.goto_prev)
   vim.keymap.set("n", "<c-]>", vim.diagnostic.goto_next)
 end
+
+-- check if ill really use this
+vim.keymap.set("v", "<c->>", "<c-a>gv")
+vim.keymap.set("v", "<c-<>", "<c-x>gv")
+vim.keymap.set("v", "<c-.>", "g<c-a>gv")
+vim.keymap.set("v", "<c-,>", "g<c-x>gv")
 
 vim.api.nvim_create_autocmd("FocusGained", {
   pattern = "*",
@@ -594,6 +604,7 @@ language en_US
 set isfname+=(
 
 set noswapfile
+set termguicolors
 
 set history=20
 
@@ -676,6 +687,8 @@ vim.api.nvim_create_autocmd("FileType", {
   pattern = { "elixir", "heex", "eex" },
   command = [[set nocindent]],
 })
+
+vim.api.nvim_set_hl(0, "NvimTreeIndentMarker", { fg = "#30323E" })
 
 -- vim.diagnostic.config({
 --   virtual_text = false,

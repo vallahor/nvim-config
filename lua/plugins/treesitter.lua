@@ -5,57 +5,16 @@ return {
       { "RRethy/nvim-treesitter-endwise" },
     },
     version = false,
-    build = ":TSUpdate",
+    build = ":TSUpdateSync",
     event = { "BufRead", "BufEnter" },
     opts = {
-      ensure_installed = {
-        "asm",
-        "bash",
-        "comment",
-        "lua",
-        "vim",
-        "vimdoc",
-        "c",
-        "cpp",
-        "c_sharp",
-        "css",
-        "zig",
-        "rust",
-        "glsl",
-        "hlsl",
-        "html",
-        "markdown",
-        "markdown_inline",
-        "mermaid",
-        "python",
-        "go",
-        "proto",
-        "json",
-        "typescript",
-        "javascript",
-        "odin",
-        "tsx",
-        "jsdoc",
-        "svelte",
-        "vue",
-        "sql",
-        "yaml",
-        "dockerfile",
-        "eex",
-        "heex",
-        "elixir",
-        "ocaml",
-        "ocaml_interface",
-        "php",
-        "php_only",
-        "phpdoc",
-      },
+      ensure_installed = "all",
       highlight = {
         enable = true,
       },
       indent = {
         enable = true,
-        disable = { "python", "rust", "cpp", "go", "odin", "ocaml", "ocaml_interface" },
+        disable = { "python", "rust", "cpp", "go", "odin", "ocaml", "ocaml_interface", "blade" },
       },
       incremental_selection = {
         enable = true,
@@ -77,21 +36,44 @@ return {
           autocmd BufRead *.scm set filetype=query
       ]])
 
-      -- ---@class ParserInfo[]
-      -- local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
+      local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
+      parser_config.blade = {
+        install_info = {
+          url = "https://github.com/EmranMR/tree-sitter-blade",
+          files = { "src/parser.c" },
+          branch = "main",
+        },
+        filetype = "blade",
+      }
+
       -- parser_config.blade = {
       --   install_info = {
-      --     url = "https://github.com/EmranMR/tree-sitter-blade",
-      --     files = {
-      --       "src/parser.c",
-      --       -- 'src/scanner.cc',
-      --     },
+      --     url = "https://github.com/deanrumsby/tree-sitter-blade",
+      --     files = { "src/parser.c", "src/scanner.c" },
       --     branch = "main",
-      --     generate_requires_npm = true,
-      --     requires_generate_from_grammar = true,
       --   },
       --   filetype = "blade",
       -- }
+
+      vim.filetype.add({
+        pattern = {
+          [".*%.blade%.php"] = "blade",
+        },
+      })
+
+      vim.cmd([[
+        augroup BladeFiletypeRelated
+        autocmd!
+        autocmd BufNewFile,BufRead *.blade.php set ft=blade
+        augroup END
+      ]])
+
+      vim.cmd([[
+        augroup BladeIndentation
+        autocmd!
+        autocmd FileType blade setlocal tabstop=2 shiftwidth=2 expandtab
+        augroup END
+      ]])
 
       require("nvim-treesitter.configs").setup(opts)
     end,
