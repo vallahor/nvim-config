@@ -23,7 +23,11 @@ return {
       -- })
 
       vim.api.nvim_create_autocmd("BufWritePre", {
-        pattern = { "*.ts", "*.tsx", "*.js", "*.jsx", "*.css", "*.scss", "*.json" },
+        pattern = { "*.tsx", "*.jsx", "*.json" },
+        command = ":Neoformat prettierd",
+      })
+      vim.api.nvim_create_autocmd("BufWritePre", {
+        pattern = { "*.ts", "*.js", "*.css", "*.scss" },
         command = ":Neoformat prettierd",
       })
     end,

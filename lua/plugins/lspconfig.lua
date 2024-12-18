@@ -203,6 +203,11 @@ return {
       cmd = { "ncat", "localhost", port },
     })
 
+    lspconfig.ocamllsp.setup({
+      capabilities = capabilities,
+      on_attach = on_attach,
+    })
+
     lspconfig.gdshader_lsp.setup({
       capabilities = capabilities,
       on_attach = on_attach,
@@ -231,23 +236,34 @@ return {
     -- lspconfig.emmet_ls.setup({
     --   capabilities = capabilities,
     --   on_attach = on_attach,
-    --   filetypes = {
-    --     "astro",
-    --     "blade",
-    --     "css",
-    --     "eruby",
-    --     "html",
-    --     "htmldjango",
-    --     "javascriptreact",
-    --     "less",
-    --     "pug",
-    --     "sass",
-    --     "scss",
-    --     "svelte",
-    --     "typescriptreact",
-    --     "vue",
-    --   },
+    -- filetypes = {
+    --   "astro",
+    --   "blade",
+    --   "css",
+    --   "eruby",
+    --   "html",
+    --   "htmldjango",
+    --   "javascriptreact",
+    --   "less",
+    --   "pug",
+    --   "sass",
+    --   "scss",
+    --   "svelte",
+    --   "typescriptreact",
+    --   "vue",
+    -- },
     -- })
+
+    lspconfig.emmet_language_server.setup({
+      capabilities = capabilities,
+      on_attach = on_attach,
+      init_options = {
+        syntaxProfiles = {
+          html = { self_closing_tag = true },
+          jsx = { self_closing_tag = true },
+        },
+      },
+    })
 
     lspconfig.gopls.setup({
       capabilities = capabilities,

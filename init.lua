@@ -25,8 +25,10 @@ require("lazy").setup("plugins", {
 
 -- SETTINGS --
 
+-- vim.opt.guifont = { "JetBrains Mono NL:h11:w60" }
 -- vim.opt.guifont = { "JetBrains Mono NL:h11" }
-vim.opt.guifont = { "JetBrainsMono Nerd Font:h11" }
+vim.opt.guifont = { "JetBrains Mono:h11" }
+-- vim.opt.guifont = { "JetBrainsMono Nerd Font:h11" }
 -- vim.opt.guifont = { "JetBrainsMonoNL Nerd Font:h11" }
 vim.opt.shiftwidth = 4
 vim.opt.tabstop = 4
@@ -62,19 +64,20 @@ vim.opt.gdefault = true
 vim.opt.cindent = false -- check
 -- vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
 -- vim.opt.cino:append("L0,g0,l1,t0,w1,w4,m1")
-vim.opt.timeoutlen = 500
-vim.opt.ttimeoutlen = 500
+vim.opt.timeoutlen = 200
+vim.opt.ttimeoutlen = 300
 vim.opt.updatetime = 50
 -- vim.opt.guicursor = "i-ci:block-iCursor"
--- vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
+vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
 
 -- make sure that's work in all terminal emulators
 vim.opt.linespace = 6
+-- vim.opt.linespace = 4
 
-vim.opt.cmdheight = 0
-vim.opt.laststatus = 2
-vim.opt.showcmdloc = "statusline"
-vim.opt.statusline = " %f %m%=%S %y L%l,C%c "
+-- vim.opt.cmdheight = 0
+-- vim.opt.laststatus = 2
+-- vim.opt.showcmdloc = "statusline"
+-- vim.opt.statusline = " %f %m%=%S %y L%l,C%c "
 -- vim.opt.winbar = " %f %m%=%l "
 
 -- vim.cmd([[
@@ -100,6 +103,7 @@ vim.bo.copyindent = true
 vim.bo.grepprg = "rg"
 
 vim.g.user_emmet_install_global = 0
+vim.g.editorconfig = true
 
 -- -- work around on python default configs
 -- -- check why in the other project indents are a complete mess
@@ -118,21 +122,22 @@ vim.g.VM_default_mappings = 0
 if vim.g.skeletyl then
   vim.g.VM_custom_remaps = {
     [")"] = "$",
-    ["("] = "0",
+    ["("] = "0^",
   }
   vim.g.VM_maps = {
-    ["Find Under"] = "<c-u>",
-    ["Find Subword Under"] = "<c-u>",
-    ["Select All"] = "<c-s-u>",
+    ["Find Under"] = "<c-l>",
+    ["Find Subword Under"] = "<c-l>",
+    ["Select All"] = "<c-s-l>",
     ["Add Cursor Down"] = "<c-j>",
     ["Add Cursor Up"] = "<c-k>",
-    ["Switch Mode"] = "<tab>",
+    -- ["Switch Mode"] = "<tab>",
+    ["Switch Mode"] = "v",
     ["Align"] = "<c-a>",
-    ["Find Next"] = "]",
-    ["Find Prev"] = "[",
+    ["Find Next"] = "<c-l>",
+    ["Find Prev"] = "<c-h>",
     ["Goto Next"] = "}",
     ["Goto Prev"] = "{",
-    ["Skip Region"] = "+",
+    ["Skip Region"] = "L",
     ["Remove Region"] = "-",
     -- ["Exit"] = "<space>",
   }
@@ -229,6 +234,7 @@ if vim.g.skeletyl then
 
   -- resize windows
   vim.keymap.set("n", "<c-0>", "<cmd>wincmd =<cr>") -- resize all windows
+  vim.keymap.set("n", "<c-=>", "<cmd>wincmd =<cr>") -- resize all windows
   -- vim.keymap.set("n", "<leader>=", "<cmd>wincmd =<cr>")
 
   vim.keymap.set("n", "<a-6>", [[<cmd>vertical   resize +2<cr>]]) -- make the window biger   vertically
@@ -413,11 +419,13 @@ else
 end
 
 -- duplicate line and lines
-vim.keymap.set("n", "<c-p>", '"0yy"0P') -- duplicate line up
-vim.keymap.set("n", "<c-n>", '"0yy"0p') -- duplicate line down
+-- vim.keymap.set("n", "<c-p>", '"0yy"0P') -- duplicate line up
+-- vim.keymap.set("n", "<c-n>", '"0yy"0p') -- duplicate line down
+vim.keymap.set("n", "<c-d>", '"0yy"0p') -- duplicate line down
 
-vim.keymap.set("v", "<c-p>", '"0y"0P') -- duplicate selection up
-vim.keymap.set("v", "<c-n>", '"0y"0Pgv') -- like sublime duplicate line
+-- vim.keymap.set("v", "<c-p>", '"0y"0P') -- duplicate selection up
+-- vim.keymap.set("v", "<c-n>", '"0y"0Pgv') -- like sublime duplicate line
+vim.keymap.set("v", "<c-d>", '"0y"0Pgv') -- like sublime duplicate line
 -- vim.keymap.set("v", "<c-n>", function()
 --   local init_pos = vim.fn.line("v")
 --   vim.cmd([[noautocmd normal! "0ygv]])
@@ -454,7 +462,7 @@ vim.keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>zz")
 vim.keymap.set("n", "gi", "<cmd>Telescope lsp_implementations<CR>")
 vim.keymap.set("n", "gr", "<cmd>Telescope lsp_references<CR>")
 -- vim.keymap.set("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>zz")
--- vim.keymap.set("n", "<leader>a", "<cmd>lua vim.lsp.buf.code_action()<CR>")
+vim.keymap.set("n", "<c-a>", "<cmd>lua vim.lsp.buf.code_action()<CR>")
 vim.keymap.set("n", "K", vim.lsp.buf.hover)
 vim.keymap.set("n", "_", vim.diagnostic.open_float)
 
@@ -506,18 +514,18 @@ vim.keymap.set("i", ">", "><c-g>u")
 vim.keymap.set("i", ";", ";<c-g>u")
 
 if vim.g.skeletyl then
-  vim.keymap.set("n", "<c-,>", vim.diagnostic.goto_prev)
-  vim.keymap.set("n", "<c-.>", vim.diagnostic.goto_next)
+  vim.keymap.set("n", "<c-[>", vim.diagnostic.goto_prev)
+  vim.keymap.set("n", "<c-]>", vim.diagnostic.goto_next)
 else
   vim.keymap.set("n", "<c-[>", vim.diagnostic.goto_prev)
   vim.keymap.set("n", "<c-]>", vim.diagnostic.goto_next)
 end
 
 -- check if ill really use this
-vim.keymap.set("v", "<c->>", "<c-a>gv")
-vim.keymap.set("v", "<c-<>", "<c-x>gv")
-vim.keymap.set("v", "<c-.>", "g<c-a>gv")
-vim.keymap.set("v", "<c-,>", "g<c-x>gv")
+vim.keymap.set("v", "<leader><c->>", "<c-a>gv")
+vim.keymap.set("v", "<leader><c-<>", "<c-x>gv")
+vim.keymap.set("v", "<leader><c-.>", "g<c-a>gv")
+vim.keymap.set("v", "<leader><c-,>", "g<c-x>gv")
 
 vim.api.nvim_create_autocmd("FocusGained", {
   pattern = "*",
@@ -538,7 +546,7 @@ vim.api.nvim_create_autocmd("FocusGained", {
 -- })
 
 vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
-  pattern = { "*.vue", "*.*eex", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.html", "*.css", "*.lua" },
+  pattern = { "*.svelte", "*.*eex", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.html", "*.css", "*.lua" },
   callback = function()
     vim.opt_local.shiftwidth = 2
     vim.opt_local.tabstop = 2
@@ -553,6 +561,9 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
       -- move paragraphs
       vim.keymap.set({ "n", "v", "x" }, "[", "{", { nowait = true, buffer = true }) -- paragraph up
       vim.keymap.set({ "n", "v", "x" }, "]", "}", { nowait = true, buffer = true }) -- paragraph down
+    else
+      vim.keymap.set({ "n", "v", "x" }, "[", vim.diagnostic.goto_prev, { nowait = true, buffer = true }) -- paragraph up
+      vim.keymap.set({ "n", "v", "x" }, "]", vim.diagnostic.goto_next, { nowait = true, buffer = true }) -- paragraph down
     end
     -- move indentation
     vim.keymap.set({ "v", "x" }, "<", "<gv", { nowait = true, buffer = true, remap = true }) -- indent left in visual mode

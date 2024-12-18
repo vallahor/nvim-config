@@ -18,8 +18,9 @@ return {
           completeopt = "menu,menuone,noinsert",
           placeholder = false,
         },
+
         window = {
-          documentation = cmp.config.disable,
+          -- documentation = cmp.config.disable,
         },
         -- experimental = {
         --   ghost_text = { hl_group = "GhostText" },
@@ -30,7 +31,12 @@ return {
           end,
         },
         sources = {
-          { name = "nvim_lsp" },
+          {
+            name = "nvim_lsp",
+            -- entry_filter = function(entry, _)
+            --   return require("cmp").lsp.CompletionItemKind.Snippet ~= entry:get_kind()
+            -- end,
+          },
           { name = "buffer" },
           { name = "path" },
           { name = "luasnip" },

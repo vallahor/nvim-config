@@ -26,8 +26,12 @@ return {
     event = "UIEnter",
     config = function()
       require("various-textobjs").setup({
-        useDefaultKeymaps = false,
-        notifyNotFound = false,
+        keymaps = {
+          useDefaults = false,
+        },
+        notify = {
+          whenObjectNotFound = false,
+        },
       })
       vim.keymap.set({ "o", "x" }, "au", "aw")
       vim.keymap.set({ "o", "x" }, "iu", "iw")

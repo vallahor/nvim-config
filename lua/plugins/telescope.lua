@@ -47,12 +47,21 @@ return {
           --   prompt_position = "bottom",
           -- },
           -- preview = false,
-          file_ignore_patterns = { "node_modules", ".venv", "__pycache__", "_build", "_opam", "vendor" },
+          file_ignore_patterns = {
+            "node_modules",
+            ".venv",
+            "__pycache__",
+            "_build",
+            "_opam",
+            "vendor",
+            "deps",
+            "public/build",
+          },
         },
       })
 
-      vim.keymap.set("n", "<c-f>", "<cmd>lua require('telescope.builtin').find_files()<cr>", { silent = true })
-      vim.keymap.set("n", "<c-/>", "<cmd>lua require('telescope.builtin').live_grep()<cr>", { silent = true })
+      vim.keymap.set("n", "<c-p>", "<cmd>lua require('telescope.builtin').find_files()<cr>", { silent = true })
+      vim.keymap.set("n", "<c-s-f>", "<cmd>lua require('telescope.builtin').live_grep()<cr>", { silent = true })
       -- vim.keymap.set("n", "<tab>", "<cmd>lua require('telescope.builtin').buffers()<cr>", { silent = true })
 
       if vim.g.skeletyl then

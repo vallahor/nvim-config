@@ -66,46 +66,40 @@ return {
         })
       end
 
-      -- -- Statusline
-      -- local MiniStatusline = require("mini.statusline")
-      -- local location = " L%l/%L C%c "
-      -- MiniStatusline.setup({
-      --   use_icons = false,
-      --   content = {
-      --     active = function()
-      --       local mode, mode_hl = MiniStatusline.section_mode({ trunc_width = 120 })
-      --       local venn_enabled = vim.inspect(vim.b.venn_enabled)
-      --       local venn_mode = ""
-      --       if venn_enabled ~= "nil" then
-      --         venn_mode = "Venn Active"
-      --       end
+      -- Statusline
+      local MiniStatusline = require("mini.statusline")
+      local location = " L%l/%L C%c "
+      MiniStatusline.setup({
+        use_icons = false,
+        content = {
+          active = function()
+            local mode, mode_hl = MiniStatusline.section_mode({ trunc_width = 120 })
 
-      --       local filename = MiniStatusline.section_filename({ trunc_width = 200 })
+            local filename = MiniStatusline.section_filename({ trunc_width = 200 })
 
-      --       return MiniStatusline.combine_groups({
-      --         { hl = mode_hl, strings = { mode } },
-      --         -- { hl = mode_hl, strings = { mode:sub(1, 1) } },
-      --         "%<",
-      --         { hl = "MiniStatuslineFilename", strings = { filename } },
-      --         "%=",
-      --         { strings = { "%S" } },
-      --         { strings = { venn_mode } },
-      --         { strings = { vim.bo.filetype } },
-      --         { hl = mode_hl, strings = { location } },
-      --       })
-      --     end,
-      --     inactive = function()
-      --       local filename = MiniStatusline.section_filename({ trunc_width = 200 })
+            return MiniStatusline.combine_groups({
+              { hl = mode_hl, strings = { mode } },
+              -- { hl = mode_hl, strings = { mode:sub(1, 1) } },
+              "%<",
+              { hl = "MiniStatuslineFilename", strings = { filename } },
+              "%=",
+              { strings = { "%S" } },
+              { strings = { vim.bo.filetype } },
+              { hl = mode_hl, strings = { location } },
+            })
+          end,
+          inactive = function()
+            local filename = MiniStatusline.section_filename({ trunc_width = 200 })
 
-      --       return MiniStatusline.combine_groups({
-      --         "%<",
-      --         { hl = "MiniStatuslineFilename", strings = { filename } },
-      --         "%=",
-      --         { strings = { location } },
-      --       })
-      --     end,
-      --   },
-      -- })
+            return MiniStatusline.combine_groups({
+              "%<",
+              { hl = "MiniStatuslineFilename", strings = { filename } },
+              "%=",
+              { strings = { location } },
+            })
+          end,
+        },
+      })
 
       -- Buf Remove
       require("mini.bufremove").setup()
@@ -136,6 +130,8 @@ return {
         " hi MiniCursorwordCurrent guisp=none guifg=none guibg=#2D2829 gui=none
         " hi MiniCursorword        guisp=#87787b guifg=none guibg=none gui=underline
         " hi MiniCursorwordCurrent guisp=#87787b guifg=none guibg=none gui=underline
+        " hi MiniCursorword        guisp=#312531 guifg=none guibg=none gui=none
+        " hi MiniCursorwordCurrent guisp=#312531 guifg=none guibg=none gui=none
       ]])
     end,
   },
