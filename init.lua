@@ -25,7 +25,6 @@ require("lazy").setup("plugins", {
 
 -- SETTINGS --
 
--- vim.opt.guifont = { "JetBrains Mono NL:h11:w60" }
 -- vim.opt.guifont = { "JetBrains Mono NL:h11" }
 vim.opt.guifont = { "JetBrains Mono:h11" }
 -- vim.opt.guifont = { "JetBrainsMono Nerd Font:h11" }
@@ -224,7 +223,8 @@ vim.keymap.set("i", "<PageDown>", "<nop>", { noremap = true }) -- page down
 if vim.g.skeletyl then
   vim.keymap.set("n", "\\", "<cmd>clo<cr>") -- close current window
   vim.keymap.set("n", "|", "<cmd>vs<cr>") -- split vertical window
-  vim.keymap.set("n", "-", "<cmd>sp<cr>") -- split horizontal window
+  -- vim.keymap.set("n", "-", "<cmd>sp<cr>") -- split horizontal window
+  vim.keymap.set("n", "_", "<cmd>sp<cr>") -- split horizontal window
   vim.keymap.set("n", "<c-9>", "<c-w>o") -- close other windows
   vim.keymap.set("n", "<c-8>", "<c-w>r") -- rotate windows
 
@@ -464,7 +464,8 @@ vim.keymap.set("n", "gr", "<cmd>Telescope lsp_references<CR>")
 -- vim.keymap.set("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>zz")
 vim.keymap.set("n", "<c-a>", "<cmd>lua vim.lsp.buf.code_action()<CR>")
 vim.keymap.set("n", "K", vim.lsp.buf.hover)
-vim.keymap.set("n", "_", vim.diagnostic.open_float)
+vim.keymap.set("n", "&", vim.diagnostic.open_float)
+-- vim.keymap.set("n", "_", vim.diagnostic.open_float)
 
 -- vim.keymap.set("n", "<leader>r", vim.lsp.buf.rename)
 vim.keymap.set("n", "<c-*>", vim.lsp.buf.rename)
