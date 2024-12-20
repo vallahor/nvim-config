@@ -35,7 +35,8 @@ return {
       },
       filters = {
         dotfiles = false,
-        custom = { ".venv", "node_modules", "__pycache__" },
+        -- custom = { ".venv", "node_modules", "__pycache__" },
+        custom = { "__pycache__" },
       },
       renderer = {
         indent_markers = {

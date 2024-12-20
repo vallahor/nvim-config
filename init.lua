@@ -546,13 +546,13 @@ vim.api.nvim_create_autocmd("FocusGained", {
 --   end,
 -- })
 
-vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
-  pattern = { "*.svelte", "*.*eex", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.html", "*.css", "*.lua" },
-  callback = function()
-    vim.opt_local.shiftwidth = 2
-    vim.opt_local.tabstop = 2
-  end,
-})
+-- vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
+--   pattern = { "*.svelte", "*.*eex", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.html", "*.css", "*.lua" },
+--   callback = function()
+--     vim.opt_local.shiftwidth = 2
+--     vim.opt_local.tabstop = 2
+--   end,
+-- })
 
 -- movements with timeout
 vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
@@ -614,6 +614,9 @@ language en_US
 
 " @windows: nextjs and sveltkit folder name pattern
 set isfname+=(
+
+" set foldmethod=expr
+" set foldexpr=nvim_treesitter#foldexpr()
 
 set noswapfile
 set termguicolors
