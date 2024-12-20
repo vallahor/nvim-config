@@ -32,7 +32,7 @@ return {
                 if buffer.is_first then
                   return " "
                 else
-                  return " "
+                  return ""
                 end
               end,
               bg = get_hex("StatusLineNC", "bg"),
@@ -41,20 +41,21 @@ return {
               text = " ",
               bg = function(buffer)
                 if buffer.is_focused then
-                  return get_hex("ColorColumn", "bg")
+                  -- return get_hex("ColorColumn", "bg")
+                  return "#3f303f"
                 end
-                return "#3d3339"
+                return "#191319"
               end,
             },
-            {
-              text = " ",
-              bg = function(buffer)
-                if buffer.is_focused then
-                  return get_hex("ColorColumn", "bg")
-                end
-                return "#3d3339"
-              end,
-            },
+            -- {
+            --   text = " ",
+            --   bg = function(buffer)
+            --     if buffer.is_focused then
+            --       return get_hex("ColorColumn", "bg")
+            --     end
+            --     return "#3d3339"
+            --   end,
+            -- },
             {
               text = function(buffer)
                 return buffer.filename
@@ -78,29 +79,31 @@ return {
               end,
               bg = function(buffer)
                 if buffer.is_focused then
-                  return get_hex("ColorColumn", "bg")
+                  -- return get_hex("ColorColumn", "bg")
+                  return "#3f303f"
                 end
-                return "#3d3339"
+                return "#191319"
               end,
             },
             {
               text = " ",
               bg = function(buffer)
                 if buffer.is_focused then
-                  return get_hex("ColorColumn", "bg")
+                  -- return get_hex("ColorColumn", "bg")
+                  return "#3f303f"
                 end
-                return "#3d3339"
+                return "#191319"
               end,
             },
-            {
-              text = " ",
-              bg = function(buffer)
-                if buffer.is_focused then
-                  return get_hex("ColorColumn", "bg")
-                end
-                return "#3d3339"
-              end,
-            },
+            -- {
+            --   text = " ",
+            --   bg = function(buffer)
+            --     if buffer.is_focused then
+            --       return get_hex("ColorColumn", "bg")
+            --     end
+            --     return "#3d3339"
+            --   end,
+            -- },
           },
         })
       end
