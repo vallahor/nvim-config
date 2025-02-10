@@ -7,10 +7,12 @@ return {
       on_save_enabled = true,
       on_save_pattern = {
         "*.templ",
-        "*.svelte",
         "*.html",
         "*.jsx",
         "*.tsx",
+        "*.heex",
+        "*.eex",
+        "*.ex",
       },
     })
   end,

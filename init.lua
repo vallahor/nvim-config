@@ -25,8 +25,9 @@ require("lazy").setup("plugins", {
 
 -- SETTINGS --
 
--- vim.opt.guifont = { "JetBrains Mono NL:h11" }
-vim.opt.guifont = { "JetBrains Mono:h11" }
+-- vim.opt.guifont = { "JetBrains Mono NL:h12" }
+-- vim.opt.guifont = { "JetBrains Mono:h11" }
+vim.opt.guifont = { "JetBrains Mono:h12" }
 -- vim.opt.guifont = { "JetBrainsMono Nerd Font:h11" }
 -- vim.opt.guifont = { "JetBrainsMonoNL Nerd Font:h11" }
 vim.opt.shiftwidth = 4
@@ -70,8 +71,8 @@ vim.opt.updatetime = 50
 vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
 
 -- make sure that's work in all terminal emulators
-vim.opt.linespace = 6
--- vim.opt.linespace = 4
+-- vim.opt.linespace = 6
+-- vim.opt.linespace = 2
 
 -- vim.opt.cmdheight = 0
 -- vim.opt.laststatus = 2
@@ -180,7 +181,7 @@ if false then
   vim.keymap.set({ "v", "x" }, "<space>", "<esc>")
 end
 
-if false then
+if not vim.g.skeletyl then
   -- if vim.g.skeletyl then
   --   vim.keymap.set("i", "_{", "<esc>")
   --   vim.keymap.set("i", "{_", "<esc>")
@@ -465,7 +466,7 @@ vim.keymap.set("n", "gr", "<cmd>Telescope lsp_references<CR>")
 vim.keymap.set("n", "<c-a>", "<cmd>lua vim.lsp.buf.code_action()<CR>")
 vim.keymap.set("n", "K", vim.lsp.buf.hover)
 vim.keymap.set("n", "&", vim.diagnostic.open_float)
--- vim.keymap.set("n", "_", vim.diagnostic.open_float)
+vim.keymap.set("n", "`", vim.diagnostic.open_float)
 
 -- vim.keymap.set("n", "<leader>r", vim.lsp.buf.rename)
 vim.keymap.set("n", "<c-*>", vim.lsp.buf.rename)
@@ -546,13 +547,13 @@ vim.api.nvim_create_autocmd("FocusGained", {
 --   end,
 -- })
 
--- vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
---   pattern = { "*.svelte", "*.*eex", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.html", "*.css", "*.lua" },
---   callback = function()
---     vim.opt_local.shiftwidth = 2
---     vim.opt_local.tabstop = 2
---   end,
--- })
+vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
+  pattern = { "*.vue", "*.svelte", "*.*eex", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.html", "*.css", "*.lua" },
+  callback = function()
+    vim.opt_local.shiftwidth = 2
+    vim.opt_local.tabstop = 2
+  end,
+})
 
 -- movements with timeout
 vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {

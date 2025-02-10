@@ -23,24 +23,25 @@ return {
 
     require("nvim-tree").setup({
       on_attach = my_on_attach,
-      update_focused_file = {
-        enable = true,
-      },
+      -- update_focused_file = {
+      --   enable = true,
+      -- },
       view = {
         -- width = 35,
-        width = 33,
+        -- width = 33,
       },
       git = {
+        enable = false,
         ignore = false,
       },
       filters = {
         dotfiles = false,
-        -- custom = { ".venv", "node_modules", "__pycache__" },
-        custom = { "__pycache__" },
+        custom = { ".venv", "node_modules", "__pycache__" },
+        -- custom = { "__pycache__" },
       },
       renderer = {
         indent_markers = {
-          enable = true,
+          enable = false,
           -- icons = {
           --   corner = "│",
           --   edge = "│",

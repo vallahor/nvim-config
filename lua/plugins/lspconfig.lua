@@ -8,7 +8,8 @@ return {
 
     -- https://www.mitchellhanberg.com/modern-format-on-save-in-neovim/
     vim.api.nvim_create_autocmd("LspAttach", {
-      pattern = { "*.svelte", "*.odin", "*.zig", "*.cs", "*.ex", "*.exs", "*.heex", "*.php", "*.vue" },
+      -- pattern = { "*.svelte", "*.odin", "*.zig", "*.cs", "*.ex", "*.exs", "*.heex", "*.php", "*.vue" },
+      pattern = { "*.odin", "*.zig", "*.cs", "*.ex", "*.exs", "*.heex", "*.php" },
       group = vim.api.nvim_create_augroup("lsp", { clear = true }),
       callback = function(args)
         vim.api.nvim_create_autocmd("BufWritePre", {
@@ -91,23 +92,23 @@ return {
     lspconfig.tailwindcss.setup({
       capabilities = capabilities,
       on_attach = on_attach,
-      -- filetypes = { "html", "elixir", "eelixir", "heex", "htmldjango" },
-      -- init_options = {
-      --   userLanguages = {
-      --     elixir = "html-eex",
-      --     eelixir = "html-eex",
-      --     heex = "html-eex",
-      --   },
-      -- },
-      -- settings = {
-      --   tailwindCSS = {
-      --     experimental = {
-      --       classRegex = {
-      --         'class[:]\\s*"([^"]*)"',
-      --       },
-      --     },
-      --   },
-      -- },
+      filetypes = { "html", "elixir", "eelixir", "heex", "htmldjango" },
+      init_options = {
+        userLanguages = {
+          elixir = "html-eex",
+          eelixir = "html-eex",
+          heex = "html-eex",
+        },
+      },
+      settings = {
+        tailwindCSS = {
+          experimental = {
+            classRegex = {
+              'class[:]\\s*"([^"]*)"',
+            },
+          },
+        },
+      },
     })
 
     lspconfig.clangd.setup({
@@ -255,16 +256,16 @@ return {
     -- },
     -- })
 
-    lspconfig.emmet_language_server.setup({
-      capabilities = capabilities,
-      on_attach = on_attach,
-      init_options = {
-        syntaxProfiles = {
-          html = { self_closing_tag = true },
-          jsx = { self_closing_tag = true },
-        },
-      },
-    })
+    -- lspconfig.emmet_language_server.setup({
+    --   capabilities = capabilities,
+    --   on_attach = on_attach,
+    --   init_options = {
+    --     syntaxProfiles = {
+    --       html = { self_closing_tag = true },
+    --       jsx = { self_closing_tag = true },
+    --     },
+    --   },
+    -- })
 
     lspconfig.gopls.setup({
       capabilities = capabilities,
