@@ -181,7 +181,7 @@ if false then
   vim.keymap.set({ "v", "x" }, "<space>", "<esc>")
 end
 
-if not vim.g.skeletyl then
+if false or not vim.g.skeletyl then
   -- if vim.g.skeletyl then
   --   vim.keymap.set("i", "_{", "<esc>")
   --   vim.keymap.set("i", "{_", "<esc>")
@@ -705,6 +705,12 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 vim.api.nvim_set_hl(0, "NvimTreeIndentMarker", { fg = "#30323E" })
+
+vim.filetype.add({
+  pattern = {
+    [".*%.blade%.php"] = "php",
+  },
+})
 
 -- vim.diagnostic.config({
 --   virtual_text = false,

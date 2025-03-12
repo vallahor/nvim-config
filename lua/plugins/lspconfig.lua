@@ -9,7 +9,7 @@ return {
     -- https://www.mitchellhanberg.com/modern-format-on-save-in-neovim/
     vim.api.nvim_create_autocmd("LspAttach", {
       -- pattern = { "*.svelte", "*.odin", "*.zig", "*.cs", "*.ex", "*.exs", "*.heex", "*.php", "*.vue" },
-      pattern = { "*.odin", "*.zig", "*.cs", "*.ex", "*.exs", "*.heex", "*.php" },
+      pattern = { "*.odin", "*.zig", "*.cs", "*.ex", "*.exs", "*.heex", "*.php", "*.blade.php" },
       group = vim.api.nvim_create_augroup("lsp", { clear = true }),
       callback = function(args)
         vim.api.nvim_create_autocmd("BufWritePre", {
@@ -92,16 +92,26 @@ return {
     lspconfig.tailwindcss.setup({
       capabilities = capabilities,
       on_attach = on_attach,
-      filetypes = { "html", "elixir", "eelixir", "heex", "htmldjango" },
-      init_options = {
-        userLanguages = {
-          elixir = "html-eex",
-          eelixir = "html-eex",
-          heex = "html-eex",
-        },
-      },
+      cmd = { "tailwindcss-language-server", "--stdio" },
+      root_dir = lspconfig.util.root_pattern(
+        "mix.exs",
+        "tailwind.config.js",
+        "tailwind.config.ts",
+        "postcss.config.js",
+        "postcss.config.ts",
+        "package.json",
+        "node_modules",
+        ".git"
+      ),
+      filetypes = { "html", "elixir", "eelixir", "heex", "ex", "svelte", "blade" },
       settings = {
         tailwindCSS = {
+          includeLanguages = {
+            elixir = "html-eex",
+            eelixir = "html-eex",
+            heex = "html-eex",
+            blade = "html",
+          },
           experimental = {
             classRegex = {
               'class[:]\\s*"([^"]*)"',

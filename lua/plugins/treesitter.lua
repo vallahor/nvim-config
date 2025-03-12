@@ -36,6 +36,7 @@ return {
           autocmd BufRead *.scm set filetype=query
       ]])
 
+      require("nvim-treesitter.configs").setup(opts)
       local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
       parser_config.blade = {
         install_info = {
@@ -54,12 +55,6 @@ return {
       --   },
       --   filetype = "blade",
       -- }
-
-      vim.filetype.add({
-        pattern = {
-          [".*%.blade%.php"] = "blade",
-        },
-      })
 
       vim.cmd([[
         augroup BladeFiletypeRelated
