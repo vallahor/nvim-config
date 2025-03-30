@@ -4,6 +4,6 @@ return {
   lazy = false,
   priority = 1000,
   config = function()
-    vim.cmd([[colorscheme gruvballish]])
+    vim.cmd([[colorscheme targino]])
   end,
 }

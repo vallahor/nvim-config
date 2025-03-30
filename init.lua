@@ -14,7 +14,7 @@ if not vim.uv.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
-vim.g.mapleader = " "
+-- vim.g.mapleader = " "
 vim.g.skeletyl = true
 
 require("lazy").setup("plugins", {
@@ -25,9 +25,9 @@ require("lazy").setup("plugins", {
 
 -- SETTINGS --
 
--- vim.opt.guifont = { "JetBrains Mono NL:h12" }
+vim.opt.guifont = { "JetBrains Mono NL:h12" }
 -- vim.opt.guifont = { "JetBrains Mono:h11" }
-vim.opt.guifont = { "JetBrains Mono:h12" }
+-- vim.opt.guifont = { "JetBrains Mono:h12" }
 -- vim.opt.guifont = { "JetBrainsMono Nerd Font:h11" }
 -- vim.opt.guifont = { "JetBrainsMonoNL Nerd Font:h11" }
 vim.opt.shiftwidth = 4
@@ -176,9 +176,11 @@ end
 
 vim.keymap.set("n", "<esc>", "<cmd>lua EscNormalMode()<cr>")
 
-if false then
+if true then
   vim.keymap.set("n", "<space>", "<cmd>lua EscNormalMode()<cr>")
   vim.keymap.set({ "v", "x" }, "<space>", "<esc>")
+else
+  vim.keymap.set("n", "<space>", "<nop>")
 end
 
 if false or not vim.g.skeletyl then
@@ -524,10 +526,10 @@ else
 end
 
 -- check if ill really use this
-vim.keymap.set("v", "<leader><c->>", "<c-a>gv")
-vim.keymap.set("v", "<leader><c-<>", "<c-x>gv")
-vim.keymap.set("v", "<leader><c-.>", "g<c-a>gv")
-vim.keymap.set("v", "<leader><c-,>", "g<c-x>gv")
+-- vim.keymap.set("v", "<leader><c->>", "<c-a>gv")
+-- vim.keymap.set("v", "<leader><c-<>", "<c-x>gv")
+-- vim.keymap.set("v", "<leader><c-.>", "g<c-a>gv")
+-- vim.keymap.set("v", "<leader><c-,>", "g<c-x>gv")
 
 vim.api.nvim_create_autocmd("FocusGained", {
   pattern = "*",
@@ -647,26 +649,28 @@ augroup END
 
 " @check if I'll used it without LSP
 hi! ErrorBg   guibg=#351C1D
-hi! WarningBg guibg=#3A2717
+hi! WarningBg guibg=#2f1f12
 hi! InfoBg    guibg=#2B2627
 hi! HintBg    guibg=#2B2627
 
 " " @check: do we really need the number fg highlight?
 hi! ErrorLineBg   guifg=#a23343 guibg=#351C1D
-hi! WarningLineBg guifg=#AF7C55 guibg=#3A2717
+hi! WarningLineBg guifg=#AF7C55 guibg=#2f1f12
 hi! InfoLineBg    guifg=#A8899C guibg=#2B2627
 hi! HintLineBg    guifg=#A98D92 guibg=#2B2627
 hi! HintLineBg    guifg=#A98D92
 
 " :h diagnostic-signs
-sign define DiagnosticSignError text=E texthl=DiagnosticSignError linehl=ErrorBg   numhl=ErrorLineBg
-sign define DiagnosticSignWarn  text=W texthl=DiagnosticSignWarn  linehl=WarningBg numhl=WarningLineBg
-sign define DiagnosticSignInfo  text=I texthl=DiagnosticSignInfo  linehl=InforBg   numhl=InfoLineBg
-sign define DiagnosticSignHint  text=H texthl=DiagnosticSignHint  linehl=HintBg    numhl=HintLineBg
-sign define DiagnosticSignHint  text=H texthl=DiagnosticSignHint  numhl=HintLineBg
-sign define DiagnosticSignHint  text=H numhl=HintLineBg
+" sign define DiagnosticSignError text=E texthl=DiagnosticSignError linehl=ErrorBg   numhl=ErrorLineBg
+" sign define DiagnosticSignWarn  text=W texthl=DiagnosticSignWarn  linehl=WarningBg numhl=WarningLineBg
+" sign define DiagnosticSignInfo  text=I texthl=DiagnosticSignInfo  linehl=InforBg   numhl=InfoLineBg
+" sign define DiagnosticSignHint  text=H texthl=DiagnosticSignHint  linehl=HintBg    numhl=HintLineBg
+" sign define DiagnosticSignHint  text=H texthl=DiagnosticSignHint  numhl=HintLineBg
+" sign define DiagnosticSignHint  text=H numhl=HintLineBg
 
 autocmd! BufNewFile,BufRead *.gs,*.vs,*.fs,*.vert,*.frag,*.geom set ft=glsl
+
+autocmd! BufNewFile,BufRead,BufEnter,BufWinEnter *.gd set noexpandtab
 
 " when autocomplete active it limit the height
 set pumblend=15
@@ -686,6 +690,7 @@ if vim.g.neovide then
 end
 
 if vim.fn.filereadable(vim.fn.getcwd() .. "/project.godot") == 1 then
+  -- zed: {project} {file}:{line}:{col}
   -- --server 127.0.0.1:6004 --remote-send "<esc>:n {file}<CR>:call cursor({line},{col})<CR>"
   local addr = "./godot.pipe"
   if vim.fn.has("win32") == 1 then
@@ -712,17 +717,29 @@ vim.filetype.add({
   },
 })
 
--- vim.diagnostic.config({
---   virtual_text = false,
---   signs = {
---     numhl = {
---       [vim.diagnostic.severity.ERROR] = "ErrorLineBg",
---       [vim.diagnostic.severity.WARN] = "WarningLineBg",
---       [vim.diagnostic.severity.INFO] = "InfoLineBg",
---       [vim.diagnostic.severity.HINT] = "HintLineBg",
---     },
---   },
--- })
+vim.diagnostic.config({
+  virtual_text = true,
+  signs = {
+    text = {
+      [vim.diagnostic.severity.ERROR] = "",
+      [vim.diagnostic.severity.WARN] = "",
+      [vim.diagnostic.severity.INFO] = "",
+      [vim.diagnostic.severity.HINT] = "",
+    },
+    linehl = {
+      [vim.diagnostic.severity.ERROR] = "ErrorBg",
+      [vim.diagnostic.severity.WARN] = "WarningBg",
+      [vim.diagnostic.severity.INFO] = "InfoBg",
+      [vim.diagnostic.severity.HINT] = "HintBg",
+    },
+    numhl = {
+      [vim.diagnostic.severity.ERROR] = "ErrorLineBg",
+      [vim.diagnostic.severity.WARN] = "WarningLineBg",
+      [vim.diagnostic.severity.INFO] = "InfoLineBg",
+      [vim.diagnostic.severity.HINT] = "HintLineBg",
+    },
+  },
+})
 -- close quickfix menu after selecting choice
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "qf" },

@@ -114,25 +114,25 @@ return {
       end
 
       -- Cursor Word
-      require("mini.cursorword").setup({
-        delay = 0,
-      })
+      -- require("mini.cursorword").setup({
+      --   delay = 0,
+      -- })
 
-      vim.api.nvim_create_autocmd(
-        "FileType",
-        { pattern = { "NvimTree" }, command = "lua vim.b.minicursorword_disable=true" }
-      )
+      -- vim.api.nvim_create_autocmd(
+      --   "FileType",
+      --   { pattern = { "NvimTree" }, command = "lua vim.b.minicursorword_disable=true" }
+      -- )
 
-      vim.cmd([[
-        " hi MiniCursorword        guisp=none guifg=none guibg=#1c212f gui=none
-        " hi MiniCursorwordCurrent guisp=none guifg=none guibg=#1c212f gui=none
-        " hi MiniCursorword        guisp=none guifg=none guibg=#2D2829 gui=none
-        " hi MiniCursorwordCurrent guisp=none guifg=none guibg=#2D2829 gui=none
-        " hi MiniCursorword        guisp=#87787b guifg=none guibg=none gui=underline
-        " hi MiniCursorwordCurrent guisp=#87787b guifg=none guibg=none gui=underline
-        " hi MiniCursorword        guisp=#312531 guifg=none guibg=none gui=none
-        " hi MiniCursorwordCurrent guisp=#312531 guifg=none guibg=none gui=none
-      ]])
+      -- vim.cmd([[
+      -- " hi MiniCursorword        guisp=none guifg=none guibg=#1c212f gui=none
+      -- " hi MiniCursorwordCurrent guisp=none guifg=none guibg=#1c212f gui=none
+      -- " hi MiniCursorword        guisp=none guifg=none guibg=#2D2829 gui=none
+      -- " hi MiniCursorwordCurrent guisp=none guifg=none guibg=#2D2829 gui=none
+      -- " hi MiniCursorword        guisp=#87787b guifg=none guibg=none gui=underline
+      -- " hi MiniCursorwordCurrent guisp=#87787b guifg=none guibg=none gui=underline
+      -- " hi MiniCursorword        guisp=#312531 guifg=none guibg=none gui=none
+      -- " hi MiniCursorwordCurrent guisp=#312531 guifg=none guibg=none gui=none
+      -- ]])
     end,
   },
 }
