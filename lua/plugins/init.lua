@@ -87,12 +87,23 @@ return {
   --     ]])
   --   end,
   -- },
-  -- {
-  --   "ziglang/zig.vim",
-  --   config = function()
-  --     vim.cmd([[
-  --       let g:zig_fmt_autosave = 0
-  --     ]])
-  --   end,
-  -- },
+  {
+    "ziglang/zig.vim",
+    config = function()
+      vim.cmd([[
+        let g:zig_fmt_autosave = 0
+      ]])
+
+      vim.api.nvim_create_autocmd("BufWritePre", {
+        pattern = { "*.zig", "*.zon" },
+        callback = function(_)
+          vim.lsp.buf.format()
+          vim.lsp.buf.code_action({
+            context = { only = { "source.fixAll" }, diagnostics = {} },
+            apply = true,
+          })
+        end,
+      })
+    end,
+  },
 }

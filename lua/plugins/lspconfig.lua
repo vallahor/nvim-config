@@ -9,7 +9,7 @@ return {
     -- https://www.mitchellhanberg.com/modern-format-on-save-in-neovim/
     vim.api.nvim_create_autocmd("LspAttach", {
       -- pattern = { "*.svelte", "*.odin", "*.zig", "*.cs", "*.ex", "*.exs", "*.heex", "*.php", "*.vue" },
-      pattern = { "*.odin", "*.zig", "*.cs", "*.ex", "*.exs", "*.heex", "*.php", "*.blade.php" },
+      pattern = { "*.odin", "*.cs", "*.ex", "*.exs", "*.heex", "*.php", "*.blade.php" },
       group = vim.api.nvim_create_augroup("lsp", { clear = true }),
       callback = function(args)
         vim.api.nvim_create_autocmd("BufWritePre", {

@@ -410,13 +410,13 @@ end
 if vim.g.skeletyl then
   -- vim.keymap.set("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
   vim.keymap.set("n", "<f10>", "<cmd>:e $MYVIMRC<CR>") -- open config file (vimrc or init.lua)
-  vim.keymap.set("n", "<f9>", "<cmd>:e c:/projects/gruvballish/colors/gruvballish.vim<CR>") -- open config file (vimrc or init.lua)
+  vim.keymap.set("n", "<f9>", "<cmd>:e c:/projects/gruvballish/colors/targino.vim<CR>") -- open config file (vimrc or init.lua)
   vim.keymap.set("n", "<f5>", "<cmd>so %<CR>") -- execute current file (vim or lua)
   vim.keymap.set("n", "<f11>", "<cmd>echo wordcount().words<CR>") -- execute current file (vim or lua)
 else
   -- vim.keymap.set("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
   vim.keymap.set("n", "<f4>", "<cmd>:e $MYVIMRC<CR>") -- open config file (vimrc or init.lua)
-  vim.keymap.set("n", "<f12>", "<cmd>:e c:/projects/gruvballish/colors/gruvballish.vim<CR>") -- open config file (vimrc or init.lua)
+  vim.keymap.set("n", "<f12>", "<cmd>:e c:/projects/gruvballish/colors/targino.vim<CR>") -- open config file (vimrc or init.lua)
   vim.keymap.set("n", "<f5>", "<cmd>so %<CR>") -- execute current file (vim or lua)
   vim.keymap.set("n", "<f11>", "<cmd>echo wordcount().words<CR>") -- execute current file (vim or lua)
 end
@@ -623,6 +623,7 @@ set isfname+=(
 
 set noswapfile
 set termguicolors
+set nowrap
 
 set history=20
 
@@ -648,17 +649,18 @@ au TextYankPost * silent! lua vim.highlight.on_yank({higroup="Visual", timeout=2
 augroup END
 
 " @check if I'll used it without LSP
-hi! ErrorBg   guibg=#351C1D
-hi! WarningBg guibg=#2f1f12
-hi! InfoBg    guibg=#2B2627
-hi! HintBg    guibg=#2B2627
+" hi! ErrorBg   guibg=#351C1D
+hi! ErrorBg   guibg=#241317
+hi! WarningBg guibg=#24180e
+hi! InfoBg    guibg=#1a181a
+hi! HintBg    guibg=#1a181a
 
 " " @check: do we really need the number fg highlight?
-hi! ErrorLineBg   guifg=#a23343 guibg=#351C1D
-hi! WarningLineBg guifg=#AF7C55 guibg=#2f1f12
-hi! InfoLineBg    guifg=#A8899C guibg=#2B2627
-hi! HintLineBg    guifg=#A98D92 guibg=#2B2627
-hi! HintLineBg    guifg=#A98D92
+hi! ErrorLineBg   guifg=#832936 guibg=#241317
+hi! WarningLineBg guifg=#825c3e guibg=#24180e
+hi! InfoLineBg    guifg=#5d595d guibg=#1a181a
+hi! HintLineBg    guifg=#5d595d guibg=#1a181a
+" hi! HintLineBg    guifg=#A98D92
 
 " :h diagnostic-signs
 " sign define DiagnosticSignError text=E texthl=DiagnosticSignError linehl=ErrorBg   numhl=ErrorLineBg
