@@ -40,7 +40,7 @@ return {
         },
 
         window = {
-          documentation = cmp.config.disable,
+          -- documentation = cmp.config.disable,
         },
         -- experimental = {
         --   ghost_text = { hl_group = "GhostText" },

@@ -9,6 +9,8 @@ return {
 
       vim.api.nvim_create_autocmd("BufWritePre", { pattern = "*.blade.php", command = ":Neoformat blade_formatter" })
 
+      -- vim.api.nvim_create_autocmd("BufWritePre", { pattern = "*.rs", command = ":Neoformat" })
+
       -- vim.api.nvim_create_autocmd("BufWritePre", { pattern = "*.py", command = ":Neoformat" })
 
       -- vim.api.nvim_create_autocmd("BufWritePre", {
@@ -26,10 +28,10 @@ return {
         pattern = { "*.svelte", "*.tsx", "*.jsx", "*.json", "*.vue" },
         command = ":Neoformat prettierd",
       })
-      vim.api.nvim_create_autocmd("BufWritePre", {
-        pattern = { "*.ts", "*.js", "*.css", "*.scss" },
-        command = ":Neoformat prettierd",
-      })
+      -- vim.api.nvim_create_autocmd("BufWritePre", {
+      --   pattern = { "*.ts", "*.js", "*.css", "*.scss" },
+      --   command = ":Neoformat prettierd",
+      -- })
     end,
   },
 }

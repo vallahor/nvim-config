@@ -14,7 +14,20 @@ return {
       },
       indent = {
         enable = true,
-        disable = { "python", "rust", "cpp", "go", "odin", "ocaml", "ocaml_interface", "blade", "gdscript", "zig" },
+        -- disable = { "python", "rust", "cpp", "go", "odin", "ocaml", "ocaml_interface", "blade", "gdscript", "zig" },
+        disable = {
+          "python",
+          "rust",
+          "cpp",
+          "go",
+          "odin",
+          "ocaml",
+          "ocaml_interface",
+          "blade",
+          "gdscript",
+          "elixir",
+          "zig",
+        },
       },
       incremental_selection = {
         enable = true,

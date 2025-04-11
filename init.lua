@@ -207,6 +207,7 @@ if false or not vim.g.skeletyl then
   vim.keymap.set("t", "kj", "<C-\\><C-n>")
 end
 
+vim.keymap.set({ "i" }, "<enter>", "<c-u><enter>")
 vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>") -- save file
 vim.keymap.set({ "n", "v" }, "<c-s>", "<cmd>w!<CR><esc>") -- save file
 -- vim.keymap.set({ "n", "v" }, "<leader>fs", "<cmd>w!<CR><esc>") -- save file
@@ -673,6 +674,8 @@ hi! HintLineBg    guifg=#5d595d guibg=#1a181a
 autocmd! BufNewFile,BufRead *.gs,*.vs,*.fs,*.vert,*.frag,*.geom set ft=glsl
 
 autocmd! BufNewFile,BufRead,BufEnter,BufWinEnter *.gd set noexpandtab
+
+" autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
 
 " when autocomplete active it limit the height
 set pumblend=15
