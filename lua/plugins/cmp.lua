@@ -87,6 +87,10 @@ return {
             select = true,
             -- behavior = cmp.ConfirmBehavior.Replace,
           }),
+          ["<c-l>"] = cmp.mapping.confirm({
+            select = true,
+            -- behavior = cmp.ConfirmBehavior.Replace,
+          }),
           ["<c-tab>"] = cmp.mapping(function()
             cmp.complete()
           end, { "i", "s", "c" }),

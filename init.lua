@@ -125,9 +125,9 @@ if vim.g.skeletyl then
     ["("] = "0^",
   }
   vim.g.VM_maps = {
-    ["Find Under"] = "<c-l>",
-    ["Find Subword Under"] = "<c-l>",
-    ["Select All"] = "<c-s-l>",
+    ["Find Under"] = "<c-u>",
+    ["Find Subword Under"] = "<c-u>",
+    ["Select All"] = "<c-s-u>",
     ["Add Cursor Down"] = "<c-j>",
     ["Add Cursor Up"] = "<c-k>",
     -- ["Switch Mode"] = "<tab>",
@@ -250,6 +250,11 @@ if vim.g.skeletyl then
   vim.keymap.set("n", "<down>", "<cmd>wincmd j<cr>") -- move to window down
   vim.keymap.set("n", "<up>", "<cmd>wincmd k<cr>") -- move to window up
   vim.keymap.set("n", "<right>", "<cmd>wincmd l<cr>") -- move to window right
+
+  vim.keymap.set({ "n", "v" }, "<c-h>", "<cmd>wincmd h<cr>") -- move to window left
+  vim.keymap.set({ "n", "v" }, "<c-j>", "<cmd>wincmd j<cr>") -- move to window down
+  vim.keymap.set({ "n", "v" }, "<c-k>", "<cmd>wincmd k<cr>") -- move to window up
+  vim.keymap.set({ "n", "v" }, "<c-l>", "<cmd>wincmd l<cr>") -- move to window right
 else
   vim.keymap.set("n", "<c-\\>", "<cmd>clo<cr>") -- close current    window
   vim.keymap.set("n", "<c-=>", "<cmd>vs<cr>") -- split vertical   window

@@ -18,7 +18,10 @@ return {
       api.config.mappings.default_on_attach(bufnr)
 
       -- your removals and mappings go here
-      vim.keymap.set("n", "<C-t>", api.tree.close, opts("Close"))
+      -- vim.keymap.set("n", "<C-t>", api.tree.close, opts("Close"))
+      vim.keymap.set("n", "<C-t>", function()
+        vim.cmd.wincmd("p")
+      end, opts("Toggle Tree Focus"))
     end
 
     require("nvim-tree").setup({

@@ -39,6 +39,11 @@ return {
         vim.keymap.set({ "n", "v" }, "<c-s-k>", "<cmd>lua Close_up()<CR>")
         vim.keymap.set({ "n", "v" }, "<c-s-l>", "<cmd>lua Close_right()<CR>")
       else
+        vim.keymap.set({ "n", "v" }, "<c-s-h>", "<cmd>lua Close_left()<CR>")
+        vim.keymap.set({ "n", "v" }, "<c-s-j>", "<cmd>lua Close_down()<CR>")
+        vim.keymap.set({ "n", "v" }, "<c-s-k>", "<cmd>lua Close_up()<CR>")
+        vim.keymap.set({ "n", "v" }, "<c-s-l>", "<cmd>lua Close_right()<CR>")
+
         vim.keymap.set({ "n", "v" }, "<c-left>", "<cmd>lua Close_left()<CR>")
         vim.keymap.set({ "n", "v" }, "<c-down>", "<cmd>lua Close_down()<CR>")
         vim.keymap.set({ "n", "v" }, "<c-up>", "<cmd>lua Close_up()<CR>")

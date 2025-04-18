@@ -25,7 +25,6 @@ return {
           "ocaml_interface",
           "blade",
           "gdscript",
-          "elixir",
           "zig",
         },
       },
