@@ -111,4 +111,7 @@ return {
       -- })
     end,
   },
+  {
+    "posva/vim-vue",
+  },
 }

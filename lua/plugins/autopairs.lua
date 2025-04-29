@@ -7,8 +7,9 @@ return {
       autopairs.setup({
         disable_filetype = { "TelescopePrompt", "vim" },
         enable_check_bracket_line = true,
+        enable_afterquote = false,
       })
-      autopairs.add_rules(require("nvim-autopairs.rules.endwise-elixir"))
+      -- autopairs.add_rules(require("nvim-autopairs.rules.endwise-elixir"))
       -- autopairs.remove_rule("'")
       -- or
       autopairs.get_rules("'")[1].not_filetypes = { "scheme", "lisp", "rust" }

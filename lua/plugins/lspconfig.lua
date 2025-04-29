@@ -167,18 +167,22 @@ return {
       on_attach = on_attach,
     })
 
-    lspconfig.volar.setup({
-      capabilities = capabilities,
-      on_attach = on_attach,
-      filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue", "json" },
-      init_options = {
-        typescript = {
-          tsdk = "C:/Users/Vallahor/AppData/Roaming/npm/node_modules/typescript/lib",
-          -- Alternative location if installed as root:
-          -- tsdk = '/usr/local/lib/node_modules/typescript/lib'
-        },
-      },
-    })
+    -- lspconfig.volar.setup({
+    --   capabilities = capabilities,
+    --   on_attach = on_attach,
+    --   -- filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue", "json" },
+    --   init_options = {
+    --     vue = {
+    --       -- disable hybrid mode
+    --       hybridMode = false,
+    --     },
+    --     -- typescript = {
+    --     --   tsdk = "C:/Users/Vallahor/AppData/Roaming/npm/node_modules/typescript/lib",
+    --     --   -- Alternative location if installed as root:
+    --     --   -- tsdk = '/usr/local/lib/node_modules/typescript/lib'
+    --     -- },
+    --   },
+    -- })
 
     lspconfig.sqlls.setup({
       capabilities = capabilities,
@@ -230,6 +234,8 @@ return {
       capabilities = capabilities,
       on_attach = on_attach,
     })
+
+    vim.lsp.enable("laravel_ls")
 
     lspconfig.intelephense.setup({
       capabilities = capabilities,

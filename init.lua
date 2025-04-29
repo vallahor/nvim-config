@@ -14,7 +14,7 @@ if not vim.uv.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
--- vim.g.mapleader = " "
+vim.g.mapleader = " "
 vim.g.skeletyl = true
 
 require("lazy").setup("plugins", {
@@ -25,10 +25,11 @@ require("lazy").setup("plugins", {
 
 -- SETTINGS --
 
-vim.opt.guifont = { "JetBrains Mono NL:h12" }
+-- vim.opt.guifont = { "JetBrains Mono NL:h12" }
 -- vim.opt.guifont = { "JetBrains Mono:h11" }
 -- vim.opt.guifont = { "JetBrains Mono:h12" }
 -- vim.opt.guifont = { "JetBrainsMono Nerd Font:h11" }
+vim.opt.guifont = { "JetBrainsMono Nerd Font:h12" }
 -- vim.opt.guifont = { "JetBrainsMonoNL Nerd Font:h11" }
 vim.opt.shiftwidth = 4
 vim.opt.tabstop = 4
@@ -250,11 +251,6 @@ if vim.g.skeletyl then
   vim.keymap.set("n", "<down>", "<cmd>wincmd j<cr>") -- move to window down
   vim.keymap.set("n", "<up>", "<cmd>wincmd k<cr>") -- move to window up
   vim.keymap.set("n", "<right>", "<cmd>wincmd l<cr>") -- move to window right
-
-  vim.keymap.set({ "n", "v" }, "<c-h>", "<cmd>wincmd h<cr>") -- move to window left
-  vim.keymap.set({ "n", "v" }, "<c-j>", "<cmd>wincmd j<cr>") -- move to window down
-  vim.keymap.set({ "n", "v" }, "<c-k>", "<cmd>wincmd k<cr>") -- move to window up
-  vim.keymap.set({ "n", "v" }, "<c-l>", "<cmd>wincmd l<cr>") -- move to window right
 else
   vim.keymap.set("n", "<c-\\>", "<cmd>clo<cr>") -- close current    window
   vim.keymap.set("n", "<c-=>", "<cmd>vs<cr>") -- split vertical   window
@@ -524,11 +520,23 @@ vim.keymap.set("i", ">", "><c-g>u")
 vim.keymap.set("i", ";", ";<c-g>u")
 
 if vim.g.skeletyl then
-  vim.keymap.set("n", "<c-[>", vim.diagnostic.goto_prev)
-  vim.keymap.set("n", "<c-]>", vim.diagnostic.goto_next)
+  -- vim.keymap.set("n", "<c-[>", vim.diagnostic.goto_prev)
+  -- vim.keymap.set("n", "<c-]>", vim.diagnostic.goto_next)
+  vim.keymap.set({ "n", "v", "x" }, "<c-[>", function()
+    vim.diagnostic.jump({ count = -1, float = false })
+  end, { nowait = true, buffer = true }) -- paragraph up
+  vim.keymap.set({ "n", "v", "x" }, "<c-]>", function()
+    vim.diagnostic.jump({ count = 1, float = false })
+  end, { nowait = true, buffer = true }) -- paragraph up
 else
-  vim.keymap.set("n", "<c-[>", vim.diagnostic.goto_prev)
-  vim.keymap.set("n", "<c-]>", vim.diagnostic.goto_next)
+  -- vim.keymap.set("n", "<c-[>", vim.diagnostic.goto_prev)
+  -- vim.keymap.set("n", "<c-]>", vim.diagnostic.goto_next)
+  vim.keymap.set({ "n", "v", "x" }, "<c-[>", function()
+    vim.diagnostic.jump({ count = -1, float = false })
+  end, { nowait = true, buffer = true }) -- paragraph up
+  vim.keymap.set({ "n", "v", "x" }, "<c-]>", function()
+    vim.diagnostic.jump({ count = 1, float = false })
+  end, { nowait = true, buffer = true }) -- paragraph up
 end
 
 -- check if ill really use this
@@ -556,7 +564,7 @@ vim.api.nvim_create_autocmd("FocusGained", {
 -- })
 
 vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
-  pattern = { "*.vue", "*.svelte", "*.*eex", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.html", "*.css", "*.lua" },
+  pattern = { "*.svelte", "*.*eex", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.html", "*.css", "*.lua" },
   callback = function()
     vim.opt_local.shiftwidth = 2
     vim.opt_local.tabstop = 2
@@ -572,8 +580,14 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
       vim.keymap.set({ "n", "v", "x" }, "[", "{", { nowait = true, buffer = true }) -- paragraph up
       vim.keymap.set({ "n", "v", "x" }, "]", "}", { nowait = true, buffer = true }) -- paragraph down
     else
-      vim.keymap.set({ "n", "v", "x" }, "[", vim.diagnostic.goto_prev, { nowait = true, buffer = true }) -- paragraph up
-      vim.keymap.set({ "n", "v", "x" }, "]", vim.diagnostic.goto_next, { nowait = true, buffer = true }) -- paragraph down
+      -- vim.keymap.set({ "n", "v", "x" }, "[", vim.diagnostic.goto_prev, { nowait = true, buffer = true }) -- paragraph up
+      -- vim.keymap.set({ "n", "v", "x" }, "]", vim.diagnostic.goto_next, { nowait = true, buffer = true }) -- paragraph down
+      vim.keymap.set({ "n", "v", "x" }, "[", function()
+        vim.diagnostic.jump({ count = -1, float = false })
+      end, { nowait = true, buffer = true }) -- paragraph up
+      vim.keymap.set({ "n", "v", "x" }, "]", function()
+        vim.diagnostic.jump({ count = 1, float = false })
+      end, { nowait = true, buffer = true }) -- paragraph up
     end
     -- move indentation
     vim.keymap.set({ "v", "x" }, "<", "<gv", { nowait = true, buffer = true, remap = true }) -- indent left in visual mode
@@ -654,27 +668,26 @@ autocmd!
 au TextYankPost * silent! lua vim.highlight.on_yank({higroup="Visual", timeout=200})
 augroup END
 
-" @check if I'll used it without LSP
-" hi! ErrorBg   guibg=#351C1D
-hi! ErrorBg   guibg=#241317
-hi! WarningBg guibg=#24180e
-hi! InfoBg    guibg=#1a181a
-hi! HintBg    guibg=#1a181a
+" " hi! ErrorBg   guibg=#351C1D
+" hi! ErrorBg   guibg=#241317
+" hi! WarningBg guibg=#24180e
+" hi! InfoBg    guibg=#1a181a
+" hi! HintBg    guibg=#1a181a
 
-" " @check: do we really need the number fg highlight?
-hi! ErrorLineBg   guifg=#832936 guibg=#241317
-hi! WarningLineBg guifg=#825c3e guibg=#24180e
-hi! InfoLineBg    guifg=#5d595d guibg=#1a181a
-hi! HintLineBg    guifg=#5d595d guibg=#1a181a
-" hi! HintLineBg    guifg=#A98D92
+" " " @check: do we really need the number fg highlight?
+" hi! ErrorLineBg   guifg=#832936 guibg=#241317
+" hi! WarningLineBg guifg=#825c3e guibg=#24180e
+" hi! InfoLineBg    guifg=#5d595d guibg=#1a181a
+" hi! HintLineBg    guifg=#5d595d guibg=#1a181a
+" " hi! HintLineBg    guifg=#A98D92
 
-" :h diagnostic-signs
-" sign define DiagnosticSignError text=E texthl=DiagnosticSignError linehl=ErrorBg   numhl=ErrorLineBg
-" sign define DiagnosticSignWarn  text=W texthl=DiagnosticSignWarn  linehl=WarningBg numhl=WarningLineBg
-" sign define DiagnosticSignInfo  text=I texthl=DiagnosticSignInfo  linehl=InforBg   numhl=InfoLineBg
-" sign define DiagnosticSignHint  text=H texthl=DiagnosticSignHint  linehl=HintBg    numhl=HintLineBg
-" sign define DiagnosticSignHint  text=H texthl=DiagnosticSignHint  numhl=HintLineBg
-" sign define DiagnosticSignHint  text=H numhl=HintLineBg
+" " :h diagnostic-signs
+" " sign define DiagnosticSignError text=E texthl=DiagnosticSignError linehl=ErrorBg   numhl=ErrorLineBg
+" " sign define DiagnosticSignWarn  text=W texthl=DiagnosticSignWarn  linehl=WarningBg numhl=WarningLineBg
+" " sign define DiagnosticSignInfo  text=I texthl=DiagnosticSignInfo  linehl=InforBg   numhl=InfoLineBg
+" " sign define DiagnosticSignHint  text=H texthl=DiagnosticSignHint  linehl=HintBg    numhl=HintLineBg
+" " sign define DiagnosticSignHint  text=H texthl=DiagnosticSignHint  numhl=HintLineBg
+" " sign define DiagnosticSignHint  text=H numhl=HintLineBg
 
 autocmd! BufNewFile,BufRead *.gs,*.vs,*.fs,*.vert,*.frag,*.geom set ft=glsl
 
@@ -750,6 +763,9 @@ vim.diagnostic.config({
     },
   },
 })
+
+vim.diagnostic.config({ jump = { float = false } })
+
 -- close quickfix menu after selecting choice
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "qf" },

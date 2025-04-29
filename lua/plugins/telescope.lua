@@ -71,6 +71,7 @@ return {
         vim.keymap.set("n", "<c-space>", "<cmd>lua require('telescope.builtin').buffers()<cr>", { silent = true })
       end
       vim.keymap.set("n", "<c-s-b>", "<cmd>lua require('telescope.builtin').buffers()<cr>", { silent = true })
+      vim.keymap.set("n", "<tab>", "<cmd>lua require('telescope.builtin').buffers()<cr>", { silent = true })
       -- vim.keymap.set("n", "<leader><leader>", "<cmd>lua require('telescope.builtin').buffers()<cr>", { silent = true })
     end,
   },
