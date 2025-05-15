@@ -63,16 +63,16 @@ return {
         },
         mapping = {
           ["<c-q>"] = cmp.mapping.close(),
-          ["<c-j>"] = cmp.mapping(function()
-            if cmp.visible() then
-              cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
-            end
-          end, { "i", "s", "c" }),
-          ["<c-k>"] = cmp.mapping(function()
-            if cmp.visible() then
-              cmp.select_prev_item({ behavior = cmp.SelectBehavior.Select })
-            end
-          end, { "i", "s", "c" }),
+          -- ["<c-j>"] = cmp.mapping(function()
+          --   if cmp.visible() then
+          --     cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
+          --   end
+          -- end, { "i", "s", "c" }),
+          -- ["<c-k>"] = cmp.mapping(function()
+          --   if cmp.visible() then
+          --     cmp.select_prev_item({ behavior = cmp.SelectBehavior.Select })
+          --   end
+          -- end, { "i", "s", "c" }),
           ["<down>"] = cmp.mapping(function()
             if cmp.visible() then
               cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
@@ -87,10 +87,10 @@ return {
             select = true,
             -- behavior = cmp.ConfirmBehavior.Replace,
           }),
-          ["<c-l>"] = cmp.mapping.confirm({
-            select = true,
-            -- behavior = cmp.ConfirmBehavior.Replace,
-          }),
+          -- ["<c-l>"] = cmp.mapping.confirm({
+          --   select = true,
+          --   -- behavior = cmp.ConfirmBehavior.Replace,
+          -- }),
           ["<c-tab>"] = cmp.mapping(function()
             cmp.complete()
           end, { "i", "s", "c" }),

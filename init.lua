@@ -28,8 +28,8 @@ require("lazy").setup("plugins", {
 -- vim.opt.guifont = { "JetBrains Mono NL:h12" }
 -- vim.opt.guifont = { "JetBrains Mono:h11" }
 -- vim.opt.guifont = { "JetBrains Mono:h12" }
--- vim.opt.guifont = { "JetBrainsMono Nerd Font:h11" }
-vim.opt.guifont = { "JetBrainsMono Nerd Font:h12" }
+vim.opt.guifont = { "JetBrainsMono Nerd Font:h11" }
+-- vim.opt.guifont = { "JetBrainsMono Nerd Font:h12" }
 -- vim.opt.guifont = { "JetBrainsMonoNL Nerd Font:h11" }
 vim.opt.shiftwidth = 4
 vim.opt.tabstop = 4
@@ -219,8 +219,8 @@ vim.keymap.set("n", "Y", "yg$") -- yank to end of line considering line wrap
 vim.keymap.set("n", "<c-i>", "<c-i>zz") -- center <c-i>
 vim.keymap.set("n", "<c-o>", "<c-o>zz") -- center <c-o>
 
-vim.keymap.set({ "n", "v" }, "H", "<c-u>zz", { noremap = true }) -- page up
-vim.keymap.set({ "n", "v" }, "L", "<c-d>zz", { noremap = true }) -- page down
+-- vim.keymap.set({ "n", "v" }, "H", "<c-u>zz", { noremap = true }) -- page up
+-- vim.keymap.set({ "n", "v" }, "L", "<c-d>zz", { noremap = true }) -- page down
 
 vim.keymap.set("i", "<PageUp>", "<nop>", { noremap = true }) -- page up
 vim.keymap.set("i", "<PageDown>", "<nop>", { noremap = true }) -- page down
@@ -566,8 +566,10 @@ vim.api.nvim_create_autocmd("FocusGained", {
 vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
   pattern = { "*.svelte", "*.*eex", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.html", "*.css", "*.lua" },
   callback = function()
-    vim.opt_local.shiftwidth = 2
-    vim.opt_local.tabstop = 2
+    if not vim.g.editorconfig then
+      vim.opt_local.shiftwidth = 2
+      vim.opt_local.tabstop = 2
+    end
   end,
 })
 

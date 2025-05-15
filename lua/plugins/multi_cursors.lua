@@ -4,7 +4,7 @@ return {
     event = "VeryLazy",
     config = function()
       vim.keymap.set({ "n", "v" }, "<a-a>", "<Plug>(VM-Reselect-Last)")
-      vim.keymap.set({ "n", "v" }, "<c-u>", "<Plug>(VM-Reselect-Last)")
+      vim.keymap.set({ "n", "v" }, "<c-s-m>", "<Plug>(VM-Reselect-Last)")
     end,
 
     -- init.lua FILE

@@ -114,14 +114,14 @@ return {
       end
 
       -- Cursor Word
-      -- require("mini.cursorword").setup({
-      --   delay = 0,
-      -- })
+      require("mini.cursorword").setup({
+        delay = 0,
+      })
 
-      -- vim.api.nvim_create_autocmd(
-      --   "FileType",
-      --   { pattern = { "NvimTree" }, command = "lua vim.b.minicursorword_disable=true" }
-      -- )
+      vim.api.nvim_create_autocmd(
+        "FileType",
+        { pattern = { "NvimTree" }, command = "lua vim.b.minicursorword_disable=true" }
+      )
 
       -- vim.cmd([[
       -- " hi MiniCursorword        guisp=none guifg=none guibg=#1c212f gui=none
