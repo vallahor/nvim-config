@@ -1,7 +1,7 @@
 return {
   { "folke/lazy.nvim", version = "*" },
   { "tpope/vim-repeat", event = "VeryLazy" },
-  -- { "sheerun/vim-polyglot" },
+  { "sheerun/vim-polyglot" },
   {
     -- dir = "../swap_buffer.lua",
     "../swap_buffer.lua",

@@ -235,17 +235,17 @@ return {
       on_attach = on_attach,
     })
 
-    vim.lsp.enable("laravel_ls")
+    -- vim.lsp.enable("laravel_ls")
 
-    lspconfig.intelephense.setup({
-      capabilities = capabilities,
-      on_attach = on_attach,
-      filetypes = { "php", "blade", "php_only" },
-      files = {
-        associations = { "*.php", "*.blade.php" }, -- Associating .blade.php files as well
-        maxSize = 5000000,
-      },
-    })
+    -- lspconfig.intelephense.setup({
+    --   capabilities = capabilities,
+    --   on_attach = on_attach,
+    --   filetypes = { "php", "blade", "php_only" },
+    --   files = {
+    --     associations = { "*.php", "*.blade.php" }, -- Associating .blade.php files as well
+    --     maxSize = 5000000,
+    --   },
+    -- })
 
     -- lspconfig.phpactor.setup({
     --   on_attach = on_attach,

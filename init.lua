@@ -566,10 +566,12 @@ vim.api.nvim_create_autocmd("FocusGained", {
 vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
   pattern = { "*.svelte", "*.*eex", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.html", "*.css", "*.lua" },
   callback = function()
-    if not vim.g.editorconfig then
-      vim.opt_local.shiftwidth = 2
-      vim.opt_local.tabstop = 2
-    end
+    vim.opt_local.shiftwidth = 2
+    vim.opt_local.tabstop = 2
+    -- if not vim.g.editorconfig then
+    --   vim.opt_local.shiftwidth = 2
+    --   vim.opt_local.tabstop = 2
+    -- end
   end,
 })
 
