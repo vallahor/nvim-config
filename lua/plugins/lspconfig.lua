@@ -103,7 +103,7 @@ return {
         "node_modules",
         ".git"
       ),
-      filetypes = { "html", "elixir", "eelixir", "heex", "ex", "svelte", "blade" },
+      filetypes = { "html", "elixir", "eelixir", "heex", "ex", "svelte", "blade", "javascriptreact", "typescriptreact" },
       settings = {
         tailwindCSS = {
           includeLanguages = {
