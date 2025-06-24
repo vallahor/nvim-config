@@ -1,5 +1,5 @@
 vim.cmd([[
-set termguicolors
+  set termguicolors
 ]])
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.uv.fs_stat(lazypath) then
@@ -25,12 +25,7 @@ require("lazy").setup("plugins", {
 
 -- SETTINGS --
 
--- vim.opt.guifont = { "JetBrains Mono NL:h12" }
--- vim.opt.guifont = { "JetBrains Mono:h11" }
--- vim.opt.guifont = { "JetBrains Mono:h12" }
-vim.opt.guifont = { "JetBrainsMono Nerd Font:h11" }
--- vim.opt.guifont = { "JetBrainsMono Nerd Font:h12" }
--- vim.opt.guifont = { "JetBrainsMonoNL Nerd Font:h11" }
+-- vim.opt.guifont = { "JetBrainsMono Nerd Font:h11" }
 vim.opt.shiftwidth = 4
 vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
@@ -42,7 +37,6 @@ vim.opt.ignorecase = true
 vim.opt.shiftround = true
 vim.opt.splitright = true
 vim.opt.splitbelow = true
--- vim.opt.termguicolors = true
 vim.opt.wildmode = "longest,list:longest,full"
 vim.opt.clipboard = "unnamedplus"
 vim.opt.encoding = "utf8"
@@ -68,7 +62,6 @@ vim.opt.cindent = false -- check
 vim.opt.timeoutlen = 200
 vim.opt.ttimeoutlen = 300
 vim.opt.updatetime = 50
--- vim.opt.guicursor = "i-ci:block-iCursor"
 vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
 
 -- make sure that's work in all terminal emulators
@@ -221,6 +214,9 @@ vim.keymap.set("n", "<c-o>", "<c-o>zz") -- center <c-o>
 
 -- vim.keymap.set({ "n", "v" }, "H", "<c-u>zz", { noremap = true }) -- page up
 -- vim.keymap.set({ "n", "v" }, "L", "<c-d>zz", { noremap = true }) -- page down
+
+vim.keymap.set({ "n", "v" }, "<PageUp>", "<c-u>zz", { noremap = true }) -- page up
+vim.keymap.set({ "n", "v" }, "<PageDown>", "<c-d>zz", { noremap = true }) -- page down
 
 vim.keymap.set("i", "<PageUp>", "<nop>", { noremap = true }) -- page up
 vim.keymap.set("i", "<PageDown>", "<nop>", { noremap = true }) -- page down
@@ -412,7 +408,8 @@ end
 if vim.g.skeletyl then
   -- vim.keymap.set("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
   vim.keymap.set("n", "<f10>", "<cmd>:e $MYVIMRC<CR>") -- open config file (vimrc or init.lua)
-  vim.keymap.set("n", "<f9>", "<cmd>:e c:/projects/gruvballish/colors/targino.vim<CR>") -- open config file (vimrc or init.lua)
+  -- vim.keymap.set("n", "<f9>", "<cmd>:e c:/projects/gruvballish/colors/targino.vim<CR>") -- open config file (vimrc or init.lua)
+  vim.keymap.set("n", "<f8>", "<cmd>:e ~/.config/ghostty/config<CR>") -- open ghostty config file (vimrc or init.lua)
   vim.keymap.set("n", "<f5>", "<cmd>so %<CR>") -- execute current file (vim or lua)
   vim.keymap.set("n", "<f11>", "<cmd>echo wordcount().words<CR>") -- execute current file (vim or lua)
 else
@@ -424,34 +421,8 @@ else
 end
 
 -- duplicate line and lines
--- vim.keymap.set("n", "<c-p>", '"0yy"0P') -- duplicate line up
--- vim.keymap.set("n", "<c-n>", '"0yy"0p') -- duplicate line down
 vim.keymap.set("n", "<c-d>", '"0yy"0p') -- duplicate line down
-
--- vim.keymap.set("v", "<c-p>", '"0y"0P') -- duplicate selection up
--- vim.keymap.set("v", "<c-n>", '"0y"0Pgv') -- like sublime duplicate line
 vim.keymap.set("v", "<c-d>", '"0y"0Pgv') -- like sublime duplicate line
--- vim.keymap.set("v", "<c-n>", function()
---   local init_pos = vim.fn.line("v")
---   vim.cmd([[noautocmd normal! "0ygv]])
---   local esc = vim.api.nvim_replace_termcodes("<esc>", true, false, true)
---   vim.api.nvim_feedkeys(esc, "v", false)
---   local end_pos = vim.fn.line(".")
---   vim.fn.setpos(".", { 0, math.max(init_pos, end_pos), 0, 0 })
---   local lines = vim.split(vim.fn.getreg("0"), "\n", { trimempty = true })
---   vim.api.nvim_put(lines, "l", true, false)
---   vim.cmd([[noautocmd normal! gv]])
---   -- match sublime duplicate lines
---   vim.cmd([[noautocmd normal! j]])
---   local visual_key = vim.api.nvim_replace_termcodes("V", true, false, true)
---   vim.api.nvim_feedkeys(visual_key, "v", false)
---   local j_key = vim.api.nvim_replace_termcodes("j", true, false, true)
---   for _ = 0, end_pos - init_pos - 1 do
---     vim.api.nvim_feedkeys(j_key, "v", false)
---   end
---   -- indent reselect
---   vim.cmd([[noautocmd normal! =gv]])
--- end) -- duplicate selection down
 
 vim.keymap.set("n", '"', "<C-^>") -- back to last buffer
 
@@ -474,14 +445,6 @@ vim.keymap.set("n", "`", vim.diagnostic.open_float)
 
 -- vim.keymap.set("n", "<leader>r", vim.lsp.buf.rename)
 vim.keymap.set("n", "<c-*>", vim.lsp.buf.rename)
-
--- vim.keymap.set("v", "<up>", [[:'<,'>move '<-2<CR>gv=gv]], { noremap = true, silent = true }) -- Move selected lines up
--- vim.keymap.set("v", "<down>", [[:'<,'>move '>+1<CR>gv=gv]], { noremap = true, silent = true }) -- Move selected lines down
-
--- if not vim.g.skeletyl then
---   vim.keymap.set("v", "<K>", [[:'<,'>move '<-2<CR>gv=gv]], { noremap = true, silent = true }) -- Move selected lines up
---   vim.keymap.set("v", "<J>", [[:'<,'>move '>+1<CR>gv=gv]], { noremap = true, silent = true }) -- Move selected lines down
--- end
 
 -- add undo capabilities in insert mode
 vim.keymap.set("i", "<space>", "<c-g>u<space>")
@@ -519,26 +482,6 @@ vim.keymap.set("i", "<", "<<c-g>u")
 vim.keymap.set("i", ">", "><c-g>u")
 vim.keymap.set("i", ";", ";<c-g>u")
 
-if vim.g.skeletyl then
-  -- vim.keymap.set("n", "<c-[>", vim.diagnostic.goto_prev)
-  -- vim.keymap.set("n", "<c-]>", vim.diagnostic.goto_next)
-  vim.keymap.set({ "n", "v", "x" }, "<c-[>", function()
-    vim.diagnostic.jump({ count = -1, float = false })
-  end, { nowait = true, buffer = true }) -- paragraph up
-  vim.keymap.set({ "n", "v", "x" }, "<c-]>", function()
-    vim.diagnostic.jump({ count = 1, float = false })
-  end, { nowait = true, buffer = true }) -- paragraph up
-else
-  -- vim.keymap.set("n", "<c-[>", vim.diagnostic.goto_prev)
-  -- vim.keymap.set("n", "<c-]>", vim.diagnostic.goto_next)
-  vim.keymap.set({ "n", "v", "x" }, "<c-[>", function()
-    vim.diagnostic.jump({ count = -1, float = false })
-  end, { nowait = true, buffer = true }) -- paragraph up
-  vim.keymap.set({ "n", "v", "x" }, "<c-]>", function()
-    vim.diagnostic.jump({ count = 1, float = false })
-  end, { nowait = true, buffer = true }) -- paragraph up
-end
-
 -- check if ill really use this
 -- vim.keymap.set("v", "<leader><c->>", "<c-a>gv")
 -- vim.keymap.set("v", "<leader><c-<>", "<c-x>gv")
@@ -550,26 +493,15 @@ vim.api.nvim_create_autocmd("FocusGained", {
   command = "silent! checktime",
 })
 
--- vim.api.nvim_create_autocmd("BufEnter", {
---   pattern = "*.html",
---   callback = function(opts)
---     if vim.bo[opts.buf].filetype == "htmldjango" then
---       vim.opt_local.shiftwidth = 4
---       vim.opt_local.tabstop = 4
---     else
---       vim.opt_local.shiftwidth = 2
---       vim.opt_local.tabstop = 2
---     end
---   end,
--- })
-
 vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
   pattern = { "*.svelte", "*.*eex", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.html", "*.css", "*.lua" },
   callback = function()
-    if not vim.g.editorconfig then
-      vim.opt_local.shiftwidth = 2
-      vim.opt_local.tabstop = 2
-    end
+    vim.opt_local.shiftwidth = 2
+    vim.opt_local.tabstop = 2
+    -- if not vim.g.editorconfig then
+    --   vim.opt_local.shiftwidth = 2
+    --   vim.opt_local.tabstop = 2
+    -- end
   end,
 })
 
@@ -632,7 +564,7 @@ end
 
 -- vimscript stuff
 vim.cmd([[
-language en_US
+"language en_US
 " filetype on
 " syntax on
 " filetype plugin indent on
@@ -671,25 +603,25 @@ au TextYankPost * silent! lua vim.highlight.on_yank({higroup="Visual", timeout=2
 augroup END
 
 " " hi! ErrorBg   guibg=#351C1D
-" hi! ErrorBg   guibg=#241317
-" hi! WarningBg guibg=#24180e
-" hi! InfoBg    guibg=#1a181a
-" hi! HintBg    guibg=#1a181a
+hi! ErrorBg   guibg=#241317
+hi! WarningBg guibg=#24180e
+hi! InfoBg    guibg=#1a181a
+hi! HintBg    guibg=#1a181a
 
 " " " @check: do we really need the number fg highlight?
-" hi! ErrorLineBg   guifg=#832936 guibg=#241317
-" hi! WarningLineBg guifg=#825c3e guibg=#24180e
-" hi! InfoLineBg    guifg=#5d595d guibg=#1a181a
-" hi! HintLineBg    guifg=#5d595d guibg=#1a181a
-" " hi! HintLineBg    guifg=#A98D92
+hi! ErrorLineBg   guifg=#832936 guibg=#241317
+hi! WarningLineBg guifg=#825c3e guibg=#24180e
+hi! InfoLineBg    guifg=#5d595d guibg=#1a181a
+hi! HintLineBg    guifg=#5d595d guibg=#1a181a
+" hi! HintLineBg    guifg=#A98D92
 
 " " :h diagnostic-signs
-" " sign define DiagnosticSignError text=E texthl=DiagnosticSignError linehl=ErrorBg   numhl=ErrorLineBg
-" " sign define DiagnosticSignWarn  text=W texthl=DiagnosticSignWarn  linehl=WarningBg numhl=WarningLineBg
-" " sign define DiagnosticSignInfo  text=I texthl=DiagnosticSignInfo  linehl=InforBg   numhl=InfoLineBg
-" " sign define DiagnosticSignHint  text=H texthl=DiagnosticSignHint  linehl=HintBg    numhl=HintLineBg
-" " sign define DiagnosticSignHint  text=H texthl=DiagnosticSignHint  numhl=HintLineBg
-" " sign define DiagnosticSignHint  text=H numhl=HintLineBg
+sign define DiagnosticSignError text=E texthl=DiagnosticSignError linehl=ErrorBg   numhl=ErrorLineBg
+sign define DiagnosticSignWarn  text=W texthl=DiagnosticSignWarn  linehl=WarningBg numhl=WarningLineBg
+sign define DiagnosticSignInfo  text=I texthl=DiagnosticSignInfo  linehl=InforBg   numhl=InfoLineBg
+sign define DiagnosticSignHint  text=H texthl=DiagnosticSignHint  linehl=HintBg    numhl=HintLineBg
+sign define DiagnosticSignHint  text=H texthl=DiagnosticSignHint  numhl=HintLineBg
+sign define DiagnosticSignHint  text=H numhl=HintLineBg
 
 autocmd! BufNewFile,BufRead *.gs,*.vs,*.fs,*.vert,*.frag,*.geom set ft=glsl
 
@@ -773,23 +705,3 @@ vim.api.nvim_create_autocmd("FileType", {
   pattern = { "qf" },
   command = [[nnoremap <buffer> <CR> <CR><cmd>cclose<CR>]],
 })
--- windows terminal, works with others terminals
---
--- {
---     "command":
---     {
---         "action": "sendInput",
---         "input": "\u0017"
---     },
---     "keys": "ctrl+backspace"
--- },
---
--- 13 is the ascii code the 5u is control 2u is shift
--- {
---     "command":
---     {
---         "action": "sendInput",
---         "input": "\u001b[13;5u"
---     },
---     "keys": "ctrl+enter"
--- },

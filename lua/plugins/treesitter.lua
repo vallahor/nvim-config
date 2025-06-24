@@ -1,14 +1,10 @@
 return {
   {
     "nvim-treesitter/nvim-treesitter",
-    dependencies = {
-      { "RRethy/nvim-treesitter-endwise" },
-    },
     version = false,
     build = ":TSUpdateSync",
-    event = { "BufRead", "BufEnter" },
     opts = {
-      ensure_installed = "all",
+      ensure_installed = {"c", "cpp", "lua", "vim", "vimdoc", "python", "javascript", "typescript", "rust", "bash", "html", "json", "tsx"},
       highlight = {
         enable = true,
       },
@@ -37,9 +33,6 @@ return {
           scope_incremental = "<nop>",
         },
       },
-      endwise = {
-        enable = true,
-      },
     },
     config = function(_, opts)
       require("nvim-treesitter.install").compilers = { "clang" }
@@ -49,40 +42,18 @@ return {
       ]])
 
       require("nvim-treesitter.configs").setup(opts)
-      local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
-      parser_config.blade = {
-        install_info = {
-          url = "https://github.com/EmranMR/tree-sitter-blade",
-          files = { "src/parser.c" },
-          branch = "main",
-        },
-        filetype = "blade",
-      }
-
-      -- parser_config.blade = {
-      --   install_info = {
-      --     url = "https://github.com/deanrumsby/tree-sitter-blade",
-      --     files = { "src/parser.c", "src/scanner.c" },
-      --     branch = "main",
-      --   },
-      --   filetype = "blade",
-      -- }
-
-      vim.cmd([[
-        augroup BladeFiletypeRelated
-        autocmd!
-        autocmd BufNewFile,BufRead *.blade.php set ft=blade
-        augroup END
-      ]])
-
-      vim.cmd([[
-        augroup BladeIndentation
-        autocmd!
-        autocmd FileType blade setlocal tabstop=2 shiftwidth=2 expandtab
-        augroup END
-      ]])
-
-      require("nvim-treesitter.configs").setup(opts)
     end,
+
+  },
+  {
+    "brianhuster/treesitter-endwise.nvim",
+    config = function()
+      vim.api.nvim_create_autocmd('FileType', {
+        pattern = {'ruby', 'lua', 'vim', 'bash', 'elixir', 'fish', 'julia'},
+        callback = function()
+          vim.treesitter.start()
+        end
+      })
+    end
   },
 }

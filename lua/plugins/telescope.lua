@@ -60,6 +60,7 @@ return {
         },
       })
 
+
       vim.keymap.set("n", "<c-p>", "<cmd>lua require('telescope.builtin').find_files()<cr>", { silent = true })
       vim.keymap.set("n", "<c-s-f>", "<cmd>lua require('telescope.builtin').live_grep()<cr>", { silent = true })
       vim.keymap.set("n", "c-/", "<cmd>lua require('telescope.builtin').live_grep()<cr>", { silent = true })
