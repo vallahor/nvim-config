@@ -3,31 +3,60 @@ return {
     "neovim/nvim-lspconfig",
     event = { "BufReadPre", "BufNewFile" },
     config = function()
+      vim.lsp.enable({
+        "lua_ls",
+        "clangd",
+        "omnisharp",
+        "ts_ls",
+        "html",
+        "rust_analyzer",
+        "pyright",
+        "jsonls",
+        "tailwindcss",
+        -- "glsl_analyzer",
+        -- "ols",
+        -- "zls",
+      })
+
       local on_attach = function(client, _)
         client.server_capabilities.semanticTokensProvider = nil
       end
+      local capabilities = require("cmp_nvim_lsp").default_capabilities()
+      vim.lsp.config("*", {
+        capabilities = capabilities,
+        on_attach = on_attach,
+      })
 
       -- -- https://www.mitchellhanberg.com/modern-format-on-save-in-neovim/
-      -- vim.api.nvim_create_autocmd("LspAttach", {
-      --   -- pattern = { "*.svelte", "*.odin", "*.zig", "*.cs", "*.ex", "*.exs", "*.heex", "*.php", "*.vue" },
-      --   pattern = { "*.zig", "*.odin", "*.cs", "*.ex", "*.exs", "*.heex", "*.php", "*.blade.php" },
-      --   group = vim.api.nvim_create_augroup("lsp", { clear = true }),
-      --   callback = function(args)
-      --     vim.api.nvim_create_autocmd("BufWritePre", {
-      --       buffer = args.buf,
-      --       callback = function()
-      --         vim.lsp.buf.format({ async = false, id = args.data.client_id })
-      --       end,
-      --     })
-      --   end,
-      -- })
+      vim.api.nvim_create_autocmd("LspAttach", {
+        pattern = { "*.cs" },
+        group = vim.api.nvim_create_augroup("lsp", { clear = true }),
+        callback = function(args)
+          vim.api.nvim_create_autocmd("BufWritePre", {
+            buffer = args.buf,
+            callback = function()
+              vim.lsp.buf.format({ async = false, id = args.data.client_id })
+            end,
+          })
+        end,
+      })
 
       vim.api.nvim_create_autocmd("LspAttach", {
-        callback = function(args)
-          local client = vim.lsp.get_client_by_id(args.data.client_id)
-          if client then
-            client.server_capabilities.semanticTokensProvider = nil
+        group = vim.api.nvim_create_augroup("UserLspConfig", {}),
+        callback = function(ev)
+          local map = function(keys, func)
+            vim.keymap.set("n", keys, func, { buffer = ev.buf })
           end
+
+          local telescope = require("telescope.builtin")
+          map("gi", telescope.lsp_implementations)
+          map("gr", telescope.lsp_references)
+          map("gd", vim.lsp.buf.definition)
+          map("<c-a>", vim.lsp.buf.code_action)
+          map("K", vim.lsp.buf.hover)
+          map("&", vim.diagnostic.open_float)
+          map("`", vim.diagnostic.open_float)
+          map("<c-*>", vim.lsp.buf.rename)
         end,
       })
 
@@ -49,13 +78,7 @@ return {
         desc = "Stop lsp client when no buffer is attached",
       })
 
-      local capabilities = require("cmp_nvim_lsp").default_capabilities()
-      local lspconfig = require("lspconfig")
-
-      -- asdf plugin add lua-language-server
-      -- asdf install lua-language-server latest
-      -- asdf set lua-language-server latest
-      lspconfig.lua_ls.setup({
+      vim.lsp.config.lua_ls = {
         on_init = function(client)
           if client.workspace_folders then
             local path = client.workspace_folders[1].name
@@ -79,12 +102,9 @@ return {
         settings = {
           Lua = {},
         },
-      })
+      }
 
-      -- bun install -g pyright
-      lspconfig.pyright.setup({
-        capabilities = capabilities,
-        on_attach = on_attach,
+      vim.lsp.config.pyright = {
         settings = {
           python = {
             analysis = {
@@ -92,26 +112,11 @@ return {
             },
           },
         },
-      })
+      }
 
-      -- bun install -g vscode-langservers-extracted
-      lspconfig.html.setup({
-        capabilities = capabilities,
-        on_attach = on_attach,
-      })
-
-      -- bun install -g typescript typescript-language-server
-      lspconfig.ts_ls.setup({
-        capabilities = capabilities,
-        on_attach = on_attach,
-      })
-
-      -- bun install -g @tailwindcss/language-server
-      lspconfig.tailwindcss.setup({
-        capabilities = capabilities,
-        on_attach = on_attach,
+      vim.lsp.config.tailwindcss = {
         cmd = { "tailwindcss-language-server", "--stdio" },
-        root_dir = lspconfig.util.root_pattern(
+        root_dir = require("lspconfig").util.root_pattern(
           "mix.exs",
           "tailwind.config.js",
           "tailwind.config.ts",
@@ -119,9 +124,16 @@ return {
           "postcss.config.ts",
           "package.json",
           "node_modules",
-          ".git"
+          ".git",
+          ".env"
         ),
-        filetypes = { "html", "elixir", "eelixir", "heex", "ex", "svelte", "blade" },
+        filetypes = vim.tbl_extend("force", vim.lsp.config.tailwindcss.filetypes, {
+          "elixir",
+          "eelixir",
+          "heex",
+          "ex",
+          "htmldjango",
+        }),
         settings = {
           tailwindCSS = {
             includeLanguages = {
@@ -129,6 +141,7 @@ return {
               eelixir = "html-eex",
               heex = "html-eex",
               blade = "html",
+              htmldjango = "html",
             },
             experimental = {
               classRegex = {
@@ -137,18 +150,10 @@ return {
             },
           },
         },
-      })
-
-      -- sudo apt-get install clangd-12
-      lspconfig.clangd.setup({
-        capabilities = capabilities,
-        on_attach = on_attach,
-      })
+      }
 
       -- rustup component add rust-src
-      lspconfig.rust_analyzer.setup({
-        capabilities = capabilities,
-        on_attach = on_attach,
+      vim.lsp.config.rust_analyzer = {
         settings = {
           ["rust-analyzer"] = {
             cargo = {
@@ -156,21 +161,9 @@ return {
             },
           },
         },
-      })
+      }
 
-      lspconfig.ols.setup({
-        capabilities = capabilities,
-        on_attach = on_attach,
-      })
-
-      lspconfig.glsl_analyzer.setup({
-        capabilities = capabilities,
-        on_attach = on_attach,
-      })
-
-      lspconfig.elixirls.setup({
-        capabilities = capabilities,
-        on_attach = on_attach,
+      vim.lsp.config.elixirls = {
         cmd = { "C:/apps/elixir-ls/language_server.bat" },
         settings = {
           elixirLS = {
@@ -180,61 +173,23 @@ return {
             suggestSpecs = false,
           },
         },
-      })
+      }
 
-      lspconfig.sqlls.setup({
-        capabilities = capabilities,
-        on_attach = on_attach,
-      })
-
-      -- bun install -g vscode-langservers-extracted
-      lspconfig.jsonls.setup({
-        capabilities = capabilities,
-        on_attach = on_attach,
-      })
-
-      -- bun install -g vscode-langservers-extracted
-      lspconfig.cssls.setup({
-        capabilities = capabilities,
-        on_attach = on_attach,
-      })
-
-      lspconfig.zls.setup({
-        capabilities = capabilities,
-        on_attach = on_attach,
+      vim.lsp.config.zls = {
         settings = {
           zls = {
             enable_build_on_save = true,
             build_on_save_step = "check",
           },
         },
-      })
-
-      lspconfig.csharp_ls.setup({
-        capabilities = capabilities,
-        on_attach = on_attach,
-        init_options = {
-          AutomaticWorkspaceInit = true,
-        },
-      })
+      }
 
       local port = os.getenv("GDScript_Port") or "6005"
-      lspconfig.gdscript.setup({
-        capabilities = capabilities,
-        on_attach = on_attach,
+      vim.lsp.config.gdscript = {
         cmd = { "ncat", "localhost", port },
-      })
-
-      lspconfig.gdshader_lsp.setup({
-        capabilities = capabilities,
-        on_attach = on_attach,
-      })
+      }
 
       -- go install golang.org/x/tools/gopls@latest
-      lspconfig.gopls.setup({
-        capabilities = capabilities,
-        on_attach = on_attach,
-      })
       vim.api.nvim_create_autocmd("BufWritePre", {
         pattern = { "*.go", "*.templ" },
         callback = function()
@@ -256,6 +211,56 @@ return {
           end
           vim.lsp.buf.format({ async = false })
         end,
+      })
+    end,
+  },
+  {
+    "mason-org/mason.nvim",
+    opts = {
+      ensure_installed = {
+        "stylua",
+        "ruff",
+        "prettierd",
+      },
+    },
+    config = function(_, opts)
+      require("mason").setup(opts)
+      local mr = require("mason-registry")
+      for _, tool in ipairs(opts.ensure_installed) do
+        local p = mr.get_package(tool)
+        if not p:is_installed() then
+          p:install()
+        end
+      end
+    end,
+  },
+
+  {
+    "williamboman/mason-lspconfig.nvim",
+    dependencies = {
+      "nvim-lspconfig",
+      "mason.nvim",
+    },
+    config = function()
+      local mason_lspconfig = require("mason-lspconfig")
+      mason_lspconfig.setup({
+        ensure_installed = {
+          "lua_ls",
+          "jsonls",
+          "html",
+          "cssls",
+          "tailwindcss",
+          "omnisharp",
+          "ts_ls",
+          "pyright",
+          "clangd",
+          "elixirls",
+          -- "ols",
+          -- "sqlls",
+          -- "gopls",
+          -- "glsl_analyzer",
+          -- "gdshader_lsp",
+        },
       })
     end,
   },

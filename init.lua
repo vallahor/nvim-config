@@ -25,7 +25,7 @@ require("lazy").setup("plugins", {
 
 -- SETTINGS --
 
--- vim.opt.guifont = { "JetBrainsMono Nerd Font:h11" }
+vim.opt.guifont = { "JetBrainsMono Nerd Font:h12" }
 vim.opt.shiftwidth = 4
 vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
@@ -433,18 +433,8 @@ vim.keymap.set("n", "<f6>", "<cmd>InspectTree<CR>") -- inspect current token tre
 vim.keymap.set("n", "<", "<<", { nowait = true, remap = true }) -- indent left
 vim.keymap.set("n", ">", ">>", { nowait = true, remap = true }) -- indent right
 
--- @check this should be in the lspconfig file
-vim.keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>zz")
-vim.keymap.set("n", "gi", "<cmd>Telescope lsp_implementations<CR>")
-vim.keymap.set("n", "gr", "<cmd>Telescope lsp_references<CR>")
--- vim.keymap.set("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>zz")
-vim.keymap.set("n", "<c-a>", "<cmd>lua vim.lsp.buf.code_action()<CR>")
-vim.keymap.set("n", "K", vim.lsp.buf.hover)
-vim.keymap.set("n", "&", vim.diagnostic.open_float)
-vim.keymap.set("n", "`", vim.diagnostic.open_float)
-
--- vim.keymap.set("n", "<leader>r", vim.lsp.buf.rename)
-vim.keymap.set("n", "<c-*>", vim.lsp.buf.rename)
+-- when it's not in lsp
+vim.keymap.set("n", "K", "<nop>")
 
 -- add undo capabilities in insert mode
 vim.keymap.set("i", "<space>", "<c-g>u<space>")
@@ -564,7 +554,8 @@ end
 
 -- vimscript stuff
 vim.cmd([[
-"language en_US
+
+language en_US
 " filetype on
 " syntax on
 " filetype plugin indent on
@@ -646,15 +637,67 @@ if vim.g.neovide then
   vim.g.neovide_cursor_animate_in_command_line = false
 end
 
-if vim.fn.filereadable(vim.fn.getcwd() .. "/project.godot") == 1 then
-  -- zed: {project} {file}:{line}:{col}
-  -- --server 127.0.0.1:6004 --remote-send "<esc>:n {file}<CR>:call cursor({line},{col})<CR>"
-  local addr = "./godot.pipe"
-  if vim.fn.has("win32") == 1 then
-    addr = "127.0.0.1:6004"
-  end
-  vim.fn.serverstart(addr)
+-- if vim.fn.filereadable(vim.fn.getcwd() .. "/project.godot") == 1 then
+--   -- zed: {project} {file}:{line}:{col}
+--   -- {file} {line} {col}
+--   local addr = "./godot.pipe"
+--   if vim.fn.has("win32") == 1 then
+--     addr = "127.0.0.1:6004"
+--   end
+
+--   vim.fn.serverstart(addr)
+-- end
+
+-- GODOT BEGIN
+-- batch file to run as the external editor
+-- @echo off
+-- setlocal
+-- set FILE=%1
+-- set LINE=%2
+-- set COL=%3
+-- set "FILE=%FILE:\=/%"
+
+-- set SERVER=127.0.0.1:6004
+
+-- netstat -ano | findstr :6004 >nul
+-- if %ERRORLEVEL% NEQ 0 (
+--     start C:\apps\neovide\neovide.exe --no-vsync -- +":e %FILE%" +":call cursor(%LINE%,%COL%)"
+-- ) else (
+--     nvim --server %SERVER% --remote-send "<esc>:e %FILE%<CR>:call cursor(%LINE%,%COL%)<CR>"
+-- )
+-- endlocal
+local started_godot_server = false
+
+local addr = "./godot.pipe"
+if vim.fn.has("win32") == 1 then
+  addr = "127.0.0.1:6004"
 end
+
+if vim.fn.filereadable(vim.fn.getcwd() .. "/project.godot") == 1 then
+  -- Only start if we're not already the server
+  if vim.v.servername ~= addr then
+    -- Try starting server; ignore if fails
+    local ok = pcall(function()
+      vim.fn.serverstart(addr)
+    end)
+
+    if ok then
+      started_godot_server = true
+    end
+  end
+end
+
+vim.api.nvim_create_autocmd("VimLeavePre", {
+  callback = function()
+    if started_godot_server then
+      pcall(function()
+        vim.fn.serverstop(addr)
+      end)
+    end
+  end,
+})
+
+-- GODOT END
 
 vim.api.nvim_create_autocmd("DiagnosticChanged", {
   pattern = "*",
