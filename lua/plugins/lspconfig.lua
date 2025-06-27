@@ -6,7 +6,7 @@ return {
       vim.lsp.enable({
         "lua_ls",
         "clangd",
-        "omnisharp",
+        "roslyn_ls",
         "ts_ls",
         "html",
         "rust_analyzer",
@@ -57,6 +57,7 @@ return {
           map("&", vim.diagnostic.open_float)
           map("`", vim.diagnostic.open_float)
           map("<c-*>", vim.lsp.buf.rename)
+          map("<f2>", vim.lsp.buf.rename)
         end,
       })
 
@@ -101,6 +102,53 @@ return {
         end,
         settings = {
           Lua = {},
+        },
+      }
+
+      -- require("lspconfig").omnisharp.setup({
+      --   cmd = { "OmniSharp.exe" },
+      --   settings = {
+      --     RoslynExtensionsOptions = {
+      --       EnableImportCompletion = true,
+      --       EnableAnalyzersSupport = true,
+      --     },
+      --   },
+      -- })
+      -- vim.lsp.config.omnisharp = {
+      --   settings = {
+      --     RoslynExtensionsOptions = {
+      --       EnableImportCompletion = true,
+      --       EnableAnalyzersSupport = true,
+      --     },
+      --   },
+      -- }
+
+      -- local roslyn_path = "C:/apps/lsp/roslyn/lib/net9.0/"
+      local roslyn_path = "C:/Users/vallahor/AppData/Local/nvim-data/mason/packages/roslyn/libexec/"
+      vim.lsp.config.roslyn_ls = {
+        cmd = {
+          "dotnet",
+          roslyn_path .. "Microsoft.CodeAnalysis.LanguageServer.dll",
+          "--logLevel=Information",
+          "--extensionLogDirectory=" .. vim.fs.dirname(vim.lsp.get_log_path()),
+          "--stdio",
+        },
+        settings = {
+          ["csharp|background_analysis"] = {
+            dotnet_analyzer_diagnostics_scope = "fullSolution",
+            dotnet_compiler_diagnostics_scope = "fullSolution",
+          },
+          ["csharp|symbol_search"] = {
+            dotnet_search_reference_assemblies = true,
+          },
+          ["csharp|completion"] = {
+            dotnet_show_name_completion_suggestions = true,
+            dotnet_show_completion_items_from_unimported_namespaces = true,
+            dotnet_provide_regex_completions = true,
+          },
+          ["csharp|code_lens"] = {
+            dotnet_enable_references_code_lens = true,
+          },
         },
       }
 
@@ -217,10 +265,22 @@ return {
   {
     "mason-org/mason.nvim",
     opts = {
+      registries = {
+        "github:mason-org/mason-registry",
+        "github:Crashdummyy/mason-registry",
+      },
       ensure_installed = {
+        "roslyn",
         "stylua",
         "ruff",
         "prettierd",
+      },
+      ui = {
+        icons = {
+          package_installed = "✓",
+          package_pending = "➜",
+          package_uninstalled = "✗",
+        },
       },
     },
     config = function(_, opts)
@@ -250,7 +310,6 @@ return {
           "html",
           "cssls",
           "tailwindcss",
-          "omnisharp",
           "ts_ls",
           "pyright",
           "clangd",

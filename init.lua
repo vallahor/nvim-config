@@ -1,6 +1,9 @@
 vim.cmd([[
   set termguicolors
 ]])
+
+vim.env.LANG = "en_US.UTF-8"
+
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.uv.fs_stat(lazypath) then
   vim.fn.system({
@@ -57,7 +60,7 @@ vim.opt.backup = false
 vim.opt.writebackup = false
 vim.opt.gdefault = true
 vim.opt.cindent = false -- check
--- vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
+vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
 -- vim.opt.cino:append("L0,g0,l1,t0,w1,w4,m1")
 vim.opt.timeoutlen = 200
 vim.opt.ttimeoutlen = 300
@@ -504,8 +507,6 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
       vim.keymap.set({ "n", "v", "x" }, "[", "{", { nowait = true, buffer = true }) -- paragraph up
       vim.keymap.set({ "n", "v", "x" }, "]", "}", { nowait = true, buffer = true }) -- paragraph down
     else
-      -- vim.keymap.set({ "n", "v", "x" }, "[", vim.diagnostic.goto_prev, { nowait = true, buffer = true }) -- paragraph up
-      -- vim.keymap.set({ "n", "v", "x" }, "]", vim.diagnostic.goto_next, { nowait = true, buffer = true }) -- paragraph down
       vim.keymap.set({ "n", "v", "x" }, "[", function()
         vim.diagnostic.jump({ count = -1, float = false })
       end, { nowait = true, buffer = true }) -- paragraph up
@@ -555,7 +556,7 @@ end
 -- vimscript stuff
 vim.cmd([[
 
-language en_US
+" language en_US
 " filetype on
 " syntax on
 " filetype plugin indent on
@@ -711,14 +712,11 @@ vim.api.nvim_create_autocmd("FileType", {
 
 vim.api.nvim_set_hl(0, "NvimTreeIndentMarker", { fg = "#30323E" })
 
-vim.filetype.add({
-  pattern = {
-    [".*%.blade%.php"] = "php",
-  },
-})
-
 vim.diagnostic.config({
-  virtual_text = true,
+  virtual_text = {
+    prefix = "",
+  },
+  jump = { float = false },
   signs = {
     text = {
       [vim.diagnostic.severity.ERROR] = "",
@@ -741,10 +739,15 @@ vim.diagnostic.config({
   },
 })
 
-vim.diagnostic.config({ jump = { float = false } })
-
 -- close quickfix menu after selecting choice
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "qf" },
   command = [[nnoremap <buffer> <CR> <CR><cmd>cclose<CR>]],
+})
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "qf" },
+  command = [[
+    nnoremap <buffer> q <cmd>cclose<CR>
+    nnoremap <buffer> <c-w> <cmd>cclose<CR>
+  ]],
 })
