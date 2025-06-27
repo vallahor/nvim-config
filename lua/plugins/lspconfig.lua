@@ -105,53 +105,6 @@ return {
         },
       }
 
-      -- require("lspconfig").omnisharp.setup({
-      --   cmd = { "OmniSharp.exe" },
-      --   settings = {
-      --     RoslynExtensionsOptions = {
-      --       EnableImportCompletion = true,
-      --       EnableAnalyzersSupport = true,
-      --     },
-      --   },
-      -- })
-      -- vim.lsp.config.omnisharp = {
-      --   settings = {
-      --     RoslynExtensionsOptions = {
-      --       EnableImportCompletion = true,
-      --       EnableAnalyzersSupport = true,
-      --     },
-      --   },
-      -- }
-
-      -- local roslyn_path = "C:/apps/lsp/roslyn/lib/net9.0/"
-      local roslyn_path = "C:/Users/vallahor/AppData/Local/nvim-data/mason/packages/roslyn/libexec/"
-      vim.lsp.config.roslyn_ls = {
-        cmd = {
-          "dotnet",
-          roslyn_path .. "Microsoft.CodeAnalysis.LanguageServer.dll",
-          "--logLevel=Information",
-          "--extensionLogDirectory=" .. vim.fs.dirname(vim.lsp.get_log_path()),
-          "--stdio",
-        },
-        settings = {
-          ["csharp|background_analysis"] = {
-            dotnet_analyzer_diagnostics_scope = "fullSolution",
-            dotnet_compiler_diagnostics_scope = "fullSolution",
-          },
-          ["csharp|symbol_search"] = {
-            dotnet_search_reference_assemblies = true,
-          },
-          ["csharp|completion"] = {
-            dotnet_show_name_completion_suggestions = true,
-            dotnet_show_completion_items_from_unimported_namespaces = true,
-            dotnet_provide_regex_completions = true,
-          },
-          ["csharp|code_lens"] = {
-            dotnet_enable_references_code_lens = true,
-          },
-        },
-      }
-
       vim.lsp.config.pyright = {
         settings = {
           python = {
