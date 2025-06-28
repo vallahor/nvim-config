@@ -10,9 +10,9 @@ return {
         preset = "none",
         ["<Up>"] = { "select_prev", "fallback" },
         ["<Down>"] = { "select_next", "fallback" },
-        ["<c-y>"] = { "accept", "snippet_forward", "fallback" },
-        ["<Tab>"] = { "accept", "snippet_forward", "fallback" },
-        ["<C-Tab>"] = { "snippet_backward", "fallback" },
+        ["<Tab>"] = { "accept", "fallback" },
+        ["<C-n>"] = { "snippet_forward" },
+        ["<C-p>"] = { "snippet_backward" },
       },
 
       completion = {

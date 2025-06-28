@@ -270,19 +270,19 @@ end
 
 -- insert semicolumn `;` to the end of line
 -- without losing cursor position
-vim.keymap.set("i", "<c-;>", function()
-  local end_col = #vim.fn.getline(".")
-  local row = vim.fn.line(".") - 1
-  vim.api.nvim_buf_set_text(0, row, end_col, row, end_col, { ";" })
-end)
+-- vim.keymap.set("i", "<c-;>", function()
+--   local end_col = #vim.fn.getline(".")
+--   local row = vim.fn.line(".") - 1
+--   vim.api.nvim_buf_set_text(0, row, end_col, row, end_col, { ";" })
+-- end)
 
 -- insert comma `,` to the end of line
 -- without losing cursor position
-vim.keymap.set("i", "<c-,>", function()
-  local end_col = #vim.fn.getline(".")
-  local row = vim.fn.line(".") - 1
-  vim.api.nvim_buf_set_text(0, row, end_col, row, end_col, { "," })
-end)
+-- vim.keymap.set("i", "<c-,>", function()
+--   local end_col = #vim.fn.getline(".")
+--   local row = vim.fn.line(".") - 1
+--   vim.api.nvim_buf_set_text(0, row, end_col, row, end_col, { "," })
+-- end)
 
 vim.keymap.set("c", "<c-v>", "<c-r>*") -- paste to command line mode
 
@@ -392,7 +392,7 @@ local beginning_of_the_line = function()
 end
 
 vim.keymap.set("i", "<c-h>", beginning_of_the_line)
-vim.keymap.set("i", "<c-;>", "<end>")
+vim.keymap.set("i", "<c-l>", "<end>")
 if vim.g.skeletyl then
   vim.keymap.set("i", "<home>", beginning_of_the_line) -- go to beginning of the line
   vim.keymap.set({ "n", "v" }, "(", beginning_of_the_line) -- go to beginning of the line
