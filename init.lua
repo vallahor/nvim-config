@@ -365,7 +365,7 @@ local beginning_of_the_line = function()
 end
 
 vim.keymap.set("i", "<c-h>", beginning_of_the_line)
-vim.keymap.set("i", "<c-l>", "<end>")
+vim.keymap.set("i", "<c-;>", "<end>")
 if vim.g.skeletyl then
   vim.keymap.set("i", "<home>", beginning_of_the_line) -- go to beginning of the line
   vim.keymap.set({ "n", "v" }, "(", beginning_of_the_line) -- go to beginning of the line
@@ -689,3 +689,4 @@ vim.api.nvim_create_autocmd("FileType", {
 
 vim.api.nvim_set_hl(0, "NvimTreeIndentMarker", { fg = "#30323E" })
 vim.api.nvim_set_hl(0, "BlinkCmpGhostText", { fg = "#776e77" })
+-- vim.api.nvim_set_hl(0, "IncSearch", { bg = "#6b2d3a" })
