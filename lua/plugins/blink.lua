@@ -8,8 +8,8 @@ return {
     opts = {
       keymap = {
         preset = "none",
-        ["<Up>"] = { "select_prev", "fallback_to_mappings" },
-        ["<Down>"] = { "select_next", "fallback_to_mappings" },
+        ["<Up>"] = { "select_prev", "fallback" },
+        ["<Down>"] = { "select_next", "fallback" },
         ["<Tab>"] = { "accept", "fallback" },
         ["<C-n>"] = { "snippet_forward" },
         ["<C-p>"] = { "snippet_backward" },

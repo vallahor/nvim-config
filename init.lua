@@ -503,13 +503,15 @@ if vim.opt.cmdheight:get() == 0 then
     pattern = "*",
     callback = function()
       local timer = vim.uv.new_timer()
-      timer:start(
-        50,
-        0,
-        vim.schedule_wrap(function()
-          vim.opt_local.cmdheight = 0
-        end)
-      )
+      if timer then
+        timer:start(
+          50,
+          0,
+          vim.schedule_wrap(function()
+            vim.opt_local.cmdheight = 0
+          end)
+        )
+      end
     end,
   })
 

@@ -6,26 +6,11 @@ return {
       local on_attach = function(client, _)
         client.server_capabilities.semanticTokensProvider = nil
       end
-      -- local capabilities = require("cmp_nvim_lsp").default_capabilities()
       local capabilities = require("blink.cmp").get_lsp_capabilities()
       vim.lsp.config("*", {
         capabilities = capabilities,
         on_attach = on_attach,
       })
-
-      -- -- -- https://www.mitchellhanberg.com/modern-format-on-save-in-neovim/
-      -- vim.api.nvim_create_autocmd("LspAttach", {
-      --   pattern = { "*.cs" },
-      --   group = vim.api.nvim_create_augroup("lsp", { clear = true }),
-      --   callback = function(args)
-      --     vim.api.nvim_create_autocmd("BufWritePre", {
-      --       buffer = args.buf,
-      --       callback = function()
-      --         vim.lsp.buf.format({ async = false, id = args.data.client_id })
-      --       end,
-      --     })
-      --   end,
-      -- })
 
       vim.api.nvim_create_autocmd("LspAttach", {
         group = vim.api.nvim_create_augroup("UserLspConfig", {}),
@@ -37,7 +22,14 @@ return {
           local telescope = require("telescope.builtin")
           map("gi", telescope.lsp_implementations)
           map("gr", telescope.lsp_references)
-          map("gd", vim.lsp.buf.definition)
+          map("gd", function()
+            vim.lsp.buf.definition()
+            -- Defer the centering to allow the LSP to complete the jump
+            vim.defer_fn(function()
+              -- vim.api.nvim_feedkeys("zz", "n", false)
+              vim.cmd("norm! zz")
+            end, 10) -- Adjust the delay (10ms) if needed
+          end)
           map("<c-a>", vim.lsp.buf.code_action)
           map("K", vim.lsp.buf.hover)
           map("&", vim.diagnostic.open_float)
@@ -69,7 +61,10 @@ return {
         on_init = function(client)
           if client.workspace_folders then
             local path = client.workspace_folders[1].name
-            if vim.loop.fs_stat(path .. "/.luarc.json") or vim.loop.fs_stat(path .. "/.luarc.jsonc") then
+            if
+              path ~= vim.fn.stdpath("config")
+              and (vim.uv.fs_stat(path .. "/.luarc.json") or vim.uv.fs_stat(path .. "/.luarc.jsonc"))
+            then
               return
             end
           end
@@ -77,6 +72,10 @@ return {
           client.config.settings.Lua = vim.tbl_deep_extend("force", client.config.settings.Lua, {
             runtime = {
               version = "LuaJIT",
+              path = {
+                "lua/?.lua",
+                "lua/?/init.lua",
+              },
             },
             workspace = {
               checkThirdParty = false,
@@ -220,21 +219,6 @@ return {
           vim.lsp.buf.format({ async = false })
         end,
       })
-
-      -- vim.lsp.enable({
-      --   "lua_ls",
-      --   "clangd",
-      --   "roslyn",
-      --   "ts_ls",
-      --   "html",
-      --   "rust_analyzer",
-      --   "pyright",
-      --   "jsonls",
-      --   "tailwindcss",
-      --   -- "glsl_analyzer",
-      --   -- "ols",
-      --   -- "zls",
-      -- })
     end,
   },
   {
