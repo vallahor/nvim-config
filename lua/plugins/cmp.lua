@@ -2,7 +2,7 @@ return {
   {
     "saghen/blink.cmp",
     dependencies = { "rafamadriz/friendly-snippets" },
-    version = "1.*",
+    version = "1.4.1",
     ---@module 'blink.cmp'
     ---@type blink.cmp.Config
     opts = {
@@ -18,7 +18,6 @@ return {
       completion = {
         menu = {
           draw = {
-            treesitter = { "lsp" },
             components = {
               kind_icon = {
                 text = function(ctx)
@@ -37,7 +36,7 @@ return {
                 end,
               },
               label = {
-                width = { max = 30 },
+                width = { max = 40 },
               },
               label_description = {
                 width = { max = 30 },
@@ -97,7 +96,7 @@ return {
         nerd_font_variant = "mono",
       },
 
-      signature = { enabled = true, window = { show_documentation = false } },
+      -- signature = { enabled = true, window = { show_documentation = false } },
     },
     opts_extend = { "sources.default" },
   },
