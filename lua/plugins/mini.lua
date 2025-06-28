@@ -133,6 +133,12 @@ return {
       -- " hi MiniCursorword        guisp=#312531 guifg=none guibg=none gui=none
       -- " hi MiniCursorwordCurrent guisp=#312531 guifg=none guibg=none gui=none
       -- ]])
+
+      require("mini.icons").setup()
+      local MiniIcons = require("mini.icons")
+      MiniIcons.mock_nvim_web_devicons()
+
+      require("mini.notify").setup()
     end,
   },
 }

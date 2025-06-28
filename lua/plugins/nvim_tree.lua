@@ -1,8 +1,5 @@
 return {
   "nvim-tree/nvim-tree.lua",
-  dependencies = {
-    "nvim-tree/nvim-web-devicons",
-  },
   config = function()
     vim.g.loaded_netrw = 1
     vim.g.loaded_netrwPlugin = 1
@@ -26,9 +23,9 @@ return {
 
     require("nvim-tree").setup({
       on_attach = my_on_attach,
-      -- update_focused_file = {
-      --   enable = true,
-      -- },
+      update_focused_file = {
+        enable = true,
+      },
       view = {
         -- width = 35,
         -- width = 33,

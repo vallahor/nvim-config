@@ -50,6 +50,7 @@ return {
           file_ignore_patterns = {
             "node_modules",
             ".venv",
+            ".git",
             "__pycache__",
             "_build",
             "_opam",
@@ -58,8 +59,12 @@ return {
             "public/build",
           },
         },
+        pickers = {
+          find_files = {
+            hidden = true,
+          },
+        },
       })
-
 
       vim.keymap.set("n", "<c-p>", "<cmd>lua require('telescope.builtin').find_files()<cr>", { silent = true })
       vim.keymap.set("n", "<c-s-f>", "<cmd>lua require('telescope.builtin').live_grep()<cr>", { silent = true })
