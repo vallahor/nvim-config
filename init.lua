@@ -27,7 +27,6 @@ require("lazy").setup("plugins", {
 })
 
 -- SETTINGS --
-
 vim.opt.guifont = { "JetBrainsMono Nerd Font:h12" }
 vim.opt.shiftwidth = 4
 vim.opt.tabstop = 4
@@ -67,10 +66,6 @@ vim.opt.ttimeoutlen = 300
 vim.opt.updatetime = 50
 vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
 
--- make sure that's work in all terminal emulators
--- vim.opt.linespace = 6
--- vim.opt.linespace = 2
-
 -- vim.opt.cmdheight = 0
 -- vim.opt.laststatus = 2
 -- vim.opt.showcmdloc = "statusline"
@@ -87,7 +82,6 @@ vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
 
 vim.wo.signcolumn = "no"
 vim.wo.relativenumber = true
--- vim.wo.number = true
 vim.wo.wrap = false
 
 if vim.wo.wrap then
@@ -102,8 +96,7 @@ vim.bo.grepprg = "rg"
 vim.g.user_emmet_install_global = 0
 vim.g.editorconfig = true
 
--- -- work around on python default configs
--- -- check why in the other project indents are a complete mess
+-- work around on python default configs
 vim.g.python_indent = {
   disable_parentheses_indenting = false,
   closed_paren_align_last_line = false,
@@ -209,9 +202,6 @@ vim.keymap.set("n", "Y", "yg$") -- yank to end of line considering line wrap
 vim.keymap.set("n", "<c-i>", "<c-i>zz") -- center <c-i>
 vim.keymap.set("n", "<c-o>", "<c-o>zz") -- center <c-o>
 
--- vim.keymap.set({ "n", "v" }, "H", "<c-u>zz", { noremap = true }) -- page up
--- vim.keymap.set({ "n", "v" }, "L", "<c-d>zz", { noremap = true }) -- page down
-
 vim.keymap.set({ "n", "v" }, "<PageUp>", "<c-u>zz", { noremap = true }) -- page up
 vim.keymap.set({ "n", "v" }, "<PageDown>", "<c-d>zz", { noremap = true }) -- page down
 
@@ -228,10 +218,9 @@ if vim.g.skeletyl then
 
   -- closes the current window and buffer
   -- to close the current buffer <c-w> and not the window
-  vim.keymap.set("n", "<c-7>", "<cmd>bd<cr>") -- close current buffer and window
+  vim.keymap.set("n", "<c-!>", "<cmd>bd<cr>") -- close current buffer and window
 
   -- resize windows
-  vim.keymap.set("n", "<c-0>", "<cmd>wincmd =<cr>") -- resize all windows
   vim.keymap.set("n", "<c-=>", "<cmd>wincmd =<cr>") -- resize all windows
   -- vim.keymap.set("n", "<leader>=", "<cmd>wincmd =<cr>")
 
@@ -267,22 +256,6 @@ else
   vim.keymap.set({ "n", "v" }, "<c-k>", "<cmd>wincmd k<cr>") -- move to window up
   vim.keymap.set({ "n", "v" }, "<c-l>", "<cmd>wincmd l<cr>") -- move to window right
 end
-
--- insert semicolumn `;` to the end of line
--- without losing cursor position
--- vim.keymap.set("i", "<c-;>", function()
---   local end_col = #vim.fn.getline(".")
---   local row = vim.fn.line(".") - 1
---   vim.api.nvim_buf_set_text(0, row, end_col, row, end_col, { ";" })
--- end)
-
--- insert comma `,` to the end of line
--- without losing cursor position
--- vim.keymap.set("i", "<c-,>", function()
---   local end_col = #vim.fn.getline(".")
---   local row = vim.fn.line(".") - 1
---   vim.api.nvim_buf_set_text(0, row, end_col, row, end_col, { "," })
--- end)
 
 vim.keymap.set("c", "<c-v>", "<c-r>*") -- paste to command line mode
 
@@ -372,7 +345,7 @@ vim.keymap.set("i", "<c-bs>", function()
 end)
 
 vim.keymap.set("n", "x", '"_x') -- delete current char without copying
-vim.keymap.set("n", "<c-d>", '"_dd') -- delete line without copying
+vim.keymap.set("n", "<c-s-d>", '"_dd') -- delete line without copying
 vim.keymap.set("v", "x", '"_d') -- delete char in visual mode without copying
 vim.keymap.set({ "n", "v" }, "c", '"_c') -- change verb without copying
 
@@ -553,16 +526,8 @@ end
 -- vimscript stuff
 vim.cmd([[
 
-" language en_US
-" filetype on
-" syntax on
-" filetype plugin indent on
-
 " @windows: nextjs and sveltkit folder name pattern
 set isfname+=(
-
-" set foldmethod=expr
-" set foldexpr=nvim_treesitter#foldexpr()
 
 set noswapfile
 set termguicolors
@@ -581,9 +546,6 @@ fun! TrimWhitespace()
     call winrestview(l:save)
 endfun
 autocmd BufWritePre * :call TrimWhitespace()
-
-" no help
-" map <f1> <nop>
 
 " highlight when yanking
 augroup highlight_yank
@@ -616,13 +578,8 @@ autocmd! BufNewFile,BufRead *.gs,*.vs,*.fs,*.vert,*.frag,*.geom set ft=glsl
 
 autocmd! BufNewFile,BufRead,BufEnter,BufWinEnter *.gd set noexpandtab
 
-" autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
-
 " when autocomplete active it limit the height
 set pumblend=15
-
-" c indent
-" autocmd BufWinEnter,BufEnter,BufRead *.c,*.cpp,*.h set cino=Ls,g0,l1,t0,w1,(0,w4
 ]])
 
 if vim.g.neovide then
@@ -690,13 +647,6 @@ vim.api.nvim_create_autocmd("FileType", {
   command = [[set nocindent]],
 })
 
-vim.api.nvim_set_hl(0, "NvimTreeIndentMarker", { fg = "#30323E" })
-
--- vim.api.nvim_create_autocmd("DiagnosticChanged", {
---   pattern = "*",
---   command = "silent! redrawtabline",
--- })
-
 vim.diagnostic.config({
   virtual_text = {
     prefix = "",
@@ -737,4 +687,5 @@ vim.api.nvim_create_autocmd("FileType", {
   ]],
 })
 
+vim.api.nvim_set_hl(0, "NvimTreeIndentMarker", { fg = "#30323E" })
 vim.api.nvim_set_hl(0, "BlinkCmpGhostText", { fg = "#776e77" })

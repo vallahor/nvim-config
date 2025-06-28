@@ -4,7 +4,7 @@ return {
     dependencies = { "rafamadriz/friendly-snippets" },
     version = "1.4.1",
     ---@module 'blink.cmp'
-    ---@type blink.cmp.Config
+    -- ---@type blink.cmp.Config
     opts = {
       keymap = {
         preset = "none",
