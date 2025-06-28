@@ -397,6 +397,8 @@ local beginning_of_the_line = function()
   end
 end
 
+vim.keymap.set("i", "<c-h>", beginning_of_the_line)
+vim.keymap.set("i", "<c-;>", "<end>")
 if vim.g.skeletyl then
   vim.keymap.set("i", "<home>", beginning_of_the_line) -- go to beginning of the line
   vim.keymap.set({ "n", "v" }, "(", beginning_of_the_line) -- go to beginning of the line
@@ -413,6 +415,7 @@ if vim.g.skeletyl then
   vim.keymap.set("n", "<f10>", "<cmd>:e $MYVIMRC<CR>") -- open config file (vimrc or init.lua)
   -- vim.keymap.set("n", "<f9>", "<cmd>:e c:/projects/gruvballish/colors/targino.vim<CR>") -- open config file (vimrc or init.lua)
   vim.keymap.set("n", "<f8>", "<cmd>:e ~/.config/ghostty/config<CR>") -- open ghostty config file (vimrc or init.lua)
+  vim.keymap.set("n", "<f7>", "<cmd>:e C:/Users/vallahor/.omnisharp/omnisharp.json<CR>") -- open ghostty config file (vimrc or init.lua)
   vim.keymap.set("n", "<f5>", "<cmd>so %<CR>") -- execute current file (vim or lua)
   vim.keymap.set("n", "<f11>", "<cmd>echo wordcount().words<CR>") -- execute current file (vim or lua)
 else
@@ -638,18 +641,9 @@ if vim.g.neovide then
   vim.g.neovide_cursor_animate_in_command_line = false
 end
 
--- if vim.fn.filereadable(vim.fn.getcwd() .. "/project.godot") == 1 then
---   -- zed: {project} {file}:{line}:{col}
---   -- {file} {line} {col}
---   local addr = "./godot.pipe"
---   if vim.fn.has("win32") == 1 then
---     addr = "127.0.0.1:6004"
---   end
-
---   vim.fn.serverstart(addr)
--- end
-
 -- GODOT BEGIN
+-- zed: {project} {file}:{line}:{col}
+-- vim_godot.{bat|sh}: {file} {line} {col}
 -- batch file to run as the external editor
 -- @echo off
 -- setlocal
@@ -675,9 +669,7 @@ if vim.fn.has("win32") == 1 then
 end
 
 if vim.fn.filereadable(vim.fn.getcwd() .. "/project.godot") == 1 then
-  -- Only start if we're not already the server
   if vim.v.servername ~= addr then
-    -- Try starting server; ignore if fails
     local ok = pcall(function()
       vim.fn.serverstart(addr)
     end)
@@ -697,13 +689,7 @@ vim.api.nvim_create_autocmd("VimLeavePre", {
     end
   end,
 })
-
 -- GODOT END
-
-vim.api.nvim_create_autocmd("DiagnosticChanged", {
-  pattern = "*",
-  command = "silent! redrawtabline",
-})
 
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "elixir", "heex", "eex" },
@@ -711,6 +697,11 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 vim.api.nvim_set_hl(0, "NvimTreeIndentMarker", { fg = "#30323E" })
+
+-- vim.api.nvim_create_autocmd("DiagnosticChanged", {
+--   pattern = "*",
+--   command = "silent! redrawtabline",
+-- })
 
 vim.diagnostic.config({
   virtual_text = {
@@ -751,3 +742,5 @@ vim.api.nvim_create_autocmd("FileType", {
     nnoremap <buffer> <c-w> <cmd>cclose<CR>
   ]],
 })
+
+vim.api.nvim_set_hl(0, "BlinkCmpGhostText", { fg = "#776e77" })

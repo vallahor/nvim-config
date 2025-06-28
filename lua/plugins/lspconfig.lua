@@ -3,43 +3,29 @@ return {
     "neovim/nvim-lspconfig",
     event = { "BufReadPre", "BufNewFile" },
     config = function()
-      vim.lsp.enable({
-        "lua_ls",
-        "clangd",
-        "roslyn_ls",
-        "ts_ls",
-        "html",
-        "rust_analyzer",
-        "pyright",
-        "jsonls",
-        "tailwindcss",
-        -- "glsl_analyzer",
-        -- "ols",
-        -- "zls",
-      })
-
       local on_attach = function(client, _)
         client.server_capabilities.semanticTokensProvider = nil
       end
-      local capabilities = require("cmp_nvim_lsp").default_capabilities()
+      -- local capabilities = require("cmp_nvim_lsp").default_capabilities()
+      local capabilities = require("blink.cmp").get_lsp_capabilities()
       vim.lsp.config("*", {
         capabilities = capabilities,
         on_attach = on_attach,
       })
 
-      -- -- https://www.mitchellhanberg.com/modern-format-on-save-in-neovim/
-      vim.api.nvim_create_autocmd("LspAttach", {
-        pattern = { "*.cs" },
-        group = vim.api.nvim_create_augroup("lsp", { clear = true }),
-        callback = function(args)
-          vim.api.nvim_create_autocmd("BufWritePre", {
-            buffer = args.buf,
-            callback = function()
-              vim.lsp.buf.format({ async = false, id = args.data.client_id })
-            end,
-          })
-        end,
-      })
+      -- -- -- https://www.mitchellhanberg.com/modern-format-on-save-in-neovim/
+      -- vim.api.nvim_create_autocmd("LspAttach", {
+      --   pattern = { "*.cs" },
+      --   group = vim.api.nvim_create_augroup("lsp", { clear = true }),
+      --   callback = function(args)
+      --     vim.api.nvim_create_autocmd("BufWritePre", {
+      --       buffer = args.buf,
+      --       callback = function()
+      --         vim.lsp.buf.format({ async = false, id = args.data.client_id })
+      --       end,
+      --     })
+      --   end,
+      -- })
 
       vim.api.nvim_create_autocmd("LspAttach", {
         group = vim.api.nvim_create_augroup("UserLspConfig", {}),
@@ -105,11 +91,31 @@ return {
         },
       }
 
-      vim.lsp.config.pyright = {
+      vim.lsp.config.roslyn = {
         settings = {
-          python = {
+          ["csharp|background_analysis"] = {
+            dotnet_analyzer_diagnostics_scope = "fullSolution",
+            dotnet_compiler_diagnostics_scope = "fullSolution",
+          },
+          ["csharp|symbol_search"] = {
+            dotnet_search_reference_assemblies = true,
+          },
+          ["csharp|completion"] = {
+            dotnet_show_name_completion_suggestions = true,
+            dotnet_show_completion_items_from_unimported_namespaces = true,
+            dotnet_provide_regex_completions = true,
+          },
+          ["csharp|code_lens"] = {
+            dotnet_enable_references_code_lens = true,
+          },
+        },
+      }
+
+      vim.lsp.config.basedpyright = {
+        settings = {
+          basedpyright = {
             analysis = {
-              typeCheckingMode = "off",
+              typeCheckingMode = "standard",
             },
           },
         },
@@ -194,7 +200,8 @@ return {
       vim.api.nvim_create_autocmd("BufWritePre", {
         pattern = { "*.go", "*.templ" },
         callback = function()
-          local params = vim.lsp.util.make_range_params()
+          -- local params = vim.lsp.util.make_range_params()
+          local params = vim.lsp.util.make_range_params(0, "utf-8")
           params.context = { only = { "source.organizeImports" } }
           -- buf_request_sync defaults to a 1000ms timeout. Depending on your
           -- machine and codebase, you may want longer. Add an additional
@@ -213,6 +220,21 @@ return {
           vim.lsp.buf.format({ async = false })
         end,
       })
+
+      -- vim.lsp.enable({
+      --   "lua_ls",
+      --   "clangd",
+      --   "roslyn",
+      --   "ts_ls",
+      --   "html",
+      --   "rust_analyzer",
+      --   "pyright",
+      --   "jsonls",
+      --   "tailwindcss",
+      --   -- "glsl_analyzer",
+      --   -- "ols",
+      --   -- "zls",
+      -- })
     end,
   },
   {
@@ -264,7 +286,7 @@ return {
           "cssls",
           "tailwindcss",
           "ts_ls",
-          "pyright",
+          "basedpyright",
           "clangd",
           "elixirls",
           -- "ols",
@@ -272,6 +294,9 @@ return {
           -- "gopls",
           -- "glsl_analyzer",
           -- "gdshader_lsp",
+        },
+        automatic_enable = {
+          exclude = { "gdscript", "ruff" },
         },
       })
     end,
