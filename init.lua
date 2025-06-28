@@ -161,24 +161,18 @@ end
 
 -- MAPPING --
 
-function EscNormalMode()
+local esc_normal_mode = function()
   for _, win in ipairs(vim.api.nvim_list_wins()) do
     local config = vim.api.nvim_win_get_config(win)
     if config.relative ~= "" then
       vim.api.nvim_win_close(win, false)
     end
   end
+  vim.snippet.stop()
   vim.cmd.nohl()
 end
 
-vim.keymap.set("n", "<esc>", "<cmd>lua EscNormalMode()<cr>")
-
-if true then
-  vim.keymap.set("n", "<space>", "<cmd>lua EscNormalMode()<cr>")
-  vim.keymap.set({ "v", "x" }, "<space>", "<esc>")
-else
-  vim.keymap.set("n", "<space>", "<nop>")
-end
+vim.keymap.set("n", "<esc>", esc_normal_mode)
 
 if false or not vim.g.skeletyl then
   -- if vim.g.skeletyl then
