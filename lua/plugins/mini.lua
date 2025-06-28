@@ -135,8 +135,9 @@ return {
       -- ]])
 
       require("mini.icons").setup()
-      local MiniIcons = require("mini.icons")
-      MiniIcons.mock_nvim_web_devicons()
+      if _G.MiniIcons then
+        _G.MiniIcons.mock_nvim_web_devicons()
+      end
 
       require("mini.notify").setup()
     end,
