@@ -46,7 +46,6 @@ vim.opt.pumheight = 10
 -- vim.opt.switchbuf = "useopen,split"
 vim.opt.switchbuf = "uselast,useopen"
 vim.opt.magic = true
-vim.opt.lazyredraw = true
 vim.opt.smartcase = true
 vim.opt.inccommand = "nosplit"
 vim.opt.backspace = "indent,eol,start"
@@ -163,6 +162,7 @@ local esc_normal_mode = function()
   end
   vim.snippet.stop()
   vim.cmd.nohl()
+  vim.cmd.normal({ "", bang = true })
 end
 
 vim.keymap.set("n", "<esc>", esc_normal_mode)
@@ -261,6 +261,9 @@ vim.keymap.set("c", "<c-v>", "<c-r>*") -- paste to command line mode
 
 vim.keymap.set("v", "v", "V") -- visual line mode
 
+vim.keymap.set("n", "n", "nzzzz")
+vim.keymap.set("n", "N", "Nzzzz")
+
 vim.keymap.set("c", "<c-bs>", "<c-w>") -- delete previous word (cmd)
 -- delete previous word (insert)
 vim.keymap.set("i", "<c-bs>", function()
@@ -351,7 +354,7 @@ vim.keymap.set({ "n", "v" }, "c", '"_c') -- change verb without copying
 
 vim.keymap.set("n", "dx", '"_d') -- delete without copying to register @check working ok with default timeoutlen
 
-vim.keymap.set("n", "*", "*``") -- highlight all occurencies of the current word
+vim.keymap.set("n", "*", [[<Cmd>let @/='\<'.expand('<cword>').'\>'<bar>set hlsearch<CR>]]) -- highlight all occurencies of the current word
 vim.keymap.set("v", "*", '"sy/\\V<c-r>s<cr>``') -- highlight all occurencies of the curren selection
 
 -- go to beginning of the line function like DOOM Emacs
@@ -490,7 +493,8 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
   end,
 })
 
-if vim.opt.cmdheight:get() == 0 then
+-- if vim.opt.cmdheight:get() == 0 then
+if vim.opt.cmdheight == 0 then
   -- show macro recording
   vim.api.nvim_create_autocmd({ "RecordingEnter", "CmdlineEnter" }, {
     pattern = "*",

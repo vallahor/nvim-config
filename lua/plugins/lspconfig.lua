@@ -24,11 +24,10 @@ return {
           map("gr", telescope.lsp_references)
           map("gd", function()
             vim.lsp.buf.definition()
-            -- Defer the centering to allow the LSP to complete the jump
             vim.defer_fn(function()
               -- vim.api.nvim_feedkeys("zz", "n", false)
-              vim.cmd("norm! zz")
-            end, 10) -- Adjust the delay (10ms) if needed
+              vim.cmd("norm! zzzz")
+            end, 100)
           end)
           map("<c-a>", vim.lsp.buf.code_action)
           map("K", vim.lsp.buf.hover)
