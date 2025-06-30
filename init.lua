@@ -94,7 +94,6 @@ vim.bo.copyindent = true
 vim.bo.grepprg = "rg"
 
 vim.g.user_emmet_install_global = 0
-vim.g.editorconfig = true
 
 -- work around on python default configs
 vim.g.python_indent = {
@@ -452,11 +451,11 @@ vim.keymap.set("i", "<", "<<c-g>u")
 vim.keymap.set("i", ">", "><c-g>u")
 vim.keymap.set("i", ";", ";<c-g>u")
 
--- check if ill really use this
--- vim.keymap.set("v", "<leader><c->>", "<c-a>gv")
--- vim.keymap.set("v", "<leader><c-<>", "<c-x>gv")
--- vim.keymap.set("v", "<leader><c-.>", "g<c-a>gv")
--- vim.keymap.set("v", "<leader><c-,>", "g<c-x>gv")
+-- change selected numbers (increase/decrease)
+vim.keymap.set("v", "<c-a>", "<c-a>gv")
+vim.keymap.set("v", "<c-x>", "<c-x>gv")
+vim.keymap.set("v", "c-s-a", "g<c-a>gv")
+vim.keymap.set("v", "c-s-x", "g<c-x>gv")
 
 vim.api.nvim_create_autocmd("FocusGained", {
   pattern = "*",
@@ -466,12 +465,10 @@ vim.api.nvim_create_autocmd("FocusGained", {
 vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
   pattern = { "*.svelte", "*.*eex", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.html", "*.css", "*.lua" },
   callback = function()
-    vim.opt_local.shiftwidth = 2
-    vim.opt_local.tabstop = 2
-    -- if not vim.g.editorconfig then
-    --   vim.opt_local.shiftwidth = 2
-    --   vim.opt_local.tabstop = 2
-    -- end
+    if not vim.g.editorconfig then
+      vim.opt_local.shiftwidth = 2
+      vim.opt_local.tabstop = 2
+    end
   end,
 })
 
