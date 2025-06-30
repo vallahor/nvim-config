@@ -454,8 +454,8 @@ vim.keymap.set("i", ";", ";<c-g>u")
 -- change selected numbers (increase/decrease)
 vim.keymap.set("v", "<c-a>", "<c-a>gv")
 vim.keymap.set("v", "<c-x>", "<c-x>gv")
-vim.keymap.set("v", "c-s-a", "g<c-a>gv")
-vim.keymap.set("v", "c-s-x", "g<c-x>gv")
+vim.keymap.set("v", "<c-s-a>", "g<c-a>gv")
+vim.keymap.set("v", "<c-s-x>", "g<c-x>gv")
 
 vim.api.nvim_create_autocmd("FocusGained", {
   pattern = "*",
