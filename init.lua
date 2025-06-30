@@ -27,7 +27,7 @@ require("lazy").setup("plugins", {
 })
 
 -- SETTINGS --
-vim.opt.guifont = { "JetBrainsMono Nerd Font:h12" }
+vim.opt.guifont = { "JetBrainsMono Nerd Font:h11" }
 vim.opt.shiftwidth = 4
 vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
@@ -64,6 +64,7 @@ vim.opt.timeoutlen = 200
 vim.opt.ttimeoutlen = 300
 vim.opt.updatetime = 50
 vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
+vim.opt.winborder = "single"
 
 -- vim.opt.cmdheight = 0
 -- vim.opt.laststatus = 2
@@ -202,6 +203,9 @@ vim.keymap.set("n", "Y", "yg$") -- yank to end of line considering line wrap
 vim.keymap.set("n", "<c-i>", "<c-i>zz") -- center <c-i>
 vim.keymap.set("n", "<c-o>", "<c-o>zz") -- center <c-o>
 
+vim.keymap.set("i", "<c-o>", "<end><cr>") -- new line bellow - insert
+vim.keymap.set("i", "<c-s-o>", "<up><end><cr>") -- new line above - insert
+
 vim.keymap.set({ "n", "v" }, "<PageUp>", "<c-u>zz", { noremap = true }) -- page up
 vim.keymap.set({ "n", "v" }, "<PageDown>", "<c-d>zz", { noremap = true }) -- page down
 
@@ -261,8 +265,8 @@ vim.keymap.set("c", "<c-v>", "<c-r>*") -- paste to command line mode
 
 vim.keymap.set("v", "v", "V") -- visual line mode
 
-vim.keymap.set("n", "n", "nzzzz")
-vim.keymap.set("n", "N", "Nzzzz")
+-- vim.keymap.set("n", "n", "nzzzz") -- center next
+-- vim.keymap.set("n", "N", "Nzzzz") -- center previous
 
 vim.keymap.set("c", "<c-bs>", "<c-w>") -- delete previous word (cmd)
 -- delete previous word (insert)
@@ -657,6 +661,9 @@ vim.diagnostic.config({
   virtual_text = {
     prefix = "",
   },
+  float = {
+    show_header = false,
+  },
   jump = { float = false },
   signs = {
     text = {
@@ -693,6 +700,17 @@ vim.api.nvim_create_autocmd("FileType", {
   ]],
 })
 
+vim.api.nvim_set_hl(0, "Pmenu", { bg = "#191319" })
+vim.api.nvim_set_hl(0, "PmenuSel", { bg = "#4f3a4e" })
+vim.api.nvim_set_hl(0, "FloatBorder", { bg = "#191319", fg = "#352835" })
+vim.api.nvim_set_hl(0, "NormalFloat", { bg = "#191319" })
+vim.api.nvim_set_hl(0, "PmenuThumb", { bg = "#362a36" })
+vim.api.nvim_set_hl(0, "PmenuSbar", { bg = "#6b2d3a", fg = "#6b2d3a" })
+vim.api.nvim_set_hl(0, "PmenuMatch", { fg = "#8e6881" })
 vim.api.nvim_set_hl(0, "NvimTreeIndentMarker", { fg = "#30323E" })
 vim.api.nvim_set_hl(0, "BlinkCmpGhostText", { fg = "#776e77" })
+vim.api.nvim_set_hl(0, "BlinkCmpMenuBorder", { bg = "#191319", fg = "#352835" })
+vim.api.nvim_set_hl(0, "BlinkCmpDocBorder", { bg = "#191319", fg = "#352835" })
+vim.api.nvim_set_hl(0, "TelescopeNormal", { bg = "#191319" })
+vim.api.nvim_set_hl(0, "TelescopeSelection", { bg = "#4f3a4e" })
 -- vim.api.nvim_set_hl(0, "IncSearch", { bg = "#6b2d3a" })

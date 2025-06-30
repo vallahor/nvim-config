@@ -13,6 +13,9 @@ return {
         ["<Tab>"] = { "accept", "fallback" },
         ["<C-n>"] = { "snippet_forward" },
         ["<C-p>"] = { "snippet_backward" },
+        ["<PageUp>"] = { "scroll_documentation_up", "fallback" },
+        ["<PageDown>"] = { "scroll_documentation_down", "fallback" },
+        ["<C-k>"] = { "show_signature", "hide_signature", "fallback" },
       },
 
       completion = {
@@ -67,8 +70,6 @@ return {
 
         documentation = {
           auto_show = true,
-          auto_show_delay_ms = 100,
-          -- window = { border = "single" },
         },
 
         -- ghost_text = { enabled = true },

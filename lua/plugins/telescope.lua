@@ -40,7 +40,7 @@ return {
           },
           initial_mode = "insert",
           path_display = { "smart" },
-          -- border = false,
+          border = false,
           -- layout_strategy = "bottom_pane",
           -- layout_config = {
           --   height = 10,
