@@ -701,16 +701,23 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 vim.api.nvim_set_hl(0, "Pmenu", { bg = "#191319" })
-vim.api.nvim_set_hl(0, "PmenuSel", { bg = "#4f3a4e" })
+vim.api.nvim_set_hl(0, "PmenuSel", { bg = "#312531" })
 vim.api.nvim_set_hl(0, "FloatBorder", { bg = "#191319", fg = "#352835" })
 vim.api.nvim_set_hl(0, "NormalFloat", { bg = "#191319" })
 vim.api.nvim_set_hl(0, "PmenuThumb", { bg = "#362a36" })
 vim.api.nvim_set_hl(0, "PmenuSbar", { bg = "#6b2d3a", fg = "#6b2d3a" })
-vim.api.nvim_set_hl(0, "PmenuMatch", { fg = "#8e6881" })
+vim.api.nvim_set_hl(0, "PmenuMatch", { fg = "#926c83" })
+
 vim.api.nvim_set_hl(0, "NvimTreeIndentMarker", { fg = "#30323E" })
+
 vim.api.nvim_set_hl(0, "BlinkCmpGhostText", { fg = "#776e77" })
+vim.api.nvim_set_hl(0, "BlinkCmpMenu", { bg = "#191319", fg = "#9d7b8f" })
 vim.api.nvim_set_hl(0, "BlinkCmpMenuBorder", { bg = "#191319", fg = "#352835" })
 vim.api.nvim_set_hl(0, "BlinkCmpDocBorder", { bg = "#191319", fg = "#352835" })
-vim.api.nvim_set_hl(0, "TelescopeNormal", { bg = "#191319" })
-vim.api.nvim_set_hl(0, "TelescopeSelection", { bg = "#4f3a4e" })
+vim.api.nvim_set_hl(0, "BlinkCmpLabelMatch", { fg = "#995464" })
+
+vim.api.nvim_set_hl(0, "TelescopeNormal", { bg = "#191319", fg = "#9d7b8f" })
+-- vim.api.nvim_set_hl(0, "TelescopeNormal", { bg = "#191319" })
+vim.api.nvim_set_hl(0, "TelescopeSelection", { bg = "#312531" })
+vim.api.nvim_set_hl(0, "TelescopeMatching", { fg = "#995464" })
 -- vim.api.nvim_set_hl(0, "IncSearch", { bg = "#6b2d3a" })
