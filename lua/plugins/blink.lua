@@ -39,7 +39,7 @@ return {
                 end,
               },
               label = {
-                width = { max = 40 },
+                width = { fill = false, max = 40 },
               },
               label_description = {
                 width = { max = 30 },
@@ -77,6 +77,27 @@ return {
 
       sources = {
         default = { "lsp", "path", "snippets", "buffer" },
+        providers = {
+          lsp = {
+            transform_items = function(_, items)
+              for _, item in ipairs(items) do
+                local cmp_item_kind = require("blink.cmp.types").CompletionItemKind
+
+                if item.kind == cmp_item_kind.Property or item.kind == cmp_item_kind.Field then
+                  item.score_offset = item.score_offset + 1
+                end
+
+                if item.kind == cmp_item_kind.Operator then
+                  item.score_offset = item.score_offset - 1
+                end
+              end
+
+              return vim.tbl_filter(function(item)
+                return item.kind ~= require("blink.cmp.types").CompletionItemKind.Text
+              end, items)
+            end,
+          },
+        },
       },
 
       fuzzy = {
@@ -89,35 +110,26 @@ return {
       },
 
       cmdline = {
-        keymap = { preset = "inherit" },
-        completion = { menu = { auto_show = true } },
+        keymap = {
+          preset = "inherit",
+        },
+
+        completion = {
+          menu = {
+            auto_show = true,
+          },
+
+          list = {
+            selection = {
+              preselect = true,
+              auto_insert = false,
+            },
+          },
+        },
       },
 
       appearance = {
         nerd_font_variant = "mono",
-      },
-      providers = {
-        lsp = {
-          transform_items = function(_, items)
-            for _, item in ipairs(items) do
-              local cmp_item_kind = require("blink.cmp.types").CompletionItemKind
-
-              if item.kind == cmp_item_kind.Property or item.kind == cmp_item_kind.Field then
-                item.score_offset = item.score_offset + 1
-              end
-
-              -- print(vim.inspect(item))
-
-              if item.kind == cmp_item_kind.Operator then
-                item.score_offset = item.score_offset - 1
-              end
-            end
-
-            return vim.tbl_filter(function(item)
-              return item.kind ~= require("blink.cmp.types").CompletionItemKind.Text
-            end, items)
-          end,
-        },
       },
 
       -- signature = { enabled = true, window = { show_documentation = false } },

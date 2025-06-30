@@ -705,7 +705,7 @@ vim.api.nvim_set_hl(0, "PmenuSel", { bg = "#312531" })
 vim.api.nvim_set_hl(0, "FloatBorder", { bg = "#191319", fg = "#352835" })
 vim.api.nvim_set_hl(0, "NormalFloat", { bg = "#191319" })
 vim.api.nvim_set_hl(0, "PmenuThumb", { bg = "#362a36" })
-vim.api.nvim_set_hl(0, "PmenuSbar", { bg = "#6b2d3a", fg = "#6b2d3a" })
+vim.api.nvim_set_hl(0, "PmenuSbar", { bg = "#362a36" })
 vim.api.nvim_set_hl(0, "PmenuMatch", { fg = "#926c83" })
 
 vim.api.nvim_set_hl(0, "NvimTreeIndentMarker", { fg = "#30323E" })
