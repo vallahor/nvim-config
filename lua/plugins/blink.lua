@@ -40,16 +40,14 @@ return {
                 end,
               },
               label = {
-                width = { fill = false, max = 40 },
-              },
-              label_description = {
-                width = { max = 30 },
+                width = { max = 40 },
               },
             },
           },
         },
 
         list = {
+          max_items = 15,
           selection = {
             preselect = true,
             auto_insert = false,
