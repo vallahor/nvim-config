@@ -15,7 +15,8 @@ return {
         ["<C-p>"] = { "snippet_backward" },
         ["<PageUp>"] = { "scroll_documentation_up", "fallback" },
         ["<PageDown>"] = { "scroll_documentation_down", "fallback" },
-        ["<C-k>"] = { "show_signature", "hide_signature", "fallback" },
+        ["<C-s>"] = { "show_signature", "hide_signature", "fallback" },
+        ["<C-k>"] = { "show", "show_documentation", "hide_documentation" },
       },
 
       completion = {
@@ -69,7 +70,7 @@ return {
         },
 
         documentation = {
-          auto_show = true,
+          auto_show = false,
         },
 
         -- ghost_text = { enabled = true },

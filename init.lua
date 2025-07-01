@@ -64,7 +64,7 @@ vim.opt.timeoutlen = 200
 vim.opt.ttimeoutlen = 300
 vim.opt.updatetime = 50
 vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
-vim.opt.winborder = "single"
+vim.opt.winborder = "rounded"
 
 -- vim.opt.cmdheight = 0
 -- vim.opt.laststatus = 2
