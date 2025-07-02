@@ -9,10 +9,10 @@ return {
     -- event = "VeryLazy",
     config = function()
       require("swap_buffer")
-      vim.keymap.set("n", "<a-h>", "<cmd>lua Swap_left()<CR>")
-      vim.keymap.set("n", "<a-j>", "<cmd>lua Swap_down()<CR>")
-      vim.keymap.set("n", "<a-k>", "<cmd>lua Swap_up()<CR>")
-      vim.keymap.set("n", "<a-l>", "<cmd>lua Swap_right()<CR>")
+      vim.keymap.set("n", "<leader>h", "<cmd>lua Swap_left()<CR>")
+      vim.keymap.set("n", "<leader>j", "<cmd>lua Swap_down()<CR>")
+      vim.keymap.set("n", "<leader>k", "<cmd>lua Swap_up()<CR>")
+      vim.keymap.set("n", "<leader>l", "<cmd>lua Swap_right()<CR>")
       -- if vim.g.skeletyl then
       --   vim.keymap.set("n", "<a-H>", "<cmd>lua Swap_left()<CR>")
       --   vim.keymap.set("n", "<a-J>", "<cmd>lua Swap_down()<CR>")
@@ -34,15 +34,15 @@ return {
     config = function()
       require("close_other_window")
       if vim.g.skeletyl then
-        -- vim.keymap.set({ "n", "v" }, "<c-s-h>", "<cmd>lua Close_left()<CR>")
-        -- vim.keymap.set({ "n", "v" }, "<c-s-j>", "<cmd>lua Close_down()<CR>")
-        -- vim.keymap.set({ "n", "v" }, "<c-s-k>", "<cmd>lua Close_up()<CR>")
-        -- vim.keymap.set({ "n", "v" }, "<c-s-l>", "<cmd>lua Close_right()<CR>")
+        vim.keymap.set({ "n", "v" }, "<c-s-h>", "<cmd>lua Close_left()<CR>")
+        vim.keymap.set({ "n", "v" }, "<c-s-j>", "<cmd>lua Close_down()<CR>")
+        vim.keymap.set({ "n", "v" }, "<c-s-k>", "<cmd>lua Close_up()<CR>")
+        vim.keymap.set({ "n", "v" }, "<c-s-l>", "<cmd>lua Close_right()<CR>")
 
-        vim.keymap.set({ "n", "v" }, "<c-left>", "<cmd>lua Close_left()<CR>")
-        vim.keymap.set({ "n", "v" }, "<c-down>", "<cmd>lua Close_down()<CR>")
-        vim.keymap.set({ "n", "v" }, "<c-up>", "<cmd>lua Close_up()<CR>")
-        vim.keymap.set({ "n", "v" }, "<c-right>", "<cmd>lua Close_right()<CR>")
+        -- vim.keymap.set({ "n", "v" }, "<c-left>", "<cmd>lua Close_left()<CR>")
+        -- vim.keymap.set({ "n", "v" }, "<c-down>", "<cmd>lua Close_down()<CR>")
+        -- vim.keymap.set({ "n", "v" }, "<c-up>", "<cmd>lua Close_up()<CR>")
+        -- vim.keymap.set({ "n", "v" }, "<c-right>", "<cmd>lua Close_right()<CR>")
       else
         vim.keymap.set({ "n", "v" }, "<c-s-h>", "<cmd>lua Close_left()<CR>")
         vim.keymap.set({ "n", "v" }, "<c-s-j>", "<cmd>lua Close_down()<CR>")
