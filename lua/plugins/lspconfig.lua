@@ -229,9 +229,6 @@ return {
       },
       ensure_installed = {
         "roslyn",
-        "stylua",
-        "ruff",
-        "prettierd",
       },
       ui = {
         icons = {
@@ -263,26 +260,41 @@ return {
       local mason_lspconfig = require("mason-lspconfig")
       mason_lspconfig.setup({
         ensure_installed = {
-          "lua_ls",
-          "jsonls",
-          "html",
-          "cssls",
-          "tailwindcss",
-          -- "ts_ls",
-          "vtsls",
           "basedpyright",
           "clangd",
+          "cssls",
           "elixirls",
+          "html",
+          "jsonls",
+          "lua_ls",
+          "tailwindcss",
+          "vtsls",
+          -- "gdshader_lsp",
+          -- "glsl_analyzer",
+          -- "gopls",
           -- "ols",
           -- "sqlls",
-          -- "gopls",
-          -- "glsl_analyzer",
-          -- "gdshader_lsp",
+          -- "ts_ls",
         },
         automatic_enable = {
           exclude = { "gdscript", "ruff" },
         },
       })
     end,
+  },
+  {
+    "zapling/mason-conform.nvim",
+    dependencies = {
+      "mason.nvim",
+      "conform.nvim",
+    },
+    opts = {
+      ensure_installed = {
+        "csharpier",
+        "prettierd",
+        "ruff",
+        "stylua",
+      },
+    },
   },
 }
