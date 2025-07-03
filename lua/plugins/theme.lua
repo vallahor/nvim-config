@@ -1,9 +1,7 @@
 return {
-  "vallahor/gruvballish",
-  -- dir = "../../../../../../../projects/gruvballish/",
+  -- "vallahor/targino-nvim",
+  dir = "c:/projects/targino-nvim",
   lazy = false,
   priority = 1000,
-  config = function()
-    vim.cmd([[colorscheme targino]])
-  end,
+  opts = {},
 }

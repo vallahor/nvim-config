@@ -565,27 +565,6 @@ autocmd!
 au TextYankPost * silent! lua vim.highlight.on_yank({higroup="Visual", timeout=200})
 augroup END
 
-" " hi! ErrorBg   guibg=#351C1D
-hi! ErrorBg   guibg=#241317
-hi! WarningBg guibg=#24180e
-hi! InfoBg    guibg=#1a181a
-hi! HintBg    guibg=#1a181a
-
-" " " @check: do we really need the number fg highlight?
-hi! ErrorLineBg   guifg=#832936 guibg=#241317
-hi! WarningLineBg guifg=#825c3e guibg=#24180e
-hi! InfoLineBg    guifg=#5d595d guibg=#1a181a
-hi! HintLineBg    guifg=#5d595d guibg=#1a181a
-" hi! HintLineBg    guifg=#A98D92
-
-" " :h diagnostic-signs
-sign define DiagnosticSignError text=E texthl=DiagnosticSignError linehl=ErrorBg   numhl=ErrorLineBg
-sign define DiagnosticSignWarn  text=W texthl=DiagnosticSignWarn  linehl=WarningBg numhl=WarningLineBg
-sign define DiagnosticSignInfo  text=I texthl=DiagnosticSignInfo  linehl=InforBg   numhl=InfoLineBg
-sign define DiagnosticSignHint  text=H texthl=DiagnosticSignHint  linehl=HintBg    numhl=HintLineBg
-sign define DiagnosticSignHint  text=H texthl=DiagnosticSignHint  numhl=HintLineBg
-sign define DiagnosticSignHint  text=H numhl=HintLineBg
-
 autocmd! BufNewFile,BufRead *.gs,*.vs,*.fs,*.vert,*.frag,*.geom set ft=glsl
 
 autocmd! BufNewFile,BufRead,BufEnter,BufWinEnter *.gd set noexpandtab
@@ -668,23 +647,17 @@ vim.diagnostic.config({
   },
   jump = { float = false },
   signs = {
-    text = {
-      [vim.diagnostic.severity.ERROR] = "",
-      [vim.diagnostic.severity.WARN] = "",
-      [vim.diagnostic.severity.INFO] = "",
-      [vim.diagnostic.severity.HINT] = "",
-    },
     linehl = {
-      [vim.diagnostic.severity.ERROR] = "ErrorBg",
-      [vim.diagnostic.severity.WARN] = "WarningBg",
-      [vim.diagnostic.severity.INFO] = "InfoBg",
-      [vim.diagnostic.severity.HINT] = "HintBg",
+      [vim.diagnostic.severity.ERROR] = "DiagnosticLinehlError",
+      [vim.diagnostic.severity.WARN] = "DiagnosticLinehlWarn",
+      [vim.diagnostic.severity.INFO] = "DiagnosticLinehlInfo",
+      [vim.diagnostic.severity.HINT] = "DiagnosticLinehlHint",
     },
     numhl = {
-      [vim.diagnostic.severity.ERROR] = "ErrorLineBg",
-      [vim.diagnostic.severity.WARN] = "WarningLineBg",
-      [vim.diagnostic.severity.INFO] = "InfoLineBg",
-      [vim.diagnostic.severity.HINT] = "HintLineBg",
+      [vim.diagnostic.severity.ERROR] = "DiagnosticNumhlError",
+      [vim.diagnostic.severity.WARN] = "DiagnosticNumhlWarn",
+      [vim.diagnostic.severity.INFO] = "DiagnosticNumhlInfo",
+      [vim.diagnostic.severity.HINT] = "DiagnosticNumhlHint",
     },
   },
 })
@@ -701,25 +674,3 @@ vim.api.nvim_create_autocmd("FileType", {
     nnoremap <buffer> <c-w> <cmd>cclose<CR>
   ]],
 })
-
-vim.api.nvim_set_hl(0, "Pmenu", { bg = "#191319" })
-vim.api.nvim_set_hl(0, "PmenuSel", { bg = "#312531" })
-vim.api.nvim_set_hl(0, "FloatBorder", { bg = "#191319", fg = "#352835" })
-vim.api.nvim_set_hl(0, "NormalFloat", { bg = "#191319" })
-vim.api.nvim_set_hl(0, "PmenuThumb", { bg = "#362a36" })
-vim.api.nvim_set_hl(0, "PmenuSbar", { bg = "#362a36" })
-vim.api.nvim_set_hl(0, "PmenuMatch", { fg = "#926c83" })
-
-vim.api.nvim_set_hl(0, "NvimTreeIndentMarker", { fg = "#30323E" })
-
-vim.api.nvim_set_hl(0, "BlinkCmpGhostText", { fg = "#776e77" })
-vim.api.nvim_set_hl(0, "BlinkCmpMenu", { bg = "#191319", fg = "#9d7b8f" })
-vim.api.nvim_set_hl(0, "BlinkCmpMenuBorder", { bg = "#191319", fg = "#352835" })
-vim.api.nvim_set_hl(0, "BlinkCmpDocBorder", { bg = "#191319", fg = "#352835" })
-vim.api.nvim_set_hl(0, "BlinkCmpLabelMatch", { fg = "#995464" })
-
-vim.api.nvim_set_hl(0, "TelescopeNormal", { bg = "#191319", fg = "#9d7b8f" })
--- vim.api.nvim_set_hl(0, "TelescopeNormal", { bg = "#191319" })
-vim.api.nvim_set_hl(0, "TelescopeSelection", { bg = "#312531" })
-vim.api.nvim_set_hl(0, "TelescopeMatching", { fg = "#995464" })
--- vim.api.nvim_set_hl(0, "IncSearch", { bg = "#6b2d3a" })
