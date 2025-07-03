@@ -8,18 +8,19 @@ return {
     opts = {
       keymap = {
         preset = "none",
-        -- ["<Up>"] = { "select_prev", "fallback" },
-        -- ["<Down>"] = { "select_next", "fallback" },
-        -- ["<Tab>"] = { "accept", "fallback" },
-        ["<C-k>"] = { "select_prev", "fallback" },
-        ["<C-j>"] = { "select_next", "fallback" },
-        ["<C-l>"] = { "accept", "fallback" },
-        ["<C-h>"] = { "show", "show_documentation", "hide_documentation" },
+        ["<Up>"] = { "select_prev", "fallback" },
+        ["<Down>"] = { "select_next", "fallback" },
+        ["<Tab>"] = { "accept", "fallback" },
+        -- ["<C-k>"] = { "select_prev", "fallback" },
+        -- ["<C-j>"] = { "select_next", "fallback" },
+        -- ["<C-l>"] = { "accept", "fallback" },
+        -- ["<C-h>"] = { "show", "show_documentation", "hide_documentation" },
         ["<C-n>"] = { "snippet_forward" },
         ["<C-p>"] = { "snippet_backward" },
         ["<PageUp>"] = { "scroll_documentation_up", "fallback" },
         ["<PageDown>"] = { "scroll_documentation_down", "fallback" },
         ["<C-s>"] = { "show_signature", "hide_signature", "fallback" },
+        ["<C-h>"] = { "show", "show_documentation", "hide_documentation" },
       },
 
       completion = {
