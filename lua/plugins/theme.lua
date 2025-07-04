@@ -3,5 +3,8 @@ return {
   dir = "c:/projects/targino-nvim",
   lazy = false,
   priority = 1000,
-  opts = {},
+  opts = {
+    -- repeat_italic = true,
+    include_italic = true,
+  },
 }

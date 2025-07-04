@@ -34,15 +34,10 @@ return {
     config = function()
       require("close_other_window")
       if vim.g.skeletyl then
-        vim.keymap.set({ "n", "v" }, "<c-s-h>", "<cmd>lua Close_left()<CR>")
-        vim.keymap.set({ "n", "v" }, "<c-s-j>", "<cmd>lua Close_down()<CR>")
-        vim.keymap.set({ "n", "v" }, "<c-s-k>", "<cmd>lua Close_up()<CR>")
-        vim.keymap.set({ "n", "v" }, "<c-s-l>", "<cmd>lua Close_right()<CR>")
-
-        -- vim.keymap.set({ "n", "v" }, "<c-left>", "<cmd>lua Close_left()<CR>")
-        -- vim.keymap.set({ "n", "v" }, "<c-down>", "<cmd>lua Close_down()<CR>")
-        -- vim.keymap.set({ "n", "v" }, "<c-up>", "<cmd>lua Close_up()<CR>")
-        -- vim.keymap.set({ "n", "v" }, "<c-right>", "<cmd>lua Close_right()<CR>")
+        vim.keymap.set({ "n", "v" }, "<c-left>", "<cmd>lua Close_left()<CR>")
+        vim.keymap.set({ "n", "v" }, "<c-down>", "<cmd>lua Close_down()<CR>")
+        vim.keymap.set({ "n", "v" }, "<c-up>", "<cmd>lua Close_up()<CR>")
+        vim.keymap.set({ "n", "v" }, "<c-right>", "<cmd>lua Close_right()<CR>")
       else
         vim.keymap.set({ "n", "v" }, "<c-s-h>", "<cmd>lua Close_left()<CR>")
         vim.keymap.set({ "n", "v" }, "<c-s-j>", "<cmd>lua Close_down()<CR>")
@@ -66,22 +61,6 @@ return {
       vim.keymap.set("n", "<leader>md", "<cmd>call emmet#removeTag()<cr>")
     end,
   },
-  -- {
-  --   "junegunn/vim-easy-align",
-  --   config = function()
-  --     vim.keymap.set({ "n", "x" }, "ga", "<Plug>(EasyAlign)")
-  --   end,
-  -- },
-  -- {
-  --   "ricardoramirezr/blade-nav.nvim",
-  --   dependencies = { -- totally optional
-  --     "hrsh7th/nvim-cmp", -- if using nvim-cmp
-  --   },
-  --   ft = { "blade", "php" }, -- optional, improves startup time
-  --   opts = {
-  --     close_tag_on_complete = true, -- default: true
-  --   },
-  -- },
   -- {
   --   "habamax/vim-godot",
   --   config = function()
@@ -110,8 +89,5 @@ return {
       --   end,
       -- })
     end,
-  },
-  {
-    "posva/vim-vue",
   },
 }
