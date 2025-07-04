@@ -117,16 +117,16 @@ if vim.g.skeletyl then
     ["Find Under"] = "<c-u>",
     ["Find Subword Under"] = "<c-u>",
     ["Select All"] = "<c-s-u>",
-    ["Add Cursor Down"] = "<down>",
-    ["Add Cursor Up"] = "<up>",
+    ["Add Cursor Down"] = "<c-j>",
+    ["Add Cursor Up"] = "<c-k>",
     -- ["Switch Mode"] = "<tab>",
     ["Switch Mode"] = "v",
     ["Align"] = "<c-a>",
-    ["Find Next"] = "<right>",
-    ["Find Prev"] = "<left>",
+    ["Find Next"] = "<c-l>",
+    ["Find Prev"] = "<c-h>",
     ["Goto Next"] = "}",
     ["Goto Prev"] = "{",
-    ["Skip Region"] = "+",
+    ["Skip Region"] = "L",
     ["Remove Region"] = "-",
     -- ["Exit"] = "<space>",
   }
@@ -237,10 +237,10 @@ if vim.g.skeletyl then
   -- vim.keymap.set("n", "<up>", "<cmd>wincmd k<cr>") -- move to window up
   -- vim.keymap.set("n", "<right>", "<cmd>wincmd l<cr>") -- move to window right
 
-  vim.keymap.set({ "n", "v" }, "<c-h>", "<cmd>wincmd h<cr>") -- move to window left
-  vim.keymap.set({ "n", "v" }, "<c-j>", "<cmd>wincmd j<cr>") -- move to window down
-  vim.keymap.set({ "n", "v" }, "<c-k>", "<cmd>wincmd k<cr>") -- move to window up
-  vim.keymap.set({ "n", "v" }, "<c-l>", "<cmd>wincmd l<cr>") -- move to window right
+  vim.keymap.set({ "n", "v" }, "<left>", "<cmd>wincmd h<cr>") -- move to window left
+  vim.keymap.set({ "n", "v" }, "<down>", "<cmd>wincmd j<cr>") -- move to window down
+  vim.keymap.set({ "n", "v" }, "<up>", "<cmd>wincmd k<cr>") -- move to window up
+  vim.keymap.set({ "n", "v" }, "<right>", "<cmd>wincmd l<cr>") -- move to window right
 else
   vim.keymap.set("n", "<c-\\>", "<cmd>clo<cr>") -- close current    window
   vim.keymap.set("n", "<c-=>", "<cmd>vs<cr>") -- split vertical   window
