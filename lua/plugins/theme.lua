@@ -4,7 +4,7 @@ return {
   lazy = false,
   priority = 1000,
   opts = {
-    -- repeat_italic = true,
-    include_italic = true,
+    repeat_italic = false,
+    include_italic = false,
   },
 }

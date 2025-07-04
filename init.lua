@@ -467,6 +467,11 @@ vim.api.nvim_create_autocmd("FocusGained", {
   command = "silent! checktime",
 })
 
+vim.api.nvim_create_autocmd("DiagnosticChanged", {
+  pattern = "*",
+  command = "silent! redrawtabline",
+})
+
 vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
   pattern = { "*.svelte", "*.*eex", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.html", "*.css", "*.lua" },
   callback = function()
