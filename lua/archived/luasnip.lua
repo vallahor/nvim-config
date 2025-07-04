@@ -8,23 +8,31 @@ return {
     local fmt = require("luasnip.extras.fmt").fmt
 
     ls.add_snippets("go", {
-      s("iferr", fmt(
-        [[
+      s(
+        "iferr",
+        fmt(
+          [[
           if err != nil {{
               {}
           }}
-        ]], { i(1) }
-        )),
+        ]],
+          { i(1) }
+        )
+      ),
     })
 
     ls.add_snippets("odin", {
-      s("iferr", fmt(
-        [[
+      s(
+        "iferr",
+        fmt(
+          [[
           if err != nil {{
               {}
           }}
-        ]], { i(1) }
-        )),
+        ]],
+          { i(1) }
+        )
+      ),
     })
   end,
 }
