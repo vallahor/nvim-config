@@ -1,7 +1,9 @@
 return {
-  { "JoosepAlviste/nvim-ts-context-commentstring", lazy = true },
   {
     "echasnovski/mini.nvim",
+    dependencies = {
+      { "JoosepAlviste/nvim-ts-context-commentstring", lazy = true },
+    },
     version = false,
     config = function()
       -- Comment
@@ -123,10 +125,9 @@ return {
         { pattern = { "NvimTree" }, command = "lua vim.b.minicursorword_disable=true" }
       )
 
-      require("mini.icons").setup()
-      if _G.MiniIcons then
-        _G.MiniIcons.mock_nvim_web_devicons()
-      end
+      local MiniIcons = require("mini.icons")
+      MiniIcons.setup()
+      MiniIcons.mock_nvim_web_devicons()
 
       require("mini.notify").setup()
     end,

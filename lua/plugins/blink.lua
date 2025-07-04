@@ -1,26 +1,26 @@
 return {
   {
     "saghen/blink.cmp",
-    dependencies = { "rafamadriz/friendly-snippets" },
+    dependencies = { "rafamadriz/friendly-snippets", "mini.nvim" },
     version = "1.*",
     ---@module 'blink.cmp'
     -- ---@type blink.cmp.Config
     opts = {
       keymap = {
         preset = "none",
-        ["<Up>"] = { "select_prev", "fallback" },
-        ["<Down>"] = { "select_next", "fallback" },
-        ["<Tab>"] = { "accept", "fallback" },
-        -- ["<C-k>"] = { "select_prev", "fallback" },
-        -- ["<C-j>"] = { "select_next", "fallback" },
-        -- ["<C-l>"] = { "accept", "fallback" },
-        -- ["<C-h>"] = { "show", "show_documentation", "hide_documentation" },
+        -- ["<Up>"] = { "select_prev", "fallback" },
+        -- ["<Down>"] = { "select_next", "fallback" },
+        -- ["<Tab>"] = { "accept", "fallback" },
+        ["<C-k>"] = { "select_prev", "fallback" },
+        ["<C-j>"] = { "select_next", "fallback" },
+        ["<C-l>"] = { "accept", "fallback" },
+        ["<C-h>"] = { "show", "show_documentation", "hide_documentation" },
+        ["<C-s>"] = { "show_signature", "hide_signature", "fallback" },
         ["<C-n>"] = { "snippet_forward" },
         ["<C-p>"] = { "snippet_backward" },
         ["<PageUp>"] = { "scroll_documentation_up", "fallback" },
         ["<PageDown>"] = { "scroll_documentation_down", "fallback" },
-        ["<C-s>"] = { "show_signature", "hide_signature", "fallback" },
-        ["<C-h>"] = { "show", "show_documentation", "hide_documentation" },
+        -- ["<C-h>"] = { "show", "show_documentation", "hide_documentation" },
       },
 
       completion = {
@@ -28,6 +28,7 @@ return {
           draw = {
             components = {
               kind_icon = {
+                ellipsis = false,
                 text = function(ctx)
                   local kind_icon, _, _ = require("mini.icons").get("lsp", ctx.kind)
                   return kind_icon

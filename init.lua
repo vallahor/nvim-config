@@ -232,15 +232,10 @@ if vim.g.skeletyl then
   vim.keymap.set("n", "<a-8>", [[<cmd>horizontal resize +2<cr>]]) -- make the window bigger  horizontally
   vim.keymap.set("n", "<a-5>", [[<cmd>horizontal resize -2<cr>]]) -- make the window smaller horizontally
 
-  -- vim.keymap.set("n", "<left>", "<cmd>wincmd h<cr>") -- move to window left
-  -- vim.keymap.set("n", "<down>", "<cmd>wincmd j<cr>") -- move to window down
-  -- vim.keymap.set("n", "<up>", "<cmd>wincmd k<cr>") -- move to window up
-  -- vim.keymap.set("n", "<right>", "<cmd>wincmd l<cr>") -- move to window right
-
-  vim.keymap.set({ "n", "v" }, "<left>", "<cmd>wincmd h<cr>") -- move to window left
-  vim.keymap.set({ "n", "v" }, "<down>", "<cmd>wincmd j<cr>") -- move to window down
-  vim.keymap.set({ "n", "v" }, "<up>", "<cmd>wincmd k<cr>") -- move to window up
-  vim.keymap.set({ "n", "v" }, "<right>", "<cmd>wincmd l<cr>") -- move to window right
+  vim.keymap.set("n", "<left>", "<cmd>wincmd h<cr>") -- move to window left
+  vim.keymap.set("n", "<down>", "<cmd>wincmd j<cr>") -- move to window down
+  vim.keymap.set("n", "<up>", "<cmd>wincmd k<cr>") -- move to window up
+  vim.keymap.set("n", "<right>", "<cmd>wincmd l<cr>") -- move to window right
 else
   vim.keymap.set("n", "<c-\\>", "<cmd>clo<cr>") -- close current    window
   vim.keymap.set("n", "<c-=>", "<cmd>vs<cr>") -- split vertical   window
