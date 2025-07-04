@@ -467,8 +467,17 @@ vim.api.nvim_create_autocmd("DiagnosticChanged", {
   command = "silent! redrawtabline",
 })
 
-vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
-  pattern = { "*.svelte", "*.*eex", "*.js", "*.ts", "*.jsx", "*.tsx", "*.json", "*.html", "*.css", "*.lua" },
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = {
+    "javascript",
+    "typescript",
+    "typescriptreact",
+    "html",
+    "json",
+    "elixir",
+    "css",
+    "svelte",
+  },
   callback = function()
     if not vim.g.editorconfig then
       vim.opt_local.shiftwidth = 2
