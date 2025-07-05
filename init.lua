@@ -1,9 +1,3 @@
-vim.cmd([[
-  set termguicolors
-]])
-
-vim.env.LANG = "en_US.UTF-8"
-
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.uv.fs_stat(lazypath) then
   vim.fn.system({
@@ -19,6 +13,8 @@ vim.opt.rtp:prepend(lazypath)
 
 vim.g.mapleader = " "
 vim.g.skeletyl = true
+
+vim.env.LANG = "en_US.UTF-8"
 
 require("lazy").setup("plugins", {
   change_detection = {
@@ -65,6 +61,10 @@ vim.opt.ttimeoutlen = 300
 vim.opt.updatetime = 50
 vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
 vim.opt.winborder = "rounded"
+vim.opt.isfname:append("(") -- " @windows: nextjs and sveltkit folder name pattern
+vim.opt.swapfile = false
+vim.opt.wrap = false
+vim.opt.history = 20
 
 vim.wo.signcolumn = "no"
 vim.wo.relativenumber = true
@@ -78,8 +78,6 @@ end
 vim.bo.autoread = true
 vim.bo.copyindent = true
 vim.bo.grepprg = "rg"
-
-vim.g.user_emmet_install_global = 0
 
 -- work around on python default configs
 vim.g.python_indent = {
@@ -180,8 +178,7 @@ end
 vim.keymap.set({ "i" }, "<enter>", "<c-u><enter>")
 vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>") -- save file
 vim.keymap.set({ "n", "v" }, "<c-s>", "<cmd>w!<CR><esc>") -- save file
--- vim.keymap.set({ "n", "v" }, "<leader>fs", "<cmd>w!<CR><esc>") -- save file
--- vim.keymap.set({ "n", "v" }, "d<enter>", "<cmd>w!<CR><esc>", { silent = true }) -- save file
+vim.keymap.set({ "n", "v" }, "<leader>fs", "<cmd>w!<CR><esc>") -- save file
 
 vim.keymap.set("n", "Y", "yg$") -- yank to end of line considering line wrap
 
@@ -206,7 +203,7 @@ if vim.g.skeletyl then
   vim.keymap.set("n", "<c-8>", "<c-w>r") -- rotate windows
 
   -- closes the current window and buffer
-  -- to close the current buffer <c-w> and not the window
+  -- to close the current buffer and not the window use <c-w>
   vim.keymap.set("n", "<c-!>", "<cmd>bd<cr>") -- close current buffer and window
 
   -- resize windows
@@ -440,6 +437,19 @@ vim.keymap.set("v", "<c-x>", "<c-x>gv")
 vim.keymap.set("v", "<c-s-a>", "g<c-a>gv")
 vim.keymap.set("v", "<c-s-x>", "g<c-x>gv")
 
+-- visual mode - paste without copying
+vim.keymap.set({ "v", "x" }, "p", [['pgv"'.v:register.'y`']], { remap = true, expr = true })
+
+-- close quickfix menu after selecting choice
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "qf" },
+  callback = function()
+    vim.keymap.set("n", "<cr>", "<CR><cmd>cclose<CR>", { buffer = true })
+    vim.keymap.set("n", "q", "<cmd>cclose<CR>", { buffer = true })
+    vim.keymap.set("n", "<c-w>", "<cmd>cclose<CR>", { buffer = true })
+  end,
+})
+
 vim.api.nvim_create_autocmd("FocusGained", {
   pattern = "*",
   command = "silent! checktime",
@@ -474,17 +484,17 @@ vim.api.nvim_create_autocmd("FileType", {
 vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
   pattern = "*",
   callback = function()
-    if not vim.g.skeletyl then
-      -- move paragraphs
-      vim.keymap.set({ "n", "v", "x" }, "[", "{", { nowait = true, buffer = true }) -- paragraph up
-      vim.keymap.set({ "n", "v", "x" }, "]", "}", { nowait = true, buffer = true }) -- paragraph down
-    else
+    if vim.g.skeletyl then
       vim.keymap.set({ "n", "v", "x" }, "[", function()
         vim.diagnostic.jump({ count = -1, float = false })
       end, { nowait = true, buffer = true }) -- paragraph up
       vim.keymap.set({ "n", "v", "x" }, "]", function()
         vim.diagnostic.jump({ count = 1, float = false })
       end, { nowait = true, buffer = true }) -- paragraph up
+    else
+      -- move paragraphs
+      vim.keymap.set({ "n", "v", "x" }, "[", "{", { nowait = true, buffer = true }) -- paragraph up
+      vim.keymap.set({ "n", "v", "x" }, "]", "}", { nowait = true, buffer = true }) -- paragraph down
     end
     -- move indentation
     vim.keymap.set({ "v", "x" }, "<", "<gv", { nowait = true, buffer = true, remap = true }) -- indent left in visual mode
@@ -492,43 +502,43 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
   end,
 })
 
--- vimscript stuff
-vim.cmd([[
+-- Lose the cursor position on yank
+-- vim.api.nvim_create_autocmd("TextYankPost", {
+--   pattern = "*",
+--   callback = function()
+--     vim.highlight.on_yank({ higroup = "Visual", timeout = 300 })
+--   end,
+-- })
 
-" @windows: nextjs and sveltkit folder name pattern
-set isfname+=(
+vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead" }, {
+  pattern = { "*.gs", "*.vs", "*.fs", "*.vert", "*.frag", "*.geom" },
+  callback = function()
+    vim.bo.filetype = "glsl"
+  end,
+})
 
-set noswapfile
-set termguicolors
-set nowrap
+vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead", "BufEnter", "BufWinEnter" }, {
+  pattern = "*.gd",
+  callback = function()
+    vim.opt_local.expandtab = false
+  end,
+})
 
-set history=20
+vim.api.nvim_create_autocmd("BufWritePre", {
+  pattern = "*",
+  callback = function()
+    local save = vim.fn.winsaveview()
+    vim.cmd([[keeppatterns %s/\s+$//e]])
+    vim.fn.winrestview(save)
+  end,
+})
 
-" visual mode - paste without copying
-vnoremap <expr> p 'pgv"'.v:register.'y`>'
-xnoremap <expr> p 'pgv"'.v:register.'y`>'
-
-" delete trailing spaces
-fun! TrimWhitespace()
-    let l:save = winsaveview()
-    keeppatterns %s/\s\+$//e
-    call winrestview(l:save)
-endfun
-autocmd BufWritePre * :call TrimWhitespace()
-
-" highlight when yanking
-augroup highlight_yank
-autocmd!
-au TextYankPost * silent! lua vim.highlight.on_yank({higroup="Visual", timeout=200})
-augroup END
-
-autocmd! BufNewFile,BufRead *.gs,*.vs,*.fs,*.vert,*.frag,*.geom set ft=glsl
-
-autocmd! BufNewFile,BufRead,BufEnter,BufWinEnter *.gd set noexpandtab
-
-" when autocomplete active it limit the height
-set pumblend=15
-]])
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "elixir", "heex", "eex" },
+  callback = function()
+    vim.bo.cindent = false
+  end,
+})
 
 if vim.g.neovide then
   vim.g.neovide_cursor_animation_length = 0
@@ -541,7 +551,6 @@ if vim.g.neovide then
 end
 
 -- GODOT BEGIN
--- zed: {project} {file}:{line}:{col}
 -- vim_godot.{bat|sh}: {file} {line} {col}
 -- batch file to run as the external editor
 -- @echo off
@@ -590,11 +599,6 @@ vim.api.nvim_create_autocmd("VimLeavePre", {
 })
 -- GODOT END
 
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "elixir", "heex", "eex" },
-  command = [[set nocindent]],
-})
-
 vim.diagnostic.config({
   virtual_text = {
     prefix = "",
@@ -617,17 +621,4 @@ vim.diagnostic.config({
       [vim.diagnostic.severity.HINT] = "DiagnosticNumhlHint",
     },
   },
-})
-
--- close quickfix menu after selecting choice
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "qf" },
-  command = [[nnoremap <buffer> <CR> <CR><cmd>cclose<CR>]],
-})
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "qf" },
-  command = [[
-    nnoremap <buffer> q <cmd>cclose<CR>
-    nnoremap <buffer> <c-w> <cmd>cclose<CR>
-  ]],
 })
