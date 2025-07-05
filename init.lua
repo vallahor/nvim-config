@@ -502,13 +502,12 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
   end,
 })
 
--- Lose the cursor position on yank
--- vim.api.nvim_create_autocmd("TextYankPost", {
---   pattern = "*",
---   callback = function()
---     vim.highlight.on_yank({ higroup = "Visual", timeout = 300 })
---   end,
--- })
+vim.api.nvim_create_autocmd("TextYankPost", {
+  pattern = "*",
+  callback = function()
+    vim.highlight.on_yank({ higroup = "VisualYank", timeout = 300 })
+  end,
+})
 
 vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead" }, {
   pattern = { "*.gs", "*.vs", "*.fs", "*.vert", "*.frag", "*.geom" },
