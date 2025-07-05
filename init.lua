@@ -66,20 +66,6 @@ vim.opt.updatetime = 50
 vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
 vim.opt.winborder = "rounded"
 
--- vim.opt.cmdheight = 0
--- vim.opt.laststatus = 2
--- vim.opt.showcmdloc = "statusline"
--- vim.opt.statusline = " %f %m%=%S %y L%l,C%c "
--- vim.opt.winbar = " %f %m%=%l "
-
--- vim.cmd([[
---   set laststatus=0
---   hi! HorSplit guifg=#382536 guibg=#121112
---   hi! link StatusLine HorSplit
---   hi! link StatusLineNC HorSplit
---   set statusline=%{repeat('─',winwidth('.'))}
--- ]])
-
 vim.wo.signcolumn = "no"
 vim.wo.relativenumber = true
 vim.wo.wrap = false
@@ -384,15 +370,12 @@ else
 end
 
 if vim.g.skeletyl then
-  -- vim.keymap.set("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
   vim.keymap.set("n", "<f10>", "<cmd>:e $MYVIMRC<CR>") -- open config file (vimrc or init.lua)
-  -- vim.keymap.set("n", "<f9>", "<cmd>:e c:/projects/gruvballish/colors/targino.vim<CR>") -- open config file (vimrc or init.lua)
+  vim.keymap.set("n", "<f5>", "<cmd>so %<CR>") -- execute current file (vim or lua)
   vim.keymap.set("n", "<f8>", "<cmd>:e ~/.config/ghostty/config<CR>") -- open ghostty config file (vimrc or init.lua)
   vim.keymap.set("n", "<f7>", "<cmd>:e C:/Users/vallahor/.omnisharp/omnisharp.json<CR>") -- open ghostty config file (vimrc or init.lua)
-  vim.keymap.set("n", "<f5>", "<cmd>so %<CR>") -- execute current file (vim or lua)
   vim.keymap.set("n", "<f11>", "<cmd>echo wordcount().words<CR>") -- execute current file (vim or lua)
 else
-  -- vim.keymap.set("n", "<f4>", "<cmd>:e ~/.config/nvim/init.lua<CR>")
   vim.keymap.set("n", "<f4>", "<cmd>:e $MYVIMRC<CR>") -- open config file (vimrc or init.lua)
   vim.keymap.set("n", "<f12>", "<cmd>:e c:/projects/gruvballish/colors/targino.vim<CR>") -- open config file (vimrc or init.lua)
   vim.keymap.set("n", "<f5>", "<cmd>so %<CR>") -- execute current file (vim or lua)
@@ -469,14 +452,15 @@ vim.api.nvim_create_autocmd("DiagnosticChanged", {
 
 vim.api.nvim_create_autocmd("FileType", {
   pattern = {
+    "css",
+    "elixir",
+    "html",
     "javascript",
+    "json",
+    "lua",
+    "svelte",
     "typescript",
     "typescriptreact",
-    "html",
-    "json",
-    "elixir",
-    "css",
-    "svelte",
   },
   callback = function()
     if not vim.g.editorconfig then
@@ -507,42 +491,6 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
     vim.keymap.set({ "v", "x" }, ">", ">gv", { nowait = true, buffer = true, remap = true }) -- indent right in visual mode
   end,
 })
-
--- if vim.opt.cmdheight:get() == 0 then
-if vim.opt.cmdheight == 0 then
-  -- show macro recording
-  vim.api.nvim_create_autocmd({ "RecordingEnter", "CmdlineEnter" }, {
-    pattern = "*",
-    callback = function()
-      vim.opt_local.cmdheight = 1
-    end,
-  })
-
-  vim.api.nvim_create_autocmd({ "RecordingLeave", "CmdlineLeave" }, {
-    pattern = "*",
-    callback = function()
-      local timer = vim.uv.new_timer()
-      if timer then
-        timer:start(
-          50,
-          0,
-          vim.schedule_wrap(function()
-            vim.opt_local.cmdheight = 0
-          end)
-        )
-      end
-    end,
-  })
-
-  vim.api.nvim_create_autocmd("ModeChanged", {
-    pattern = "*",
-    callback = function()
-      vim.schedule(function()
-        vim.cmd.redrawstatus()
-      end)
-    end,
-  })
-end
 
 -- vimscript stuff
 vim.cmd([[
