@@ -121,43 +121,43 @@ return {
         },
       }
 
-      vim.lsp.config.tailwindcss = {
-        cmd = { "tailwindcss-language-server", "--stdio" },
-        root_dir = require("lspconfig").util.root_pattern(
-          "mix.exs",
-          "tailwind.config.js",
-          "tailwind.config.ts",
-          "postcss.config.js",
-          "postcss.config.ts",
-          "package.json",
-          "node_modules",
-          ".git",
-          ".env"
-        ),
-        filetypes = vim.tbl_extend("force", vim.lsp.config.tailwindcss.filetypes, {
-          "elixir",
-          "eelixir",
-          "heex",
-          "ex",
-          "htmldjango",
-        }),
-        settings = {
-          tailwindCSS = {
-            includeLanguages = {
-              elixir = "html-eex",
-              eelixir = "html-eex",
-              heex = "html-eex",
-              blade = "html",
-              htmldjango = "html",
-            },
-            experimental = {
-              classRegex = {
-                'class[:]\\s*"([^"]*)"',
-              },
-            },
-          },
-        },
-      }
+      -- vim.lsp.config.tailwindcss = {
+      --   cmd = { "tailwindcss-language-server", "--stdio" },
+      --   root_dir = require("lspconfig").util.root_pattern(
+      --     "mix.exs",
+      --     "tailwind.config.js",
+      --     "tailwind.config.ts",
+      --     "postcss.config.js",
+      --     "postcss.config.ts",
+      --     "package.json",
+      --     "node_modules",
+      --     ".git",
+      --     ".env"
+      --   ),
+      --   filetypes = vim.tbl_extend("force", vim.lsp.config.tailwindcss.filetypes, {
+      --     "elixir",
+      --     "eelixir",
+      --     "heex",
+      --     "ex",
+      --     "htmldjango",
+      --   }),
+      --   settings = {
+      --     tailwindCSS = {
+      --       includeLanguages = {
+      --         elixir = "html-eex",
+      --         eelixir = "html-eex",
+      --         heex = "html-eex",
+      --         blade = "html",
+      --         htmldjango = "html",
+      --       },
+      --       experimental = {
+      --         classRegex = {
+      --           'class[:]\\s*"([^"]*)"',
+      --         },
+      --       },
+      --     },
+      --   },
+      -- }
 
       -- rustup component add rust-src
       vim.lsp.config.rust_analyzer = {

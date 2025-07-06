@@ -440,6 +440,10 @@ vim.keymap.set("v", "<c-s-x>", "g<c-x>gv")
 -- visual mode - paste without copying
 vim.keymap.set({ "v", "x" }, "p", [['pgv"'.v:register.'y`']], { remap = true, expr = true })
 
+-- maybe blink related (fallback keys)
+vim.keymap.set("n", "<cr>", "<nop>")
+vim.keymap.set("c", "<tab>", "<nop>")
+
 -- close quickfix menu after selecting choice
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "qf" },
