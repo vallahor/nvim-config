@@ -91,26 +91,6 @@ return {
         },
       }
 
-      vim.lsp.config.roslyn = {
-        settings = {
-          ["csharp|background_analysis"] = {
-            dotnet_analyzer_diagnostics_scope = "fullSolution",
-            dotnet_compiler_diagnostics_scope = "fullSolution",
-          },
-          ["csharp|symbol_search"] = {
-            dotnet_search_reference_assemblies = true,
-          },
-          ["csharp|completion"] = {
-            dotnet_show_name_completion_suggestions = true,
-            dotnet_show_completion_items_from_unimported_namespaces = true,
-            dotnet_provide_regex_completions = true,
-          },
-          ["csharp|code_lens"] = {
-            dotnet_enable_references_code_lens = true,
-          },
-        },
-      }
-
       vim.lsp.config.basedpyright = {
         settings = {
           basedpyright = {
@@ -120,44 +100,6 @@ return {
           },
         },
       }
-
-      -- vim.lsp.config.tailwindcss = {
-      --   cmd = { "tailwindcss-language-server", "--stdio" },
-      --   root_dir = require("lspconfig").util.root_pattern(
-      --     "mix.exs",
-      --     "tailwind.config.js",
-      --     "tailwind.config.ts",
-      --     "postcss.config.js",
-      --     "postcss.config.ts",
-      --     "package.json",
-      --     "node_modules",
-      --     ".git",
-      --     ".env"
-      --   ),
-      --   filetypes = vim.tbl_extend("force", vim.lsp.config.tailwindcss.filetypes, {
-      --     "elixir",
-      --     "eelixir",
-      --     "heex",
-      --     "ex",
-      --     "htmldjango",
-      --   }),
-      --   settings = {
-      --     tailwindCSS = {
-      --       includeLanguages = {
-      --         elixir = "html-eex",
-      --         eelixir = "html-eex",
-      --         heex = "html-eex",
-      --         blade = "html",
-      --         htmldjango = "html",
-      --       },
-      --       experimental = {
-      --         classRegex = {
-      --           'class[:]\\s*"([^"]*)"',
-      --         },
-      --       },
-      --     },
-      --   },
-      -- }
 
       -- rustup component add rust-src
       vim.lsp.config.rust_analyzer = {
@@ -171,7 +113,7 @@ return {
       }
 
       vim.lsp.config.elixirls = {
-        cmd = { "C:/apps/elixir-ls/language_server.bat" },
+        -- cmd = { "C:/apps/elixir-ls/language_server.bat" },
         settings = {
           elixirLS = {
             dialyzerEnabled = false,
@@ -195,31 +137,6 @@ return {
       vim.lsp.config.gdscript = {
         cmd = { "ncat", "localhost", port },
       }
-
-      -- go install golang.org/x/tools/gopls@latest
-      vim.api.nvim_create_autocmd("BufWritePre", {
-        pattern = { "*.go", "*.templ" },
-        callback = function()
-          -- local params = vim.lsp.util.make_range_params()
-          local params = vim.lsp.util.make_range_params(0, "utf-8")
-          params.context = { only = { "source.organizeImports" } }
-          -- buf_request_sync defaults to a 1000ms timeout. Depending on your
-          -- machine and codebase, you may want longer. Add an additional
-          -- argument after params if you find that you have to write the file
-          -- twice for changes to be saved.
-          -- E.g., vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, 3000)
-          local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params)
-          for cid, res in pairs(result or {}) do
-            for _, r in pairs(res.result or {}) do
-              if r.edit then
-                local enc = (vim.lsp.get_client_by_id(cid) or {}).offset_encoding or "utf-16"
-                vim.lsp.util.apply_workspace_edit(r.edit, enc)
-              end
-            end
-          end
-          vim.lsp.buf.format({ async = false })
-        end,
-      })
     end,
   },
   {
