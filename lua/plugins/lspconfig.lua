@@ -271,6 +271,7 @@ return {
           "lua_ls",
           "tailwindcss",
           "vtsls",
+          "zls",
           -- "gdshader_lsp",
           -- "glsl_analyzer",
           -- "gopls",

@@ -2,8 +2,7 @@ return {
   {
     "kana/vim-arpeggio",
     config = function()
-      -- if false or not vim.g.skeletyl then
-      if not vim.g.skeletyl then
+      if false or not vim.g.skeletyl then
         function EscNormalMode()
           for _, win in ipairs(vim.api.nvim_list_wins()) do
             local config = vim.api.nvim_win_get_config(win)
@@ -11,11 +10,14 @@ return {
               vim.api.nvim_win_close(win, false)
             end
           end
+          vim.snippet.stop()
           vim.cmd.nohl()
+          vim.cmd.normal({ "", bang = true })
         end
 
         vim.cmd([[
-          let g:arpeggio_timeoutlen = 75
+          let g:arpeggio_timeoutlen = 65
+          " let g:arpeggio_timeoutlen = 75
           " let g:arpeggio_timeoutlen = 80
           " let g:arpeggio_timeoutlen = 150
 

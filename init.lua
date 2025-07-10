@@ -1,6 +1,6 @@
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.uv.fs_stat(lazypath) then
-  vim.fn.system({
+  vim.system({
     "git",
     "clone",
     "--filter=blob:none",
@@ -56,8 +56,8 @@ vim.opt.gdefault = true
 vim.opt.cindent = false -- check
 vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
 -- vim.opt.cino:append("L0,g0,l1,t0,w1,w4,m1")
-vim.opt.timeoutlen = 200
-vim.opt.ttimeoutlen = 300
+vim.opt.timeoutlen = 100
+vim.opt.ttimeoutlen = 100
 vim.opt.updatetime = 50
 vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
 vim.opt.winborder = "rounded"
@@ -509,7 +509,7 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
 vim.api.nvim_create_autocmd("TextYankPost", {
   pattern = "*",
   callback = function()
-    vim.highlight.on_yank({ higroup = "VisualYank", timeout = 300 })
+    vim.highlight.on_yank({ higroup = "VisualYank", timeout = 200 })
   end,
 })
 
