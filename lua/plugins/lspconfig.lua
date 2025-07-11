@@ -113,7 +113,6 @@ return {
       }
 
       vim.lsp.config.elixirls = {
-        -- cmd = { "C:/apps/elixir-ls/language_server.bat" },
         settings = {
           elixirLS = {
             dialyzerEnabled = false,

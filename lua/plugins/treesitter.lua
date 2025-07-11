@@ -8,7 +8,10 @@ return {
         "bash",
         "c",
         "cpp",
+        "eex",
         "elixir",
+        "erlang",
+        "heex",
         "gdscript",
         "html",
         "javascript",
@@ -30,6 +33,7 @@ return {
         enable = true,
         disable = {
           "cpp",
+          "elixir",
           "gdscript",
           "go",
           "ocaml",

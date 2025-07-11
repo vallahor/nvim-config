@@ -33,4 +33,14 @@ return {
       end
     end,
   },
+  {
+    "habamax/vim-godot",
+    config = function()
+      vim.cmd([[
+        setlocal tabstop=4
+        setlocal shiftwidth=4
+        setlocal indentexpr=
+      ]])
+    end,
+  },
 }
