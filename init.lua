@@ -467,20 +467,31 @@ vim.api.nvim_create_autocmd("DiagnosticChanged", {
 vim.api.nvim_create_autocmd("FileType", {
   pattern = {
     "css",
-    "elixir",
-    "html",
     "javascript",
     "json",
-    "lua",
-    "svelte",
     "typescript",
     "typescriptreact",
   },
   callback = function()
     if not vim.g.editorconfig then
-      vim.opt_local.shiftwidth = 2
-      vim.opt_local.tabstop = 2
+      vim.opt.shiftwidth = 2
+      vim.opt.tabstop = 2
     end
+  end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = {
+    "eex",
+    "heex",
+    "elixir",
+    "html",
+    "lua",
+    "svelte",
+  },
+  callback = function()
+    vim.opt.shiftwidth = 2
+    vim.opt.tabstop = 2
   end,
 })
 

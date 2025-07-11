@@ -33,7 +33,6 @@ return {
         enable = true,
         disable = {
           "cpp",
-          "elixir",
           "gdscript",
           "go",
           "ocaml",

@@ -123,6 +123,16 @@ return {
         },
       }
 
+      vim.lsp.config.tailwindcss = {
+        settings = {
+          tailwindCSS = {
+            experimental = {
+              classRegex = { { 'class[:]\\s*"([^"]*)"', 1 }, { '~H"([^"]*)"', 1 } },
+            },
+          },
+        },
+      }
+
       vim.lsp.config.zls = {
         settings = {
           zls = {
