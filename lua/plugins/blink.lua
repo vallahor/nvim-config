@@ -2,7 +2,7 @@ return {
   {
     "saghen/blink.cmp",
     dependencies = { "rafamadriz/friendly-snippets", "mini.nvim" },
-    version = "1.*",
+    version = "1.5.*",
     ---@module 'blink.cmp'
     -- ---@type blink.cmp.Config
     opts = {

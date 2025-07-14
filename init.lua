@@ -442,7 +442,7 @@ vim.keymap.set({ "v", "x" }, "p", [['pgv"'.v:register.'y`']], { remap = true, ex
 
 -- maybe blink related (fallback keys)
 vim.keymap.set("n", "<cr>", "<nop>")
-vim.keymap.set("c", "<tab>", "<nop>")
+-- vim.keymap.set("c", "<tab>", "<nop>")
 
 -- vim.keymap.set("n", ";", "m'")
 -- add mark after insert | <c-o> and <c-i>
