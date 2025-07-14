@@ -182,14 +182,14 @@ vim.keymap.set({ "n", "v" }, "<leader>fs", "<cmd>w!<CR><esc>") -- save file
 
 vim.keymap.set("n", "Y", "yg$") -- yank to end of line considering line wrap
 
-vim.keymap.set("n", "<c-i>", "<c-i>zz") -- center <c-i>
-vim.keymap.set("n", "<c-o>", "<c-o>zz") -- center <c-o>
+vim.keymap.set("n", "<c-i>", "<c-i>zzzz") -- center <c-i>
+vim.keymap.set("n", "<c-o>", "<c-o>zzzz") -- center <c-o>
 
 vim.keymap.set("i", "<c-o>", "<end><cr>") -- new line bellow - insert
 vim.keymap.set("i", "<c-s-o>", "<up><end><cr>") -- new line above - insert
 
-vim.keymap.set({ "n", "v" }, "<PageUp>", "<c-u>zz", { noremap = true }) -- page up
-vim.keymap.set({ "n", "v" }, "<PageDown>", "<c-d>zz", { noremap = true }) -- page down
+vim.keymap.set({ "n", "v" }, "<PageUp>", "<c-u>zzzz", { noremap = true }) -- page up
+vim.keymap.set({ "n", "v" }, "<PageDown>", "<c-d>zzzz", { noremap = true }) -- page down
 
 vim.keymap.set("i", "<PageUp>", "<nop>", { noremap = true }) -- page up
 vim.keymap.set("i", "<PageDown>", "<nop>", { noremap = true }) -- page down
@@ -443,6 +443,14 @@ vim.keymap.set({ "v", "x" }, "p", [['pgv"'.v:register.'y`']], { remap = true, ex
 -- maybe blink related (fallback keys)
 vim.keymap.set("n", "<cr>", "<nop>")
 vim.keymap.set("c", "<tab>", "<nop>")
+
+-- vim.keymap.set("n", ";", "m'")
+-- add mark after insert | <c-o> and <c-i>
+vim.api.nvim_create_autocmd("InsertEnter", {
+  callback = function(_)
+    vim.cmd("normal! m'")
+  end,
+})
 
 -- close quickfix menu after selecting choice
 vim.api.nvim_create_autocmd("FileType", {

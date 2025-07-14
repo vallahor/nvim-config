@@ -177,7 +177,6 @@ return {
           -- "gopls",
           -- "ols",
           -- "sqlls",
-          -- "ts_ls",
         },
         automatic_enable = {
           exclude = { "gdscript", "ruff" },
