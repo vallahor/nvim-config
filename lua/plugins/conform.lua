@@ -9,6 +9,7 @@ return {
         python = { "ruff_format" },
         typescript = { "prettierd" },
         typescriptreact = { "prettierd" },
+        rust = { "rustfmt" },
       },
       format_on_save = {
         timeout_ms = 500,

@@ -18,6 +18,10 @@ return {
           local map = function(keys, func)
             vim.keymap.set("n", keys, func, { buffer = ev.buf })
           end
+          local client = vim.lsp.get_client_by_id(ev.data.client_id)
+          if client then
+            client.server_capabilities.semanticTokensProvider = nil
+          end
 
           local telescope = require("telescope.builtin")
           map("gi", telescope.lsp_implementations)
@@ -172,6 +176,7 @@ return {
           "tailwindcss",
           "vtsls",
           "zls",
+          "rust_analyzer",
           -- "gdshader_lsp",
           -- "glsl_analyzer",
           -- "gopls",
