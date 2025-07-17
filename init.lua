@@ -60,7 +60,7 @@ vim.opt.timeoutlen = 100
 vim.opt.ttimeoutlen = 100
 vim.opt.updatetime = 50
 vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
-vim.opt.winborder = "rounded"
+vim.opt.winborder = "single"
 vim.opt.isfname:append("(") -- " @windows: nextjs and sveltkit folder name pattern
 vim.opt.swapfile = false
 vim.opt.wrap = false
