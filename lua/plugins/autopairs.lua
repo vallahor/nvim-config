@@ -12,6 +12,7 @@ return {
       -- autopairs.remove_rule("'")
       -- or
       autopairs.get_rules("'")[1].not_filetypes = { "rust", "ocaml" }
+      autopairs.get_rules("`")[1].not_filetypes = { "ocaml" }
 
       local npairs = require("nvim-autopairs")
       local Rule = require("nvim-autopairs.rule")
