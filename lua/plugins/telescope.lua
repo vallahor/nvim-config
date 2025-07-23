@@ -54,10 +54,9 @@ return {
 
       vim.keymap.set("n", "<c-p>", "<cmd>lua require('telescope.builtin').find_files()<cr>")
       vim.keymap.set("n", "<c-s-f>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
-      vim.keymap.set("n", "<c-f>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
 
-      if not vim.g.skeletyl then
-        vim.keymap.set("n", "<c-m>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
+      if vim.g.skeletyl then
+        vim.keymap.set("n", "<c-f>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
       else
         vim.keymap.set("n", "<c-space>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
         -- vim.keymap.set("n", "<tab>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
