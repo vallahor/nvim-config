@@ -2,6 +2,15 @@ return {
   {
     "kana/vim-arpeggio",
     config = function()
+      if vim.g.skeletyl then
+        vim.cmd([[
+          let g:arpeggio_timeoutlen = 100
+
+          call arpeggio#map('i', '', 0, 'jk', '<Esc>')
+          call arpeggio#map('i', '', 0, 'kj', '<Esc>')
+        ]])
+      end
+
       if false or not vim.g.skeletyl then
         function EscNormalMode()
           for _, win in ipairs(vim.api.nvim_list_wins()) do
