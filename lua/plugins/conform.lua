@@ -3,17 +3,20 @@ return {
   config = function()
     require("conform").setup({
       formatters_by_ft = {
-        javascript = { "prettierd" },
-        json = { "prettierd" },
+        json = { "prettierd", "prettier", stop_after_first = true },
+        javascript = { "prettierd", "prettier", stop_after_first = true },
+        javascriptreact = { "prettierd", "prettier", stop_after_first = true },
         lua = { "stylua" },
         python = { "ruff_format" },
-        typescript = { "prettierd" },
-        typescriptreact = { "prettierd" },
+        typescript = { "prettierd", "prettier", stop_after_first = true },
+        typescriptreact = { "prettierd", "prettier", stop_after_first = true },
         rust = { "rustfmt" },
       },
       format_on_save = {
         timeout_ms = 500,
         lsp_format = "fallback",
+        quiet = true,
+        async = false,
       },
     })
   end,
