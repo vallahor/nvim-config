@@ -18,7 +18,12 @@ return {
       vim.keymap.set({ "n", "o", "x", "v" }, "e", "<cmd>lua require('spider').motion('e')<CR>")
       vim.keymap.set({ "n", "o", "x", "v" }, "b", "<cmd>lua require('spider').motion('b')<CR>")
       vim.keymap.set({ "n", "o", "x", "v" }, "ge", "<cmd>lua require('spider').motion('ge')<CR>")
-      -- vim.keymap.set("i", "<c-bs>", "<esc>v<cmd>lua require('spider').motion('b')<CR>c", { silent = true })
+      -- vim.keymap.set({ "n", "o", "x", "v" }, "q", "<cmd>lua require('spider').motion('ge')<CR>")
+      vim.keymap.set({ "n", "o", "x", "v" }, "r", "<cmd>lua require('spider').motion('ge')<CR>")
+
+      -- set "Q" to default "q"
+      vim.keymap.set("n", "Q", "q")
+      vim.keymap.set({ "n", "x", "v" }, "q", "r")
     end,
   },
   {
