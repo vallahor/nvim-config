@@ -178,6 +178,7 @@ end
 vim.keymap.set({ "i" }, "<enter>", "<c-u><enter>")
 vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>") -- save file
 vim.keymap.set({ "n", "v" }, "<c-s>", "<cmd>w!<CR><esc>") -- save file
+vim.keymap.set({ "n", "v" }, "<s-s>", "<cmd>w!<CR><esc>") -- save file
 vim.keymap.set({ "n", "v" }, "<leader>fs", "<cmd>w!<CR><esc>") -- save file
 
 vim.keymap.set("n", "Y", "yg$") -- yank to end of line considering line wrap
@@ -383,6 +384,9 @@ end
 vim.keymap.set("n", "<c-d>", '"0yy"0p') -- duplicate line down
 vim.keymap.set("v", "<c-d>", '"0y"0Pgv') -- like sublime duplicate line
 
+vim.keymap.set("n", "<c-c>", '"0yy"0p') -- duplicate line down
+vim.keymap.set("v", "<c-c>", '"0y"0Pgv') -- like sublime duplicate line
+
 vim.keymap.set("n", '"', "<C-^>") -- back to last buffer
 
 vim.keymap.set("n", "<f1>", "<cmd>Inspect<CR>") -- inspect current token treesitter
@@ -438,7 +442,7 @@ vim.keymap.set("v", "<c-s-a>", "g<c-a>gv")
 vim.keymap.set("v", "<c-s-x>", "g<c-x>gv")
 
 -- visual mode - paste without copying
-vim.keymap.set({ "v", "x" }, "p", [['pgv"'.v:register.'y`']], { remap = true, expr = true })
+vim.keymap.set({ "v", "x" }, "p", "P")
 
 -- maybe blink related (fallback keys)
 vim.keymap.set("n", "<cr>", "<nop>")

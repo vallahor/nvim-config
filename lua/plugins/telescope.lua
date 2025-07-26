@@ -22,6 +22,7 @@ return {
               -- ["jk"] = actions.close,
               -- ["kj"] = actions.close,
               ["<c-w>"] = actions.delete_buffer, -- delete_buffer delete window too
+              ["<c-c>"] = actions.delete_buffer, -- delete_buffer delete window too
             },
           },
           initial_mode = "insert",
@@ -56,7 +57,9 @@ return {
       vim.keymap.set("n", "<c-s-f>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
 
       if vim.g.skeletyl then
-        vim.keymap.set("n", "<c-f>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
+        vim.keymap.set("n", "0", "<cmd>lua require('telescope.builtin').find_files()<cr>")
+        vim.keymap.set("n", "<tab>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
+        vim.keymap.set("n", "<c-tab>", "<cmd>lua require('telescope.builtin').live_grep()<cr>")
       else
         vim.keymap.set("n", "<c-space>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
         -- vim.keymap.set("n", "<tab>", "<cmd>lua require('telescope.builtin').buffers()<cr>")
