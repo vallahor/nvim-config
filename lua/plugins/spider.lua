@@ -13,6 +13,12 @@ return {
           overrideDefault = false,
         },
       })
+      local pattern = { "[%w_%-]+", "[!\"#$%%&'()%*+,.%/:;<=>?@%[%]\\%^`{|}~]" }
+
+      local custom = {
+        subwordMovement = false,
+        customPatterns = pattern,
+      }
 
       vim.keymap.set({ "n", "o", "x", "v" }, "w", function()
         require("spider").motion("w")
@@ -28,16 +34,16 @@ return {
       end)
 
       vim.keymap.set({ "n", "o", "x", "v" }, "W", function()
-        require("spider").motion("w", { subwordMovement = false })
+        require("spider").motion("w", custom)
       end)
       vim.keymap.set({ "n", "o", "x", "v" }, "E", function()
-        require("spider").motion("e", { subwordMovement = false })
+        require("spider").motion("e", custom)
       end)
       vim.keymap.set({ "n", "o", "x", "v" }, "B", function()
-        require("spider").motion("b", { subwordMovement = false })
+        require("spider").motion("b", custom)
       end)
       vim.keymap.set({ "n", "o", "x", "v" }, "R", function()
-        require("spider").motion("ge", { subwordMovement = false })
+        require("spider").motion("ge", custom)
       end)
 
       -- set "Q" to default "q"
