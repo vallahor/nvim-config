@@ -131,33 +131,35 @@ return {
 
       require("mini.notify").setup()
 
+      -- Picker
       local pick = require("mini.pick")
       pick.setup({
         mappings = {
           caret_left = "<Left>",
           caret_right = "<Right>",
 
-          -- choose = { "<CR>", "<tab>" },
           choose = "<CR>",
-          choose_in_vsplit = "<C-v>",
-          choose_marked = "<M-CR>",
+          choose_in_split = "",
+          choose_in_tabpage = "",
+          choose_in_vsplit = "",
+          choose_marked = "",
 
           delete_char = "<BS>",
           delete_char_right = "<Del>",
-          delete_left = "<C-u>",
+          delete_left = "",
           delete_word = "<C-bs>",
 
-          mark = "<C-;>",
-          mark_all = "<C-/>",
+          mark = "",
+          mark_all = "",
 
           move_down = "<down>",
-          move_start = "<C-g>",
+          move_start = "<pageup>",
           move_up = "<up>",
 
-          paste = "<C-v>",
+          paste = "<c-v>",
 
-          refine = "<C-Space>",
-          refine_marked = "<M-Space>",
+          refine = "",
+          refine_marked = "",
 
           scroll_down = "<PageDown>",
           scroll_left = "<c-left>",
@@ -166,8 +168,8 @@ return {
 
           stop = "<Esc>",
 
-          toggle_info = "<S-Tab>",
-          toggle_preview = "<c-Tab>",
+          toggle_info = "",
+          toggle_preview = "<Tab>",
         },
       })
 
