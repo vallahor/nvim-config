@@ -130,91 +130,84 @@ return {
       MiniIcons.mock_nvim_web_devicons()
 
       require("mini.notify").setup()
+
+      local pick = require("mini.pick")
+      pick.setup({
+        mappings = {
+          caret_left = "<Left>",
+          caret_right = "<Right>",
+
+          -- choose = { "<CR>", "<tab>" },
+          choose = "<CR>",
+          choose_in_vsplit = "<C-v>",
+          choose_marked = "<M-CR>",
+
+          delete_char = "<BS>",
+          delete_char_right = "<Del>",
+          delete_left = "<C-u>",
+          delete_word = "<C-bs>",
+
+          mark = "<C-;>",
+          mark_all = "<C-/>",
+
+          move_down = "<down>",
+          move_start = "<C-g>",
+          move_up = "<up>",
+
+          paste = "<C-v>",
+
+          refine = "<C-Space>",
+          refine_marked = "<M-Space>",
+
+          scroll_down = "<PageDown>",
+          scroll_left = "<c-left>",
+          scroll_right = "<c-right>",
+          scroll_up = "<PageUp>",
+
+          stop = "<Esc>",
+
+          toggle_info = "<S-Tab>",
+          toggle_preview = "<c-Tab>",
+        },
+      })
+
+      pick.registry.files_rg = function()
+        local command = { "rg", "--files", "--no-require-git", "--glob", "!.git/" }
+        local show_with_icons = function(buf_id, items, query)
+          return pick.default_show(buf_id, items, query, { show_icons = true })
+        end
+        local source = { name = "Files rg", show = show_with_icons }
+        return pick.builtin.cli({ command = command }, { source = source })
+      end
+
+      -- vim.keymap.set("n", "0", "<cmd>Pick files<CR>")
+      vim.keymap.set("n", "0", "<cmd>Pick files_rg<CR>")
+      vim.keymap.set("n", "<c-tab>", "<cmd>Pick grep<CR>")
+
+      local bufremove = require("mini.bufremove")
+      local wipeout_cur = function()
+        local current = pick.get_picker_matches().current
+        if not current or not current.bufnr then
+          return
+        end
+
+        bufremove.delete(current.bufnr, false)
+
+        local buffers = {}
+        for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+          if vim.api.nvim_buf_is_loaded(buf) and vim.bo[buf].buflisted then
+            table.insert(buffers, {
+              text = vim.api.nvim_buf_get_name(buf),
+              bufnr = buf,
+            })
+          end
+        end
+        pick.set_picker_items(buffers)
+      end
+      local buffer_mappings = { wipeout = { char = "<c-x>", func = wipeout_cur } }
+      vim.keymap.set("n", "<tab>", function()
+        pick.builtin.buffers({ include_current = true }, { mappings = buffer_mappings })
+      end)
     end,
-  },
-  {
-    {
-      "echasnovski/mini.pick",
-      version = false,
-      config = function()
-        local pick = require("mini.pick")
-        pick.setup({
-          mappings = {
-            caret_left = "<Left>",
-            caret_right = "<Right>",
-
-            -- choose = { "<CR>", "<tab>" },
-            choose = "<CR>",
-            choose_in_vsplit = "<C-v>",
-            choose_marked = "<M-CR>",
-
-            delete_char = "<BS>",
-            delete_char_right = "<Del>",
-            delete_left = "<C-u>",
-            delete_word = "<C-bs>",
-
-            mark = "<C-;>",
-            mark_all = "<C-/>",
-
-            move_down = "<down>",
-            move_start = "<C-g>",
-            move_up = "<up>",
-
-            paste = "<C-v>",
-
-            refine = "<C-Space>",
-            refine_marked = "<M-Space>",
-
-            scroll_down = "<PageDown>",
-            scroll_left = "<c-left>",
-            scroll_right = "<c-right>",
-            scroll_up = "<PageUp>",
-
-            stop = "<Esc>",
-
-            toggle_info = "<S-Tab>",
-            toggle_preview = "<c-Tab>",
-          },
-        })
-
-        pick.registry.files_rg = function()
-          local command = { "rg", "--files", "--no-require-git", "--glob", "!.git/" }
-          local show_with_icons = function(buf_id, items, query)
-            return pick.default_show(buf_id, items, query, { show_icons = true })
-          end
-          local source = { name = "Files rg", show = show_with_icons }
-          return pick.builtin.cli({ command = command }, { source = source })
-        end
-
-        -- vim.keymap.set("n", "0", "<cmd>Pick files<CR>")
-        vim.keymap.set("n", "0", "<cmd>Pick files_rg<CR>")
-        vim.keymap.set("n", "<c-tab>", "<cmd>Pick grep<CR>")
-
-        local bufremove = require("mini.bufremove")
-        local wipeout_cur = function()
-          local current = pick.get_picker_matches().current
-          if not current or not current.bufnr then
-            return
-          end
-
-          bufremove.delete(current.bufnr, false)
-
-          local buffers = {}
-          for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-            if vim.api.nvim_buf_is_loaded(buf) and vim.bo[buf].buflisted then
-              table.insert(buffers, {
-                text = vim.api.nvim_buf_get_name(buf),
-                bufnr = buf,
-              })
-            end
-          end
-          pick.set_picker_items(buffers)
-        end
-        local buffer_mappings = { wipeout = { char = "<c-x>", func = wipeout_cur } }
-        vim.keymap.set("n", "<tab>", function()
-          pick.builtin.buffers({ include_current = true }, { mappings = buffer_mappings })
-        end)
-      end,
-    },
   },
 }
