@@ -1,6 +1,9 @@
 return {
   {
     "noib3/nvim-cokeline",
+    dependencies = {
+      { "nvim-lua/plenary.nvim", lazy = true },
+    },
     config = function()
       local ok, cokeline = pcall(require, "cokeline")
       if ok then

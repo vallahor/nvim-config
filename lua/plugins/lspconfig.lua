@@ -23,9 +23,6 @@ return {
             client.server_capabilities.semanticTokensProvider = nil
           end
 
-          local telescope = require("telescope.builtin")
-          map("gi", telescope.lsp_implementations)
-          map("gr", telescope.lsp_references)
           map("gd", function()
             vim.lsp.buf.definition()
             vim.defer_fn(function()
