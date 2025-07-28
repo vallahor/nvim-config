@@ -69,19 +69,45 @@ return {
       end
 
       -- Statusline
+      --
+      -- copied from source
+      local CTRL_S = vim.api.nvim_replace_termcodes("<C-S>", true, true, true)
+      local CTRL_V = vim.api.nvim_replace_termcodes("<C-V>", true, true, true)
+
+      local modes = setmetatable({
+        ["n"] = { short = "N", hl = "MiniStatuslineModeNormal" },
+        ["v"] = { short = "V", hl = "MiniStatuslineModeVisual" },
+        ["V"] = { short = "V-L", hl = "MiniStatuslineModeVisual" },
+        [CTRL_V] = { short = "V-B", hl = "MiniStatuslineModeVisual" },
+        ["s"] = { short = "S", hl = "MiniStatuslineModeVisual" },
+        ["S"] = { short = "S-L", hl = "MiniStatuslineModeVisual" },
+        [CTRL_S] = { short = "S-B", hl = "MiniStatuslineModeVisual" },
+        ["i"] = { short = "I", hl = "MiniStatuslineModeInsert" },
+        ["R"] = { short = "R", hl = "MiniStatuslineModeReplace" },
+        ["c"] = { short = "C", hl = "MiniStatuslineModeCommand" },
+        ["r"] = { short = "P", hl = "MiniStatuslineModeOther" },
+        ["!"] = { short = "Sh", hl = "MiniStatuslineModeOther" },
+        ["t"] = { short = "T", hl = "MiniStatuslineModeOther" },
+      }, {
+        -- By default return 'Unknown' but this shouldn't be needed
+        __index = function()
+          return { short = "U", hl = "%#MiniStatuslineModeOther#" }
+        end,
+      })
+
       local MiniStatusline = require("mini.statusline")
       local location = " L%l/%L C%c "
       MiniStatusline.setup({
         use_icons = false,
         content = {
           active = function()
-            local mode, mode_hl = MiniStatusline.section_mode({ trunc_width = 120 })
+            local mode_info = modes[vim.fn.mode()]
+            local mode, mode_hl = mode_info.short, mode_info.hl
 
             local filename = MiniStatusline.section_filename({ trunc_width = 200 })
 
             return MiniStatusline.combine_groups({
               { hl = mode_hl, strings = { mode } },
-              -- { hl = mode_hl, strings = { mode:sub(1, 1) } },
               "%<",
               { hl = "MiniStatuslineFilename", strings = { filename } },
               "%=",
