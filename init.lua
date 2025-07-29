@@ -444,6 +444,9 @@ vim.keymap.set("v", "<c-s-x>", "g<c-x>gv")
 -- visual mode - paste without copying
 vim.keymap.set({ "v", "x" }, "p", "P")
 
+-- insert mode - paste
+vim.keymap.set("i", "<c-v>", "<s-insert>")
+
 -- maybe blink related (fallback keys)
 vim.keymap.set("n", "<cr>", "<nop>")
 -- vim.keymap.set("c", "<tab>", "<nop>")

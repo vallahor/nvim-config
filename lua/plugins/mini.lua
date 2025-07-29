@@ -69,8 +69,8 @@ return {
       end
 
       -- Statusline
-      --
-      -- copied from source
+
+      -- https://github.com/echasnovski/mini.nvim/blob/main/lua/mini/statusline.lua#L557
       local CTRL_S = vim.api.nvim_replace_termcodes("<C-S>", true, true, true)
       local CTRL_V = vim.api.nvim_replace_termcodes("<C-V>", true, true, true)
 
@@ -221,21 +221,55 @@ return {
 
         bufremove.delete(current.bufnr, false)
 
-        local buffers = {}
-        for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-          if vim.api.nvim_buf_is_loaded(buf) and vim.bo[buf].buflisted then
-            table.insert(buffers, {
-              text = vim.api.nvim_buf_get_name(buf),
-              bufnr = buf,
-            })
+        -- https://github.com/echasnovski/mini.nvim/blob/main/lua/mini/pick.lua#L1497
+        local buffers_output = vim.api.nvim_exec("buffers" .. "", true)
+        local cur_buf_id = vim.api.nvim_get_current_buf()
+        local items = {}
+        for _, l in ipairs(vim.split(buffers_output, "\n")) do
+          local buf_str, name = l:match("^%s*%d+"), l:match('"(.*)"')
+          local buf_id = tonumber(buf_str)
+          local item = { text = name, bufnr = buf_id }
+          if buf_id ~= cur_buf_id then
+            table.insert(items, item)
           end
         end
-        pick.set_picker_items(buffers)
+        pick.set_picker_items(items)
       end
       local buffer_mappings = { wipeout = { char = "<c-x>", func = wipeout_cur } }
       vim.keymap.set("n", "<tab>", function()
         pick.builtin.buffers({ include_current = true }, { mappings = buffer_mappings })
       end)
+
+      -- https://www.reddit.com/r/neovim/comments/1k4efz8/comment/mola3k0
+      -- Duplicate selection and comment out the first instance.
+      function _G.duplicate_and_comment_lines()
+        local start_line, end_line = vim.api.nvim_buf_get_mark(0, "[")[1], vim.api.nvim_buf_get_mark(0, "]")[1]
+
+        -- NOTE: `nvim_buf_get_mark()` is 1-indexed, but `nvim_buf_get_lines()` is 0-indexed. Adjust accordingly.
+        local lines = vim.api.nvim_buf_get_lines(0, start_line - 1, end_line, false)
+
+        -- Store cursor position because it might move when commenting out the lines.
+        local cursor = vim.api.nvim_win_get_cursor(0)
+
+        -- Comment out the selection using the builtin gc operator.
+        vim.cmd.normal({ "gc", range = { start_line, end_line } })
+
+        -- Append a duplicate of the selected lines to the end of selection.
+        vim.api.nvim_buf_set_lines(0, end_line, end_line, false, lines)
+
+        -- Move cursor to the start of the duplicate lines.
+        vim.api.nvim_win_set_cursor(0, { end_line + 1, cursor[2] })
+      end
+
+      vim.keymap.set({ "n", "x", "v" }, "<c-s-c>", function()
+        vim.opt.operatorfunc = "v:lua.duplicate_and_comment_lines"
+        return "g@"
+      end, { expr = true })
+
+      vim.keymap.set("n", "<c-s-c>", function()
+        vim.opt.operatorfunc = "v:lua.duplicate_and_comment_lines"
+        return "g@_"
+      end, { expr = true })
     end,
   },
 }

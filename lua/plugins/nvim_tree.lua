@@ -22,6 +22,9 @@ return {
       vim.keymap.set("n", "<C-t>", function()
         vim.cmd.wincmd("p")
       end, opts("Toggle Tree Focus"))
+      vim.keymap.set("n", "t", function()
+        vim.cmd.wincmd("p")
+      end, opts("Toggle Tree Focus"))
     end
 
     require("nvim-tree").setup({
@@ -62,5 +65,8 @@ return {
 
     vim.keymap.set("n", "<c-t>", "<cmd>NvimTreeFocus<cr>", { silent = true })
     vim.keymap.set("n", "<c-b>", "<cmd>NvimTreeClose<cr>", { silent = true })
+
+    vim.keymap.set("n", "t", "<cmd>NvimTreeFocus<cr>", { silent = true })
+    vim.keymap.set("n", "T", "<cmd>NvimTreeClose<cr>", { silent = true })
   end,
 }
