@@ -387,7 +387,14 @@ vim.keymap.set("v", "<c-d>", '"0y"0Pgv') -- like sublime duplicate line
 vim.keymap.set("n", "<c-c>", '"0yy"0p') -- duplicate line down
 vim.keymap.set("v", "<c-c>", '"0y"0Pgv') -- like sublime duplicate line
 
-vim.keymap.set("n", '"', "<C-^>") -- back to last buffer
+vim.keymap.set("n", "<c-s-c>", function()
+  vim.cmd([[norm "0yygc"0p]])
+end) -- duplicate line down and comment
+vim.keymap.set("v", "<c-s-c>", function()
+  vim.cmd([[norm gcgv"0y"0Pgvgc]])
+end) -- like sublime duplicate line and comment
+
+-- vim.keymap.set("n", '"', "<C-^>", { remap = true }) -- back to last buffer
 
 vim.keymap.set("n", "<f1>", "<cmd>Inspect<CR>") -- inspect current token treesitter
 vim.keymap.set("n", "<f6>", "<cmd>InspectTree<CR>") -- inspect current token treesitter
