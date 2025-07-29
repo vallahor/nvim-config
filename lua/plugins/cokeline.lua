@@ -61,7 +61,7 @@ return {
             -- },
             {
               text = function(buffer)
-                return buffer.filename
+                return buffer.unique_prefix .. buffer.filename
               end,
               italic = function(buffer)
                 return buffer.is_modified
