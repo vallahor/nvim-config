@@ -394,7 +394,7 @@ vim.keymap.set("v", "<c-s-c>", function()
   vim.cmd([[norm gcgv"0y"0Pgvgc]])
 end) -- like sublime duplicate line and comment
 
--- vim.keymap.set("n", '"', "<C-^>", { remap = true }) -- back to last buffer
+vim.keymap.set("n", "'", "<C-^>") -- back to last buffer
 
 vim.keymap.set("n", "<f1>", "<cmd>Inspect<CR>") -- inspect current token treesitter
 vim.keymap.set("n", "<f6>", "<cmd>InspectTree<CR>") -- inspect current token treesitter
