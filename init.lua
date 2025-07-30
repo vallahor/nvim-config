@@ -89,52 +89,6 @@ vim.g.python_indent = {
   nested_paren = 4,
 }
 
--- -- VM --
--- vim.g.VM_theme = "iceblue"
--- vim.g.VM_default_mappings = 0
--- if vim.g.skeletyl then
---   vim.g.VM_custom_remaps = {
---     [")"] = "$",
---     ["("] = "0^",
---   }
---   vim.g.VM_maps = {
---     ["Find Under"] = "<c-u>",
---     ["Find Subword Under"] = "<c-u>",
---     ["Select All"] = "<c-s-u>",
---     ["Add Cursor Down"] = "<c-j>",
---     ["Add Cursor Up"] = "<c-k>",
---     -- ["Switch Mode"] = "<tab>",
---     ["Switch Mode"] = "v",
---     ["Align"] = "<c-a>",
---     ["Find Next"] = "<c-l>",
---     ["Find Prev"] = "<c-h>",
---     ["Goto Next"] = "}",
---     ["Goto Prev"] = "{",
---     ["Skip Region"] = "L",
---     ["Remove Region"] = "-",
---     -- ["Exit"] = "<space>",
---   }
--- else
---   vim.g.VM_custom_remaps = { ["-"] = "$" }
---   vim.g.VM_maps = {
---     ["Find Under"] = "<a-u>",
---     ["Find Subword Under"] = "<a-u>",
---     ["Select All"] = "<a-s-u>",
---     ["Add Cursor Down"] = "<a-j>",
---     ["Add Cursor Up"] = "<a-k>",
---     ["Switch Mode"] = "<Tab>",
---     ["Align"] = "<a-a>",
---     ["Find Next"] = "<a-l>",
---     ["Find Prev"] = "<a-h>",
---     ["Goto Next"] = "<a-.>",
---     ["Goto Prev"] = "<a-,>",
---     ["Skip Region"] = "<a-;>",
---     ["Remove Region"] = "<a-m>",
---     ["I BS"] = "",
---     ["Exit"] = "<space>",
---   }
--- end
-
 -- MAPPING --
 
 local esc_normal_mode = function()
