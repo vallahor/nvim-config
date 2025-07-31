@@ -12,7 +12,6 @@ return {
 
       vim.keymap.set({ "n", "v" }, "s", function()
         sj.run({
-          auto_jump = true,
           forward_search = true,
           inclusive = true,
           max_pattern_length = 2,
