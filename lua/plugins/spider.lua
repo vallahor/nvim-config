@@ -29,7 +29,7 @@ return {
       vim.keymap.set({ "n", "o", "x", "v" }, "b", function()
         require("spider").motion("b")
       end)
-      vim.keymap.set({ "n", "o", "x", "v" }, "r", function()
+      vim.keymap.set({ "n", "o", "x", "v" }, "q", function()
         require("spider").motion("ge")
       end)
 
@@ -42,13 +42,13 @@ return {
       vim.keymap.set({ "n", "o", "x", "v" }, "B", function()
         require("spider").motion("b", custom)
       end)
-      vim.keymap.set({ "n", "o", "x", "v" }, "R", function()
+      vim.keymap.set({ "n", "o", "x", "v" }, "Q", function()
         require("spider").motion("ge", custom)
       end)
 
       -- set "Q" to default "q"
-      vim.keymap.set("n", "Q", "q")
-      vim.keymap.set({ "n", "x", "v" }, "q", "r")
+      vim.keymap.set("n", "R", "q")
+      -- vim.keymap.set({ "n", "x", "v" }, "q", "r")
     end,
   },
   {
