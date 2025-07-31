@@ -3,42 +3,22 @@ return {
     "neovim/nvim-lspconfig",
     event = { "BufReadPre", "BufNewFile" },
     config = function()
-      local on_attach = function(client, _)
+      local on_attach = function(client, bufnr)
         client.server_capabilities.semanticTokensProvider = nil
+
+        local opts = { buffer = bufnr }
+        vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+        vim.keymap.set("n", "<c-a>", vim.lsp.buf.code_action, opts)
+        vim.keymap.set("n", "K", function()
+          vim.lsp.buf.hover({ silent = true })
+        end, opts)
+        vim.keymap.set("n", "&", vim.diagnostic.open_float, opts)
+        vim.keymap.set("n", "<f2>", vim.lsp.buf.rename, opts)
       end
       local capabilities = require("blink.cmp").get_lsp_capabilities()
       vim.lsp.config("*", {
         capabilities = capabilities,
         on_attach = on_attach,
-      })
-
-      vim.api.nvim_create_autocmd("LspAttach", {
-        group = vim.api.nvim_create_augroup("UserLspConfig", {}),
-        callback = function(ev)
-          local map = function(keys, func)
-            vim.keymap.set("n", keys, func, { buffer = ev.buf })
-          end
-          local client = vim.lsp.get_client_by_id(ev.data.client_id)
-          if client then
-            client.server_capabilities.semanticTokensProvider = nil
-          end
-
-          map("gd", function()
-            vim.lsp.buf.definition()
-            vim.defer_fn(function()
-              -- vim.api.nvim_feedkeys("zz", "n", false)
-              vim.cmd("norm! zzzz")
-            end, 100)
-          end)
-          map("<c-a>", vim.lsp.buf.code_action)
-          map("K", function()
-            vim.lsp.buf.hover({ silent = true })
-          end)
-          map("&", vim.diagnostic.open_float)
-          map("`", vim.diagnostic.open_float)
-          map("<c-*>", vim.lsp.buf.rename)
-          map("<f2>", vim.lsp.buf.rename)
-        end,
       })
 
       -- https://www.reddit.com/r/neovim/comments/1jibjpp/comment/mjgigww/

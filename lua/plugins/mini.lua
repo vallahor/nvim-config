@@ -210,7 +210,7 @@ return {
 
       -- vim.keymap.set("n", "0", "<cmd>Pick files<CR>")
       vim.keymap.set("n", "0", "<cmd>Pick files_rg<CR>")
-      vim.keymap.set("n", "<c-tab>", "<cmd>Pick grep<CR>")
+      vim.keymap.set("n", "<s-tab>", "<cmd>Pick grep<CR>")
 
       local bufremove = require("mini.bufremove")
       local wipeout_cur = function()

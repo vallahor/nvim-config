@@ -56,7 +56,7 @@ vim.opt.gdefault = true
 vim.opt.cindent = false -- check
 vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
 -- vim.opt.cino:append("L0,g0,l1,t0,w1,w4,m1")
-vim.opt.timeoutlen = 100
+vim.opt.timeoutlen = 300
 vim.opt.ttimeoutlen = 100
 vim.opt.updatetime = 50
 vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
