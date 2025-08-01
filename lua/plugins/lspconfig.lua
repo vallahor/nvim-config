@@ -3,9 +3,7 @@ return {
     "neovim/nvim-lspconfig",
     event = { "BufReadPre", "BufNewFile" },
     config = function()
-      local on_attach = function(client, bufnr)
-        client.server_capabilities.semanticTokensProvider = nil
-
+      local on_attach = function(_, bufnr)
         local opts = { buffer = bufnr }
         vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
         vim.keymap.set("n", "<c-a>", vim.lsp.buf.code_action, opts)
@@ -20,6 +18,7 @@ return {
         capabilities = capabilities,
         on_attach = on_attach,
       })
+      vim.lsp.semantic_tokens.enable(false)
 
       -- https://www.reddit.com/r/neovim/comments/1jibjpp/comment/mjgigww/
       vim.api.nvim_create_autocmd({ "LspDetach" }, {
