@@ -33,7 +33,15 @@ return {
               return
             end
           end
-          client:stop()
+
+          -- this is a hard stop that's why show as an error.
+          -- client:stop()
+
+          client:request("shutdown", nil, function(err)
+            if err then
+              client:notify(err.message)
+            end
+          end)
         end,
         desc = "Stop lsp client when no buffer is attached",
       })
@@ -151,6 +159,7 @@ return {
           "lua_ls",
           "tailwindcss",
           "vtsls",
+          "ols",
           "zls",
           "rust_analyzer",
           -- "gdshader_lsp",
