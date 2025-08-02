@@ -34,12 +34,9 @@ return {
             end
           end
 
-          -- this is a hard stop that's why show as an error.
-          -- client:stop()
-
           client:request("shutdown", nil, function(err)
             if err then
-              client:notify(err.message)
+              client:stop()
             end
           end)
         end,
