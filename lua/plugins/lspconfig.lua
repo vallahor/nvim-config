@@ -36,7 +36,7 @@ return {
 
           client:request("shutdown", nil, function(err)
             if err then
-              client:stop()
+              client:stop(true)
             end
           end)
         end,
