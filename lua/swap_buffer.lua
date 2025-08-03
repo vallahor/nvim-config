@@ -1,6 +1,6 @@
 local M = {}
 
-local function swap(direction)
+local function swap_buffer(direction)
   local old_buf = vim.api.nvim_get_current_buf()
   local old_win = vim.api.nvim_get_current_win()
 
@@ -15,19 +15,19 @@ local function swap(direction)
 end
 
 M.left = function()
-  swap("h")
+  swap_buffer("h")
 end
 
 M.down = function()
-  swap("j")
+  swap_buffer("j")
 end
 
 M.up = function()
-  swap("k")
+  swap_buffer("k")
 end
 
 M.right = function()
-  swap("l")
+  swap_buffer("l")
 end
 
 return M
