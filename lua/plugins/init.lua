@@ -6,19 +6,11 @@ return {
     "../swap_buffer.lua",
     virtual = true,
     config = function()
-      require("swap_buffer")
-      vim.keymap.set("n", "<s-left>", function()
-        Swap_left()
-      end)
-      vim.keymap.set("n", "<s-down>", function()
-        Swap_down()
-      end)
-      vim.keymap.set("n", "<s-up>", function()
-        Swap_up()
-      end)
-      vim.keymap.set("n", "<s-right>", function()
-        Swap_right()
-      end)
+      local sb = require("swap_buffer")
+      vim.keymap.set("n", "<s-left>", sb.left)
+      vim.keymap.set("n", "<s-down>", sb.down)
+      vim.keymap.set("n", "<s-up>", sb.up)
+      vim.keymap.set("n", "<s-right>", sb.right)
     end,
   },
   {
@@ -26,33 +18,17 @@ return {
     "../close_other_window.lua",
     virtual = true,
     config = function()
-      require("close_other_window")
+      local cow = require("close_other_window")
       if vim.g.skeletyl then
-        vim.keymap.set({ "n", "v" }, "<c-left>", function()
-          Close_left()
-        end)
-        vim.keymap.set({ "n", "v" }, "<c-down>", function()
-          Close_down()
-        end)
-        vim.keymap.set({ "n", "v" }, "<c-up>", function()
-          Close_up()
-        end)
-        vim.keymap.set({ "n", "v" }, "<c-right>", function()
-          Close_right()
-        end)
+        vim.keymap.set({ "n", "v" }, "<c-left>", cow.left)
+        vim.keymap.set({ "n", "v" }, "<c-down>", cow.down)
+        vim.keymap.set({ "n", "v" }, "<c-up>", cow.up)
+        vim.keymap.set({ "n", "v" }, "<c-right>", cow.right)
       else
-        vim.keymap.set({ "n", "v" }, "<c-s-h>", function()
-          Close_left()
-        end)
-        vim.keymap.set({ "n", "v" }, "<c-s-j>", function()
-          Close_down()
-        end)
-        vim.keymap.set({ "n", "v" }, "<c-s-k>", function()
-          Close_up()
-        end)
-        vim.keymap.set({ "n", "v" }, "<c-s-l>", function()
-          Close_right()
-        end)
+        vim.keymap.set({ "n", "v" }, "<c-s-h>", cow.left)
+        vim.keymap.set({ "n", "v" }, "<c-s-j>", cow.down)
+        vim.keymap.set({ "n", "v" }, "<c-s-k>", cow.up)
+        vim.keymap.set({ "n", "v" }, "<c-s-l>", cow.right)
       end
     end,
   },

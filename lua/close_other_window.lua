@@ -1,4 +1,6 @@
-function CloseOtherWindow(direction)
+local M = {}
+
+local function close_other_window(direction)
   local old_win = vim.api.nvim_get_current_win()
   vim.cmd(string.format("wincmd %s", direction))
   local win = vim.api.nvim_get_current_win()
@@ -9,18 +11,20 @@ function CloseOtherWindow(direction)
   end
 end
 
-function Close_left()
-  CloseOtherWindow("h")
+M.left = function()
+  close_other_window("h")
 end
 
-function Close_down()
-  CloseOtherWindow("j")
+M.down = function()
+  close_other_window("j")
 end
 
-function Close_up()
-  CloseOtherWindow("k")
+M.up = function()
+  close_other_window("k")
 end
 
-function Close_right()
-  CloseOtherWindow("l")
+M.right = function()
+  close_other_window("l")
 end
+
+return M

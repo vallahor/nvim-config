@@ -1,4 +1,6 @@
-function Swap(direction)
+local M = {}
+
+local function swap(direction)
   local old_buf = vim.api.nvim_get_current_buf()
   local old_win = vim.api.nvim_get_current_win()
 
@@ -12,18 +14,20 @@ function Swap(direction)
   vim.api.nvim_set_current_win(old_win)
 end
 
-function Swap_left()
-  Swap("h")
+M.left = function()
+  swap("h")
 end
 
-function Swap_down()
-  Swap("j")
+M.down = function()
+  swap("j")
 end
 
-function Swap_up()
-  Swap("k")
+M.up = function()
+  swap("k")
 end
 
-function Swap_right()
-  Swap("l")
+M.right = function()
+  swap("l")
 end
+
+return M

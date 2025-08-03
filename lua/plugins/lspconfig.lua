@@ -3,6 +3,7 @@ return {
     "neovim/nvim-lspconfig",
     event = { "BufReadPre", "BufNewFile" },
     config = function()
+      local capabilities = require("blink.cmp").get_lsp_capabilities()
       local on_attach = function(_, bufnr)
         local opts = { buffer = bufnr }
         vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
@@ -13,7 +14,6 @@ return {
         vim.keymap.set("n", "&", vim.diagnostic.open_float, opts)
         vim.keymap.set("n", "<f2>", vim.lsp.buf.rename, opts)
       end
-      local capabilities = require("blink.cmp").get_lsp_capabilities()
       vim.lsp.config("*", {
         capabilities = capabilities,
         on_attach = on_attach,
