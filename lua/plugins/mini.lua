@@ -97,6 +97,12 @@ return {
 
       local MiniStatusline = require("mini.statusline")
       local location = " L%l/%L C%c "
+      local get_filename = function()
+        if vim.bo.buftype == "terminal" then
+          return "%t"
+        end
+        return "%f%m%r"
+      end
       MiniStatusline.setup({
         use_icons = false,
         content = {
@@ -104,7 +110,7 @@ return {
             local mode_info = modes[vim.fn.mode()]
             local mode, mode_hl = mode_info.short, mode_info.hl
 
-            local filename = MiniStatusline.section_filename({ trunc_width = 200 })
+            local filename = get_filename()
 
             return MiniStatusline.combine_groups({
               { hl = mode_hl, strings = { mode } },
@@ -117,7 +123,7 @@ return {
             })
           end,
           inactive = function()
-            local filename = MiniStatusline.section_filename({ trunc_width = 200 })
+            local filename = get_filename()
 
             return MiniStatusline.combine_groups({
               "%<",
