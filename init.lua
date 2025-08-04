@@ -396,12 +396,6 @@ vim.keymap.set("n", "K", "<nop>")
 -- vim.keymap.set("i", ">", "><c-g>u")
 -- vim.keymap.set("i", ";", ";<c-g>u")
 
--- change selected numbers (increase/decrease)
-vim.keymap.set("v", "<c-a>", "<c-a>gv")
-vim.keymap.set("v", "<c-x>", "<c-x>gv")
-vim.keymap.set("v", "<c-s-a>", "g<c-a>gv")
-vim.keymap.set("v", "<c-s-x>", "g<c-x>gv")
-
 -- visual mode - paste without copying
 vim.keymap.set({ "v", "x" }, "p", "P")
 
