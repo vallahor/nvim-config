@@ -228,10 +228,10 @@ return {
         bufremove.delete(current.bufnr, false)
 
         -- https://github.com/echasnovski/mini.nvim/blob/main/lua/mini/pick.lua#L1497
-        local buffers_output = vim.api.nvim_exec("buffers" .. "", true)
+        local buffers = vim.api.nvim_exec2("buffers" .. "", { output = true })
         local cur_buf_id = vim.api.nvim_get_current_buf()
         local items = {}
-        for _, l in ipairs(vim.split(buffers_output, "\n")) do
+        for _, l in ipairs(vim.split(buffers.output, "\n")) do
           local buf_str, name = l:match("^%s*%d+"), l:match('"(.*)"')
           local buf_id = tonumber(buf_str)
           local item = { text = name, bufnr = buf_id }
