@@ -6,65 +6,63 @@ return {
       local mc = require("multicursor-nvim")
       mc.setup()
 
-      local set = vim.keymap.set
-
       -- Disable and enable cursors.
-      set({ "n", "x" }, "<c-q>", mc.toggleCursor)
+      vim.keymap.set({ "n", "x" }, "<c-q>", mc.toggleCursor)
 
       -- Add a cursor for all matches of cursor word/selection in the document.
-      set({ "n", "x" }, "<c-u>", mc.matchAllAddCursors)
+      vim.keymap.set({ "n", "x" }, "<c-u>", mc.matchAllAddCursors)
       -- bring back cursors if you accidentally clear them
-      set("n", "Z", mc.restoreCursors)
+      vim.keymap.set("n", "Z", mc.restoreCursors)
 
       -- Add or skip cursor above/below the main cursor.
-      set({ "n", "x" }, "<c-k>", function()
+      vim.keymap.set({ "n", "x" }, "<c-k>", function()
         mc.lineAddCursor(-1)
       end)
-      set({ "n", "x" }, "<c-j>", function()
+      vim.keymap.set({ "n", "x" }, "<c-j>", function()
         mc.lineAddCursor(1)
       end)
-      set({ "n", "x" }, "<c-s-k>", function()
+      vim.keymap.set({ "n", "x" }, "<c-s-k>", function()
         mc.lineSkipCursor(-1)
       end)
-      set({ "n", "x" }, "<c-s-j>", function()
+      vim.keymap.set({ "n", "x" }, "<c-s-j>", function()
         mc.lineSkipCursor(1)
       end)
 
       -- Add or skip adding a new cursor by matching word/selection
-      set({ "n", "x" }, "<c-.>", function()
+      vim.keymap.set({ "n", "x" }, "<c-.>", function()
         mc.matchAddCursor(1)
       end)
-      set({ "n", "x" }, "<c->>", function()
+      vim.keymap.set({ "n", "x" }, "<c->>", function()
         mc.matchSkipCursor(1)
       end)
-      set({ "n", "x" }, "<c-,>", function()
+      vim.keymap.set({ "n", "x" }, "<c-,>", function()
         mc.matchAddCursor(-1)
       end)
-      set({ "n", "x" }, "<c-<>", function()
+      vim.keymap.set({ "n", "x" }, "<c-<>", function()
         mc.matchSkipCursor(-1)
       end)
 
       -- Split visual selections by regex.
-      set("x", "<c-s-s>", mc.splitCursors)
+      vim.keymap.set("x", "<c-s-s>", mc.splitCursors)
 
       -- match new cursors within visual selections by regex.
-      set("x", "<c-s-m>", mc.matchCursors)
+      vim.keymap.set("x", "<c-s-m>", mc.matchCursors)
 
       -- Add and remove cursors with control + left click.
-      set("n", "<c-leftmouse>", mc.handleMouse)
-      set("n", "<c-leftdrag>", mc.handleMouseDrag)
-      set("n", "<c-leftrelease>", mc.handleMouseRelease)
+      vim.keymap.set("n", "<c-leftmouse>", mc.handleMouse)
+      vim.keymap.set("n", "<c-leftdrag>", mc.handleMouseDrag)
+      vim.keymap.set("n", "<c-leftrelease>", mc.handleMouseRelease)
 
       -- Append/insert for each line of visual selections.
       -- Similar to block selection insertion.
-      set("v", "I", mc.insertVisual)
-      set("v", "A", mc.appendVisual)
+      vim.keymap.set("v", "I", mc.insertVisual)
+      vim.keymap.set("v", "A", mc.appendVisual)
 
       -- Align cursor columns.
-      set("n", "<c-s-a>", mc.alignCursors)
+      vim.keymap.set("n", "<c-s-a>", mc.alignCursors)
 
-      set({ "n", "x" }, "gA", mc.sequenceIncrement)
-      set({ "n", "x" }, "gX", mc.sequenceDecrement)
+      vim.keymap.set({ "n", "x" }, "gA", mc.sequenceIncrement)
+      vim.keymap.set({ "n", "x" }, "gX", mc.sequenceDecrement)
 
       -- Mappings defined in a keymap layer only apply when there are
       -- multiple cursors. This lets you have overlapping mappings.
