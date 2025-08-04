@@ -206,7 +206,7 @@ return {
       })
 
       pick.registry.files_rg = function()
-        local command = { "rg", "--files", "--no-require-git", "--glob", "!.git/" }
+        local command = { "rg", "--files", "--no-require-git", "--hidden", "--glob", "!.git/" }
         local show_with_icons = function(buf_id, items, query)
           return pick.default_show(buf_id, items, query, { show_icons = true })
         end
