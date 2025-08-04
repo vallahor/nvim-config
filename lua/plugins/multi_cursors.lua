@@ -44,8 +44,11 @@ return {
         mc.matchSkipCursor(-1)
       end)
 
+      -- Split visual selections by regex.
+      set("x", "<c-s-s>", mc.splitCursors)
+
       -- match new cursors within visual selections by regex.
-      set("x", "<c-s-s>", mc.matchCursors)
+      set("x", "<c-s-m>", mc.matchCursors)
 
       -- Add and remove cursors with control + left click.
       set("n", "<c-leftmouse>", mc.handleMouse)
