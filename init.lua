@@ -591,7 +591,9 @@ vim.diagnostic.config({
   float = {
     show_header = false,
   },
-  jump = { float = false },
+  jump = {
+    on_jump = function() end,
+  },
   signs = {
     linehl = {
       [vim.diagnostic.severity.ERROR] = "DiagnosticLinehlError",

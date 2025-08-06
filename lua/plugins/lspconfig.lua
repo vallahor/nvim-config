@@ -19,6 +19,7 @@ return {
         on_attach = on_attach,
       })
       vim.lsp.semantic_tokens.enable(false)
+      vim.lsp.set_log_level("off")
 
       -- https://www.reddit.com/r/neovim/comments/1jibjpp/comment/mjgigww/
       vim.api.nvim_create_autocmd({ "LspDetach" }, {
@@ -104,16 +105,6 @@ return {
             fetchDeps = false,
             enableTestLenses = false,
             suggestSpecs = false,
-          },
-        },
-      }
-
-      vim.lsp.config.tailwindcss = {
-        settings = {
-          tailwindCSS = {
-            experimental = {
-              classRegex = { { 'class[:]\\s*"([^"]*)"', 1 }, { '~H"([^"]*)"', 1 } },
-            },
           },
         },
       }
