@@ -8,6 +8,8 @@ return {
         enable_check_bracket_line = true,
         enable_afterquote = false,
         ignored_next_char = [=[[%w%%%'%[%"%.%`%$%(%{]]=],
+        map_c_h = true,
+        map_c_w = true,
       })
       -- autopairs.remove_rule("'")
       -- or

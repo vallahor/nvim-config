@@ -21,6 +21,8 @@ return {
       vim.lsp.semantic_tokens.enable(false)
       vim.lsp.set_log_level("off")
 
+      vim.lsp.enable({ "gdscript" })
+
       -- https://www.reddit.com/r/neovim/comments/1jibjpp/comment/mjgigww/
       vim.api.nvim_create_autocmd({ "LspDetach" }, {
         group = vim.api.nvim_create_augroup("LspStopWithLastClient", {}),
@@ -150,14 +152,12 @@ return {
           "ols",
           "zls",
           "rust_analyzer",
-          -- "gdshader_lsp",
           -- "glsl_analyzer",
           -- "gopls",
-          -- "ols",
           -- "sqlls",
         },
         automatic_enable = {
-          exclude = { "gdscript", "ruff" },
+          exclude = { "ruff" },
         },
       })
     end,
