@@ -13,6 +13,7 @@ return {
       vim.keymap.set({ "n", "x" }, "<c-u>", mc.matchAllAddCursors)
       -- bring back cursors if you accidentally clear them
       vim.keymap.set("n", "Z", mc.restoreCursors)
+      vim.keymap.set("n", "<c-z>", mc.restoreCursors)
 
       -- Add or skip cursor above/below the main cursor.
       vim.keymap.set({ "n", "x" }, "<c-k>", function()

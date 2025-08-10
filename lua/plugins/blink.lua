@@ -53,6 +53,10 @@ return {
           },
         },
 
+        accept = {
+          auto_brackets = { enabled = false },
+        },
+
         list = {
           max_items = 15,
           selection = {

@@ -13,6 +13,8 @@ return {
         "erlang",
         "heex",
         "gdscript",
+        "gdshader",
+        "godot_resource",
         "html",
         "javascript",
         "json",
