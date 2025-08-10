@@ -173,6 +173,7 @@ return {
         "prettierd",
         "ruff",
         "stylua",
+        "gdformat",
       },
     },
   },

@@ -322,10 +322,9 @@ else
 end
 
 if vim.g.skeletyl then
-  vim.keymap.set("n", "<f10>", "<cmd>:e $MYVIMRC<CR>") -- open config file (vimrc or init.lua)
+  vim.keymap.set("n", "<f4>", "<cmd>:e $MYVIMRC<CR>") -- open config file (vimrc or init.lua)
   vim.keymap.set("n", "<f5>", "<cmd>so %<CR>") -- execute current file (vim or lua)
-  vim.keymap.set("n", "<f8>", "<cmd>:e ~/.config/ghostty/config<CR>") -- open ghostty config file (vimrc or init.lua)
-  vim.keymap.set("n", "<f7>", "<cmd>:e C:/Users/vallahor/.omnisharp/omnisharp.json<CR>") -- open ghostty config file (vimrc or init.lua)
+  vim.keymap.set("n", "<f7>", "<cmd>:e ~/.config/ghostty/config<CR>") -- open ghostty config file (vimrc or init.lua)
   vim.keymap.set("n", "<f11>", "<cmd>echo wordcount().words<CR>") -- execute current file (vim or lua)
 else
   vim.keymap.set("n", "<f4>", "<cmd>:e $MYVIMRC<CR>") -- open config file (vimrc or init.lua)
@@ -580,6 +579,15 @@ vim.api.nvim_create_autocmd("VimLeavePre", {
         vim.fn.serverstop(addr)
       end)
     end
+  end,
+})
+
+-- check
+vim.api.nvim_create_autocmd("BufWritePre", {
+  group = vim.api.nvim_create_augroup("FormatOnSave", { clear = true }),
+  pattern = "*.gd",
+  callback = function()
+    require("conform").format({ bufnr = vim.api.nvim_get_current_buf() })
   end,
 })
 -- GODOT END

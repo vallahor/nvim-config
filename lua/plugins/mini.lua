@@ -161,8 +161,6 @@ return {
       mini_icons.setup()
       mini_icons.mock_nvim_web_devicons()
 
-      require("mini.notify").setup()
-
       -- Picker
       local pick = require("mini.pick")
       pick.setup({
