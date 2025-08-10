@@ -581,15 +581,6 @@ vim.api.nvim_create_autocmd("VimLeavePre", {
     end
   end,
 })
-
--- check
-vim.api.nvim_create_autocmd("BufWritePre", {
-  group = vim.api.nvim_create_augroup("FormatOnSave", { clear = true }),
-  pattern = "*.gd",
-  callback = function()
-    require("conform").format({ bufnr = vim.api.nvim_get_current_buf() })
-  end,
-})
 -- GODOT END
 
 vim.diagnostic.config({
