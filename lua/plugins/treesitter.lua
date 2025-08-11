@@ -8,6 +8,7 @@ return {
         "bash",
         "c",
         "cpp",
+        "css",
         "eex",
         "elixir",
         "erlang",

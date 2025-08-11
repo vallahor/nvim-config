@@ -5,6 +5,8 @@ return {
     config = function()
       local capabilities = require("blink.cmp").get_lsp_capabilities()
       local on_attach = function(_, bufnr)
+        vim.lsp.document_color.enable(false, bufnr)
+
         local opts = { buffer = bufnr }
         vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
         vim.keymap.set("n", "<c-a>", vim.lsp.buf.code_action, opts)
@@ -19,7 +21,6 @@ return {
         on_attach = on_attach,
       })
       vim.lsp.semantic_tokens.enable(false)
-      vim.lsp.document_color.enable(false)
       vim.lsp.set_log_level("off")
 
       vim.lsp.enable({ "gdscript" })
