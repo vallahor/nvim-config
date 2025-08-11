@@ -5,7 +5,9 @@ return {
     config = function()
       local capabilities = require("blink.cmp").get_lsp_capabilities()
       local on_attach = function(_, bufnr)
-        vim.lsp.document_color.enable(false, bufnr)
+        vim.lsp.document_color.enable(true, bufnr, {
+          style = "virtual",
+        })
 
         local opts = { buffer = bufnr }
         vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)

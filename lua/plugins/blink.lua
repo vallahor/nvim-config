@@ -32,10 +32,16 @@ return {
               kind_icon = {
                 ellipsis = false,
                 text = function(ctx)
+                  if ctx.kind == "Color" then
+                    return "■"
+                  end
                   local kind_icon, _, _ = require("mini.icons").get("lsp", ctx.kind)
                   return kind_icon
                 end,
                 highlight = function(ctx)
+                  if ctx.kind == "Color" then
+                    return ctx.item.kind_hl
+                  end
                   local _, hl, _ = require("mini.icons").get("lsp", ctx.kind)
                   return hl
                 end,
