@@ -27,7 +27,19 @@ return {
           inclusive = true,
           max_pattern_length = 1,
           pattern_type = "lua_plain",
-          search_scope = "current_line",
+          search_scope = "current_line", -- works with other scopes
+          use_overlay = false,
+        })
+      end)
+
+      vim.keymap.set({ "n", "v", "o" }, "t", function()
+        sj.run({
+          auto_jump = true,
+          forward_search = true,
+          inclusive = false,
+          max_pattern_length = 1,
+          pattern_type = "lua_plain",
+          search_scope = "current_line", -- works with other scopes
           use_overlay = false,
         })
       end)
