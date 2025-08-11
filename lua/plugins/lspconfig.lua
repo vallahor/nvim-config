@@ -19,6 +19,7 @@ return {
         on_attach = on_attach,
       })
       vim.lsp.semantic_tokens.enable(false)
+      vim.lsp.document_color.enable(false)
       vim.lsp.set_log_level("off")
 
       vim.lsp.enable({ "gdscript" })
