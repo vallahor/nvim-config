@@ -134,7 +134,6 @@ return {
           on_attach(_, bufnr)
           vim.api.nvim_create_autocmd({ "BufWritePre" }, {
             group = vim.api.nvim_create_augroup("TailwindSort", { clear = true }),
-            buffer = bufnr,
             callback = function(args)
               local clients = vim.lsp.get_clients({ bufnr = args.buf, name = "tailwindcss" })
 
