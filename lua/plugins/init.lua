@@ -72,15 +72,7 @@ return {
     dependencies = { "nvim-treesitter" },
     opts = {
       server = {
-        on_attach = function(_, bufnr)
-          vim.api.nvim_create_autocmd({ "BufWritePre" }, {
-            group = vim.api.nvim_create_augroup("TailwindSort" .. bufnr, { clear = true }),
-            buffer = bufnr,
-            callback = function()
-              vim.cmd.TailwindSortSync()
-            end,
-          })
-        end,
+        override = false,
       },
       document_color = {
         enabled = false,

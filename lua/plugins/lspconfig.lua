@@ -128,6 +128,19 @@ return {
       vim.lsp.config.gdscript = {
         cmd = { "ncat", "localhost", port },
       }
+
+      vim.lsp.config.tailwindcss = {
+        on_attach = function(client, bufnr)
+          on_attach(client, bufnr)
+          vim.api.nvim_create_autocmd({ "BufWritePre" }, {
+            group = vim.api.nvim_create_augroup("TailwindSort" .. bufnr, { clear = true }),
+            buffer = bufnr,
+            callback = function()
+              vim.cmd.TailwindSortSync()
+            end,
+          })
+        end,
+      }
     end,
   },
   {
