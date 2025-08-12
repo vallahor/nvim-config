@@ -23,13 +23,13 @@ return {
         on_attach = on_attach,
       })
       vim.lsp.semantic_tokens.enable(false)
-      vim.lsp.set_log_level("off")
+      vim.lsp.set_log_level(vim.log.levels.ERROR)
 
       vim.lsp.enable({ "gdscript" })
 
       -- https://www.reddit.com/r/neovim/comments/1jibjpp/comment/mjgigww/
       vim.api.nvim_create_autocmd({ "LspDetach" }, {
-        group = vim.api.nvim_create_augroup("LspStopWithLastClient", {}),
+        group = vim.api.nvim_create_augroup("LspStopWithLastClient", { clear = true }),
         callback = function(args)
           local client = vim.lsp.get_client_by_id(args.data.client_id)
           if not client or not client.attached_buffers then
@@ -41,13 +41,15 @@ return {
             end
           end
 
-          client:request("shutdown", nil, function(err)
-            if err then
-              client:stop(true)
-            end
-          end)
+          local original_notify = vim.notify
+          vim.notify = function() end
+
+          client:stop(true)
+
+          vim.defer_fn(function()
+            vim.notify = original_notify
+          end, 500)
         end,
-        desc = "Stop lsp client when no buffer is attached",
       })
 
       vim.lsp.config.lua_ls = {
