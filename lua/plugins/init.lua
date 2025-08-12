@@ -69,10 +69,19 @@ return {
   {
     "luckasRanarison/tailwind-tools.nvim",
     build = ":UpdateRemotePlugins",
-    dependencies = {
-      "nvim-treesitter/nvim-treesitter",
-    },
+    dependencies = { "nvim-treesitter" },
     opts = {
+      server = {
+        on_attach = function(_, bufnr)
+          vim.api.nvim_create_autocmd({ "BufWritePre" }, {
+            group = vim.api.nvim_create_augroup("TailwindSort" .. bufnr, { clear = true }),
+            buffer = bufnr,
+            callback = function()
+              vim.cmd.TailwindSortSync()
+            end,
+          })
+        end,
+      },
       document_color = {
         enabled = false,
       },
