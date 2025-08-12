@@ -23,7 +23,7 @@ return {
         on_attach = on_attach,
       })
       vim.lsp.semantic_tokens.enable(false)
-      vim.lsp.set_log_level(vim.log.levels.ERROR)
+      vim.lsp.log.set_level(vim.log.levels.ERROR)
 
       vim.lsp.enable({ "gdscript" })
 
@@ -48,7 +48,7 @@ return {
 
           vim.defer_fn(function()
             vim.notify = original_notify
-          end, 500)
+          end, 200)
         end,
       })
 
@@ -147,6 +147,12 @@ return {
             end,
           })
         end,
+        settings = {
+          includeLanguages = {
+            elixir = "phoenix-heex",
+            heex = "phoenix-heex",
+          },
+        },
       }
     end,
   },
