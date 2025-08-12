@@ -66,4 +66,21 @@ return {
       ]])
     end,
   },
+  {
+    "luckasRanarison/tailwind-tools.nvim",
+    build = ":UpdateRemotePlugins",
+    dependencies = {
+      "nvim-treesitter/nvim-treesitter",
+    },
+    opts = {
+      document_color = {
+        enabled = false,
+      },
+      keymaps = {
+        smart_increment = {
+          enabled = false,
+        },
+      },
+    },
+  },
 }
