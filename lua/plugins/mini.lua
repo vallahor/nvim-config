@@ -164,6 +164,11 @@ return {
       -- Picker
       local pick = require("mini.pick")
       pick.setup({
+        window = {
+          config = {
+            width = vim.o.columns,
+          },
+        },
         mappings = {
           caret_left = "<Left>",
           caret_right = "<Right>",
