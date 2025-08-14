@@ -205,6 +205,16 @@ vim.keymap.set("v", "v", "V") -- visual line mode
 -- vim.keymap.set("n", "n", "nzzzz") -- center next
 -- vim.keymap.set("n", "N", "Nzzzz") -- center previous
 
+local pairs_map = {
+  ["("] = ")",
+  ["["] = "]",
+  ["{"] = "}",
+  ["<"] = ">",
+  ['"'] = '"',
+  ["'"] = "'",
+  ["`"] = "`",
+}
+
 vim.keymap.set("c", "<c-bs>", "<c-w>") -- delete previous word (cmd)
 -- delete previous word (insert)
 vim.keymap.set("i", "<c-bs>", function()
@@ -265,6 +275,29 @@ vim.keymap.set("i", "<c-bs>", function()
     return
   end
   -- eat upper
+
+  -- TODO: walking if white space walk until find the next char and if is
+  -- the enclosing pair delete it too
+  -- TODO: multi line
+  -- eat punctuation and pairs
+  local punctuation_count = 0
+  if string.match(current_char, "%p") then
+    current_col = current_col - 1
+    punctuation_count = punctuation_count + 1
+    local line = vim.api.nvim_get_current_line()
+    if end_col + 1 <= #line then
+      local next_end_char = vim.fn.getline("."):sub(end_col + 1, end_col + 1)
+      if pairs_map[current_char] and next_end_char == pairs_map[current_char] then
+        end_col = end_col + 1
+      end
+    end
+  end
+
+  if punctuation_count > 0 then
+    vim.api.nvim_buf_set_text(0, row, current_col, row, end_col, {})
+    return
+  end
+  -- eat punctuation and pairs
 
   while current_col > 0 do
     current_char = vim.fn.getline("."):sub(current_col, current_col)
