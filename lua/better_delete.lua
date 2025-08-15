@@ -53,6 +53,12 @@ local eat_empty_lines = function(row, col, direction)
   return new_row, new_col
 end
 
+---Delete a sequence of characters that match the given pattern.
+---@param pattern string
+---@param char string
+---@param row integer
+---@param col integer
+---@return boolean
 local delete_backward_from_pattern = function(pattern, char, row, col)
   local threshold = 1
 

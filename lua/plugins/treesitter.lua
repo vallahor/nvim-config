@@ -21,6 +21,8 @@ return {
         "json",
         "vue",
         "lua",
+        "luadoc",
+        "luau",
         "odin",
         "python",
         "php",
