@@ -1,7 +1,7 @@
 local M = {}
 
-local _forward = 1
-local _backward = -1
+local _right = 1
+local _left = -1
 
 local pairs_open_close_map = {
   ["("] = ")",
@@ -25,28 +25,27 @@ local pairs_close_open_map = {
 
 local eat_whitespace = function(line, col, direction)
   local char = line:sub(col, col)
-  col = col
+  local col_current = col
 
-  while char:match("%s") and col > 0 and col <= #line do
-    col = col + direction
-    char = line:sub(col, col)
+  while char:match("%s") and col_current > 0 and col_current <= #line do
+    col_current = col_current + direction
+    char = line:sub(col_current, col_current)
   end
 
-  return col
+  return col_current
 end
 
 local get_row_and_line = function(row, direction)
   local new_row = row + direction
   local line = vim.api.nvim_buf_get_lines(0, new_row, new_row + 1, true)[1]
-  local col = (direction == _forward and 1) or #line
+  local col = (direction == _right and 1) or #line
   return line, new_row, col
 end
 
 local eat_empty_lines = function(row, col, direction)
   local buf_rows = vim.api.nvim_buf_line_count(0)
   local line = vim.api.nvim_buf_get_lines(0, row, row + 1, true)[1]
-  local new_col = col + direction
-  local new_row = row
+  local new_row, new_col = row, col + direction
 
   if (row <= 0 and new_col < 0) or (row >= buf_rows - 1 and new_col > #line) then
     return row, col
@@ -72,61 +71,31 @@ local eat_empty_lines = function(row, col, direction)
 end
 
 ---Delete a sequence of characters that match the given pattern.
+---@param line string
 ---@param pattern string
 ---@param char string
 ---@param row integer
 ---@param col integer
+---@param direction integer -- _left|_right or -1|1
 ---@return boolean
-local delete_backward_from_pattern = function(pattern, char, row, col)
-  local threshold = 1
-
-  local current_col = col
+local delete_from_pattern = function(line, pattern, char, row, col, direction)
+  local col_current, col_start, col_end = col, col, col
   local current_char = char
 
-  local line = vim.api.nvim_get_current_line()
-
-  if char == " " then
-    threshold = 0
-    current_col = eat_whitespace(line, col + _backward, -1)
-  else
-    while string.match(current_char, pattern) and current_col > 0 do
-      current_col = current_col - 1
-      current_char = line:sub(current_col, current_col)
-    end
+  while current_char:match(pattern) and col_current > 0 and col_current <= #line do
+    col_current = col_current + direction
+    current_char = line:sub(col_current, col_current)
   end
 
-  if col - current_col > threshold then
-    vim.api.nvim_buf_set_text(0, row, current_col, row, col, {})
-    return true
+  if direction == _right then
+    col_start = col_start - 1
+    col_end = col_current - 1
+  elseif direction == _left then
+    col_start = col_current
   end
 
-  return false
-end
-
-local delete_next_from_pattern = function(pattern, char, row, col)
-  local threshold = 1
-  local eaten_tokens = 0
-
-  local current_col = col
-  local current_char = char
-
-  local line = vim.api.nvim_get_current_line()
-
-  if char == " " then
-    eaten_tokens = eaten_tokens + 1
-    threshold = 0
-    current_col = eat_whitespace(line, col, 1)
-    current_char = line:sub(current_col, current_col)
-  else
-    while current_char:match(pattern) do
-      eaten_tokens = eaten_tokens + 1
-      current_col = current_col + _forward
-      current_char = line:sub(current_col, current_col)
-    end
-  end
-
-  if eaten_tokens > threshold then
-    vim.api.nvim_buf_set_text(0, row, col - 1, row, current_col - 1, {})
+  if col_end - col_start > 1 then
+    vim.api.nvim_buf_set_text(0, row, col_start, row, col_end, {})
     return true
   end
 
@@ -143,7 +112,6 @@ local peek_next_symbol = function(row, col, direction)
   end
 
   local peek_char = line:sub(peek_col, peek_col)
-  print(peek_char)
   if peek_char:match("%s") or peek_col < 1 or peek_col > #line then
     peek_row, peek_col = eat_empty_lines(peek_row, peek_col, direction)
     line = vim.api.nvim_buf_get_lines(0, peek_row, peek_row + 1, true)[1]
@@ -165,7 +133,7 @@ local delete_symbol_or_pair_backward = function(char, row, col)
     eaten_tokens = eaten_tokens + 1
 
     if pairs_open_close_map[char] then
-      local peek_char, peek_row, peek_col = peek_next_symbol(row, col, _forward)
+      local peek_char, peek_row, peek_col = peek_next_symbol(row, col, _right)
       if peek_char == pairs_open_close_map[char] then
         end_row = peek_row
         end_col = peek_col
@@ -191,7 +159,7 @@ local delete_symbol_or_pair_next = function(char, row, col)
     eaten_tokens = eaten_tokens + 1
 
     if pairs_close_open_map[char] then
-      local peek_char, peek_row, peek_col = peek_next_symbol(row, col, _backward)
+      local peek_char, peek_row, peek_col = peek_next_symbol(row, col, _left)
       -- print(peek_char, peek_row, peek_col)
       if peek_char == pairs_close_open_map[char] then
         row_start = peek_row
@@ -210,21 +178,33 @@ local delete_symbol_or_pair_next = function(char, row, col)
   return false
 end
 
-local consume_spaces = function(row, col, direction)
+local consume_spaces_and_lines = function(row, col, direction)
   local row_start, col_start = row, col
   local row_end, col_end = row, col
 
-  if direction == _forward then
+  if direction == _right then
     row_end, col_end = eat_empty_lines(row_start, col_start, direction)
     col_start = col_start - 1
     col_end = (col_end == 0 and 1) or col_end - 1
-  elseif direction == _backward then
+  elseif direction == _left then
     row_start, col_start = eat_empty_lines(row_end, col_end, direction)
   end
 
-  print(row_start, col_start, row_end, col_end)
-
   vim.api.nvim_buf_set_text(0, row_start, col_start, row_end, col_end, {})
+end
+
+local consume_spaces = function(line, row, col, direction)
+  local col_start, col_end = col, col
+
+  if direction == _right then
+    col_end = eat_whitespace(line, col_start, direction)
+    col_start = col_start - 1
+    col_end = col_end - 1
+  elseif direction == _left then
+    col_start = eat_whitespace(line, col_end, direction)
+  end
+
+  vim.api.nvim_buf_set_text(0, row, col_start, row, col_end, {})
 end
 
 M.delete_backward_word = function()
@@ -234,7 +214,7 @@ M.delete_backward_word = function()
   if end_col == 0 then
     local mark = vim.api.nvim_replace_termcodes("<c-g>u", true, false, true)
     vim.api.nvim_feedkeys(mark, "i", false)
-    consume_spaces(row, 0, _backward)
+    consume_spaces_and_lines(row, 0, _left)
     return
   end
 
@@ -242,21 +222,23 @@ M.delete_backward_word = function()
   local mark = vim.api.nvim_replace_termcodes("<c-g>u", true, false, true)
   vim.api.nvim_feedkeys(mark, "i", false)
 
-  local current_col = end_col
-  local current_char = vim.fn.getline("."):sub(current_col, current_col)
+  local line = vim.api.nvim_get_current_line()
 
-  -- eat whitespaces
-  if delete_backward_from_pattern("%s", current_char, row, current_col) then
+  local current_col = end_col
+  local current_char = line:sub(current_col, current_col)
+
+  if current_char == " " then
+    consume_spaces(line, row, current_col, _left)
     return
   end
 
   -- eat digits
-  if delete_backward_from_pattern("%d", current_char, row, current_col) then
+  if delete_from_pattern(line, "%d", current_char, row, current_col, _left) then
     return
   end
 
   -- eat upper
-  if delete_backward_from_pattern("%u", current_char, row, current_col) then
+  if delete_from_pattern(line, "%u", current_char, row, current_col, _left) then
     return
   end
 
@@ -295,7 +277,7 @@ M.delete_next_word = function()
     local mark = vim.api.nvim_replace_termcodes("<c-g>u", true, false, true)
     vim.api.nvim_feedkeys(mark, "i", false)
 
-    consume_spaces(row, col, _forward)
+    consume_spaces_and_lines(row, col, _right)
     return
   end
 
@@ -306,18 +288,18 @@ M.delete_next_word = function()
   local current_col = col
   local char = line:sub(current_col, current_col)
 
-  -- eat whitespaces
-  if delete_next_from_pattern("%s", char, row, current_col) then
+  if char == " " then
+    consume_spaces(line, row, current_col, _right)
     return
   end
 
   -- eat digits
-  if delete_next_from_pattern("%d", char, row, current_col) then
+  if delete_from_pattern(line, "%d", char, row, current_col, _right) then
     return
   end
 
   -- eat upper
-  if delete_next_from_pattern("%u", char, row, current_col) then
+  if delete_from_pattern(line, "%u", char, row, current_col, _right) then
     return
   end
 
