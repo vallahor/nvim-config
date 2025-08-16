@@ -97,6 +97,7 @@ end
 
 local delete_next_from_pattern = function(pattern, char, row, col)
   local threshold = 1
+  local eaten_tokens = 0
 
   local current_col = col
   local current_char = char
@@ -104,20 +105,23 @@ local delete_next_from_pattern = function(pattern, char, row, col)
   local line = vim.api.nvim_get_current_line()
 
   if char == " " then
+    eaten_tokens = eaten_tokens + 1
     threshold = 0
-    -- (col - 1) -> accounts for the new column added by the insert mode
-    current_col = eat_whitespace(line, col + _forward, 1)
+    -- current_col = eat_whitespace(line, col + _forward, 1)
+    current_col = eat_whitespace(line, col, 1)
     current_char = line:sub(current_col, current_col)
   else
-    while string.match(current_char, pattern) and current_col < #line do
-      current_col = current_col + 1
+    -- while current_char:match(pattern) and current_col < #line do
+    while current_char:match(pattern) do
+      eaten_tokens = eaten_tokens + 1
+      current_col = current_col + _forward
       current_char = line:sub(current_col, current_col)
     end
   end
 
-  if current_col - col > threshold then
-    vim.api.nvim_buf_set_text(0, row, col, row, current_col, {})
-    vim.api.nvim_put({ current_char }, "c", false, false)
+  if eaten_tokens > threshold then
+    vim.api.nvim_buf_set_text(0, row, col - 1, row, current_col - 1, {})
+    -- vim.api.nvim_put({ current_char }, "c", false, false)
     return true
   end
 
@@ -178,33 +182,39 @@ local delete_symbol_or_pair_next = function(char, row, col)
   local threshold = 0
   local eaten_tokens = 0
 
-  local end_row = row
-  local end_col = col
-  local current_col = col
+  local row_start, col_start = row, col
+  local row_end, col_end = row, col
   if string.match(char, "%p") then
-    print("current char: ", char)
     eaten_tokens = eaten_tokens + 1
 
     if pairs_close_open_map[char] then
-      print("closing char: ", pairs_close_open_map[char])
       local peek_char, peek_row, peek_col = peek_next_symbol(row, col, _backward)
       if peek_char == pairs_close_open_map[char] then
-        end_row = peek_row
-        end_col = peek_col - 1
+        row_start = peek_row
+        col_start = peek_col
       end
-      print("peek_char: ", peek_char)
     end
   end
 
-  print(end_row, end_col, row, current_col)
-
   if eaten_tokens > threshold then
-    vim.api.nvim_buf_set_text(0, end_row, end_col, row, col, {})
-    -- vim.api.nvim_buf_set_text(0, 0, 1, 0, 2, {})
+    vim.api.nvim_buf_set_text(0, row_start, col_start - 1, row_end, col_end, {})
     return true
   end
 
-  return true
+  return false
+end
+
+local consume_spaces = function(row, col, direction)
+  local row_start, col_start = row, col
+  local row_end, col_end = row, col
+
+  if direction == _forward then
+    row_end, col_end = eat_empty_lines(row_start, col_start, direction)
+  elseif direction == _backward then
+    row_start, col_start = eat_empty_lines(row_end, col_end, direction)
+  end
+
+  vim.api.nvim_buf_set_text(0, row_start, col_start, row_end, col_end, {})
 end
 
 M.delete_backward_word = function()
@@ -271,8 +281,10 @@ M.delete_next_word = function()
   local line = vim.api.nvim_get_current_line()
 
   if col > #line then
-    local bs = vim.api.nvim_replace_termcodes("<c-g>u<del>", true, false, true)
-    vim.api.nvim_feedkeys(bs, "i", false)
+    local mark = vim.api.nvim_replace_termcodes("<c-g>u", true, false, true)
+    vim.api.nvim_feedkeys(mark, "i", false)
+
+    consume_spaces(row, #line, _forward)
     return
   end
 
@@ -282,47 +294,44 @@ M.delete_next_word = function()
 
   local current_col = col
   local char = line:sub(current_col, current_col)
-  print(char)
 
-  -- -- eat whitespaces
-  -- if delete_next_from_pattern("%s", char, row, current_col) then
-  --   return
-  -- end
+  -- eat whitespaces
+  if delete_next_from_pattern("%s", char, row, current_col) then
+    return
+  end
 
-  -- -- eat digits
-  -- if delete_next_from_pattern("%d", char, row, current_col) then
-  --   return
-  -- end
+  -- eat digits
+  if delete_next_from_pattern("%d", char, row, current_col) then
+    return
+  end
 
-  -- -- eat upper
-  -- if delete_next_from_pattern("%u", char, row, current_col) then
-  --   return
-  -- end
+  -- eat upper
+  if delete_next_from_pattern("%u", char, row, current_col) then
+    return
+  end
 
   if delete_symbol_or_pair_next(char, row, current_col) then
     return
   end
 
-  -- while current_col < #line do
-  --   char = line:sub(current_col + 1, current_col + 1)
+  while current_col <= #line do
+    char = line:sub(current_col, current_col)
 
-  --   if char:match("[%s%t]") and col + current_col < #line then
-  --     break
-  --   end
+    if char:match("[%s%t]") then
+      current_col = current_col - 1
+      break
+    end
 
-  --   if char:match("[%p%d]") and current_col ~= col then
-  --     break
-  --   end
+    print(current_col, char, char:match("[%p%d%u]"))
+    if char:match("[%p%d%u]") and current_col ~= col then
+      current_col = current_col - 1
+      break
+    end
 
-  --   if string.upper(char) == char then
-  --     current_col = current_col + 1
-  --     break
-  --   end
+    current_col = current_col + 1
+  end
 
-  --   current_col = current_col + 1
-  -- end
-
-  -- vim.api.nvim_buf_set_text(0, row, col, row, current_col, {})
+  vim.api.nvim_buf_set_text(0, row, col - 1, row, current_col, {})
 end
 
 return M
