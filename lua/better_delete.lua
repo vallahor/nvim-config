@@ -134,7 +134,7 @@ local function delete_from_pattern(line, pattern, char, row, col, direction)
   end
 
   if col_end - col_start > 1 then
-    vim.api.nvim_buf_set_text(0, row, col_start, row, col_end, {})
+    vim.api.nvim_buf_set_text(_bufnr, row, col_start, row, col_end, {})
     return true
   end
 
@@ -165,7 +165,8 @@ local function find_match_pair(expected_symbol, row, col, direction)
   local row_end, col_end = row, col
 
   local peek_char, peek_row, peek_col = peek_next_symbol(row_start, col_start, direction)
-  if peek_char == expected_symbol then
+  local found = peek_char == expected_symbol
+  if found then
     if direction == _right then
       row_end = peek_row
       col_end = peek_col
@@ -175,7 +176,7 @@ local function find_match_pair(expected_symbol, row, col, direction)
     end
   end
 
-  return row_start, col_start, row_end, col_end
+  return found, row_start, col_start, row_end, col_end
 end
 
 local function delete_symbol_or_match_pair(match_pairs, char, row, col, direction)
@@ -184,7 +185,7 @@ local function delete_symbol_or_match_pair(match_pairs, char, row, col, directio
     local row_end, col_end = row, col
 
     if match_pairs[char] then
-      row_start, col_start, row_end, col_end = find_match_pair(match_pairs[char], row, col, -direction)
+      _, row_start, col_start, row_end, col_end = find_match_pair(match_pairs[char], row, col, -direction)
     elseif M.config.delete_repeated_punctuation.enable then
       local line = vim.api.nvim_get_current_line()
       local col_current = walk_line_matching_char(line, char, char, col, direction)
@@ -196,7 +197,7 @@ local function delete_symbol_or_match_pair(match_pairs, char, row, col, directio
       end
     end
 
-    vim.api.nvim_buf_set_text(0, row_start, col_start - 1, row_end, col_end, {})
+    vim.api.nvim_buf_set_text(_bufnr, row_start, col_start - 1, row_end, col_end, {})
     return true
   end
   return false
@@ -214,7 +215,7 @@ local function consume_spaces_and_lines(row, col, direction)
     row_start, col_start = eat_empty_lines(row_end, col_end, direction)
   end
 
-  vim.api.nvim_buf_set_text(0, row_start, col_start, row_end, col_end, {})
+  vim.api.nvim_buf_set_text(_bufnr, row_start, col_start, row_end, col_end, {})
 end
 
 local function consume_spaces(line, row, col, direction)
@@ -228,7 +229,7 @@ local function consume_spaces(line, row, col, direction)
     col_start = col_current
   end
 
-  vim.api.nvim_buf_set_text(0, row, col_start, row, col_end, {})
+  vim.api.nvim_buf_set_text(_bufnr, row, col_start, row, col_end, {})
 end
 
 local function delete_word(row, col, direction)
@@ -312,10 +313,67 @@ local function delete_word(row, col, direction)
     col_start = col_peek
   end
 
-  vim.api.nvim_buf_set_text(0, row_start, col_start, row_end, col_end, {})
+  vim.api.nvim_buf_set_text(_bufnr, row_start, col_start, row_end, col_end, {})
 end
 
-M.delete_backward_word = function()
+local function delete(row, col, direction)
+  local line = vim.api.nvim_get_current_line()
+  local char = line:sub(col, col)
+
+  local row_start, col_start = row, col
+  local row_end, col_end = row, col
+
+  print(char, char:match("%p"), string.format("%q", char))
+
+  if char:match("%p") and (M.config.delete_pairs.close_open.enable or M.config.delete_pairs.open_close.enable) then
+    local match_pairs = {}
+    -- check if i need to invert this
+    if direction == _right then
+      match_pairs = (M.config.delete_pairs.close_open.enable and M.config.delete_pairs.close_open.match_pairs) or {}
+    elseif direction == _left then
+      match_pairs = (M.config.delete_pairs.open_close.enable and M.config.delete_pairs.open_close.match_pairs) or {}
+    end
+
+    print(char, match_pairs[char])
+    print(vim.inspect(match_pairs))
+    if match_pairs[char] then
+      local found = false
+      found, row_start, col_start, row_end, col_end = find_match_pair(match_pairs[char], row, col, -direction)
+      print(found, row_start, col_start, row_end, col_end)
+      if found then
+        local mark = vim.api.nvim_replace_termcodes("<c-g>u", true, false, true)
+        vim.api.nvim_feedkeys(mark, "i", false)
+
+        vim.api.nvim_buf_set_text(_bufnr, row_start, col_start - 1, row_end, col_end, {})
+        return
+      end
+    end
+  end
+
+  local buf_rows = vim.api.nvim_buf_line_count(0)
+
+  if direction == _right then
+    col_start = col - 1
+    if col > #line and row + 1 < buf_rows then
+      row_end = row + 1
+      col_end = 0
+    end
+  elseif direction == _left then
+    if col > 0 then
+      col_start = col - 1
+    elseif row > 0 then
+      row_start = row - 1
+      line = vim.api.nvim_buf_get_lines(_bufnr, row_start, row_start + 1, true)[1]
+      col_start = #line
+    end
+  end
+
+  print(row_start, col_start, row_end, col_end)
+
+  vim.api.nvim_buf_set_text(_bufnr, row_start, col_start, row_end, col_end, {})
+end
+
+M.delete_previous_word = function()
   local col = vim.fn.col(".") - 1
   local row = vim.fn.line(".") - 1
 
@@ -327,6 +385,20 @@ M.delete_next_word = function()
   local row = vim.fn.line(".") - 1
 
   delete_word(row, col, _right)
+end
+
+M.delete_previous = function()
+  local col = vim.fn.col(".") - 1
+  local row = vim.fn.line(".") - 1
+
+  delete(row, col, _left)
+end
+
+M.delete_next = function()
+  local col = vim.fn.col(".")
+  local row = vim.fn.line(".") - 1
+
+  delete(row, col, _right)
 end
 
 return M
