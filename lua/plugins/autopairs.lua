@@ -8,6 +8,7 @@ return {
         enable_check_bracket_line = true,
         enable_afterquote = false,
         ignored_next_char = [=[[%w%%%'%[%"%.%`%$%(%{]]=],
+        map_bs = false,
         map_c_h = false,
         map_c_w = false,
       })
