@@ -200,7 +200,7 @@ local function consume_spaces(line, row, col, direction)
   vim.api.nvim_buf_set_text(0, row, col_start, row, col_end, {})
 end
 
-M. functiondelete_backward_word()
+M.delete_backward_word = function()
   local end_col = vim.fn.col(".") - 1
   local row = vim.fn.line(".") - 1
 
@@ -261,7 +261,7 @@ M. functiondelete_backward_word()
   vim.api.nvim_buf_set_text(0, row, current_col, row, end_col, {})
 end
 
-M. functiondelete_next_word()
+M.delete_next_word = function()
   local col = vim.fn.col(".")
   local row = vim.fn.line(".") - 1
   local line = vim.api.nvim_get_current_line()
