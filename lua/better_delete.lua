@@ -323,7 +323,7 @@ local function delete_word(row, col, direction)
   vim.api.nvim_buf_set_text(_bufnr, row_start, col_start, row_end, col_end, {})
 end
 
-local function delete(cmd, row, col, direction)
+local function delete(row, col, direction)
   local line = vim.api.nvim_get_current_line()
   local char = line:sub(col, col)
 
@@ -340,49 +340,36 @@ local function delete(cmd, row, col, direction)
 
     if match_pairs[char] then
       local found = false
-      print(found, row_start, col_start, row_end, col_end)
       found, row_start, col_start, row_end, col_end = find_match_pair(match_pairs[char], row, col, -direction)
-      print(found, row_start, col_start, row_end, col_end)
       if found then
-        local distance = 0
-        if row_start == row_end then
-          distance = vim.api.nvim_strwidth(line:sub(col_start, col_end - 1))
-        else
-          local lines = vim.api.nvim_buf_get_lines(_bufnr, row_start, row_end + 1, false)
-          print(vim.inspect(lines))
-          print(#lines)
+        local mark = vim.api.nvim_replace_termcodes("<c-g>u", true, false, true)
+        vim.api.nvim_feedkeys(mark, "i", false)
 
-          for i = 1, #lines do
-            line = lines[i]
-            if i == 1 then
-              distance = distance + vim.api.nvim_strwidth(line:sub(col_start + 1))
-              print(line, vim.api.nvim_strwidth(line:sub(col_start + 1)))
-            elseif i == #lines then
-              distance = distance + vim.api.nvim_strwidth(line:sub(1, col_end - 1))
-              print(line, vim.api.nvim_strwidth(line:sub(1, col_end - 1)))
-            else
-              distance = distance + vim.api.nvim_strwidth(line)
-              print(line, vim.api.nvim_strwidth(line))
-            end
-          end
-        end
-
-        print("after: ", distance)
-
-        local cmd_inverse = ""
-        if direction == _right then
-          cmd_inverse = utils.keys.bs
-        elseif direction == _left then
-          cmd_inverse = utils.keys.del
-        end
-        cmd = "<c-g>u" .. cmd .. string.rep(cmd_inverse, distance)
-
-        print(cmd)
+        vim.api.nvim_buf_set_text(_bufnr, row_start, col_start - 1, row_end, col_end, {})
+        return
       end
     end
   end
 
-  return vim.api.nvim_replace_termcodes(cmd, true, false, true)
+  local buf_rows = vim.api.nvim_buf_line_count(0)
+
+  if direction == _right then
+    col_start = col - 1
+    if col > #line and row + 1 < buf_rows then
+      row_end = row + 1
+      col_end = 0
+    end
+  elseif direction == _left then
+    if col > 0 then
+      col_start = col - 1
+    elseif row > 0 then
+      row_start = row - 1
+      line = vim.api.nvim_buf_get_lines(_bufnr, row_start, row_start + 1, true)[1]
+      col_start = #line
+    end
+  end
+
+  vim.api.nvim_buf_set_text(_bufnr, row_start, col_start, row_end, col_end, {})
 end
 
 M.delete_previous_word = function()
@@ -401,32 +388,15 @@ end
 
 M.delete_previous = function()
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-
-  if delete(utils.keys.bs, row - 1, col, _left) then
-    return nil
-  end
-  return vim.api.nvim_replace_termcodes(utils.keys.bs, true, false, true)
+  delete(row - 1, col, _left)
 end
 
 M.delete_next = function()
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-
-  if delete(utils.keys.del, row - 1, col + 1, _right) then
-    return nil
-  end
-
-  return vim.api.nvim_replace_termcodes(utils.keys.del, true, false, true)
+  delete(row - 1, col + 1, _right)
 end
 
-vim.api.nvim_buf_set_keymap(0, "i", utils.keys.bs, "", {
-  callback = M.delete_previous,
-  expr = true,
-  noremap = true,
-})
-vim.api.nvim_buf_set_keymap(0, "i", utils.keys.del, "", {
-  callback = M.delete_next,
-  expr = true,
-  noremap = true,
-})
+vim.keymap.set("i", utils.keys.bs, M.delete_previous)
+vim.keymap.set("i", utils.keys.del, M.delete_next)
 
 return M
