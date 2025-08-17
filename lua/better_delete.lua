@@ -4,25 +4,44 @@ local _right = 1
 local _left = -1
 local _bufnr = 0
 
-local pairs_open_close_map = {
-  ["("] = ")",
-  ["["] = "]",
-  ["{"] = "}",
-  ["<"] = ">",
-  ['"'] = '"',
-  ["'"] = "'",
-  ["`"] = "`",
+M.config = {
+  delete_empty_lines_until_next_char = {
+    enable = true,
+  },
+  delete_repeated_punctuation = {
+    enable = true,
+  },
+  delete_pairs = {
+    open_close = {
+      enable = true,
+      match_pairs = {
+        ["("] = ")",
+        ["["] = "]",
+        ["{"] = "}",
+        ["<"] = ">",
+        ['"'] = '"',
+        ["'"] = "'",
+        ["`"] = "`",
+      },
+    },
+    close_open = {
+      enable = true,
+      match_pairs = {
+        [")"] = "(",
+        ["]"] = "[",
+        ["}"] = "{",
+        [">"] = "<",
+        ['"'] = '"',
+        ["'"] = "'",
+        ["`"] = "`",
+      },
+    },
+  },
 }
 
-local pairs_close_open_map = {
-  [")"] = "(",
-  ["]"] = "[",
-  ["}"] = "{",
-  [">"] = "<",
-  ['"'] = '"',
-  ["'"] = "'",
-  ["`"] = "`",
-}
+M.setup = function(config)
+  M.config = vim.tbl_deep_extend("force", vim.deepcopy(M.config), config or {})
+end
 
 local function eat_whitespace(line, col, direction)
   local char = line:sub(col, col)
@@ -166,7 +185,7 @@ local function delete_symbol_or_match_pair(match_pairs, char, row, col, directio
 
     if match_pairs[char] then
       row_start, col_start, row_end, col_end = find_match_pair(match_pairs[char], row, col, -direction)
-    else
+    elseif M.config.delete_repeated_punctuation.enable then
       local line = vim.api.nvim_get_current_line()
       local col_current = walk_line_matching_char(line, char, char, col, direction)
 
@@ -216,12 +235,24 @@ local function delete_word(row, col, direction)
   local line = vim.api.nvim_get_current_line()
 
   local mark = vim.api.nvim_replace_termcodes("<c-g>u", true, false, true)
-  vim.api.nvim_feedkeys(mark, "i", false)
 
   if col == 0 or col > #line then
-    consume_spaces_and_lines(row, 0, direction)
+    if M.config.delete_empty_lines_until_next_char.enable then
+      vim.api.nvim_feedkeys(mark, "i", false)
+      consume_spaces_and_lines(row, 0, direction)
+    else
+      if direction == _right then
+        local delete = vim.api.nvim_replace_termcodes("<del>", true, false, true)
+        vim.api.nvim_feedkeys(delete, "i", false)
+      elseif direction == _left then
+        local backspace = vim.api.nvim_replace_termcodes("<bs>", true, false, true)
+        vim.api.nvim_feedkeys(backspace, "i", false)
+      end
+    end
     return
   end
+
+  vim.api.nvim_feedkeys(mark, "i", false)
 
   local char = line:sub(col, col)
 
@@ -230,21 +261,19 @@ local function delete_word(row, col, direction)
     return
   end
 
-  -- eat digits
   if delete_from_pattern(line, "%d", char, row, col, direction) then
     return
   end
 
-  -- eat upper
   if delete_from_pattern(line, "%u", char, row, col, direction) then
     return
   end
 
   local match_pairs = {}
   if direction == _right then
-    match_pairs = pairs_close_open_map
+    match_pairs = (M.config.delete_pairs.close_open.enable and M.config.delete_pairs.close_open.match_pairs) or {}
   elseif direction == _left then
-    match_pairs = pairs_open_close_map
+    match_pairs = (M.config.delete_pairs.open_close.enable and M.config.delete_pairs.open_close.match_pairs) or {}
   end
 
   if delete_symbol_or_match_pair(match_pairs, char, row, col, direction) then
@@ -255,7 +284,6 @@ local function delete_word(row, col, direction)
   local row_end, col_end = row, col
   local col_peek = col + direction
 
-  -- word1 and 1work are being deleted
   while col_peek > 0 and col_peek <= #line do
     char = line:sub(col_peek, col_peek)
 
