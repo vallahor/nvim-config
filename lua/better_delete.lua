@@ -74,29 +74,51 @@ local function eat_empty_lines(row, col, direction)
   local line = vim.api.nvim_buf_get_lines(_bufnr, row, row + 1, false)[1] or ""
   local new_row, new_col = row, col + direction
 
-  if (row < 0 and new_col < 0) or (row + 1 > buf_rows and new_col > #line) then
+  -- Empty buffer
+  if buf_rows == 1 and #line == 0 then
+    return 0, 1
+  end
+
+  -- Out of bounds
+  if (row < 0 and new_col < 0) or (row + 1 >= buf_rows and new_col > #line) then
     return row, col
   end
 
-  if col > #line or col <= 0 then
+  -- Change line if in BOL/EOL
+  if col <= 0 or col > #line then
     line, new_row, new_col = get_row_and_line(row, direction)
   end
 
   local char = line:sub(new_col, new_col)
   while char:match("%s") or char == "" do
+    -- Out of bounds
     if new_row < 0 or new_row + 1 > buf_rows then
       break
     end
+
+    -- Change line if line is empty or in BOL/EOL
     if line:match("^[%s]*$") or (new_col < 1 or new_col >= #line) then
       line, new_row, new_col = get_row_and_line(new_row, direction)
     end
+
     new_col = eat_whitespace(line, new_col, direction)
     char = line:sub(new_col, new_col)
   end
 
+  -- `consume_spaces_and_lines` excceed 1 if the remaining lines are empty
+  -- until the end of the buffer
+  new_row = math.min(new_row, buf_rows - 1)
   return new_row, new_col
 end
 
+---Walk the line through the `direction` specified matching the char using the
+---given pattern and returning the new column position.
+---@param line string
+---@param pattern string
+---@param char string
+---@param col integer
+---@param direction integer
+---@return integer
 local function walk_line_matching_pattern(line, pattern, char, col, direction)
   local col_current = col
   local char_current = char
@@ -109,6 +131,14 @@ local function walk_line_matching_pattern(line, pattern, char, col, direction)
   return col_current
 end
 
+---Same as walk_line_matching_pattern but for `char` because if use the
+---symbol `.` it matches as any char.
+---@param line string
+---@param pattern string
+---@param char string
+---@param col integer
+---@param direction integer
+---@return integer
 local function walk_line_matching_char(line, pattern, char, col, direction)
   local col_current = col
   local char_current = char
@@ -140,6 +170,7 @@ local function delete_from_pattern(line, pattern, char, row, col, direction)
     col_start = col_current
   end
 
+  -- Found at least 2 matching pattern
   if col_end - col_start > 1 then
     vim.api.nvim_buf_set_text(_bufnr, row, col_start, row, col_end, {})
     return true
@@ -148,6 +179,13 @@ local function delete_from_pattern(line, pattern, char, row, col, direction)
   return false
 end
 
+---Peek the next punctuation across lines, returninig the char and position.
+---@param row integer
+---@param col integer
+---@param direction integer
+---@return string
+---@return integer
+---@return integer
 local function peek_next_symbol(row, col, direction)
   local line = vim.api.nvim_buf_get_lines(_bufnr, row, row + 1, false)[1] or ""
   local peek_row = row
@@ -247,7 +285,7 @@ local function delete_word(row, col, direction)
   if col == 0 or col > #line then
     if M.config.delete_empty_lines_until_next_char.enable then
       vim.api.nvim_feedkeys(mark, "i", false)
-      consume_spaces_and_lines(row, 0, direction)
+      consume_spaces_and_lines(row, col, direction)
     else
       if direction == _right then
         local delete = vim.api.nvim_replace_termcodes(utils.keys.del, true, false, true)
@@ -351,7 +389,14 @@ local function delete(row, col, direction)
     end
   end
 
+  --- It's necessary to recreate the <bs>/<del> behavior
+  --- because it's not possible to map this function to <bs>/<del>
+  --- and call `nvim_feedkeys` as a fallback without an infinite loop.
   local buf_rows = vim.api.nvim_buf_line_count(0)
+
+  if buf_rows == 1 and #line == 0 then
+    return
+  end
 
   if direction == _right then
     col_start = col - 1
