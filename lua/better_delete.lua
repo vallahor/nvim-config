@@ -188,134 +188,103 @@ end
 
 local function consume_spaces(line, row, col, direction)
   local col_start, col_end = col, col
+  local col_current = eat_whitespace(line, col_start, direction)
 
   if direction == _right then
-    col_end = eat_whitespace(line, col_start, direction)
     col_start = col_start - 1
-    col_end = col_end - 1
+    col_end = col_current - 1
   elseif direction == _left then
-    col_start = eat_whitespace(line, col_end, direction)
+    col_start = col_current
   end
 
   vim.api.nvim_buf_set_text(0, row, col_start, row, col_end, {})
 end
 
-M.delete_backward_word = function()
-  local end_col = vim.fn.col(".") - 1
-  local row = vim.fn.line(".") - 1
+local function delete_word(row, col, direction)
+  local line = vim.api.nvim_get_current_line()
 
-  if end_col == 0 then
-    local mark = vim.api.nvim_replace_termcodes("<c-g>u", true, false, true)
-    vim.api.nvim_feedkeys(mark, "i", false)
-    consume_spaces_and_lines(row, 0, _left)
-    return
-  end
-
-  -- mark undo system
   local mark = vim.api.nvim_replace_termcodes("<c-g>u", true, false, true)
   vim.api.nvim_feedkeys(mark, "i", false)
 
-  local line = vim.api.nvim_get_current_line()
+  if col == 0 or col > #line then
+    consume_spaces_and_lines(row, 0, direction)
+    return
+  end
 
-  local current_col = end_col
-  local current_char = line:sub(current_col, current_col)
+  local char = line:sub(col, col)
 
-  if current_char == " " then
-    consume_spaces(line, row, current_col, _left)
+  if char:match("%s") then
+    consume_spaces(line, row, col, direction)
     return
   end
 
   -- eat digits
-  if delete_from_pattern(line, "%d", current_char, row, current_col, _left) then
+  if delete_from_pattern(line, "%d", char, row, col, direction) then
     return
   end
 
   -- eat upper
-  if delete_from_pattern(line, "%u", current_char, row, current_col, _left) then
+  if delete_from_pattern(line, "%u", char, row, col, direction) then
     return
   end
 
-  if delete_symbol_or_match_pair(pairs_open_close_map, current_char, row, current_col, _left) then
+  local match_pairs = {}
+  if direction == _right then
+    match_pairs = pairs_close_open_map
+  elseif direction == _left then
+    match_pairs = pairs_open_close_map
+  end
+
+  if delete_symbol_or_match_pair(match_pairs, char, row, col, direction) then
     return
   end
 
-  while current_col > 0 do
-    current_char = vim.fn.getline("."):sub(current_col, current_col)
+  local row_start, col_start = row, col
+  local row_end, col_end = row, col
+  local col_current = col + direction
 
-    if current_char == " " or current_char == "\t" and end_col - current_col > 0 then
+  while col_current > 0 and col_current <= #line do
+    if char:match("%s") then
       break
     end
 
-    if (string.match(current_char, "%p") or string.match(current_char, "%d")) and current_col ~= end_col then
+    if char:match("[%p%d]") and col_current ~= col then
       break
     end
 
-    if string.upper(current_char) == current_char then
-      current_col = current_col - 1
+    if char:match("[%u]") and col_current ~= col then
+      if direction == _left then
+        col_current = col_current - 1
+      end
       break
     end
 
-    current_col = current_col - 1
+    col_current = col_current + direction
+    char = line:sub(col_current, col_current)
   end
 
-  vim.api.nvim_buf_set_text(0, row, current_col, row, end_col, {})
+  if direction == _right then
+    col_start = col_start - 1
+    col_end = col_current - 1
+  elseif direction == _left then
+    col_start = col_current
+  end
+
+  vim.api.nvim_buf_set_text(0, row_start, col_start, row_end, col_end, {})
+end
+
+M.delete_backward_word = function()
+  local col = vim.fn.col(".") - 1
+  local row = vim.fn.line(".") - 1
+
+  delete_word(row, col, _left)
 end
 
 M.delete_next_word = function()
   local col = vim.fn.col(".")
   local row = vim.fn.line(".") - 1
-  local line = vim.api.nvim_get_current_line()
 
-  if col > #line then
-    local mark = vim.api.nvim_replace_termcodes("<c-g>u", true, false, true)
-    vim.api.nvim_feedkeys(mark, "i", false)
-
-    consume_spaces_and_lines(row, col, _right)
-    return
-  end
-
-  -- mark undo system
-  local mark = vim.api.nvim_replace_termcodes("<c-g>u", true, false, true)
-  vim.api.nvim_feedkeys(mark, "i", false)
-
-  local current_col = col
-  local char = line:sub(current_col, current_col)
-
-  if char == " " then
-    consume_spaces(line, row, current_col, _right)
-    return
-  end
-
-  -- eat digits
-  if delete_from_pattern(line, "%d", char, row, current_col, _right) then
-    return
-  end
-
-  -- eat upper
-  if delete_from_pattern(line, "%u", char, row, current_col, _right) then
-    return
-  end
-
-  if delete_symbol_or_match_pair(pairs_close_open_map, char, row, current_col, _right) then
-    return
-  end
-
-  while current_col <= #line do
-    char = line:sub(current_col, current_col)
-
-    if char:match("%s") then
-      break
-    end
-
-    if char:match("[%p%d%u]") and current_col ~= col then
-      break
-    end
-
-    current_col = current_col + 1
-  end
-  current_col = current_col - 1
-
-  vim.api.nvim_buf_set_text(0, row, col - 1, row, current_col, {})
+  delete_word(row, col, _right)
 end
 
 return M
