@@ -241,34 +241,38 @@ local function delete_word(row, col, direction)
 
   local row_start, col_start = row, col
   local row_end, col_end = row, col
-  local col_current = col + direction
+  local col_peek = col + direction
 
-  while col_current > 0 and col_current <= #line do
+  -- word1 and 1work are being deleted
+  while col_peek > 0 and col_peek <= #line do
+    char = line:sub(col_peek, col_peek)
+
     if char:match("%s") then
       break
     end
 
-    if char:match("[%p%d]") and col_current ~= col then
+    if char:match("[%p%d]") and col_peek ~= col then
       break
     end
 
-    if char:match("[%u]") and col_current ~= col then
+    if char:match("[%u]") and col_peek ~= col then
       if direction == _left then
-        col_current = col_current - 1
+        col_peek = col_peek - 1
       end
       break
     end
 
-    col_current = col_current + direction
-    char = line:sub(col_current, col_current)
+    col_peek = col_peek + direction
   end
 
   if direction == _right then
     col_start = col_start - 1
-    col_end = col_current - 1
+    col_end = col_peek - 1
   elseif direction == _left then
-    col_start = col_current
+    col_start = col_peek
   end
+
+  print(row_start, col_start, row_end, col_end)
 
   vim.api.nvim_buf_set_text(0, row_start, col_start, row_end, col_end, {})
 end
