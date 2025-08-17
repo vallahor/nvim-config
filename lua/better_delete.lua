@@ -23,7 +23,7 @@ local pairs_close_open_map = {
   ["`"] = "`",
 }
 
-local eat_whitespace = function(line, col, direction)
+local function eat_whitespace(line, col, direction)
   local char = line:sub(col, col)
   local col_current = col
 
@@ -35,14 +35,14 @@ local eat_whitespace = function(line, col, direction)
   return col_current
 end
 
-local get_row_and_line = function(row, direction)
+local function get_row_and_line(row, direction)
   local new_row = row + direction
   local line = vim.api.nvim_buf_get_lines(0, new_row, new_row + 1, true)[1]
   local col = (direction == _right and 1) or #line
   return line, new_row, col
 end
 
-local eat_empty_lines = function(row, col, direction)
+local function eat_empty_lines(row, col, direction)
   local buf_rows = vim.api.nvim_buf_line_count(0)
   local line = vim.api.nvim_buf_get_lines(0, row, row + 1, true)[1]
   local new_row, new_col = row, col + direction
@@ -70,6 +70,18 @@ local eat_empty_lines = function(row, col, direction)
   return new_row, new_col
 end
 
+local function walk_line_matching_pattern(line, pattern, char, col, direction)
+  local col_current = col
+  local char_current = char
+
+  while char_current:match(pattern) and col_current > 0 and col_current <= #line do
+    col_current = col_current + direction
+    char_current = line:sub(col_current, col_current)
+  end
+
+  return col_current
+end
+
 ---Delete a sequence of characters that match the given pattern.
 ---@param line string
 ---@param pattern string
@@ -78,14 +90,9 @@ end
 ---@param col integer
 ---@param direction integer -- _left|_right or -1|1
 ---@return boolean
-local delete_from_pattern = function(line, pattern, char, row, col, direction)
-  local col_current, col_start, col_end = col, col, col
-  local current_char = char
-
-  while current_char:match(pattern) and col_current > 0 and col_current <= #line do
-    col_current = col_current + direction
-    current_char = line:sub(col_current, col_current)
-  end
+local function delete_from_pattern(line, pattern, char, row, col, direction)
+  local col_start, col_end = col, col
+  local col_current = walk_line_matching_pattern(line, pattern, char, col, direction)
 
   if direction == _right then
     col_start = col_start - 1
@@ -102,7 +109,7 @@ local delete_from_pattern = function(line, pattern, char, row, col, direction)
   return false
 end
 
-local peek_next_symbol = function(row, col, direction)
+local function peek_next_symbol(row, col, direction)
   local line = vim.api.nvim_buf_get_lines(0, row, row + 1, true)[1]
   local peek_row = row
   local peek_col = col + direction
@@ -121,7 +128,7 @@ local peek_next_symbol = function(row, col, direction)
   return peek_char, peek_row, peek_col
 end
 
-local find_match_pair = function(expected_symbol, row, col, direction)
+local function find_match_pair(expected_symbol, row, col, direction)
   local row_start, col_start = row, col
   local row_end, col_end = row, col
 
@@ -139,7 +146,7 @@ local find_match_pair = function(expected_symbol, row, col, direction)
   return row_start, col_start, row_end, col_end
 end
 
-local delete_symbol_or_match_pair = function(match_pairs, char, row, col, direction)
+local function delete_symbol_or_match_pair(match_pairs, char, row, col, direction)
   if string.match(char, "%p") then
     local row_start, col_start = row, col
     local row_end, col_end = row, col
@@ -148,19 +155,12 @@ local delete_symbol_or_match_pair = function(match_pairs, char, row, col, direct
       row_start, col_start, row_end, col_end = find_match_pair(match_pairs[char], row, col, -direction)
     else
       local line = vim.api.nvim_get_current_line()
-      local col_current = col
-      local current_char = char
-
-      while current_char:match(char) and col_current > 0 and col_current <= #line do
-        col_current = col_current + direction
-        current_char = line:sub(col_current, col_current)
-      end
+      local col_current = walk_line_matching_pattern(line, char, char, col, direction)
 
       if direction == _right then
-        col_start = col_start - 1
         col_end = col_current - 1
       elseif direction == _left then
-        col_start = col_current
+        col_start = col_current + 1
       end
     end
 
@@ -171,7 +171,7 @@ local delete_symbol_or_match_pair = function(match_pairs, char, row, col, direct
   return false
 end
 
-local consume_spaces_and_lines = function(row, col, direction)
+local function consume_spaces_and_lines(row, col, direction)
   local row_start, col_start = row, col
   local row_end, col_end = row, col
 
@@ -186,7 +186,7 @@ local consume_spaces_and_lines = function(row, col, direction)
   vim.api.nvim_buf_set_text(0, row_start, col_start, row_end, col_end, {})
 end
 
-local consume_spaces = function(line, row, col, direction)
+local function consume_spaces(line, row, col, direction)
   local col_start, col_end = col, col
 
   if direction == _right then
@@ -200,7 +200,7 @@ local consume_spaces = function(line, row, col, direction)
   vim.api.nvim_buf_set_text(0, row, col_start, row, col_end, {})
 end
 
-M.delete_backward_word = function()
+M. functiondelete_backward_word()
   local end_col = vim.fn.col(".") - 1
   local row = vim.fn.line(".") - 1
 
@@ -261,7 +261,7 @@ M.delete_backward_word = function()
   vim.api.nvim_buf_set_text(0, row, current_col, row, end_col, {})
 end
 
-M.delete_next_word = function()
+M. functiondelete_next_word()
   local col = vim.fn.col(".")
   local row = vim.fn.line(".") - 1
   local line = vim.api.nvim_get_current_line()
