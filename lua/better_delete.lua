@@ -179,7 +179,8 @@ local function delete_from_pattern(line, pattern, char, row, col, direction)
   return false
 end
 
----Peek the next punctuation across lines, returninig the char and position.
+---Peek the next symbol across lines running by a specified direction,
+---returninig the char and position.
 ---@param row integer
 ---@param col integer
 ---@param direction integer
@@ -205,6 +206,17 @@ local function peek_next_symbol(row, col, direction)
   return peek_char, peek_row, peek_col
 end
 
+---Peek the next char following the given `direction` returning if the `peeked char` and
+---the `expected_symbol` matches.
+---@param expected_symbol string
+---@param row integer
+---@param col integer
+---@param direction integer
+---@return true|false
+---@return integer
+---@return integer
+---@return integer
+---@return integer
 local function find_match_pair(expected_symbol, row, col, direction)
   local row_start, col_start = row, col
   local row_end, col_end = row, col
@@ -224,8 +236,17 @@ local function find_match_pair(expected_symbol, row, col, direction)
   return found, row_start, col_start, row_end, col_end
 end
 
+---Delete one or more punctuation.
+---Can delete matching pairs or repeated punctuation.
+---check: `delete_repeated_punctuation`.
+---@param match_pairs table
+---@param char string
+---@param row integer
+---@param col integer
+---@param direction integer
+---@return boolean
 local function delete_symbol_or_match_pair(match_pairs, char, row, col, direction)
-  if string.match(char, "%p") then
+  if char:match("%p") then
     local row_start, col_start = row, col
     local row_end, col_end = row, col
 
@@ -248,6 +269,10 @@ local function delete_symbol_or_match_pair(match_pairs, char, row, col, directio
   return false
 end
 
+---Consume spaces, tabs, and lines.
+---@param row integer
+---@param col integer
+---@param direction integer
 local function consume_spaces_and_lines(row, col, direction)
   local row_start, col_start = row, col
   local row_end, col_end = row, col
@@ -263,6 +288,11 @@ local function consume_spaces_and_lines(row, col, direction)
   vim.api.nvim_buf_set_text(_bufnr, row_start, col_start, row_end, col_end, {})
 end
 
+---Consume spaces and tabs in the same line.
+---@param line string
+---@param row integer
+---@param col integer
+---@param direction integer
 local function consume_spaces(line, row, col, direction)
   local col_start, col_end = col, col
   local col_current = eat_whitespace(line, col_start, direction)
@@ -277,6 +307,10 @@ local function consume_spaces(line, row, col, direction)
   vim.api.nvim_buf_set_text(_bufnr, row, col_start, row, col_end, {})
 end
 
+---Delete word or punctuation following the specified `direction`.
+---@param row integer
+---@param col integer
+---@param direction integer
 local function delete_word(row, col, direction)
   local line = vim.api.nvim_get_current_line()
 
@@ -307,10 +341,12 @@ local function delete_word(row, col, direction)
     return
   end
 
+  -- Digits
   if delete_from_pattern(line, "%d", char, row, col, direction) then
     return
   end
 
+  -- Uppercase
   if delete_from_pattern(line, "%u", char, row, col, direction) then
     return
   end
@@ -330,17 +366,23 @@ local function delete_word(row, col, direction)
   local row_end, col_end = row, col
   local col_peek = col + direction
 
+  -- Limited to the current row
+  -- stops if reachs BOL/EOL
   while col_peek > 0 and col_peek <= #line do
     char = line:sub(col_peek, col_peek)
 
+    -- Stops if find space or tab
     if char:match("%s") then
       break
     end
 
+    -- Stops if find punctuation or digit
     if char:match("[%p%d]") and col_peek ~= col then
       break
     end
 
+    -- Stops if find uppercase
+    -- if the direction is `_left` it consumes the char
     if char:match("[%u]") and col_peek ~= col then
       if direction == _left then
         col_peek = col_peek - 1
@@ -361,6 +403,10 @@ local function delete_word(row, col, direction)
   vim.api.nvim_buf_set_text(_bufnr, row_start, col_start, row_end, col_end, {})
 end
 
+---Is <BS> and <DEL> but add the possibility of deleting matching pairs.
+---@param row integer
+---@param col integer
+---@param direction integer
 local function delete(row, col, direction)
   local line = vim.api.nvim_get_current_line()
   local char = line:sub(col, col)
@@ -394,12 +440,15 @@ local function delete(row, col, direction)
   --- and call `nvim_feedkeys` as a fallback without an infinite loop.
   local buf_rows = vim.api.nvim_buf_line_count(0)
 
+  -- Empty buffer
   if buf_rows == 1 and #line == 0 then
     return
   end
 
   if direction == _right then
     col_start = col - 1
+
+    -- EOL and not at the last line
     if col > #line and row + 1 < buf_rows then
       row_end = row + 1
       col_end = 0
@@ -407,6 +456,8 @@ local function delete(row, col, direction)
   elseif direction == _left then
     if col > 0 then
       col_start = col - 1
+    -- In BOL and not at the fist line.
+    -- ps.: the `col == 0` is redundant because it's an `elseif`.
     elseif row > 0 then
       row_start = row - 1
       line = vim.api.nvim_buf_get_lines(_bufnr, row_start, row_start + 1, true)[1]
@@ -418,17 +469,15 @@ local function delete(row, col, direction)
 end
 
 M.delete_previous_word = function()
-  local col = vim.fn.col(".") - 1
-  local row = vim.fn.line(".") - 1
+  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
 
-  delete_word(row, col, _left)
+  delete_word(row - 1, col, _left)
 end
 
 M.delete_next_word = function()
-  local col = vim.fn.col(".")
-  local row = vim.fn.line(".") - 1
+  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
 
-  delete_word(row, col, _right)
+  delete_word(row - 1, col + 1, _right)
 end
 
 M.delete_previous = function()
