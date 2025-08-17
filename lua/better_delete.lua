@@ -57,7 +57,7 @@ local eat_empty_lines = function(row, col, direction)
 
   local char = line:sub(new_col, new_col)
   while char:match("%s") or char == "" do
-    if new_row + direction < 0 or new_row + direction > buf_rows - 1 then
+    if new_row + direction < 0 or new_row + direction >= buf_rows then
       break
     end
     if line:match("^[%s]*$") or (new_col < 1 or new_col >= #line) then
@@ -121,56 +121,49 @@ local peek_next_symbol = function(row, col, direction)
   return peek_char, peek_row, peek_col
 end
 
-local delete_symbol_or_pair_backward = function(char, row, col)
-  local threshold = 0
-  local eaten_tokens = 0
-
-  local end_row = row
-  local end_col = col
-  local current_col = col
-  if string.match(char, "%p") then
-    current_col = current_col - 1
-    eaten_tokens = eaten_tokens + 1
-
-    if pairs_open_close_map[char] then
-      local peek_char, peek_row, peek_col = peek_next_symbol(row, col, _right)
-      if peek_char == pairs_open_close_map[char] then
-        end_row = peek_row
-        end_col = peek_col
-      end
-    end
-  end
-
-  if eaten_tokens > threshold then
-    vim.api.nvim_buf_set_text(0, row, current_col, end_row, end_col, {})
-    return true
-  end
-
-  return false
-end
-
-local delete_symbol_or_pair_next = function(char, row, col)
-  local threshold = 0
-  local eaten_tokens = 0
-
+local find_match_pair = function(expected_symbol, row, col, direction)
   local row_start, col_start = row, col
   local row_end, col_end = row, col
-  if string.match(char, "%p") then
-    eaten_tokens = eaten_tokens + 1
 
-    if pairs_close_open_map[char] then
-      local peek_char, peek_row, peek_col = peek_next_symbol(row, col, _left)
-      -- print(peek_char, peek_row, peek_col)
-      if peek_char == pairs_close_open_map[char] then
-        row_start = peek_row
-        col_start = peek_col
-      end
+  local peek_char, peek_row, peek_col = peek_next_symbol(row_start, col_start, direction)
+  if peek_char == expected_symbol then
+    if direction == _right then
+      row_end = peek_row
+      col_end = peek_col
+    elseif direction == _left then
+      row_start = peek_row
+      col_start = peek_col
     end
   end
 
-  -- print(row_start, col_start - 1, row_end, col_end)
+  return row_start, col_start, row_end, col_end
+end
 
-  if eaten_tokens > threshold then
+local delete_symbol_or_match_pair = function(match_pairs, char, row, col, direction)
+  if string.match(char, "%p") then
+    local row_start, col_start = row, col
+    local row_end, col_end = row, col
+
+    if match_pairs[char] then
+      row_start, col_start, row_end, col_end = find_match_pair(match_pairs[char], row, col, -direction)
+    else
+      local line = vim.api.nvim_get_current_line()
+      local col_current = col
+      local current_char = char
+
+      while current_char:match(char) and col_current > 0 and col_current <= #line do
+        col_current = col_current + direction
+        current_char = line:sub(col_current, col_current)
+      end
+
+      if direction == _right then
+        col_start = col_start - 1
+        col_end = col_current - 1
+      elseif direction == _left then
+        col_start = col_current
+      end
+    end
+
     vim.api.nvim_buf_set_text(0, row_start, col_start - 1, row_end, col_end, {})
     return true
   end
@@ -242,7 +235,7 @@ M.delete_backward_word = function()
     return
   end
 
-  if delete_symbol_or_pair_backward(current_char, row, current_col) then
+  if delete_symbol_or_match_pair(pairs_open_close_map, current_char, row, current_col, _left) then
     return
   end
 
@@ -303,7 +296,7 @@ M.delete_next_word = function()
     return
   end
 
-  if delete_symbol_or_pair_next(char, row, current_col) then
+  if delete_symbol_or_match_pair(pairs_close_open_map, char, row, current_col, _right) then
     return
   end
 
