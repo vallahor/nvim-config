@@ -1,13 +1,14 @@
 local M = {}
 
-local _right = 1
-local _left = -1
-local _bufnr = 0
-
 local utils = {
+  bufnr = 0,
   keys = {
     bs = "<bs>",
     del = "<del>",
+  },
+  direction = {
+    left = -1,
+    right = 1,
   },
 }
 
@@ -74,11 +75,11 @@ end
 
 local function get_match_pairs(opts, direction)
   local match_pairs = {}
-  if direction == _right then
+  if direction == utils.direction.right then
     if M.config.delete_pairs.close_open.enable then
       match_pairs = concat_tables(M.config.delete_pairs.close_open.match_pairs, opts.close_open)
     end
-  elseif direction == _left then
+  elseif direction == utils.direction.left then
     if M.config.delete_pairs.open_close.enable then
       match_pairs = concat_tables(M.config.delete_pairs.open_close.match_pairs, opts.open_close)
     end
@@ -101,14 +102,14 @@ end
 
 local function get_row_and_line(row, direction)
   local new_row = row + direction
-  local line = vim.api.nvim_buf_get_lines(_bufnr, new_row, new_row + 1, false)[1] or ""
-  local col = (direction == _right and 1) or #line
+  local line = vim.api.nvim_buf_get_lines(utils.bufnr, new_row, new_row + 1, false)[1] or ""
+  local col = (direction == utils.direction.right and 1) or #line
   return line, new_row, col
 end
 
 local function eat_empty_lines(row, col, direction)
   local buf_rows = vim.api.nvim_buf_line_count(0)
-  local line = vim.api.nvim_buf_get_lines(_bufnr, row, row + 1, false)[1] or ""
+  local line = vim.api.nvim_buf_get_lines(utils.bufnr, row, row + 1, false)[1] or ""
   local new_row, new_col = row, col + direction
 
   -- Empty buffer
@@ -194,22 +195,22 @@ end
 ---@param char string
 ---@param row integer
 ---@param col integer
----@param direction integer -- _left|_right or -1|1
+---@param direction integer
 ---@return boolean
 local function delete_from_pattern(line, pattern, char, row, col, direction)
   local col_start, col_end = col, col
   local col_current = walk_line_matching_pattern(line, pattern, char, col, direction)
 
-  if direction == _right then
+  if direction == utils.direction.right then
     col_start = col_start - 1
     col_end = col_current - 1
-  elseif direction == _left then
+  elseif direction == utils.direction.left then
     col_start = col_current
   end
 
   -- Found at least 2 matching pattern
   if col_end - col_start > 1 then
-    vim.api.nvim_buf_set_text(_bufnr, row, col_start, row, col_end, {})
+    vim.api.nvim_buf_set_text(utils.bufnr, row, col_start, row, col_end, {})
     return true
   end
 
@@ -225,7 +226,7 @@ end
 ---@return integer
 ---@return integer
 local function peek_next_symbol(row, col, direction)
-  local line = vim.api.nvim_buf_get_lines(_bufnr, row, row + 1, false)[1] or ""
+  local line = vim.api.nvim_buf_get_lines(utils.bufnr, row, row + 1, false)[1] or ""
   local peek_row = row
   local peek_col = col + direction
 
@@ -236,7 +237,7 @@ local function peek_next_symbol(row, col, direction)
   local peek_char = line:sub(peek_col, peek_col)
   if peek_char:match("%s") or peek_col < 1 or peek_col > #line then
     peek_row, peek_col = eat_empty_lines(peek_row, peek_col, direction)
-    line = vim.api.nvim_buf_get_lines(_bufnr, peek_row, peek_row + 1, false)[1] or ""
+    line = vim.api.nvim_buf_get_lines(utils.bufnr, peek_row, peek_row + 1, false)[1] or ""
     peek_char = line:sub(peek_col, peek_col)
   end
 
@@ -261,10 +262,10 @@ local function find_match_pair(expected_symbol, row, col, direction)
   local peek_char, peek_row, peek_col = peek_next_symbol(row_start, col_start, direction)
   local found = peek_char == expected_symbol
   if found then
-    if direction == _right then
+    if direction == utils.direction.right then
       row_end = peek_row
       col_end = peek_col
-    elseif direction == _left then
+    elseif direction == utils.direction.left then
       row_start = peek_row
       col_start = peek_col
     end
@@ -293,14 +294,14 @@ local function delete_symbol_or_match_pair(match_pairs, char, row, col, directio
       local line = vim.api.nvim_get_current_line()
       local col_current = walk_line_matching_char(line, char, char, col, direction)
 
-      if direction == _right then
+      if direction == utils.direction.right then
         col_end = col_current - 1
-      elseif direction == _left then
+      elseif direction == utils.direction.left then
         col_start = col_current + 1
       end
     end
 
-    vim.api.nvim_buf_set_text(_bufnr, row_start, col_start - 1, row_end, col_end, {})
+    vim.api.nvim_buf_set_text(utils.bufnr, row_start, col_start - 1, row_end, col_end, {})
     return true
   end
   return false
@@ -318,15 +319,15 @@ local function consume_spaces_and_lines(row, col, direction, opts)
   local row_start, col_start = row, col
   local row_end, col_end = row, col
 
-  if direction == _right then
+  if direction == utils.direction.right then
     row_end, col_end = eat_empty_lines(row_start, col_start, direction)
     col_start = col_start - 1
     col_end = (col_end == 0 and 1) or col_end - 1
-  elseif direction == _left then
+  elseif direction == utils.direction.left then
     row_start, col_start = eat_empty_lines(row_end, col_end, direction)
   end
 
-  vim.api.nvim_buf_set_text(_bufnr, row_start, col_start, row_end, col_end, { opts.separator })
+  vim.api.nvim_buf_set_text(utils.bufnr, row_start, col_start, row_end, col_end, { opts.separator })
 end
 
 ---Consume spaces and tabs in the same line.
@@ -338,14 +339,14 @@ local function consume_spaces(line, row, col, direction)
   local col_start, col_end = col, col
   local col_current = eat_whitespace(line, col_start, direction)
 
-  if direction == _right then
+  if direction == utils.direction.right then
     col_start = col_start - 1
     col_end = col_current - 1
-  elseif direction == _left then
+  elseif direction == utils.direction.left then
     col_start = col_current
   end
 
-  vim.api.nvim_buf_set_text(_bufnr, row, col_start, row, col_end, {})
+  vim.api.nvim_buf_set_text(utils.bufnr, row, col_start, row, col_end, {})
 end
 
 ---Join line consuming spaces, tabs, and lines using a separator.
@@ -359,7 +360,7 @@ local function join_next_line(row, opts)
   consume_spaces_and_lines(
     row,
     #line + 1,
-    _right,
+    utils.direction.right,
     { separator = string.rep(opts.join_line.separator, opts.join_line.times) }
   )
 end
@@ -382,10 +383,10 @@ local function delete_word(row, col, direction, opts)
       vim.api.nvim_feedkeys(mark, "i", false)
       consume_spaces_and_lines(row, col, direction, {})
     else
-      if direction == _right then
+      if direction == utils.direction.right then
         local delete = vim.api.nvim_replace_termcodes(utils.keys.del, true, false, true)
         vim.api.nvim_feedkeys(delete, "i", false)
-      elseif direction == _left then
+      elseif direction == utils.direction.left then
         local backspace = vim.api.nvim_replace_termcodes(utils.keys.bs, true, false, true)
         vim.api.nvim_feedkeys(backspace, "i", false)
       end
@@ -438,9 +439,9 @@ local function delete_word(row, col, direction, opts)
     end
 
     -- Stops if find uppercase
-    -- if the direction is `_left` it consumes the char
+    -- if the direction is `utils.direction.left` it consumes the char
     if char:match("[%u]") and col_peek ~= col then
-      if direction == _left then
+      if direction == utils.direction.left then
         col_peek = col_peek - 1
       end
       break
@@ -449,14 +450,14 @@ local function delete_word(row, col, direction, opts)
     col_peek = col_peek + direction
   end
 
-  if direction == _right then
+  if direction == utils.direction.right then
     col_start = col_start - 1
     col_end = col_peek - 1
-  elseif direction == _left then
+  elseif direction == utils.direction.left then
     col_start = col_peek
   end
 
-  vim.api.nvim_buf_set_text(_bufnr, row_start, col_start, row_end, col_end, {})
+  vim.api.nvim_buf_set_text(utils.bufnr, row_start, col_start, row_end, col_end, {})
 end
 
 ---Is <BS> and <DEL> but add the capability of deleting matching pairs.
@@ -485,7 +486,7 @@ local function delete(row, col, direction, opts)
         local mark = vim.api.nvim_replace_termcodes("<c-g>u", true, false, true)
         vim.api.nvim_feedkeys(mark, "i", false)
 
-        vim.api.nvim_buf_set_text(_bufnr, row_start, col_start - 1, row_end, col_end, {})
+        vim.api.nvim_buf_set_text(utils.bufnr, row_start, col_start - 1, row_end, col_end, {})
         return
       end
     end
@@ -505,7 +506,7 @@ local function delete(row, col, direction, opts)
     return
   end
 
-  if direction == _right then
+  if direction == utils.direction.right then
     col_start = col - 1
 
     -- EOL and not at the last line
@@ -513,39 +514,39 @@ local function delete(row, col, direction, opts)
       row_end = row + 1
       col_end = 0
     end
-  elseif direction == _left then
+  elseif direction == utils.direction.left then
     if col > 0 then
       col_start = col - 1
     -- In BOL and not at the fist line.
     -- ps.: the `col == 0` is redundant because it's an `elseif`.
     elseif row > 0 then
       row_start = row - 1
-      line = vim.api.nvim_buf_get_lines(_bufnr, row_start, row_start + 1, true)[1]
+      line = vim.api.nvim_buf_get_lines(utils.bufnr, row_start, row_start + 1, true)[1]
       col_start = #line
     end
   end
 
-  vim.api.nvim_buf_set_text(_bufnr, row_start, col_start, row_end, col_end, {})
+  vim.api.nvim_buf_set_text(utils.bufnr, row_start, col_start, row_end, col_end, {})
 end
 
 M.previous_word = function(opts)
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  delete_word(row - 1, col, _left, opts)
+  delete_word(row - 1, col, utils.direction.left, opts)
 end
 
 M.next_word = function(opts)
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  delete_word(row - 1, col + 1, _right, opts)
+  delete_word(row - 1, col + 1, utils.direction.right, opts)
 end
 
 M.previous = function(opts)
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  delete(row - 1, col, _left, opts)
+  delete(row - 1, col, utils.direction.left, opts)
 end
 
 M.next = function(opts)
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  delete(row - 1, col + 1, _right, opts)
+  delete(row - 1, col + 1, utils.direction.right, opts)
 end
 
 M.join = function(opts)
