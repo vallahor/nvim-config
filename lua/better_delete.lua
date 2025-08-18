@@ -29,16 +29,12 @@ M.config = {
     enable = true,
     list = {
       {
-        regex = true,
         -- 13::26::45
         pattern = "%d%d::%d%d::%d%d",
-        length = 10,
         replace = "",
       },
       {
-        regex = true,
         pattern = "%x%x%x%x%x%x",
-        length = 6,
         replace = "0x",
       },
     },
@@ -47,29 +43,29 @@ M.config = {
     enable = true,
     list = {
       {
-        lhs = { regex = false, pattern = "<%=", length = nil },
-        rhs = { regex = false, pattern = "%>", length = nil },
+        lhs = { pattern = "<%=" },
+        rhs = { pattern = "%>" },
         replace = "",
         surround_check = nil,
         -- surround_check = "%w",
       },
       {
-        lhs = { regex = false, pattern = "#STRING", length = nil },
-        rhs = { regex = false, pattern = "#END", length = nil },
+        lhs = { pattern = "#STRING" },
+        rhs = { pattern = "#END" },
         replace = "",
         surround_check = nil,
         -- surround_check = "%w",
       },
       {
-        lhs = { regex = false, pattern = "xxx", length = nil },
-        rhs = { regex = false, pattern = "yyy", length = nil },
+        lhs = { pattern = "xxx" },
+        rhs = { pattern = "yyy" },
         replace = "",
         surround_check = nil,
         -- surround_check = "%w",
       },
       {
-        lhs = { regex = false, pattern = "yyy", length = nil },
-        rhs = { regex = false, pattern = "xxx", length = nil },
+        lhs = { pattern = "yyy" },
+        rhs = { pattern = "xxx" },
         replace = "",
         -- surround_check = "%w",
       },
@@ -423,41 +419,51 @@ end
 ---@param col integer
 ---@param direction integer
 ---@return boolean
+---@return table
 ---@return integer
 ---@return integer
 local function find_pattern_line(item, line, col, direction)
-  local length = item.length or #item.pattern
+  item.inject_matches = item.inject_matches or nil
   local col_start, col_end = col, col
 
+  local pattern = item.pattern
+
+  if item.inject_matches then
+    pattern = string.format(pattern, table.unpack(item.inject_matches))
+  end
+
   if direction == utils.direction.right then
-    if col + length > #line then
-      col_end = #line
-    else
-      col_end = col + length - 1
-    end
+    pattern = "^" .. pattern .. (item.surround_check or "")
+    col_end = #line
   elseif direction == utils.direction.left then
-    if col - length < 0 then
-      return false, -1, -1
-    end
-    col_start = col - length
+    pattern = (item.surround_check or "") .. pattern .. "$"
+    col_start = 1
   end
 
   local slice = line:sub(col_start, col_end)
-  local match = false
-  if item.regex then
-    match = slice:match(item.pattern)
-  else
-    match = slice == item.pattern
-  end
+  local match = slice:match(pattern)
 
   if match then
-    if direction == utils.direction.right then
-      col_start = col_start - 1
+    local length = #match
+    local result_matches = {}
+
+    if item.save_matches then
+      for result_match in string.gsub(slice, pattern, item.save_matches) do
+        table.insert(result_matches, result_match)
+      end
     end
-    return true, col_start, col_end
+
+    if direction == utils.direction.right then
+      col_start = col - 1
+      col_end = col + length - 1
+    elseif direction == utils.direction.left then
+      col_start = col - length
+    end
+
+    return true, result_matches, col_start, col_end
   end
 
-  return false, 0, 0
+  return false, {}, 0, 0
 end
 
 ---Delete string slice from a given pattern. Matches regex and literal string.
@@ -469,7 +475,7 @@ end
 ---@param direction integer
 ---@return boolean
 local function delete_pattern(item, line, row, col, direction)
-  local found, col_start, col_end = find_pattern_line(item, line, col, direction)
+  local found, _, col_start, col_end = find_pattern_line(item, line, col, direction)
 
   if found then
     local replace = item.replace or ""
@@ -489,38 +495,28 @@ end
 ---@param direction integer
 ---@return boolean
 local function delete_pattern_pairs(item, line, row, col, direction)
-  local found_lhs, col_lhs_start, col_lhs_end = find_pattern_line(item.lhs, line, col, direction)
+  local found_lhs, result_matches, col_lhs_start, col_lhs_end = find_pattern_line(item.lhs, line, col, direction)
 
   if found_lhs then
+    if item.lhs.save_matches then
+      item.rhs.inject_matches = result_matches
+    end
+
     local peek_line, _, peek_row, peek_col = peek_next_symbol(row, col, -direction)
-    local found_rhs, col_rhs_start, col_rhs_end = find_pattern_line(item.rhs, peek_line, peek_col, -direction)
+    local found_rhs, _, col_rhs_start, col_rhs_end = find_pattern_line(item.rhs, peek_line, peek_col, -direction)
 
     if found_rhs then
       local row_start, col_start = row, col
       local row_end, col_end = row, col
-      local peek_char = ""
 
       if direction == utils.direction.right then
         row_start = peek_row
         col_start = col_rhs_start
         col_end = col_lhs_end
-
-        if col_start > 0 then
-          peek_char = peek_line:sub(col_start - 1, col_start - 1)
-        end
       elseif direction == utils.direction.left then
         col_start = col_lhs_start
         row_end = peek_row
         col_end = col_rhs_end
-
-        if col_end < #line then
-          peek_char = peek_line:sub(col_end + 1, col_end + 1)
-        end
-      end
-
-      item.surround_check = item.surround_check or nil
-      if item.surround_check and peek_char:match(item.surround_check) then
-        return false
       end
 
       local replace = item.replace or ""
