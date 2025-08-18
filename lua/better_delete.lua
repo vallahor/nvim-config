@@ -18,6 +18,11 @@ M.config = {
   delete_repeated_punctuation = {
     enable = true,
   },
+  join_line = {
+    enable = true,
+    separator = " ",
+    times = 1,
+  },
   delete_pairs = {
     open_close = {
       enable = true,
@@ -30,6 +35,7 @@ M.config = {
         ["'"] = "'",
         ["`"] = "`",
       },
+      match_pairs_custom = {},
     },
     close_open = {
       enable = true,
@@ -42,12 +48,43 @@ M.config = {
         ["'"] = "'",
         ["`"] = "`",
       },
+      match_pairs_custom = {},
     },
   },
 }
 
+local function concat_tables(t1, t2)
+  for k, v in pairs(t2) do
+    t1[k] = v
+  end
+  return t1
+end
+
 M.setup = function(config)
   M.config = vim.tbl_deep_extend("force", vim.deepcopy(M.config), config or {})
+  if M.config.delete_pairs.open_close.enable then
+    M.config.delete_pairs.open_close.match_pairs =
+      concat_tables(M.config.delete_pairs.open_close.match_pairs, M.config.delete_pairs.open_close.match_pairs_custom)
+  end
+  if M.config.delete_pairs.close_open.enable then
+    M.config.delete_pairs.close_open.match_pairs =
+      concat_tables(M.config.delete_pairs.close_open.match_pairs, M.config.delete_pairs.close_open.match_pairs_custom)
+  end
+end
+
+local function get_match_pairs(opts, direction)
+  local match_pairs = {}
+  if direction == _right then
+    if M.config.delete_pairs.close_open.enable then
+      match_pairs = concat_tables(M.config.delete_pairs.close_open.match_pairs, opts.close_open)
+    end
+  elseif direction == _left then
+    if M.config.delete_pairs.open_close.enable then
+      match_pairs = concat_tables(M.config.delete_pairs.open_close.match_pairs, opts.open_close)
+    end
+  end
+
+  return match_pairs
 end
 
 local function eat_whitespace(line, col, direction)
@@ -273,7 +310,11 @@ end
 ---@param row integer
 ---@param col integer
 ---@param direction integer
-local function consume_spaces_and_lines(row, col, direction)
+---@param opts table
+local function consume_spaces_and_lines(row, col, direction, opts)
+  opts = opts or {}
+  opts.separator = opts.separator or ""
+
   local row_start, col_start = row, col
   local row_end, col_end = row, col
 
@@ -285,7 +326,7 @@ local function consume_spaces_and_lines(row, col, direction)
     row_start, col_start = eat_empty_lines(row_end, col_end, direction)
   end
 
-  vim.api.nvim_buf_set_text(_bufnr, row_start, col_start, row_end, col_end, {})
+  vim.api.nvim_buf_set_text(_bufnr, row_start, col_start, row_end, col_end, { opts.separator })
 end
 
 ---Consume spaces and tabs in the same line.
@@ -307,11 +348,31 @@ local function consume_spaces(line, row, col, direction)
   vim.api.nvim_buf_set_text(_bufnr, row, col_start, row, col_end, {})
 end
 
+---Join line consuming spaces, tabs, and lines using a separator.
+---@param row integer
+---@param opts table
+local function join_next_line(row, opts)
+  opts = opts or {}
+  opts.join_line = opts.join_line or M.config.join_line
+
+  local line = vim.api.nvim_get_current_line()
+  consume_spaces_and_lines(
+    row,
+    #line + 1,
+    _right,
+    { separator = string.rep(opts.join_line.separator, opts.join_line.times) }
+  )
+end
+
 ---Delete word or punctuation following the specified `direction`.
 ---@param row integer
 ---@param col integer
 ---@param direction integer
-local function delete_word(row, col, direction)
+---@param opts table
+local function delete_word(row, col, direction, opts)
+  opts = opts or {}
+  opts.open_close = opts.open_close or {}
+  opts.close_open = opts.close_open or {}
   local line = vim.api.nvim_get_current_line()
 
   local mark = vim.api.nvim_replace_termcodes("<c-g>u", true, false, true)
@@ -319,7 +380,7 @@ local function delete_word(row, col, direction)
   if col == 0 or col > #line then
     if M.config.delete_empty_lines_until_next_char.enable then
       vim.api.nvim_feedkeys(mark, "i", false)
-      consume_spaces_and_lines(row, col, direction)
+      consume_spaces_and_lines(row, col, direction, {})
     else
       if direction == _right then
         local delete = vim.api.nvim_replace_termcodes(utils.keys.del, true, false, true)
@@ -351,12 +412,7 @@ local function delete_word(row, col, direction)
     return
   end
 
-  local match_pairs = {}
-  if direction == _right then
-    match_pairs = (M.config.delete_pairs.close_open.enable and M.config.delete_pairs.close_open.match_pairs) or {}
-  elseif direction == _left then
-    match_pairs = (M.config.delete_pairs.open_close.enable and M.config.delete_pairs.open_close.match_pairs) or {}
-  end
+  local match_pairs = get_match_pairs(opts, direction)
 
   if delete_symbol_or_match_pair(match_pairs, char, row, col, direction) then
     return
@@ -403,11 +459,16 @@ local function delete_word(row, col, direction)
   vim.api.nvim_buf_set_text(_bufnr, row_start, col_start, row_end, col_end, {})
 end
 
----Is <BS> and <DEL> but add the possibility of deleting matching pairs.
+---Is <BS> and <DEL> but add the capability of deleting matching pairs.
 ---@param row integer
 ---@param col integer
 ---@param direction integer
-local function delete(row, col, direction)
+---@param opts table
+local function delete(row, col, direction, opts)
+  opts = opts or {}
+  opts.open_close = opts.open_close or {}
+  opts.close_open = opts.close_open or {}
+
   local line = vim.api.nvim_get_current_line()
   local char = line:sub(col, col)
 
@@ -415,12 +476,7 @@ local function delete(row, col, direction)
   local row_end, col_end = row, col
 
   if char:match("%p") and (M.config.delete_pairs.close_open.enable or M.config.delete_pairs.open_close.enable) then
-    local match_pairs = {}
-    if direction == _right then
-      match_pairs = (M.config.delete_pairs.close_open.enable and M.config.delete_pairs.close_open.match_pairs) or {}
-    elseif direction == _left then
-      match_pairs = (M.config.delete_pairs.open_close.enable and M.config.delete_pairs.open_close.match_pairs) or {}
-    end
+    local match_pairs = get_match_pairs(opts, direction)
 
     if match_pairs[char] then
       local found = false
@@ -438,6 +494,10 @@ local function delete(row, col, direction)
   --- It's necessary to recreate the <bs>/<del> behavior
   --- because it's not possible to map this function to <bs>/<del>
   --- and call `nvim_feedkeys` as a fallback without an infinite loop.
+  --- Other solutions like couting the empty spaces/tabs/lines not worked
+  --- because of `nvim_srtwidth` was count the tabs as spaces `tabwidth`
+  --- generating way more <bs>/<del> than required deleting more than
+  --- expected.
   local buf_rows = vim.api.nvim_buf_line_count(0)
 
   -- Empty buffer
@@ -468,29 +528,29 @@ local function delete(row, col, direction)
   vim.api.nvim_buf_set_text(_bufnr, row_start, col_start, row_end, col_end, {})
 end
 
-M.delete_previous_word = function()
+M.previous_word = function(opts)
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-
-  delete_word(row - 1, col, _left)
+  delete_word(row - 1, col, _left, opts)
 end
 
-M.delete_next_word = function()
+M.next_word = function(opts)
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-
-  delete_word(row - 1, col + 1, _right)
+  delete_word(row - 1, col + 1, _right, opts)
 end
 
-M.delete_previous = function()
+M.previous = function(opts)
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  delete(row - 1, col, _left)
+  delete(row - 1, col, _left, opts)
 end
 
-M.delete_next = function()
+M.next = function(opts)
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  delete(row - 1, col + 1, _right)
+  delete(row - 1, col + 1, _right, opts)
 end
 
-vim.keymap.set("i", utils.keys.bs, M.delete_previous)
-vim.keymap.set("i", utils.keys.del, M.delete_next)
+M.join = function(opts)
+  local row, _ = unpack(vim.api.nvim_win_get_cursor(0))
+  join_next_line(row - 1, opts)
+end
 
 return M
