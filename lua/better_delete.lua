@@ -30,6 +30,7 @@ M.config = {
     list = {
       {
         regex = true,
+        -- 13::26::45
         pattern = "%d%d::%d%d::%d%d",
         length = 10,
         replace = "",
@@ -37,8 +38,33 @@ M.config = {
       {
         regex = true,
         pattern = "%x%x%x%x%x%x",
-        length = nil,
+        length = 6,
         replace = "0x",
+      },
+    },
+  },
+  delete_pattern_pairs = {
+    enable = true,
+    list = {
+      {
+        lhs = { regex = false, pattern = "<%=", length = nil },
+        rhs = { regex = false, pattern = "%>", length = nil },
+        replace = "",
+        surround_check = nil,
+        -- surround_check = "%w",
+      },
+      {
+        lhs = { regex = false, pattern = "xxx", length = nil },
+        rhs = { regex = false, pattern = "yyy", length = nil },
+        replace = "",
+        surround_check = nil,
+        -- surround_check = "%w",
+      },
+      {
+        lhs = { regex = false, pattern = "yyy", length = nil },
+        rhs = { regex = false, pattern = "xxx", length = nil },
+        replace = "",
+        -- surround_check = "%w",
       },
     },
   },
@@ -387,24 +413,24 @@ end
 ---NOTE: For the regex the length must be provided to match correctly.
 ---@param item table
 ---@param line string
----@param row integer
 ---@param col integer
 ---@param direction integer
 ---@return boolean
-local function delete_pattern(item, line, row, col, direction)
+---@return integer
+---@return integer
+local function aux_delete_pattern(item, line, col, direction)
   local length = item.length or #item.pattern
-  local replace = item.replace or ""
   local col_start, col_end = col, col
 
   if direction == utils.direction.right then
     if col + length > #line then
       col_end = #line
     else
-      col_end = col + length
+      col_end = col + length - 1
     end
   elseif direction == utils.direction.left then
     if col - length < 0 then
-      return false
+      return false, -1, -1
     end
     col_start = col - length
   end
@@ -421,11 +447,83 @@ local function delete_pattern(item, line, row, col, direction)
     if direction == utils.direction.right then
       col_start = col_start - 1
     end
-    vim.api.nvim_buf_set_text(utils.bufnr, row, col_start, row, col_end, { replace })
-    return true
+    return true, col_start, col_end
   end
 
-  return false
+  return false, 0, 0
+end
+
+---Delete string slice from a given pattern. Matches regex and literal string.
+---NOTE: For the regex the length must be provided to match correctly.
+---@param item table
+---@param line string
+---@param row integer
+---@param col integer
+---@param direction integer
+---@return boolean
+local function delete_pattern(item, line, row, col, direction)
+  local found, col_start, col_end = aux_delete_pattern(item, line, col, direction)
+
+  if found then
+    local replace = item.replace or ""
+    vim.api.nvim_buf_set_text(utils.bufnr, row, col_start, row, col_end, { replace })
+  end
+
+  return found
+end
+
+---Delete string slice from a given pattern. Matches regex and literal string.
+---NOTE: For the regex the length must be provided to match correctly.
+---@param item table
+---@param line string
+---@param row integer
+---@param col integer
+---@param direction integer
+---@return boolean
+local function delete_pattern_pairs(item, line, row, col, direction)
+  local found_lhs, col_lhs_start, col_lhs_end = aux_delete_pattern(item.lhs, line, col, direction)
+
+  if found_lhs then
+    local _, peek_row, peek_col = peek_next_symbol(row, col, -direction)
+    local peek_line = vim.api.nvim_buf_get_lines(utils.bufnr, peek_row, peek_row + 1, false)[1] or ""
+    local found_rhs, col_rhs_start, col_rhs_end = aux_delete_pattern(item.rhs, peek_line, peek_col, -direction)
+
+    if found_rhs then
+      local row_start, col_start = row, col
+      local row_end, col_end = row, col
+      local peek_char = ""
+
+      if direction == utils.direction.right then
+        row_start = peek_row
+        col_start = col_rhs_start
+        col_end = col_lhs_end
+
+        if col_start > 0 then
+          peek_char = peek_line:sub(col_start - 1, col_start - 1)
+        end
+      elseif direction == utils.direction.left then
+        col_start = col_lhs_start
+        row_end = peek_row
+        col_end = col_rhs_end
+
+        if col_end < #line then
+          peek_char = peek_line:sub(col_end + 1, col_end + 1)
+        end
+      end
+
+      item.surround_check = item.surround_check or nil
+      if item.surround_check and peek_char:match(item.surround_check) then
+        return false
+      end
+
+      local replace = item.replace or ""
+      vim.api.nvim_buf_set_text(utils.bufnr, row_start, col_start, row_end, col_end, { replace })
+    end
+
+    return found_lhs and found_rhs
+  end
+
+  return found_lhs
 end
 
 ---Delete word or punctuation following the specified `direction`.
@@ -466,6 +564,18 @@ local function delete_word(row, col, direction, opts)
     return
   end
 
+  if M.config.delete_pattern_pairs.enable then
+    for _, item in ipairs(M.config.delete_pattern_pairs.list) do
+      if delete_pattern_pairs(item, line, row, col, direction) then
+        return
+      end
+    end
+  end
+
+  -- This should be executed after `delete_pattern_pairs` because it's
+  -- a fallback if the same pattern appear in both tables.
+  -- The reason is if this run first the expected behavior will not work
+  -- because the `lhs pattern` from pair will be deleted.
   if M.config.delete_pattern.enable then
     for _, item in ipairs(M.config.delete_pattern.list) do
       if delete_pattern(item, line, row, col, direction) then
