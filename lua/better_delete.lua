@@ -19,6 +19,8 @@ M.config = {
   delete_repeated_punctuation = {
     enable = true,
   },
+  passthrough_numbers = false,
+  passthrough_uppercase = false,
   join_line = {
     enable = true,
     separator = " ",
@@ -403,16 +405,6 @@ local function delete_word(row, col, direction, opts)
     return
   end
 
-  -- Digits
-  if delete_from_pattern(line, "%d", char, row, col, direction) then
-    return
-  end
-
-  -- Uppercase
-  if delete_from_pattern(line, "%u", char, row, col, direction) then
-    return
-  end
-
   local match_pairs = get_match_pairs(opts, direction)
 
   if delete_symbol_or_match_pair(match_pairs, char, row, col, direction) then
@@ -422,6 +414,20 @@ local function delete_word(row, col, direction, opts)
   local row_start, col_start = row, col
   local row_end, col_end = row, col
   local col_peek = col + direction
+
+  -- Digits
+  if M.config.passthrough_numbers then
+    col_peek = walk_line_matching_pattern(line, "%d", char, col, direction)
+  elseif delete_from_pattern(line, "%d", char, row, col, direction) then
+    return
+  end
+
+  -- Uppercase
+  if M.config.passthrough_uppercase then
+    col_peek = walk_line_matching_pattern(line, "%u", char, col, direction)
+  elseif delete_from_pattern(line, "%u", char, row, col, direction) then
+    return
+  end
 
   -- Limited to the current row
   -- stops if reachs BOL/EOL
