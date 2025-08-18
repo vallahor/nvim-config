@@ -54,6 +54,13 @@ M.config = {
         -- surround_check = "%w",
       },
       {
+        lhs = { regex = false, pattern = "#STRING", length = nil },
+        rhs = { regex = false, pattern = "#END", length = nil },
+        replace = "",
+        surround_check = nil,
+        -- surround_check = "%w",
+      },
+      {
         lhs = { regex = false, pattern = "xxx", length = nil },
         rhs = { regex = false, pattern = "yyy", length = nil },
         replace = "",
@@ -267,6 +274,7 @@ end
 ---@param col integer
 ---@param direction integer
 ---@return string
+---@return string
 ---@return integer
 ---@return integer
 local function peek_next_symbol(row, col, direction)
@@ -285,7 +293,7 @@ local function peek_next_symbol(row, col, direction)
     peek_char = line:sub(peek_col, peek_col)
   end
 
-  return peek_char, peek_row, peek_col
+  return line, peek_char, peek_row, peek_col
 end
 
 ---Peek the next char following the given `direction` returning if the `peeked char` and
@@ -303,7 +311,7 @@ local function find_match_pair(expected_symbol, row, col, direction)
   local row_start, col_start = row, col
   local row_end, col_end = row, col
 
-  local peek_char, peek_row, peek_col = peek_next_symbol(row_start, col_start, direction)
+  local _, peek_char, peek_row, peek_col = peek_next_symbol(row_start, col_start, direction)
   local found = peek_char == expected_symbol
   if found then
     if direction == utils.direction.right then
@@ -409,8 +417,7 @@ local function join_next_line(row, opts)
   )
 end
 
----Delete string slice from a given pattern. Matches regex and literal string.
----NOTE: For the regex the length must be provided to match correctly.
+---Finds if the pattern exists in the given line.
 ---@param item table
 ---@param line string
 ---@param col integer
@@ -418,7 +425,7 @@ end
 ---@return boolean
 ---@return integer
 ---@return integer
-local function aux_delete_pattern(item, line, col, direction)
+local function find_pattern_line(item, line, col, direction)
   local length = item.length or #item.pattern
   local col_start, col_end = col, col
 
@@ -462,7 +469,7 @@ end
 ---@param direction integer
 ---@return boolean
 local function delete_pattern(item, line, row, col, direction)
-  local found, col_start, col_end = aux_delete_pattern(item, line, col, direction)
+  local found, col_start, col_end = find_pattern_line(item, line, col, direction)
 
   if found then
     local replace = item.replace or ""
@@ -472,7 +479,8 @@ local function delete_pattern(item, line, row, col, direction)
   return found
 end
 
----Delete string slice from a given pattern. Matches regex and literal string.
+---Delete pairs from a given pattern. Matches regex and literal string.
+---Multiple lines.
 ---NOTE: For the regex the length must be provided to match correctly.
 ---@param item table
 ---@param line string
@@ -481,12 +489,11 @@ end
 ---@param direction integer
 ---@return boolean
 local function delete_pattern_pairs(item, line, row, col, direction)
-  local found_lhs, col_lhs_start, col_lhs_end = aux_delete_pattern(item.lhs, line, col, direction)
+  local found_lhs, col_lhs_start, col_lhs_end = find_pattern_line(item.lhs, line, col, direction)
 
   if found_lhs then
-    local _, peek_row, peek_col = peek_next_symbol(row, col, -direction)
-    local peek_line = vim.api.nvim_buf_get_lines(utils.bufnr, peek_row, peek_row + 1, false)[1] or ""
-    local found_rhs, col_rhs_start, col_rhs_end = aux_delete_pattern(item.rhs, peek_line, peek_col, -direction)
+    local peek_line, _, peek_row, peek_col = peek_next_symbol(row, col, -direction)
+    local found_rhs, col_rhs_start, col_rhs_end = find_pattern_line(item.rhs, peek_line, peek_col, -direction)
 
     if found_rhs then
       local row_start, col_start = row, col
