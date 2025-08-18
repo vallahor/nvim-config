@@ -22,9 +22,25 @@ M.config = {
   passthrough_numbers = false,
   passthrough_uppercase = false,
   join_line = {
-    enable = true,
     separator = " ",
     times = 1,
+  },
+  delete_pattern = {
+    enable = true,
+    list = {
+      {
+        regex = true,
+        pattern = "%d%d::%d%d::%d%d",
+        length = 10,
+        replace = "",
+      },
+      {
+        regex = true,
+        pattern = "%x%x%x%x%x%x",
+        length = nil,
+        replace = "0x",
+      },
+    },
   },
   delete_pairs = {
     open_close = {
@@ -367,6 +383,51 @@ local function join_next_line(row, opts)
   )
 end
 
+---Delete string slice from a given pattern. Matches regex and literal string.
+---NOTE: For the regex the length must be provided to match correctly.
+---@param item table
+---@param line string
+---@param row integer
+---@param col integer
+---@param direction integer
+---@return boolean
+local function delete_pattern(item, line, row, col, direction)
+  local length = item.length or #item.pattern
+  local replace = item.replace or ""
+  local col_start, col_end = col, col
+
+  if direction == utils.direction.right then
+    if col + length > #line then
+      col_end = #line
+    else
+      col_end = col + length
+    end
+  elseif direction == utils.direction.left then
+    if col - length < 0 then
+      return false
+    end
+    col_start = col - length
+  end
+
+  local slice = line:sub(col_start, col_end)
+  local match = false
+  if item.regex then
+    match = slice:match(item.pattern)
+  else
+    match = slice == item.pattern
+  end
+
+  if match then
+    if direction == utils.direction.right then
+      col_start = col_start - 1
+    end
+    vim.api.nvim_buf_set_text(utils.bufnr, row, col_start, row, col_end, { replace })
+    return true
+  end
+
+  return false
+end
+
 ---Delete word or punctuation following the specified `direction`.
 ---@param row integer
 ---@param col integer
@@ -405,8 +466,15 @@ local function delete_word(row, col, direction, opts)
     return
   end
 
-  local match_pairs = get_match_pairs(opts, direction)
+  if M.config.delete_pattern.enable then
+    for _, item in ipairs(M.config.delete_pattern.list) do
+      if delete_pattern(item, line, row, col, direction) then
+        return
+      end
+    end
+  end
 
+  local match_pairs = get_match_pairs(opts, direction)
   if delete_symbol_or_match_pair(match_pairs, char, row, col, direction) then
     return
   end
