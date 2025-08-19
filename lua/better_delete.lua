@@ -127,7 +127,7 @@ local function concat_tables(t1, t2)
   return t1
 end
 
-local function in_ignored_list(filetype, item)
+local function in_ignore_list(filetype, item)
   item = item.pattern or (item.lhs and item.lhs.pattern) or item
   local found = false
   if M.config.filetypes[filetype] and M.config.filetypes[filetype].ignore then
@@ -421,10 +421,9 @@ end
 
 ---Join line consuming spaces, tabs, and lines using a separator.
 ---@param row integer
----@param opts table
-local function join_next_line(row, opts)
-  opts = opts or {}
-  opts.join_line = opts.join_line or M.config.join_line
+local function join_next_line(row)
+  local opts = {}
+  opts.join_line = M.config.join_line
 
   local line = vim.api.nvim_get_current_line()
   consume_spaces_and_lines(
@@ -596,13 +595,7 @@ end
 ---@param row integer
 ---@param col integer
 ---@param direction integer
----@param opts table
-local function delete_word(row, col, direction, opts)
-  opts = opts or {}
-  opts.open_close = opts.open_close or {}
-  opts.close_open = opts.close_open or {}
-  local bufnr = vim.api.nvim_get_current_buf()
-  local filetype = vim.bo[bufnr].filetype
+local function delete_word(row, col, direction)
   local line = vim.api.nvim_get_current_line()
 
   local mark = vim.api.nvim_replace_termcodes("<c-g>u", true, false, true)
@@ -625,6 +618,9 @@ local function delete_word(row, col, direction, opts)
 
   vim.api.nvim_feedkeys(mark, "i", false)
 
+  local bufnr = vim.api.nvim_get_current_buf()
+  local filetype = vim.bo[bufnr].filetype
+  local config_filetype = M.config.filetypes[filetype]
   local char = line:sub(col, col)
 
   if char:match("%s") then
@@ -633,8 +629,15 @@ local function delete_word(row, col, direction, opts)
   end
 
   if M.config.delete_pattern_pairs.enable then
+    if config_filetype then
+      for _, item in ipairs(config_filetype.delete_pattern_pairs) do
+        if delete_pattern_pairs(item, line, row, col, direction) then
+          return
+        end
+      end
+    end
     for _, item in ipairs(M.config.delete_pattern_pairs.patterns) do
-      if not in_ignored_list(filetype, item) then
+      if not in_ignore_list(filetype, item) then
         if delete_pattern_pairs(item, line, row, col, direction) then
           return
         end
@@ -647,8 +650,15 @@ local function delete_word(row, col, direction, opts)
   -- The reason is if this run first the expected behavior will not work
   -- because the `lhs pattern` from pair will be deleted.
   if M.config.delete_pattern.enable then
+    if config_filetype then
+      for _, item in ipairs(config_filetype.delete_patterns) do
+        if delete_pattern(item, line, row, col, direction) then
+          return
+        end
+      end
+    end
     for _, item in ipairs(M.config.delete_pattern.patterns) do
-      if not in_ignored_list(filetype, item) then
+      if not in_ignore_list(filetype, item) then
         if delete_pattern(item, line, row, col, direction) then
           return
         end
@@ -656,8 +666,13 @@ local function delete_word(row, col, direction, opts)
     end
   end
 
-  if not in_ignored_list(filetype, char) then
-    local match_pairs = get_match_pairs(opts, direction)
+  if not in_ignore_list(filetype, char) then
+    if config_filetype then
+      if delete_symbol_or_match_pair(config_filetype.delete_pairs, char, row, col, direction) then
+        return
+      end
+    end
+    local match_pairs = get_match_pairs({}, direction)
     if delete_symbol_or_match_pair(match_pairs, char, row, col, direction) then
       return
     end
@@ -722,12 +737,7 @@ end
 ---@param row integer
 ---@param col integer
 ---@param direction integer
----@param opts table
-local function delete(row, col, direction, opts)
-  opts = opts or {}
-  opts.open_close = opts.open_close or {}
-  opts.close_open = opts.close_open or {}
-
+local function delete(row, col, direction)
   local line = vim.api.nvim_get_current_line()
   local char = line:sub(col, col)
 
@@ -735,7 +745,7 @@ local function delete(row, col, direction, opts)
   local row_end, col_end = row, col
 
   if char:match("%p") and (M.config.delete_pairs.close_open.enable or M.config.delete_pairs.open_close.enable) then
-    local match_pairs = get_match_pairs(opts, direction)
+    local match_pairs = get_match_pairs({}, direction)
 
     if match_pairs[char] then
       local found = false
@@ -787,29 +797,29 @@ local function delete(row, col, direction, opts)
   vim.api.nvim_buf_set_text(utils.bufnr, row_start, col_start, row_end, col_end, {})
 end
 
-M.previous_word = function(opts)
+M.previous_word = function()
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  delete_word(row - 1, col, utils.direction.left, opts)
+  delete_word(row - 1, col, utils.direction.left)
 end
 
-M.next_word = function(opts)
+M.next_word = function()
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  delete_word(row - 1, col + 1, utils.direction.right, opts)
+  delete_word(row - 1, col + 1, utils.direction.right)
 end
 
-M.previous = function(opts)
+M.previous = function()
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  delete(row - 1, col, utils.direction.left, opts)
+  delete(row - 1, col, utils.direction.left)
 end
 
-M.next = function(opts)
+M.next = function()
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  delete(row - 1, col + 1, utils.direction.right, opts)
+  delete(row - 1, col + 1, utils.direction.right)
 end
 
-M.join = function(opts)
+M.join = function()
   local row, _ = unpack(vim.api.nvim_win_get_cursor(0))
-  join_next_line(row - 1, opts)
+  join_next_line(row - 1)
 end
 
 return M
