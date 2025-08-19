@@ -27,7 +27,7 @@ M.config = {
   },
   delete_pattern = {
     enable = true,
-    list = {
+    patterns = {
       {
         -- 13::26::45
         pattern = "%d%d::%d%d::%d%d",
@@ -41,13 +41,26 @@ M.config = {
   },
   delete_pattern_pairs = {
     enable = true,
-    list = {
+    patterns = {
       {
-        lhs = { pattern = "<%=" },
-        rhs = { pattern = "%>" },
+        -- lhs = { pattern = ".*(<(%w+).*>)", save_matches = { ignore = { 1 } } },
+        -- lhs = { pattern = ".*(<(%w+)>)", save_matches = { ignore = { 1 } } },
+        lhs = { pattern = ".*(<(%w+) (%w+)>)", save_matches = { ignore = { 1 }, order = { [3] = 1, [2] = 2 } } },
+        rhs = { format = "</%s %s>" },
+        replace = "ihul",
+        surround_check = "%w",
+      },
+      {
+        lhs = { pattern = "<%%=" },
+        rhs = { pattern = "%%>" },
         replace = "",
-        surround_check = nil,
-        -- surround_check = "%w",
+        surround_check = "%w",
+      },
+      {
+        rhs = { pattern = "<%%=" },
+        lhs = { pattern = "%%>" },
+        replace = "",
+        surround_check = "%w",
       },
       {
         lhs = { pattern = "#STRING" },
@@ -419,39 +432,62 @@ end
 ---@param col integer
 ---@param direction integer
 ---@return boolean
----@return table
 ---@return integer
 ---@return integer
 local function find_pattern_line(item, line, col, direction)
   item.inject_matches = item.inject_matches or nil
   local col_start, col_end = col, col
 
-  local pattern = item.pattern
+  local pattern = item.pattern or ""
 
-  if item.inject_matches then
-    pattern = string.format(pattern, table.unpack(item.inject_matches))
+  if item.inject_matches and #item.inject_matches >= 1 then
+    pattern = string.format(item.format, table.unpack(item.inject_matches))
   end
 
   if direction == utils.direction.right then
-    pattern = "^" .. pattern .. (item.surround_check or "")
+    pattern = "^" .. pattern
     col_end = #line
   elseif direction == utils.direction.left then
-    pattern = (item.surround_check or "") .. pattern .. "$"
+    pattern = pattern .. "$"
     col_start = 1
   end
 
   local slice = line:sub(col_start, col_end)
-  local match = slice:match(pattern)
+  local match = ""
+
+  if item.save_matches then
+    item.save_matches.items = {}
+    if item.save_matches.order then
+      local items_ordered = {}
+      match = slice:gsub(pattern, function(...)
+        local matches = { ... }
+        for i = 1, #matches do
+          local index = item.save_matches.order[i] or i
+          items_ordered[index] = matches[i]
+        end
+
+        return matches[1]
+      end)
+
+      for _, matched in pairs(items_ordered) do
+        table.insert(item.save_matches.items, matched)
+      end
+    else
+      match = slice:gsub(pattern, function(...)
+        local matches = { ... }
+        for i = 1, #matches do
+          table.insert(item.save_matches.items, matches[i])
+        end
+
+        return matches[1]
+      end)
+    end
+  else
+    match = slice:match(pattern)
+  end
 
   if match then
     local length = #match
-    local result_matches = {}
-
-    if item.save_matches then
-      for result_match in string.gsub(slice, pattern, item.save_matches) do
-        table.insert(result_matches, result_match)
-      end
-    end
 
     if direction == utils.direction.right then
       col_start = col - 1
@@ -460,10 +496,10 @@ local function find_pattern_line(item, line, col, direction)
       col_start = col - length
     end
 
-    return true, result_matches, col_start, col_end
+    return true, col_start, col_end
   end
 
-  return false, {}, 0, 0
+  return false, 0, 0
 end
 
 ---Delete string slice from a given pattern. Matches regex and literal string.
@@ -475,7 +511,7 @@ end
 ---@param direction integer
 ---@return boolean
 local function delete_pattern(item, line, row, col, direction)
-  local found, _, col_start, col_end = find_pattern_line(item, line, col, direction)
+  local found, col_start, col_end = find_pattern_line(item, line, col, direction)
 
   if found then
     local replace = item.replace or ""
@@ -495,28 +531,44 @@ end
 ---@param direction integer
 ---@return boolean
 local function delete_pattern_pairs(item, line, row, col, direction)
-  local found_lhs, result_matches, col_lhs_start, col_lhs_end = find_pattern_line(item.lhs, line, col, direction)
+  local found_lhs, col_lhs_start, col_lhs_end = find_pattern_line(item.lhs, line, col, direction)
 
   if found_lhs then
     if item.lhs.save_matches then
-      item.rhs.inject_matches = result_matches
+      -- When the regex gone wrong just return that didn't found.
+      -- It's easy to debug.
+      if #item.lhs.save_matches.items < 1 then
+        return false
+      end
+
+      item.rhs.inject_matches = item.lhs.save_matches.items
     end
 
     local peek_line, _, peek_row, peek_col = peek_next_symbol(row, col, -direction)
-    local found_rhs, _, col_rhs_start, col_rhs_end = find_pattern_line(item.rhs, peek_line, peek_col, -direction)
+    local found_rhs, col_rhs_start, col_rhs_end = find_pattern_line(item.rhs, peek_line, peek_col, -direction)
 
     if found_rhs then
       local row_start, col_start = row, col
       local row_end, col_end = row, col
+      local peek_char = ""
 
       if direction == utils.direction.right then
         row_start = peek_row
         col_start = col_rhs_start
         col_end = col_lhs_end
+
+        peek_char = peek_line:sub(col_start, col_start)
       elseif direction == utils.direction.left then
         col_start = col_lhs_start
         row_end = peek_row
         col_end = col_rhs_end
+
+        peek_char = peek_line:sub(col_end + 1, col_end + 1)
+      end
+
+      item.surround_check = item.surround_check or nil
+      if item.surround_check and peek_char:match(item.surround_check) then
+        return false
       end
 
       local replace = item.replace or ""
@@ -568,7 +620,7 @@ local function delete_word(row, col, direction, opts)
   end
 
   if M.config.delete_pattern_pairs.enable then
-    for _, item in ipairs(M.config.delete_pattern_pairs.list) do
+    for _, item in ipairs(M.config.delete_pattern_pairs.patterns) do
       if delete_pattern_pairs(item, line, row, col, direction) then
         return
       end
@@ -580,7 +632,7 @@ local function delete_word(row, col, direction, opts)
   -- The reason is if this run first the expected behavior will not work
   -- because the `lhs pattern` from pair will be deleted.
   if M.config.delete_pattern.enable then
-    for _, item in ipairs(M.config.delete_pattern.list) do
+    for _, item in ipairs(M.config.delete_pattern.patterns) do
       if delete_pattern(item, line, row, col, direction) then
         return
       end
