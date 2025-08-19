@@ -59,7 +59,7 @@ M.config = {
       },
       {
         pattern = "%x%x%x%x%x%x",
-        replace = "0x",
+        before = "0x",
       },
     },
   },
@@ -69,8 +69,13 @@ M.config = {
       {
         -- lhs = { pattern = ".*(<(%w+).*>)", save_matches = { ignore = { 1 } } },
         -- lhs = { pattern = ".*(<(%w+)>)", save_matches = { ignore = { 1 } } },
-        lhs = { apply_before = ".*", pattern = "<(%w+) (%w+)>", save_matches = { order = { [2] = 1, [1] = 2 } } },
-        rhs = { apply_after = ".*", format = "</%s %s>" },
+        lhs = {
+          force_rule_before = "",
+          before = "",
+          pattern = "<(%w+) (%w+)>",
+          save_matches = { order = { [2] = 1, [1] = 2 } },
+        },
+        rhs = { force_rule_after = "", after = "", format = "</%s %s>" },
         replace = "ihul",
         surround_check = "%w",
       },
@@ -474,10 +479,10 @@ local function find_pattern_line(item, line, col, direction)
   end
 
   if direction == utils.direction.right then
-    pattern = "^" .. pattern .. (item.apply_after or "")
+    pattern = "^" .. pattern .. (item.after or "") .. (item.force_rule_after or ".*")
     col_end = #line
   elseif direction == utils.direction.left then
-    pattern = (item.apply_before or "") .. pattern .. "$"
+    pattern = (item.force_rule_before or ".*") .. (item.before or "") .. pattern .. "$"
     col_start = 1
   end
 
