@@ -556,15 +556,15 @@ local function find_pattern_line(item, line, col, direction)
   end
 
   if match then
+    -- Can safelly sub/add the length because the line
+    -- has the given pattern.
     local length = #match
-
     if direction == utils.direction.right then
       col_start = col - 1
       col_end = col + length - 1
     elseif direction == utils.direction.left then
       col_start = col - length
     end
-
     return true, col_start, col_end
   end
 
@@ -605,7 +605,6 @@ local function delete_pattern_pairs(item, line, row, col, direction)
   if found_lhs then
     if item.lhs.save_matches then
       -- When the regex gone wrong just return that didn't found.
-      -- It's easy to debug.
       if #item.lhs.save_matches.items < 1 then
         return false
       end
@@ -613,30 +612,32 @@ local function delete_pattern_pairs(item, line, row, col, direction)
       item.rhs.inject_matches = item.lhs.save_matches.items
     end
 
-    local line_found, _, row_pos, col_pos = peek_non_whitespace(row, col, -direction)
-    local found_rhs, col_rhs_start, col_rhs_end = find_pattern_line(item.rhs, line_found, col_pos, -direction)
+    local peeked_line, _, row_pos, col_pos = peek_non_whitespace(row, col, -direction)
+    local found_rhs, col_rhs_start, col_rhs_end = find_pattern_line(item.rhs, peeked_line, col_pos, -direction)
 
     if found_rhs then
       local row_start, col_start = row, col
       local row_end, col_end = row, col
-      local peek_char = ""
+      local surround_char = ""
 
       if direction == utils.direction.right then
         row_start = row_pos
         col_start = col_rhs_start
         col_end = col_lhs_end
 
-        peek_char = line_found:sub(col_start, col_start)
+        surround_char = peeked_line:sub(col_start, col_start)
       elseif direction == utils.direction.left then
         col_start = col_lhs_start
         row_end = row_pos
         col_end = col_rhs_end
 
-        peek_char = line_found:sub(col_end + 1, col_end + 1)
+        surround_char = peeked_line:sub(col_end + 1, col_end + 1)
       end
 
+      -- Surround Check apply a char pattern matchs
+      -- to garantee that not matching the wrong `rhs`.
       item.surround_check = item.surround_check or nil
-      if item.surround_check and peek_char:match(item.surround_check) then
+      if item.surround_check and surround_char:match(item.surround_check) then
         return false
       end
 
@@ -659,11 +660,18 @@ local function delete_word(row, col, direction)
 
   local mark = vim.api.nvim_replace_termcodes("<c-g>u", true, false, true)
 
+  -- Check if BOL/EOF.
   if col == 0 or col > #line then
     if M.config.delete_empty_lines_until_next_char.enable then
+      -- Consume spaces and lines til the next non whitespace char
+      -- or begin of the buffer or EOF.
       vim.api.nvim_feedkeys(mark, "i", false)
-      consume_spaces_and_lines(row, col, direction, {})
+      consume_spaces_and_lines(row, col, direction)
     else
+      -- If `delete_empty_lines_until_next_char` is disabled
+      -- it fallback to <bs>/<del>.
+      --
+      -- Note: if that keys are set in the keymap it will fallback to them
       if direction == utils.direction.right then
         local delete = vim.api.nvim_replace_termcodes(utils.keys.del, true, false, true)
         vim.api.nvim_feedkeys(delete, "i", false)
@@ -677,9 +685,6 @@ local function delete_word(row, col, direction)
 
   vim.api.nvim_feedkeys(mark, "i", false)
 
-  local bufnr = vim.api.nvim_get_current_buf()
-  local filetype = vim.bo[bufnr].filetype
-  local config_filetype = M.config.filetypes[filetype]
   local char = line:sub(col, col)
 
   if char:match("%s") then
@@ -687,8 +692,13 @@ local function delete_word(row, col, direction)
     return
   end
 
+  local bufnr = vim.api.nvim_get_current_buf()
+  local filetype = vim.bo[bufnr].filetype
+  local config_filetype = M.config.filetypes[filetype]
   local filetype_match, config_match = get_match_pairs(config_filetype, direction)
 
+  -- First look if there are any config related with the filetype
+  -- if nothing matches fallback to global config.
   if config_filetype and config_filetype.enable then
     if config_filetype.delete_pattern_pairs and config_filetype.delete_pattern_pairs.patterns then
       for _, item in ipairs(config_filetype.delete_pattern_pairs.patterns) do
@@ -711,6 +721,16 @@ local function delete_word(row, col, direction)
     end
   end
 
+  if M.config.delete_pattern_pairs.enable then
+    for _, item in ipairs(M.config.delete_pattern_pairs.patterns) do
+      if not in_ignore_list(filetype, item) then
+        if delete_pattern_pairs(item, line, row, col, direction) then
+          return
+        end
+      end
+    end
+  end
+
   -- This should be executed after `delete_pattern_pairs` because it's
   -- a fallback if the same pattern appear in both tables.
   -- The reason is if this run first the expected behavior will not work
@@ -719,15 +739,6 @@ local function delete_word(row, col, direction)
     for _, item in ipairs(M.config.delete_pattern.patterns) do
       if not in_ignore_list(filetype, item) then
         if delete_pattern(item, line, row, col, direction) then
-          return
-        end
-      end
-    end
-  end
-  if M.config.delete_pattern_pairs.enable then
-    for _, item in ipairs(M.config.delete_pattern_pairs.patterns) do
-      if not in_ignore_list(filetype, item) then
-        if delete_pattern_pairs(item, line, row, col, direction) then
           return
         end
       end
@@ -821,6 +832,8 @@ local function delete(row, col, direction)
 
     if not in_ignore_list(filetype, char) then
       local found = false
+      -- Looks first if there some rule in filetype config and if not found
+      -- fallback to the global config.
       if filetype_match[char] then
         found, row_start, col_start, row_end, col_end = find_match_pair(filetype_match[char], row, col, -direction)
       end
