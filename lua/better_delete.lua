@@ -34,6 +34,7 @@ M.config = {
           enable = true,
           match_pairs = {
             [">"] = "%",
+            ["("] = ")",
           },
         },
         close_open = {},
@@ -153,18 +154,22 @@ local function get_match_pairs(config_filetype, direction)
   local filetype_match_pairs = {}
 
   if direction == utils.direction.right then
-    config_match_pairs = M.config.delete_pairs.close_open.enable and M.config.delete_pairs.close_open.match_pairs
+    config_match_pairs = (M.config.delete_pairs.close_open.enable and M.config.delete_pairs.close_open.match_pairs)
+      or {}
 
     if config_filetype then
-      filetype_match_pairs = config_filetype.delete_pairs.close_open.enable
-        and config_filetype.delete_pairs.close_open.match_pairs
+      filetype_match_pairs = (
+        config_filetype.delete_pairs.close_open.enable and config_filetype.delete_pairs.close_open.match_pairs
+      ) or {}
     end
   elseif direction == utils.direction.left then
-    config_match_pairs = M.config.delete_pairs.open_close.enable and M.config.delete_pairs.open_close.match_pairs
+    config_match_pairs = (M.config.delete_pairs.open_close.enable and M.config.delete_pairs.open_close.match_pairs)
+      or {}
 
     if config_filetype then
-      filetype_match_pairs = config_filetype.delete_pairs.open_close.enable
-        and config_filetype.delete_pairs.open_close.match_pairs
+      filetype_match_pairs = (
+        config_filetype.delete_pairs.open_close.enable and config_filetype.delete_pairs.open_close.match_pairs
+      ) or {}
     end
   end
 
@@ -768,19 +773,16 @@ local function delete(row, col, direction)
   local row_start, col_start = row, col
   local row_end, col_end = row, col
 
-  if char:match("%p") and (M.config.delete_pairs.close_open.enable or M.config.delete_pairs.open_close.enable) then
+  if char:match("%p") then
     local bufnr = vim.api.nvim_get_current_buf()
     local filetype = vim.bo[bufnr].filetype
     local config_filetype = M.config.filetypes[filetype]
+    local filetype_match, config_match = get_match_pairs(config_filetype, direction)
 
     if not in_ignore_list(filetype, char) then
-      local filetype_match, config_match = get_match_pairs(config_filetype, direction)
-
       local found = false
-      if filetype_match then
-        if filetype_match[char] then
-          found, row_start, col_start, row_end, col_end = find_match_pair(filetype_match[char], row, col, -direction)
-        end
+      if filetype_match[char] then
+        found, row_start, col_start, row_end, col_end = find_match_pair(filetype_match[char], row, col, -direction)
       end
       if not found and config_match[char] then
         found, row_start, col_start, row_end, col_end = find_match_pair(config_match[char], row, col, -direction)
