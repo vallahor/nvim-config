@@ -69,12 +69,22 @@ M.config = {
       {
         -- 13::26::45
         pattern = "%d%d::%d%d::%d%d",
-        replace = "",
       },
       {
-        pattern = "%x%x%x%x%x%x",
-        before = "0[xb]",
-        after = "[xb]0",
+        pattern = "(%x%x)(%x%x)(%x%x)(%x%x)argb",
+        order = { [4] = 1, [3] = 2, [2] = 3, [1] = 4 },
+        format = "%s%s%s%s",
+        capture_regex = true,
+        -- before = "0[xb]",
+        -- after = "[xb]0",
+      },
+      {
+        pattern = "(%x%x)(%x%x)(%x%x)(%x%x)rgba",
+        order = { [4] = 1, [3] = 2, [2] = 3, [1] = 4 },
+        format = "%s%s%s%s",
+        capture_regex = true,
+        -- before = "0[xb]",
+        -- after = "[xb]0",
       },
     },
   },
@@ -88,10 +98,10 @@ M.config = {
           rule_before = "",
           before = "",
           pattern = "<(%w+) (%w+)>",
-          save_matches = { order = { [2] = 1, [1] = 2 } },
+          order = { [2] = 1, [1] = 2 },
+          capture_regex = true,
         },
         rhs = { rule_after = "", after = "", format = "</%s %s>" },
-        replace = "ihul",
         surround_check = "%w",
       },
       {
@@ -482,31 +492,17 @@ end
 ---@param col integer
 ---@param direction integer
 ---@return boolean
+---@return table
 ---@return integer
 ---@return integer
 local function find_pattern_line(item, line, col, direction)
-  item.inject_matches = item.inject_matches or nil
   local col_start, col_end = col, col
 
-  local pattern = ""
-
-  if item.inject_matches and #item.inject_matches >= 1 then
-    -- Generate a pattern from `lhs` captures.
-    -- This is necessary when the deleted pattern appears in the `rhs`
-    -- with the same name or structure with variable sized patterns .
-    --
-    -- Example: <div>|</div>
-    -- The pattern <(%w).*> captures %w which can be length.
-    -- If we simply use </(%w)> in `rhs`, it could match the wrong string,
-    -- e.g., <div>|</main>.
-    --
-    -- To fix this the captured %w in `lhs` id inject in
-    -- the `rhs` pattern using </%s> which producing a string
-    -- that corretly matches the first pattern.
-    pattern = string.format(item.format, table.unpack(item.inject_matches))
-  else
-    pattern = "(" .. item.pattern .. ")"
+  if not item.formated and not item.pattern then
+    return false, {}, -1, -1
   end
+
+  local pattern = item.formated or ("(" .. item.pattern .. ")")
 
   -- Adds wildcards in the pattern and aditional rules.
   -- Right: "^(pattern)item.after|[item.rule_after|.*]"
@@ -525,11 +521,11 @@ local function find_pattern_line(item, line, col, direction)
 
   local slice = line:sub(col_start, col_end)
   local match = ""
+  local matches = {}
 
-  if item.save_matches then
+  if item.capture_regex then
     -- Save the matches to insert in the `rhs` format string.
-    item.save_matches.items = {}
-    if item.save_matches.order then
+    if item.order then
       -- If there are some capture ordering that need to be
       -- followed like `"%2 %1 %3"` it appears in
       -- `item.save_matches.order` as a table linking the
@@ -542,27 +538,27 @@ local function find_pattern_line(item, line, col, direction)
       -- the `length` after the match.
       local items_ordered = {}
       match = slice:gsub(pattern, function(...)
-        local matches = { ... }
-        for i = 2, #matches do
-          local index = item.save_matches.order[i - 1] or i
-          items_ordered[index] = matches[i]
+        local result_matches = { ... }
+        for i = 2, #result_matches do
+          local index = item.order[i - 1] or i
+          items_ordered[index] = result_matches[i]
         end
-        return matches[1]
+        return result_matches[1]
       end)
 
       -- Flatten the `items_ordered` table into the
       -- actual captures from the regex.
       for _, matched in pairs(items_ordered) do
-        table.insert(item.save_matches.items, matched)
+        table.insert(matches, matched)
       end
     else
-      -- Directly insert the captures into `item.save_matches.items`.
+      -- Directly insert the captures into `matches`.
       match = slice:gsub(pattern, function(...)
-        local matches = { ... }
-        for i = 2, #matches do
-          table.insert(item.save_matches.items, matches[i])
+        local result_matches = { ... }
+        for i = 2, #result_matches do
+          table.insert(matches, result_matches[i])
         end
-        return matches[1]
+        return result_matches[1]
       end)
     end
   else
@@ -579,10 +575,10 @@ local function find_pattern_line(item, line, col, direction)
     elseif direction == utils.direction.left then
       col_start = col - length
     end
-    return true, col_start, col_end
+    return true, matches, col_start, col_end
   end
 
-  return false, 0, 0
+  return false, {}, 0, 0
 end
 
 ---Delete string slice from a given pattern. Matches regex and literal string.
@@ -594,9 +590,13 @@ end
 ---@param direction integer
 ---@return boolean
 local function delete_pattern(item, line, row, col, direction)
-  local found, col_start, col_end = find_pattern_line(item, line, col, direction)
+  local found, matches, col_start, col_end = find_pattern_line(item, line, col, direction)
 
   if found then
+    if item.format and #matches > 0 then
+      item.replace = string.format(item.format, table.unpack(matches))
+    end
+
     local replace = item.replace or ""
     vim.api.nvim_buf_set_text(utils.bufnr, row, col_start, row, col_end, { replace })
   end
@@ -614,20 +614,27 @@ end
 ---@param direction integer
 ---@return boolean
 local function delete_pattern_pairs(item, line, row, col, direction)
-  local found_lhs, col_lhs_start, col_lhs_end = find_pattern_line(item.lhs, line, col, direction)
+  local found_lhs, matches, col_lhs_start, col_lhs_end = find_pattern_line(item.lhs, line, col, direction)
 
   if found_lhs then
-    if item.lhs.save_matches then
-      -- When the regex gone wrong just return that didn't found.
-      if #item.lhs.save_matches.items < 1 then
-        return false
-      end
-
-      item.rhs.inject_matches = item.lhs.save_matches.items
+    if item.rhs.format and #matches > 0 then
+      -- Generate a pattern from `lhs` captures.
+      -- This is necessary when the deleted pattern appears in the `rhs`
+      -- with the same name or structure with variable sized patterns .
+      --
+      -- Example: <div>|</div>
+      -- The pattern <(%w).*> captures %w which can be length.
+      -- If we simply use </(%w)> in `rhs`, it could match the wrong string,
+      -- e.g., <div>|</main>.
+      --
+      -- To fix this the captured %w in `lhs` id inject in
+      -- the `rhs` pattern using </%s> which producing a string
+      -- that corretly matches the first pattern.
+      item.rhs.formated = string.format(item.rhs.format, table.unpack(matches))
     end
 
     local peeked_line, _, row_pos, col_pos = peek_non_whitespace(row, col, -direction)
-    local found_rhs, col_rhs_start, col_rhs_end = find_pattern_line(item.rhs, peeked_line, col_pos, -direction)
+    local found_rhs, _, col_rhs_start, col_rhs_end = find_pattern_line(item.rhs, peeked_line, col_pos, -direction)
 
     if found_rhs then
       local row_start, col_start = row, col
