@@ -27,10 +27,25 @@ M.config = {
   },
   filetypes = {
     ["lua"] = {
+      enable = true,
       ignore = { "'", "%d%d::%d%d::%d%d", "<%%=" },
-      delete_pairs = {},
-      delete_patterns = {},
-      delete_patterns_pairs = {},
+      delete_pairs = {
+        open_close = {
+          enable = true,
+          match_pairs = {
+            [">"] = "%",
+          },
+        },
+        close_open = {},
+      },
+      delete_patterns = {
+        enable = true,
+        patterns = {},
+      },
+      delete_patterns_pairs = {
+        enable = true,
+        patterns = {},
+      },
     },
   },
   delete_pattern = {
@@ -120,13 +135,6 @@ M.config = {
   },
 }
 
-local function concat_tables(t1, t2)
-  for k, v in pairs(t2) do
-    t1[k] = v
-  end
-  return t1
-end
-
 local function in_ignore_list(filetype, item)
   item = item.pattern or (item.lhs and item.lhs.pattern) or item
   local found = false
@@ -140,19 +148,27 @@ M.setup = function(config)
   M.config = vim.tbl_deep_extend("force", vim.deepcopy(M.config), config or {})
 end
 
-local function get_match_pairs(opts, direction)
-  local match_pairs = {}
+local function get_match_pairs(config_filetype, direction)
+  local config_match_pairs = {}
+  local filetype_match_pairs = {}
+
   if direction == utils.direction.right then
-    if M.config.delete_pairs.close_open.enable then
-      match_pairs = { M.config.delete_pairs.close_open.match_pairs, opts.close_open }
+    config_match_pairs = M.config.delete_pairs.close_open.enable and M.config.delete_pairs.close_open.match_pairs
+
+    if config_filetype then
+      filetype_match_pairs = config_filetype.delete_pairs.close_open.enable
+        and config_filetype.delete_pairs.close_open.match_pairs
     end
   elseif direction == utils.direction.left then
-    if M.config.delete_pairs.open_close.enable then
-      match_pairs = { M.config.delete_pairs.open_close.match_pairs, opts.open_close }
+    config_match_pairs = M.config.delete_pairs.open_close.enable and M.config.delete_pairs.open_close.match_pairs
+
+    if config_filetype then
+      filetype_match_pairs = config_filetype.delete_pairs.open_close.enable
+        and config_filetype.delete_pairs.open_close.match_pairs
     end
   end
 
-  return table.unpack(match_pairs)
+  return filetype_match_pairs, config_match_pairs
 end
 
 local function eat_whitespace(line, col, direction)
@@ -626,14 +642,44 @@ local function delete_word(row, col, direction)
     return
   end
 
-  if M.config.delete_pattern_pairs.enable then
-    if config_filetype and config_filetype.delete_pattern_pairs then
-      for _, item in ipairs(config_filetype.delete_pattern_pairs) do
+  local filetype_match, config_match = get_match_pairs(config_filetype, direction)
+
+  if config_filetype and config_filetype.enable then
+    if config_filetype.delete_pattern_pairs and config_filetype.delete_pattern_pairs.patterns then
+      for _, item in ipairs(config_filetype.delete_pattern_pairs.patterns) do
         if delete_pattern_pairs(item, line, row, col, direction) then
           return
         end
       end
     end
+
+    if config_filetype.delete_patterns and config_filetype.delete_patterns.patterns then
+      for _, item in ipairs(config_filetype.delete_patterns.patterns) do
+        if delete_pattern(item, line, row, col, direction) then
+          return
+        end
+      end
+    end
+
+    if delete_symbol_or_match_pair(filetype_match, char, row, col, direction) then
+      return
+    end
+  end
+
+  -- This should be executed after `delete_pattern_pairs` because it's
+  -- a fallback if the same pattern appear in both tables.
+  -- The reason is if this run first the expected behavior will not work
+  -- because the `lhs pattern` from pair will be deleted.
+  if M.config.delete_pattern.enable then
+    for _, item in ipairs(M.config.delete_pattern.patterns) do
+      if not in_ignore_list(filetype, item) then
+        if delete_pattern(item, line, row, col, direction) then
+          return
+        end
+      end
+    end
+  end
+  if M.config.delete_pattern_pairs.enable then
     for _, item in ipairs(M.config.delete_pattern_pairs.patterns) do
       if not in_ignore_list(filetype, item) then
         if delete_pattern_pairs(item, line, row, col, direction) then
@@ -643,34 +689,16 @@ local function delete_word(row, col, direction)
     end
   end
 
-  -- This should be executed after `delete_pattern_pairs` because it's
-  -- a fallback if the same pattern appear in both tables.
-  -- The reason is if this run first the expected behavior will not work
-  -- because the `lhs pattern` from pair will be deleted.
-  if M.config.delete_pattern.enable then
-    if config_filetype and config_filetype.delete_patterns then
-      for _, item in ipairs(config_filetype.delete_patterns) do
-        if delete_pattern(item, line, row, col, direction) then
-          return
-        end
-      end
-    end
-    for _, item in ipairs(M.config.delete_pattern.patterns) do
-      if not in_ignore_list(filetype, item) then
-        if delete_pattern(item, line, row, col, direction) then
-          return
-        end
-      end
-    end
-  end
-
   if not in_ignore_list(filetype, char) then
-    local config_match, filetype_match = get_match_pairs(config_filetype.delete_pairs, direction)
-    if delete_symbol_or_match_pair(filetype_match, char, row, col, direction) then
-      return
+    if config_filetype then
+      if delete_symbol_or_match_pair(filetype_match, char, row, col, direction) then
+        return
+      end
     end
-    if delete_symbol_or_match_pair(config_match, char, row, col, direction) then
-      return
+    if config_match then
+      if delete_symbol_or_match_pair(config_match, char, row, col, direction) then
+        return
+      end
     end
   end
 
@@ -743,23 +771,26 @@ local function delete(row, col, direction)
   if char:match("%p") and (M.config.delete_pairs.close_open.enable or M.config.delete_pairs.open_close.enable) then
     local bufnr = vim.api.nvim_get_current_buf()
     local filetype = vim.bo[bufnr].filetype
+    local config_filetype = M.config.filetypes[filetype]
 
     if not in_ignore_list(filetype, char) then
-      local config_filetype = M.config.filetypes[filetype]
-      local config_match, filetype_match = get_match_pairs(config_filetype.delete_pairs, direction)
+      local filetype_match, config_match = get_match_pairs(config_filetype, direction)
 
-      local match = config_match[char] or filetype_match[char]
-
-      if match then
-        local found = false
-        found, row_start, col_start, row_end, col_end = find_match_pair(match, row, col, -direction)
-        if found then
-          local mark = vim.api.nvim_replace_termcodes("<c-g>u", true, false, true)
-          vim.api.nvim_feedkeys(mark, "i", false)
-
-          vim.api.nvim_buf_set_text(utils.bufnr, row_start, col_start - 1, row_end, col_end, {})
-          return
+      local found = false
+      if filetype_match then
+        if filetype_match[char] then
+          found, row_start, col_start, row_end, col_end = find_match_pair(filetype_match[char], row, col, -direction)
         end
+      end
+      if not found and config_match[char] then
+        found, row_start, col_start, row_end, col_end = find_match_pair(config_match[char], row, col, -direction)
+      end
+      if found then
+        local mark = vim.api.nvim_replace_termcodes("<c-g>u", true, false, true)
+        vim.api.nvim_feedkeys(mark, "i", false)
+
+        vim.api.nvim_buf_set_text(utils.bufnr, row_start, col_start - 1, row_end, col_end, {})
+        return
       end
     end
   end
