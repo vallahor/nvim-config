@@ -45,8 +45,8 @@ M.config = {
       {
         -- lhs = { pattern = ".*(<(%w+).*>)", save_matches = { ignore = { 1 } } },
         -- lhs = { pattern = ".*(<(%w+)>)", save_matches = { ignore = { 1 } } },
-        lhs = { pattern = ".*(<(%w+) (%w+)>)", save_matches = { ignore = { 1 }, order = { [3] = 1, [2] = 2 } } },
-        rhs = { format = "</%s %s>" },
+        lhs = { apply_before = ".*", pattern = "<(%w+) (%w+)>", save_matches = { order = { [2] = 1, [1] = 2 } } },
+        rhs = { apply_after = ".*", format = "</%s %s>" },
         replace = "ihul",
         surround_check = "%w",
       },
@@ -438,17 +438,19 @@ local function find_pattern_line(item, line, col, direction)
   item.inject_matches = item.inject_matches or nil
   local col_start, col_end = col, col
 
-  local pattern = item.pattern or ""
+  local pattern = ""
 
   if item.inject_matches and #item.inject_matches >= 1 then
     pattern = string.format(item.format, table.unpack(item.inject_matches))
+  else
+    pattern = "(" .. item.pattern .. ")"
   end
 
   if direction == utils.direction.right then
-    pattern = "^" .. pattern
+    pattern = "^" .. pattern .. (item.apply_after or "")
     col_end = #line
   elseif direction == utils.direction.left then
-    pattern = pattern .. "$"
+    pattern = (item.apply_before or "") .. pattern .. "$"
     col_start = 1
   end
 
@@ -461,8 +463,8 @@ local function find_pattern_line(item, line, col, direction)
       local items_ordered = {}
       match = slice:gsub(pattern, function(...)
         local matches = { ... }
-        for i = 1, #matches do
-          local index = item.save_matches.order[i] or i
+        for i = 2, #matches do
+          local index = item.save_matches.order[i - 1] or i
           items_ordered[index] = matches[i]
         end
 
@@ -475,7 +477,7 @@ local function find_pattern_line(item, line, col, direction)
     else
       match = slice:gsub(pattern, function(...)
         local matches = { ... }
-        for i = 1, #matches do
+        for i = 2, #matches do
           table.insert(item.save_matches.items, matches[i])
         end
 
