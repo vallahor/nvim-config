@@ -131,8 +131,6 @@ local function in_ignore_list(filetype, item)
   item = item.pattern or (item.lhs and item.lhs.pattern) or item
   local found = false
   if M.config.filetypes[filetype] and M.config.filetypes[filetype].ignore then
-    print(item)
-    print(table.unpack(M.config.filetypes[filetype].ignore))
     found = vim.tbl_contains(M.config.filetypes[filetype].ignore, item)
   end
   return found
@@ -146,15 +144,15 @@ local function get_match_pairs(opts, direction)
   local match_pairs = {}
   if direction == utils.direction.right then
     if M.config.delete_pairs.close_open.enable then
-      match_pairs = concat_tables(M.config.delete_pairs.close_open.match_pairs, opts.close_open)
+      match_pairs = { M.config.delete_pairs.close_open.match_pairs, opts.close_open }
     end
   elseif direction == utils.direction.left then
     if M.config.delete_pairs.open_close.enable then
-      match_pairs = concat_tables(M.config.delete_pairs.open_close.match_pairs, opts.open_close)
+      match_pairs = { M.config.delete_pairs.open_close.match_pairs, opts.open_close }
     end
   end
 
-  return match_pairs
+  return table.unpack(match_pairs)
 end
 
 local function eat_whitespace(line, col, direction)
@@ -629,7 +627,7 @@ local function delete_word(row, col, direction)
   end
 
   if M.config.delete_pattern_pairs.enable then
-    if config_filetype then
+    if config_filetype and config_filetype.delete_pattern_pairs then
       for _, item in ipairs(config_filetype.delete_pattern_pairs) do
         if delete_pattern_pairs(item, line, row, col, direction) then
           return
@@ -650,7 +648,7 @@ local function delete_word(row, col, direction)
   -- The reason is if this run first the expected behavior will not work
   -- because the `lhs pattern` from pair will be deleted.
   if M.config.delete_pattern.enable then
-    if config_filetype then
+    if config_filetype and config_filetype.delete_patterns then
       for _, item in ipairs(config_filetype.delete_patterns) do
         if delete_pattern(item, line, row, col, direction) then
           return
@@ -667,13 +665,11 @@ local function delete_word(row, col, direction)
   end
 
   if not in_ignore_list(filetype, char) then
-    if config_filetype then
-      if delete_symbol_or_match_pair(config_filetype.delete_pairs, char, row, col, direction) then
-        return
-      end
+    local config_match, filetype_match = get_match_pairs(config_filetype.delete_pairs, direction)
+    if delete_symbol_or_match_pair(filetype_match, char, row, col, direction) then
+      return
     end
-    local match_pairs = get_match_pairs({}, direction)
-    if delete_symbol_or_match_pair(match_pairs, char, row, col, direction) then
+    if delete_symbol_or_match_pair(config_match, char, row, col, direction) then
       return
     end
   end
@@ -745,17 +741,25 @@ local function delete(row, col, direction)
   local row_end, col_end = row, col
 
   if char:match("%p") and (M.config.delete_pairs.close_open.enable or M.config.delete_pairs.open_close.enable) then
-    local match_pairs = get_match_pairs({}, direction)
+    local bufnr = vim.api.nvim_get_current_buf()
+    local filetype = vim.bo[bufnr].filetype
 
-    if match_pairs[char] then
-      local found = false
-      found, row_start, col_start, row_end, col_end = find_match_pair(match_pairs[char], row, col, -direction)
-      if found then
-        local mark = vim.api.nvim_replace_termcodes("<c-g>u", true, false, true)
-        vim.api.nvim_feedkeys(mark, "i", false)
+    if not in_ignore_list(filetype, char) then
+      local config_filetype = M.config.filetypes[filetype]
+      local config_match, filetype_match = get_match_pairs(config_filetype.delete_pairs, direction)
 
-        vim.api.nvim_buf_set_text(utils.bufnr, row_start, col_start - 1, row_end, col_end, {})
-        return
+      local match = config_match[char] or filetype_match[char]
+
+      if match then
+        local found = false
+        found, row_start, col_start, row_end, col_end = find_match_pair(match, row, col, -direction)
+        if found then
+          local mark = vim.api.nvim_replace_termcodes("<c-g>u", true, false, true)
+          vim.api.nvim_feedkeys(mark, "i", false)
+
+          vim.api.nvim_buf_set_text(utils.bufnr, row_start, col_start - 1, row_end, col_end, {})
+          return
+        end
       end
     end
   end
