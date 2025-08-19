@@ -1,5 +1,5 @@
 return {
-  -- "vallahor/targino-nvim",
+  -- "vallahor/targino.nvim",
   dir = "c:/projects/targino-nvim",
   lazy = false,
   priority = 1000,

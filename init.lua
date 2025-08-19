@@ -205,8 +205,6 @@ vim.keymap.set("v", "v", "V") -- visual line mode
 -- vim.keymap.set("n", "n", "nzzzz") -- center next
 -- vim.keymap.set("n", "N", "Nzzzz") -- center previous
 
-local delete = require("better_delete")
-delete.setup({})
 vim.keymap.set("c", "<c-bs>", "<c-w>") -- delete previous word (cmd)
 -- delete previous word (insert)
 -- vim.keymap.set("i", "<bs>", function()
@@ -214,14 +212,6 @@ vim.keymap.set("c", "<c-bs>", "<c-w>") -- delete previous word (cmd)
 --     [">"] = "<",
 --   } })
 -- end)
-vim.keymap.set("i", "<c-bs>", delete.previous_word)
-vim.keymap.set("i", "<c-del>", delete.next_word)
-
-vim.keymap.set("i", "<bs>", delete.previous)
--- vim.keymap.set("i", "<del>", delete.next)
-
-vim.keymap.set("i", "<c-j>", delete.join)
-vim.keymap.set("n", "J", delete.join)
 
 vim.keymap.set("n", "x", '"_x') -- delete current char without copying
 vim.keymap.set("n", "<c-s-d>", '"_dd') -- delete line without copying

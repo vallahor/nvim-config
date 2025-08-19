@@ -16,6 +16,8 @@ return {
         "gdscript",
         "gdshader",
         "godot_resource",
+        "markdown",
+        "markdown_inline",
         "html",
         "javascript",
         "json",

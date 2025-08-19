@@ -59,7 +59,8 @@ M.config = {
       },
       {
         pattern = "%x%x%x%x%x%x",
-        before = "0x",
+        before = "0[xb]",
+        after = "[xb]0",
       },
     },
   },
@@ -141,6 +142,10 @@ M.config = {
   },
 }
 
+M.setup = function(config)
+  M.config = vim.tbl_deep_extend("force", vim.deepcopy(M.config), config or {})
+end
+
 local function in_ignore_list(filetype, item)
   item = item.pattern or (item.lhs and item.lhs.pattern) or item
   local found = false
@@ -148,10 +153,6 @@ local function in_ignore_list(filetype, item)
     found = vim.tbl_contains(M.config.filetypes[filetype].ignore, item)
   end
   return found
-end
-
-M.setup = function(config)
-  M.config = vim.tbl_deep_extend("force", vim.deepcopy(M.config), config or {})
 end
 
 local function get_match_pairs(config_filetype, direction)
@@ -193,7 +194,7 @@ local function eat_whitespace(line, col, direction)
   return col_current
 end
 
-local function get_row_and_line(row, direction)
+local function get_line_and_pos(row, direction)
   local new_row = row + direction
   local line = vim.api.nvim_buf_get_lines(utils.bufnr, new_row, new_row + 1, false)[1] or ""
   local col = (direction == utils.direction.right and 1) or #line
@@ -217,7 +218,7 @@ local function eat_empty_lines(row, col, direction)
 
   -- Change line if in BOL/EOL
   if col <= 0 or col > #line then
-    line, new_row, new_col = get_row_and_line(row, direction)
+    line, new_row, new_col = get_line_and_pos(row, direction)
   end
 
   local char = line:sub(new_col, new_col)
@@ -229,15 +230,14 @@ local function eat_empty_lines(row, col, direction)
 
     -- Change line if line is empty or in BOL/EOL
     if line:match("^[%s]*$") or (new_col < 1 or new_col >= #line) then
-      line, new_row, new_col = get_row_and_line(new_row, direction)
+      line, new_row, new_col = get_line_and_pos(new_row, direction)
     end
 
     new_col = eat_whitespace(line, new_col, direction)
     char = line:sub(new_col, new_col)
   end
 
-  -- `consume_spaces_and_lines` excceed 1 if the remaining lines are empty
-  -- until the end of the buffer
+  -- `consume_spaces_and_lines` excceed 1 if the remaining lines are empty.
   new_row = math.min(new_row, buf_rows - 1)
   return new_row, new_col
 end
@@ -301,7 +301,7 @@ local function delete_from_pattern(line, pattern, char, row, col, direction)
     col_start = col_current
   end
 
-  -- Found at least 2 matching pattern
+  -- Found at least 2 matching pattern.
   if col_end - col_start > 1 then
     vim.api.nvim_buf_set_text(utils.bufnr, row, col_start, row, col_end, {})
     return true
@@ -319,23 +319,23 @@ end
 ---@return string
 ---@return integer
 ---@return integer
-local function peek_next_symbol(row, col, direction)
+local function peek_non_whitespace(row, col, direction)
   local line = vim.api.nvim_buf_get_lines(utils.bufnr, row, row + 1, false)[1] or ""
-  local peek_row = row
-  local peek_col = col + direction
+  local row_pos = row
+  local col_pos = col + direction
 
   if col > #line then
-    peek_col = col
+    col_pos = col
   end
 
-  local peek_char = line:sub(peek_col, peek_col)
-  if peek_char:match("%s") or peek_col < 1 or peek_col > #line then
-    peek_row, peek_col = eat_empty_lines(peek_row, peek_col, direction)
-    line = vim.api.nvim_buf_get_lines(utils.bufnr, peek_row, peek_row + 1, false)[1] or ""
-    peek_char = line:sub(peek_col, peek_col)
+  local char = line:sub(col_pos, col_pos)
+  if char:match("%s") or col_pos < 1 or col_pos > #line then
+    row_pos, col_pos = eat_empty_lines(row_pos, col_pos, direction)
+    line = vim.api.nvim_buf_get_lines(utils.bufnr, row_pos, row_pos + 1, false)[1] or ""
+    char = line:sub(col_pos, col_pos)
   end
 
-  return line, peek_char, peek_row, peek_col
+  return line, char, row_pos, col_pos
 end
 
 ---Peek the next char following the given `direction` returning if the `peeked char` and
@@ -353,15 +353,15 @@ local function find_match_pair(expected_symbol, row, col, direction)
   local row_start, col_start = row, col
   local row_end, col_end = row, col
 
-  local _, peek_char, peek_row, peek_col = peek_next_symbol(row_start, col_start, direction)
-  local found = peek_char == expected_symbol
+  local _, char, row_pos, col_pos = peek_non_whitespace(row_start, col_start, direction)
+  local found = char == expected_symbol
   if found then
     if direction == utils.direction.right then
-      row_end = peek_row
-      col_end = peek_col
+      row_end = row_pos
+      col_end = col_pos
     elseif direction == utils.direction.left then
-      row_start = peek_row
-      col_start = peek_col
+      row_start = row_pos
+      col_start = col_pos
     end
   end
 
@@ -385,6 +385,10 @@ local function delete_symbol_or_match_pair(match_pairs, char, row, col, directio
     if match_pairs[char] then
       _, row_start, col_start, row_end, col_end = find_match_pair(match_pairs[char], row, col, -direction)
     elseif M.config.delete_repeated_punctuation.enable then
+      -- Delete repeated punctuation.
+      -- Example: `...|` -> `|` or `=========|` -> `|`
+      --
+      -- Note: it can be turned off.
       local line = vim.api.nvim_get_current_line()
       local col_current = walk_line_matching_char(line, char, char, col, direction)
 
@@ -405,23 +409,29 @@ end
 ---@param row integer
 ---@param col integer
 ---@param direction integer
----@param opts table
-local function consume_spaces_and_lines(row, col, direction, opts)
-  opts = opts or {}
-  opts.separator = opts.separator or ""
-
+local function consume_spaces_and_lines(row, col, direction)
   local row_start, col_start = row, col
   local row_end, col_end = row, col
 
+  local row_pos, col_pos = eat_empty_lines(row_start, col_start, direction)
+
   if direction == utils.direction.right then
-    row_end, col_end = eat_empty_lines(row_start, col_start, direction)
+    row_end = row_pos
     col_start = col_start - 1
-    col_end = (col_end == 0 and 1) or col_end - 1
+    col_end = (col_pos == 0 and 1) or col_pos - 1
   elseif direction == utils.direction.left then
-    row_start, col_start = eat_empty_lines(row_end, col_end, direction)
+    row_start = row_pos
+    col_start = col_pos
   end
 
-  vim.api.nvim_buf_set_text(utils.bufnr, row_start, col_start, row_end, col_end, { opts.separator })
+  vim.api.nvim_buf_set_text(
+    utils.bufnr,
+    row_start,
+    col_start,
+    row_end,
+    col_end,
+    { string.rep(M.config.join_line.separator, M.config.join_line.times) }
+  )
 end
 
 ---Consume spaces and tabs in the same line.
@@ -434,6 +444,8 @@ local function consume_spaces(line, row, col, direction)
   local col_current = eat_whitespace(line, col_start, direction)
 
   if direction == utils.direction.right then
+    -- its col_(start|end) - 1 because the start is inclusive
+    -- and the end is the non whitespace char.
     col_start = col_start - 1
     col_end = col_current - 1
   elseif direction == utils.direction.left then
@@ -445,17 +457,9 @@ end
 
 ---Join line consuming spaces, tabs, and lines using a separator.
 ---@param row integer
-local function join_next_line(row)
-  local opts = {}
-  opts.join_line = M.config.join_line
-
+local function join_line(row)
   local line = vim.api.nvim_get_current_line()
-  consume_spaces_and_lines(
-    row,
-    #line + 1,
-    utils.direction.right,
-    { separator = string.rep(opts.join_line.separator, opts.join_line.times) }
-  )
+  consume_spaces_and_lines(row, #line + 1, utils.direction.right)
 end
 
 ---Finds if the pattern exists in the given line.
@@ -473,11 +477,30 @@ local function find_pattern_line(item, line, col, direction)
   local pattern = ""
 
   if item.inject_matches and #item.inject_matches >= 1 then
+    -- Generate a pattern from `lhs` captures.
+    -- This is necessary when the deleted pattern appears in the `rhs`
+    -- with the same name or structure with variable sized patterns .
+    --
+    -- Example: <div>|</div>
+    -- The pattern <(%w).*> captures %w which can be length.
+    -- If we simply use </(%w)> in `rhs`, it could match the wrong string,
+    -- e.g., <div>|</main>.
+    --
+    -- To fix this the captured %w in `lhs` id inject in
+    -- the `rhs` pattern using </%s> which producing a string
+    -- that corretly matches the first pattern.
     pattern = string.format(item.format, table.unpack(item.inject_matches))
   else
     pattern = "(" .. item.pattern .. ")"
   end
 
+  -- Adds wildcards in the pattern and aditional rules.
+  -- Right: "^(pattern)item.after|[item.rule_after|.*]"
+  -- Left: "[.*|item.rule_before]|item.before(pattern)$"
+  --
+  -- Note: The outer most capture group it's used to get the
+  -- length of the string generated by the pattern and it does not
+  -- counts the `item.rule_(before|after)` and `item.(before|after)`.
   if direction == utils.direction.right then
     pattern = "^" .. pattern .. (item.after or "") .. (item.force_rule_after or ".*")
     col_end = #line
@@ -490,8 +513,19 @@ local function find_pattern_line(item, line, col, direction)
   local match = ""
 
   if item.save_matches then
+    -- Save the matches to insert in the `rhs` format string.
     item.save_matches.items = {}
     if item.save_matches.order then
+      -- If there are some capture ordering that need to be
+      -- followed like `"%2 %1 %3"` it appears in
+      -- `item.save_matches.order` as a table linking the
+      -- expected number the specified position.
+      -- eg. `"%2 %1 %3"` becomes
+      -- `item.save_matches.order = { [2] = 1, [1] = 2, [3] = 3 }`
+      --
+      -- Note: it matches the `i - 1` because of the capture group
+      -- inserted around the pattern, which is used to calculate
+      -- the `length` after the match.
       local items_ordered = {}
       match = slice:gsub(pattern, function(...)
         local matches = { ... }
@@ -499,20 +533,21 @@ local function find_pattern_line(item, line, col, direction)
           local index = item.save_matches.order[i - 1] or i
           items_ordered[index] = matches[i]
         end
-
         return matches[1]
       end)
 
+      -- Flatten the `items_ordered` table into the
+      -- actual captures from the regex.
       for _, matched in pairs(items_ordered) do
         table.insert(item.save_matches.items, matched)
       end
     else
+      -- Directly insert the captures into `item.save_matches.items`.
       match = slice:gsub(pattern, function(...)
         local matches = { ... }
         for i = 2, #matches do
           table.insert(item.save_matches.items, matches[i])
         end
-
         return matches[1]
       end)
     end
@@ -578,8 +613,8 @@ local function delete_pattern_pairs(item, line, row, col, direction)
       item.rhs.inject_matches = item.lhs.save_matches.items
     end
 
-    local peek_line, _, peek_row, peek_col = peek_next_symbol(row, col, -direction)
-    local found_rhs, col_rhs_start, col_rhs_end = find_pattern_line(item.rhs, peek_line, peek_col, -direction)
+    local line_found, _, row_pos, col_pos = peek_non_whitespace(row, col, -direction)
+    local found_rhs, col_rhs_start, col_rhs_end = find_pattern_line(item.rhs, line_found, col_pos, -direction)
 
     if found_rhs then
       local row_start, col_start = row, col
@@ -587,17 +622,17 @@ local function delete_pattern_pairs(item, line, row, col, direction)
       local peek_char = ""
 
       if direction == utils.direction.right then
-        row_start = peek_row
+        row_start = row_pos
         col_start = col_rhs_start
         col_end = col_lhs_end
 
-        peek_char = peek_line:sub(col_start, col_start)
+        peek_char = line_found:sub(col_start, col_start)
       elseif direction == utils.direction.left then
         col_start = col_lhs_start
-        row_end = peek_row
+        row_end = row_pos
         col_end = col_rhs_end
 
-        peek_char = peek_line:sub(col_end + 1, col_end + 1)
+        peek_char = line_found:sub(col_end + 1, col_end + 1)
       end
 
       item.surround_check = item.surround_check or nil
@@ -861,7 +896,7 @@ end
 
 M.join = function()
   local row, _ = unpack(vim.api.nvim_win_get_cursor(0))
-  join_next_line(row - 1)
+  join_line(row - 1)
 end
 
 return M
