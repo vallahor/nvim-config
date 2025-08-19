@@ -25,6 +25,14 @@ M.config = {
     separator = " ",
     times = 1,
   },
+  filetypes = {
+    ["lua"] = {
+      ignore = { "'", "%d%d::%d%d::%d%d", "<%%=" },
+      delete_pairs = {},
+      delete_patterns = {},
+      delete_patterns_pairs = {},
+    },
+  },
   delete_pattern = {
     enable = true,
     patterns = {
@@ -96,7 +104,6 @@ M.config = {
         ["'"] = "'",
         ["`"] = "`",
       },
-      match_pairs_custom = {},
     },
     close_open = {
       enable = true,
@@ -109,7 +116,6 @@ M.config = {
         ["'"] = "'",
         ["`"] = "`",
       },
-      match_pairs_custom = {},
     },
   },
 }
@@ -121,16 +127,19 @@ local function concat_tables(t1, t2)
   return t1
 end
 
+local function in_ignored_list(filetype, item)
+  item = item.pattern or (item.lhs and item.lhs.pattern) or item
+  local found = false
+  if M.config.filetypes[filetype] and M.config.filetypes[filetype].ignore then
+    print(item)
+    print(table.unpack(M.config.filetypes[filetype].ignore))
+    found = vim.tbl_contains(M.config.filetypes[filetype].ignore, item)
+  end
+  return found
+end
+
 M.setup = function(config)
   M.config = vim.tbl_deep_extend("force", vim.deepcopy(M.config), config or {})
-  if M.config.delete_pairs.open_close.enable then
-    M.config.delete_pairs.open_close.match_pairs =
-      concat_tables(M.config.delete_pairs.open_close.match_pairs, M.config.delete_pairs.open_close.match_pairs_custom)
-  end
-  if M.config.delete_pairs.close_open.enable then
-    M.config.delete_pairs.close_open.match_pairs =
-      concat_tables(M.config.delete_pairs.close_open.match_pairs, M.config.delete_pairs.close_open.match_pairs_custom)
-  end
 end
 
 local function get_match_pairs(opts, direction)
@@ -592,6 +601,8 @@ local function delete_word(row, col, direction, opts)
   opts = opts or {}
   opts.open_close = opts.open_close or {}
   opts.close_open = opts.close_open or {}
+  local bufnr = vim.api.nvim_get_current_buf()
+  local filetype = vim.bo[bufnr].filetype
   local line = vim.api.nvim_get_current_line()
 
   local mark = vim.api.nvim_replace_termcodes("<c-g>u", true, false, true)
@@ -623,8 +634,10 @@ local function delete_word(row, col, direction, opts)
 
   if M.config.delete_pattern_pairs.enable then
     for _, item in ipairs(M.config.delete_pattern_pairs.patterns) do
-      if delete_pattern_pairs(item, line, row, col, direction) then
-        return
+      if not in_ignored_list(filetype, item) then
+        if delete_pattern_pairs(item, line, row, col, direction) then
+          return
+        end
       end
     end
   end
@@ -635,15 +648,19 @@ local function delete_word(row, col, direction, opts)
   -- because the `lhs pattern` from pair will be deleted.
   if M.config.delete_pattern.enable then
     for _, item in ipairs(M.config.delete_pattern.patterns) do
-      if delete_pattern(item, line, row, col, direction) then
-        return
+      if not in_ignored_list(filetype, item) then
+        if delete_pattern(item, line, row, col, direction) then
+          return
+        end
       end
     end
   end
 
-  local match_pairs = get_match_pairs(opts, direction)
-  if delete_symbol_or_match_pair(match_pairs, char, row, col, direction) then
-    return
+  if not in_ignored_list(filetype, char) then
+    local match_pairs = get_match_pairs(opts, direction)
+    if delete_symbol_or_match_pair(match_pairs, char, row, col, direction) then
+      return
+    end
   end
 
   local row_start, col_start = row, col
