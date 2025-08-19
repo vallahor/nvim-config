@@ -498,11 +498,11 @@ end
 local function find_pattern_line(item, line, col, direction)
   local col_start, col_end = col, col
 
-  if not item.formated and not item.pattern then
+  if not item.pattern then
     return false, {}, -1, -1
   end
 
-  local pattern = item.formated or ("(" .. item.pattern .. ")")
+  local pattern = "(" .. item.pattern .. ")"
 
   -- Adds wildcards in the pattern and aditional rules.
   -- Right: "^(pattern)item.after|[item.rule_after|.*]"
@@ -630,7 +630,7 @@ local function delete_pattern_pairs(item, line, row, col, direction)
       -- To fix this the captured %w in `lhs` id inject in
       -- the `rhs` pattern using </%s> which producing a string
       -- that corretly matches the first pattern.
-      item.rhs.formated = string.format(item.rhs.format, table.unpack(matches))
+      item.rhs.pattern = string.format(item.rhs.format, table.unpack(matches))
     end
 
     local peeked_line, _, row_pos, col_pos = peek_non_whitespace(row, col, -direction)
