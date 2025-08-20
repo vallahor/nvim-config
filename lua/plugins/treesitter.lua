@@ -85,7 +85,7 @@ return {
     end,
   },
   {
-    "brianhuster/treesitter-endwise.nvim",
+    "RRethy/nvim-treesitter-endwise",
     dependencies = { "nvim-treesitter" },
     config = function()
       vim.api.nvim_create_autocmd("FileType", {
