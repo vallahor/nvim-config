@@ -12,6 +12,14 @@ local utils = {
   },
 }
 
+local store = {
+  pairs = {},
+  ft_pairs = {},
+  patterns = {},
+  ft_patterns = {},
+  filetypes = {},
+}
+
 M.config = {
   delete_empty_lines_until_next_char = true,
   delete_repeated_punctuation = true,
@@ -21,58 +29,123 @@ M.config = {
     separator = " ",
     times = 1,
   },
-  pairs = {},
-  rules = {},
-  patterns = {},
-  ignore = {},
-  filetypes = {
-    ["lua"] = {
-      ignore = { "'", "%d%d::%d%d::%d%d", "<%%=" },
-      pairs = {},
-      patterns = {},
-      rules = {},
-      treesitter = {
-        enable = true,
-        captures = {
-          {
-            capture = "",
-            retrict_to_whitespaces = false,
-            query = [[]],
-            -- will receive the captured node with informations and current (row|col)_pos.
-            -- should return a boolean a output string in an array and a range for deletion.
-            callback = function(node_info, row_pos, col_pos)
-              return false, {}, {}
-            end,
-          },
-        },
-      },
-    },
-  },
+  -- pairs = {},
+  -- patterns = {},
+  -- ignore = {},
+  -- filetypes = {
+  --   ["lua"] = {
+  --     ignore = { "'", "%d%d::%d%d::%d%d", "<%%=" },
+  --     pairs = {},
+  --     patterns = {},
+  --     treesitter = {
+  --       enable = true,
+  --       captures = {
+  --         {
+  --           capture = "",
+  --           retrict_to_whitespaces = false,
+  --           query = [[]],
+  --           -- will receive the captured node with informations and current (row|col)_pos.
+  --           -- should return a boolean a output string in an array and a range for deletion.
+  --           callback = function(node_info, row_pos, col_pos)
+  --             return false, {}, {}
+  --           end,
+  --         },
+  --       },
+  --     },
+  --   },
+  -- },
 }
 
 M.setup = function(config)
   M.config = vim.tbl_deep_extend("force", vim.deepcopy(M.config), config or {})
 end
 
-M.insert_pair = function() end
+local function get_or_create_filetype(filetype)
+  local ft = store.filetypes[filetype]
 
-local function in_ignore_list(ignore_list, pattern)
-  if not ignore_list then
-    return false
+  if not ft then
+    ft = {
+      index = #store.filetypes + 1,
+      pairs = {},
+      patterns = {},
+    }
+    table.insert(store.filetypes, ft)
   end
 
-  local found = vim.tbl_contains(ignore_list, pattern)
-  if not found then
-    found = vim.tbl_contains(M.config.ignore, pattern)
-  end
-  return false
+  return ft
 end
 
-local function get_filetype()
-  local bufnr = vim.api.nvim_get_current_buf()
-  local filetype = vim.bo[bufnr].filetype
+local function insert_into(store_global, store_ft, elem, opts)
+  opts.filetypes = opts.filetypes or nil
+  opts.not_filetypes = opts.not_filetypes or nil
 
-  return filetype
+  if opts.filetypes then
+    local store_ft_index = #store_ft + 1
+    for _, filetype in ipairs(opts.filetypes) do
+      local ft = get_or_create_filetype(filetype)
+      local ft_list = (opts.type == 1 and ft.pairs) or ft.patterns
+      table.insert(ft_list, store_ft_index)
+    end
+    table.insert(store_ft, elem)
+    return
+  end
+
+  if opts.not_filetypes then
+    for _, filetype in ipairs(opts.filetypes) do
+      local ft = get_or_create_filetype(filetype)
+      elem.not_filetypes[ft.index] = true
+    end
+  end
+  table.insert(store_global, elem)
+end
+
+M.insert_pair = function(config, opts)
+  if not config or not config.first and (not config.second or config.format) then
+    return
+  end
+  opts = opts or {}
+  opts.type = 1
+
+  local pair = vim.tbl_extend("force", {
+    first = "",
+    second = nil,
+    format = nil,
+    filetypes = {},
+    not_filetypes = {},
+  }, config)
+
+  insert_into(store.pairs, store.ft_pairs, pair, opts)
+end
+
+M.insert_pattern = function(config, opts)
+  if not config or not config.pattern then
+    return
+  end
+
+  opts = opts or {}
+  opts.type = 2
+
+  local pattern = vim.tbl_deep_extend("force", {
+    pattern = "",
+    prefix = nil,
+    suffix = nil,
+    before = nil,
+    after = nil,
+    rule_before = nil,
+    rule_after = nil,
+    filetypes = {},
+    not_filetypes = {},
+    capture = {
+      format = nil,
+      order = nil,
+    },
+  }, config)
+
+  insert_into(store.patterns, store.ft_patterns, pattern, opts)
+end
+
+local function in_ignore_list(item, filetype)
+  return item.not_filetypes and item.not_filetypes[filetype]
 end
 
 local function eat_whitespace(line, col, direction)
@@ -364,24 +437,22 @@ local function find_pattern_line(item, line, col, direction, opts)
 
   -- Try to match the pattern first and if not exists in the slice early
   -- return else extract the values from the match if it's a regex.
-  local matches = {}
   local slice = line:sub(col_start, col_end)
   local match = slice:match(pattern)
 
-  if not match then
-    return false, 0, 0
+  if match then
+    -- Can safelly sub/add the length because the line
+    -- has the given pattern.
+    local length = #match + (item.prefix and #item.prefix or 0) + (item.suffix and #item.suffix or 0)
+    if direction == utils.direction.right then
+      col_start = col - 1
+      col_end = col + length - 1
+    elseif direction == utils.direction.left then
+      col_start = col - length
+    end
   end
 
-  -- Can safelly sub/add the length because the line
-  -- has the given pattern.
-  local length = #match + (item.prefix and #item.prefix or 0) + (item.suffix and #item.suffix or 0)
-  if direction == utils.direction.right then
-    col_start = col - 1
-    col_end = col + length - 1
-  elseif direction == utils.direction.left then
-    col_start = col - length
-  end
-  return true, col_start, col_end
+  return match, col_start, col_end
 end
 
 ---Delete string slice from a given pattern. Matches regex and literal string.
@@ -411,7 +482,7 @@ end
 ---@param col integer
 ---@param direction integer
 ---@return boolean
-local function delete_rules(item, line, row, col, direction)
+local function delete_pairs(item, line, row, col, direction)
   local found_lhs, col_lhs_start, col_lhs_end = find_pattern_line(item.lhs, line, col, direction, {})
 
   if found_lhs then
@@ -506,57 +577,46 @@ local function delete_word(row, col, direction)
     return
   end
 
-  local filetype = get_filetype()
-  local config_filetype = M.config.filetypes[filetype]
+  local bufnr = vim.api.nvim_get_current_buf()
+  local filetype = vim.bo[bufnr].filetype
+  local config_filetype = store.filetypes[filetype]
 
   -- First look if there are any config related with the filetype
   -- if nothing matches fallback to global config.
   if config_filetype then
-    if config_filetype.treesitter then
-      for _, item in ipairs(config_filetype.treesitter.captures) do
-        if delete_capture(item, row, col, direction) then
-          return
-        end
+    -- for _, item in ipairs(config_filetype.treesitter.captures) do
+    --   if delete_capture(item, row, col, direction) then
+    --     return
+    --   end
+    -- end
+
+    for _, index in ipairs(config_filetype.pairs) do
+      local item = store.ft_pairs[index]
+      if delete_pairs(item, line, row, col, direction) then
+        return
       end
     end
 
-    if config_filetype.delete_pattern_pairs.patterns then
-      for _, item in ipairs(config_filetype.rules) do
-        if delete_rules(item, line, row, col, direction) then
-          return
-        end
-      end
-    end
-
-    if config_filetype.patterns then
-      for _, item in ipairs(config_filetype.patterns) do
-        if delete_pattern(item, line, row, col, direction) then
-          return
-        end
+    for _, index in ipairs(config_filetype.patterns) do
+      local item = store.ft_pairs[index]
+      if delete_pattern(item, line, row, col, direction) then
+        return
       end
     end
   end
 
-  if M.config.rules then
-    for _, item in ipairs(M.config.rules) do
-      if not in_ignore_list(filetype, item) then
-        if delete_rules(item, line, row, col, direction) then
-          return
-        end
+  for _, item in ipairs(store.pairs) do
+    if not in_ignore_list(item, filetype) then
+      if delete_pairs(item, line, row, col, direction) then
+        return
       end
     end
   end
 
-  -- This should be executed after `delete_pattern_pairs` because it's
-  -- a fallback if the same pattern appear in both tables.
-  -- The reason is if this run first the expected behavior will not work
-  -- because the `lhs pattern` from pair will be deleted.
-  if M.config.patterns then
-    for _, item in ipairs(M.config.patterns) do
-      if not in_ignore_list(filetype, item) then
-        if delete_pattern(item, line, row, col, direction) then
-          return
-        end
+  for _, item in ipairs(store.patterns) do
+    if not in_ignore_list(item, filetype) then
+      if delete_pattern(item, line, row, col, direction) then
+        return
       end
     end
   end

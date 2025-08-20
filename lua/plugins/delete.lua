@@ -1,17 +1,20 @@
 return {
   dir = "c:/projects/delete.nvim",
-  lazy = false,
+  -- lazy = false,
   config = function()
     -- local delete = require("delete")
-    local delete = require("better_delete")
-    delete.setup()
-    vim.keymap.set("i", "<c-bs>", delete.previous_word)
-    vim.keymap.set("i", "<c-del>", delete.next_word)
+    local delite = require("better_delete")
+    delite.setup()
 
-    vim.keymap.set("i", "<bs>", delete.previous)
-    -- vim.keymap.set("i", "<del>", delete.next)
+    delite.insert_pattern({ pattern = "%d%d::%d%d::%d%d" })
 
-    vim.keymap.set("i", "<c-j>", delete.join)
-    vim.keymap.set("n", "J", delete.join)
+    vim.keymap.set("i", "<c-bs>", delite.previous_word)
+    vim.keymap.set("i", "<c-del>", delite.next_word)
+
+    vim.keymap.set("i", "<bs>", delite.previous)
+    -- vim.keymap.set("i", "<del>", delite.next)
+
+    vim.keymap.set("i", "<c-j>", delite.join)
+    vim.keymap.set("n", "J", delite.join)
   end,
 }
