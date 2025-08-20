@@ -54,150 +54,7 @@ M.setup = function(config)
   M.config = vim.tbl_deep_extend("force", vim.deepcopy(M.config), config or {})
 end
 
-M.add_pattern_to_ignore_list = function(pattern, opts)
-  if not opts.filetypes then
-    -- check if put in a global ignore list
-    return
-  end
-
-  for _, filetype in ipairs(opts.filetypes) do
-    M.config.filetypes[filetype] = M.config.filetypes[filetype] or {}
-    M.config.filetypes[filetype].ignore = M.config.filetypes[filetype] or {}
-    table.insert(M.config.filetypes[filetype].ignore, pattern)
-  end
-end
-
-local default_pattern_pairs = {
-  open_close = {
-    enable = false,
-    match_pairs = {},
-  },
-  close_open = {
-    enable = false,
-    match_pairs = {},
-  },
-}
-
-M.add_pairs = function(config, opts)
-  config = vim.tbl_deep_extend("force", default_pattern_pairs, config or {})
-  local filetypes = opts.filetypes or nil
-  local ignore = opts.ignore or nil
-
-  if ignore then
-    for _, filetype in ipairs(ignore) do
-      table.insert(M.config.filetypes[filetype].ignore, config.lhs.pattern)
-    end
-    return
-  end
-
-  if filetypes then
-    for _, filetype in ipairs(filetypes) do
-      M.config.filetypes[filetype] = M.config.filetypes[filetype] or {}
-      M.config.filetypes[filetype].delete_pairs =
-        table.insert(M.config.filetypes[filetype].delete_pairs.close_open.match_pairs, config)
-    end
-    return
-  end
-
-  table.insert(M.config.delete_pairs.close_open.match_pairs, config)
-end
-
-local default_delete_pattern = {
-  pattern = nil,
-  order = nil,
-  format = nil,
-  capture_regex = nil,
-  before = nil,
-  after = nil,
-  rule_before = nil,
-  rule_after = nil,
-  prefix = nil,
-  suffix = nil,
-  replace = nil,
-}
-
--- add something to insert it into ignore lists
-M.add_pattern = function(config, opts)
-  config = vim.tbl_deep_extend("force", default_delete_pattern, config or {})
-  local filetypes = opts.filetypes or nil
-  local ignore = opts.ignore or nil
-
-  if not config.pattern then
-    return
-  end
-
-  if ignore then
-    for _, filetype in ipairs(ignore) do
-      table.insert(M.config.filetypes[filetype].ignore, config.lhs.pattern)
-    end
-    return
-  end
-
-  if filetypes then
-    for _, filetype in ipairs(filetypes) do
-      M.config.filetypes[filetype] = M.config.filetypes[filetype] or {}
-      table.insert(M.config.filetypes[filetype].delete_pattern.patterns, config)
-    end
-    return
-  end
-
-  table.insert(M.config.delete_pattern.patterns, config)
-end
-
-local default_delete_pattern_pairs = {
-  lhs = {
-    pattern = nil,
-    order = nil,
-    format = nil,
-    capture_regex = nil,
-    rule_before = nil,
-    rule_after = nil,
-    before = nil,
-    after = nil,
-    prefix = nil,
-    suffix = nil,
-  },
-  rhs = {
-    pattern = nil,
-    order = nil,
-    format = nil,
-    before = nil,
-    after = nil,
-    rule_before = nil,
-    rule_after = nil,
-    prefix = nil,
-    suffix = nil,
-  },
-  replace = nil,
-  surround_check = nil,
-}
-
-M.add_pattern_pairs = function(config, opts)
-  config = vim.tbl_deep_extend("force", default_delete_pattern_pairs, config or {})
-  local filetypes = opts.filetypes or nil
-  local ignore = opts.ignore or nil
-
-  if not config.lhs.pattern then
-    return
-  end
-
-  if ignore then
-    for _, filetype in ipairs(ignore) do
-      table.insert(M.config.filetypes[filetype].ignore, config.lhs.pattern)
-    end
-    return
-  end
-
-  if filetypes then
-    for _, filetype in ipairs(filetypes) do
-      M.config.filetypes[filetype] = M.config.filetypes[filetype] or {}
-      table.insert(M.config.filetypes[filetype].delete_pattern.patterns, config)
-    end
-    return
-  end
-
-  table.insert(M.config.delete_pattern.patterns, config)
-end
+M.insert_pair = function() end
 
 local function in_ignore_list(ignore_list, pattern)
   if not ignore_list then
@@ -291,27 +148,7 @@ local function walk_line_matching_pattern(line, pattern, char, col, direction)
   local col_current = col
   local char_current = char
 
-  while char_current:match(pattern) and col_current > 0 and col_current <= #line do
-    col_current = col_current + direction
-    char_current = line:sub(col_current, col_current)
-  end
-
-  return col_current
-end
-
----Same as walk_line_matching_pattern but for `char` because if use the
----symbol `.` it matches as any char.
----@param line string
----@param pattern string
----@param char string
----@param col integer
----@param direction integer
----@return integer
-local function walk_line_matching_char(line, pattern, char, col, direction)
-  local col_current = col
-  local char_current = char
-
-  while char_current == pattern and col_current > 0 and col_current <= #line do
+  while (char_current == pattern or char_current:match(pattern)) and col_current > 0 and col_current <= #line do
     col_current = col_current + direction
     char_current = line:sub(col_current, col_current)
   end
@@ -408,12 +245,13 @@ end
 ---Delete one or more punctuation.
 ---Can delete matching pairs or repeated punctuation.
 ---check: `delete_repeated_punctuation`.
+---@param line string
 ---@param char string
 ---@param row integer
 ---@param col integer
 ---@param direction integer
 ---@return boolean
-local function delete_symbol(char, row, col, direction)
+local function delete_symbol(line, char, row, col, direction)
   if char:match("%p") then
     local row_start, col_start = row, col
     local row_end, col_end = row, col
@@ -424,8 +262,7 @@ local function delete_symbol(char, row, col, direction)
       -- Example: `...|` -> `|` or `=========|` -> `|`
       --
       -- Note: it can be turned off.
-      local line = vim.api.nvim_get_current_line()
-      local col_current = walk_line_matching_char(line, char, char, col, direction)
+      local col_current = walk_line_matching_pattern(line, char, char, col, direction)
 
       if direction == utils.direction.right then
         col_end = col_current - 1
@@ -698,10 +535,6 @@ local function delete_word(row, col, direction)
         end
       end
     end
-
-    if delete_symbol(char, row, col, direction) then
-      return
-    end
   end
 
   if M.config.rules then
@@ -728,15 +561,8 @@ local function delete_word(row, col, direction)
     end
   end
 
-  if not in_ignore_list(filetype, char) then
-    if config_filetype then
-      if delete_symbol(char, row, col, direction) then
-        return
-      end
-    end
-    if delete_symbol(char, row, col, direction) then
-      return
-    end
+  if delete_symbol(line, char, row, col, direction) then
+    return
   end
 
   local row_start, col_start = row, col
