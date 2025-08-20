@@ -53,10 +53,48 @@ M.config = {
           {
             capture = "",
             retrict_to_whitespaces = false,
+            query = [[]],
             -- will receive the captured node with informations and current (row|col)_pos.
-            -- should return a boolean.
+            -- should return a boolean a output string in an array and a range for deletion.
             callback = function(node_info, row_pos, col_pos)
-              return false
+              return false, {}, {}
+            end,
+          },
+        },
+      },
+    },
+    ["html"] = {
+      enable = true,
+      ignore = { "'", "%d%d::%d%d::%d%d", "<%%=" },
+      delete_pairs = {
+        open_close = {
+          enable = true,
+          match_pairs = {
+            [">"] = "%",
+            ["("] = ")",
+          },
+        },
+        close_open = {},
+      },
+      delete_patterns = {
+        enable = true,
+        patterns = {},
+      },
+      delete_patterns_pairs = {
+        enable = true,
+        patterns = {},
+      },
+      treesitter = {
+        enable = true,
+        captures = {
+          {
+            capture = "",
+            retrict_to_whitespaces = false,
+            query = [[]],
+            -- will receive the captured node with informations and current (row|col)_pos.
+            -- should return a boolean a output string in an array and a range for deletion.
+            callback = function(node_info, row_pos, col_pos)
+              return false, {}, {}
             end,
           },
         },
@@ -232,7 +270,7 @@ local function eat_empty_lines(row, col, direction)
 
   -- Empty buffer
   if buf_rows == 1 and #line == 0 then
-    return 0, 1
+    return row, col
   end
 
   -- Out of bounds
@@ -261,8 +299,9 @@ local function eat_empty_lines(row, col, direction)
     char = line:sub(new_col, new_col)
   end
 
-  -- `consume_spaces_and_lines` excceed 1 if the remaining lines are empty.
-  new_row = math.min(new_row, buf_rows - 1)
+  -- `consume_spaces_and_lines` excceed 1 if the remaining lines are empty
+  -- or -1 if the all previous lines are empty.
+  new_row = math.min(buf_rows - 1, math.max(new_row, 0))
   return new_row, new_col
 end
 
@@ -519,9 +558,9 @@ local function find_pattern_line(item, line, col, direction)
     col_start = 1
   end
 
-  local slice = line:sub(col_start, col_end)
   local match = ""
   local matches = {}
+  local slice = line:sub(col_start, col_end)
 
   if item.capture_regex then
     -- Save the matches to insert in the `rhs` format string.
@@ -672,6 +711,30 @@ local function delete_pattern_pairs(item, line, row, col, direction)
   return found_lhs
 end
 
+---
+---@param item table
+---@param row integer
+---@param col integer
+---@param direction integer
+---@return boolean
+local function delete_treesitter_capture(item, row, col, direction)
+  local node = vim.treesitter.get_node({ pos = { row, col } })
+  local captures = vim.treesitter.get_captures_at_pos(0, row, col)
+  if node then
+    vim.print(node:type(), vim.treesitter.get_node_text(node, vim.api.nvim_get_current_buf()))
+    vim.print("id: ", node:id())
+    vim.print("range: ", node:range())
+    vim.print("child_count: ", node:child_count())
+    vim.print("named_children: ", node:named_children())
+  end
+
+  -- print(vim.inspect(node))
+  -- print(vim.inspect(captures))
+
+  -- return false
+  return true -- DEV DELETE IT
+end
+
 ---Delete word or punctuation following the specified `direction`.
 ---@param row integer
 ---@param col integer
@@ -721,6 +784,14 @@ local function delete_word(row, col, direction)
   -- First look if there are any config related with the filetype
   -- if nothing matches fallback to global config.
   if config_filetype and config_filetype.enable then
+    if config_filetype.treesitter and config_filetype.treesitter.enable then
+      for _, item in ipairs(config_filetype.treesitter.captures) do
+        if delete_treesitter_capture(item, row, col, direction) then
+          return
+        end
+      end
+    end
+
     if config_filetype.delete_pattern_pairs and config_filetype.delete_pattern_pairs.patterns then
       for _, item in ipairs(config_filetype.delete_pattern_pairs.patterns) do
         if delete_pattern_pairs(item, line, row, col, direction) then
