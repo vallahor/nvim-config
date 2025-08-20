@@ -106,13 +106,32 @@ M.insert_pair = function(config, opts)
   opts = opts or {}
   opts.type = 1
 
-  local pair = vim.tbl_extend("force", {
-    first = "",
-    second = nil,
-    format = nil,
-    filetypes = {},
+  local first = vim.tbl_extend("force", {
+    pattern = config.first,
+    prefix = nil,
+    suffix = nil,
+    before = nil,
+    after = nil,
+    rule_before = nil,
+    rule_after = nil,
+  }, opts.first or {})
+
+  local second = vim.tbl_extend("force", {
+    pattern = config.second or "",
+    prefix = nil,
+    suffix = nil,
+    before = nil,
+    after = nil,
+    rule_before = nil,
+    rule_after = nil,
+  }, opts.first or {})
+
+  local pair = {
+    lhs = first,
+    rhs = second,
+    format = config.format or "",
     not_filetypes = {},
-  }, config)
+  }
 
   insert_into(store.pairs, store.ft_pairs, pair, opts)
 end
@@ -133,7 +152,6 @@ M.insert_pattern = function(config, opts)
     after = nil,
     rule_before = nil,
     rule_after = nil,
-    filetypes = {},
     not_filetypes = {},
     capture = {
       format = nil,
@@ -415,7 +433,9 @@ end
 ---@return boolean
 ---@return integer
 ---@return integer
-local function find_pattern_line(item, line, col, direction, opts)
+local function find_pattern_line(item, line, col, direction)
+  print(item)
+  print(vim.inspect(item))
   local col_start, col_end = col, col
 
   local pattern = (item.prefix or "") .. "(" .. item.pattern .. ")" .. (item.suffix or "")
@@ -464,7 +484,7 @@ end
 ---@param direction integer
 ---@return boolean
 local function delete_pattern(item, line, row, col, direction)
-  local found, col_start, col_end = find_pattern_line(item, line, col, direction, {})
+  local found, col_start, col_end = find_pattern_line(item, line, col, direction)
 
   if found then
     vim.api.nvim_buf_set_text(utils.bufnr, row, col_start, row, col_end, { item.replace })
@@ -483,7 +503,7 @@ end
 ---@param direction integer
 ---@return boolean
 local function delete_pairs(item, line, row, col, direction)
-  local found_lhs, col_lhs_start, col_lhs_end = find_pattern_line(item.lhs, line, col, direction, {})
+  local found_lhs, col_lhs_start, col_lhs_end = find_pattern_line(item.lhs, line, col, direction)
 
   if found_lhs then
     local peeked_line, _, row_pos, col_pos = peek_non_whitespace(row, col, -direction)
