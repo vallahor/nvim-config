@@ -104,22 +104,24 @@ M.config = {
   delete_pattern = {
     enable = true,
     patterns = {
+      -- {
+      --   -- 13::26::45
+      --   pattern = "%d%d::%d%d::%d%d",
+      -- },
       {
-        -- 13::26::45
-        pattern = "%d%d::%d%d::%d%d",
-      },
-      {
-        pattern = "(%x%x)(%x%x)(%x%x)(%x%x)argb",
+        pattern = "(%x%x)(%x%x)(%x%x)(%x%x)",
         order = { [4] = 1, [3] = 2, [2] = 3, [1] = 4 },
         format = "%s%s%s%s",
+        suffix = "a",
         capture_regex = true,
         -- before = "0[xb]",
         -- after = "[xb]0",
       },
       {
-        pattern = "(%x%x)(%x%x)(%x%x)(%x%x)rgba",
-        order = { [4] = 1, [3] = 2, [2] = 3, [1] = 4 },
+        pattern = "(%x%x)(%x%x)(%x%x)(%x%x)",
+        order = { [4] = 1, [1] = 2, [2] = 3, [3] = 4 },
         format = "%s%s%s%s",
+        suffix = "r",
         capture_regex = true,
         -- before = "0[xb]",
         -- after = "[xb]0",
@@ -129,51 +131,51 @@ M.config = {
   delete_pattern_pairs = {
     enable = true,
     patterns = {
-      {
-        -- lhs = { pattern = ".*(<(%w+).*>)", save_matches = { ignore = { 1 } } },
-        -- lhs = { pattern = ".*(<(%w+)>)", save_matches = { ignore = { 1 } } },
-        lhs = {
-          rule_before = "",
-          before = "",
-          pattern = "<(%w+) (%w+)>",
-          order = { [2] = 1, [1] = 2 },
-          capture_regex = true,
-        },
-        rhs = { rule_after = "", after = "", format = "</%s %s>" },
-        surround_check = "%w",
-      },
-      {
-        lhs = { pattern = "<%%=" },
-        rhs = { pattern = "%%>" },
-        replace = "",
-        surround_check = "%w",
-      },
-      {
-        rhs = { pattern = "<%%=" },
-        lhs = { pattern = "%%>" },
-        replace = "",
-        surround_check = "%w",
-      },
-      {
-        lhs = { pattern = "#STRING" },
-        rhs = { pattern = "#END" },
-        replace = "",
-        surround_check = nil,
-        -- surround_check = "%w",
-      },
-      {
-        lhs = { pattern = "xxx" },
-        rhs = { pattern = "yyy" },
-        replace = "",
-        surround_check = nil,
-        -- surround_check = "%w",
-      },
-      {
-        lhs = { pattern = "yyy" },
-        rhs = { pattern = "xxx" },
-        replace = "",
-        -- surround_check = "%w",
-      },
+      -- {
+      --   -- lhs = { pattern = ".*(<(%w+).*>)", save_matches = { ignore = { 1 } } },
+      --   -- lhs = { pattern = ".*(<(%w+)>)", save_matches = { ignore = { 1 } } },
+      --   lhs = {
+      --     rule_before = "",
+      --     before = "",
+      --     pattern = "<(%w+) (%w+)>",
+      --     order = { [2] = 1, [1] = 2 },
+      --     capture_regex = true,
+      --   },
+      --   rhs = { rule_after = "", after = "", format = "</%s %s>" },
+      --   surround_check = "%w",
+      -- },
+      -- {
+      --   lhs = { pattern = "<%%=" },
+      --   rhs = { pattern = "%%>" },
+      --   replace = "",
+      --   surround_check = "%w",
+      -- },
+      -- {
+      --   rhs = { pattern = "<%%=" },
+      --   lhs = { pattern = "%%>" },
+      --   replace = "",
+      --   surround_check = "%w",
+      -- },
+      -- {
+      --   lhs = { pattern = "#STRING" },
+      --   rhs = { pattern = "#END" },
+      --   replace = "",
+      --   surround_check = nil,
+      --   -- surround_check = "%w",
+      -- },
+      -- {
+      --   lhs = { pattern = "xxx" },
+      --   rhs = { pattern = "yyy" },
+      --   replace = "",
+      --   surround_check = nil,
+      --   -- surround_check = "%w",
+      -- },
+      -- {
+      --   lhs = { pattern = "yyy" },
+      --   rhs = { pattern = "xxx" },
+      --   replace = "",
+      --   -- surround_check = "%w",
+      -- },
     },
   },
   delete_pairs = {
@@ -534,14 +536,15 @@ end
 ---@return table
 ---@return integer
 ---@return integer
-local function find_pattern_line(item, line, col, direction)
+local function find_pattern_line(item, line, col, direction, opts)
   local col_start, col_end = col, col
+  local item_pattern = item.pattern or opts.pattern
 
-  if not item.pattern then
+  if not item_pattern then
     return false, {}, -1, -1
   end
 
-  local pattern = "(" .. item.pattern .. ")"
+  local pattern = (item.prefix or "") .. "(" .. item_pattern .. ")" .. (item.suffix or "")
 
   -- Adds wildcards in the pattern and aditional rules.
   -- Right: "^(pattern)item.after|[item.rule_after|.*]"
@@ -558,9 +561,15 @@ local function find_pattern_line(item, line, col, direction)
     col_start = 1
   end
 
-  local match = ""
+  -- Try to match the pattern first and if not exists in the slice early
+  -- return else extract the values from the match if it's a regex.
   local matches = {}
   local slice = line:sub(col_start, col_end)
+  local match = slice:match(pattern)
+
+  if not match then
+    return false, {}, 0, 0
+  end
 
   if item.capture_regex then
     -- Save the matches to insert in the `rhs` format string.
@@ -582,6 +591,7 @@ local function find_pattern_line(item, line, col, direction)
           local index = item.order[i - 1] or i
           items_ordered[index] = result_matches[i]
         end
+
         return result_matches[1]
       end)
 
@@ -600,24 +610,18 @@ local function find_pattern_line(item, line, col, direction)
         return result_matches[1]
       end)
     end
-  else
-    match = slice:match(pattern)
   end
 
-  if match then
-    -- Can safelly sub/add the length because the line
-    -- has the given pattern.
-    local length = #match
-    if direction == utils.direction.right then
-      col_start = col - 1
-      col_end = col + length - 1
-    elseif direction == utils.direction.left then
-      col_start = col - length
-    end
-    return true, matches, col_start, col_end
+  -- Can safelly sub/add the length because the line
+  -- has the given pattern.
+  local length = #match + (item.prefix and #item.prefix or 0) + (item.suffix and #item.suffix or 0)
+  if direction == utils.direction.right then
+    col_start = col - 1
+    col_end = col + length - 1
+  elseif direction == utils.direction.left then
+    col_start = col - length
   end
-
-  return false, {}, 0, 0
+  return true, matches, col_start, col_end
 end
 
 ---Delete string slice from a given pattern. Matches regex and literal string.
@@ -629,14 +633,18 @@ end
 ---@param direction integer
 ---@return boolean
 local function delete_pattern(item, line, row, col, direction)
-  local found, matches, col_start, col_end = find_pattern_line(item, line, col, direction)
+  local found, matches, col_start, col_end = find_pattern_line(item, line, col, direction, {})
+
+  print(found, col_start, col_end)
+  print(table.unpack(matches))
 
   if found then
+    local replace = item.replace or ""
+
     if item.format and #matches > 0 then
-      item.replace = string.format(item.format, table.unpack(matches))
+      replace = string.format(item.format, table.unpack(matches))
     end
 
-    local replace = item.replace or ""
     vim.api.nvim_buf_set_text(utils.bufnr, row, col_start, row, col_end, { replace })
   end
 
@@ -653,9 +661,10 @@ end
 ---@param direction integer
 ---@return boolean
 local function delete_pattern_pairs(item, line, row, col, direction)
-  local found_lhs, matches, col_lhs_start, col_lhs_end = find_pattern_line(item.lhs, line, col, direction)
+  local found_lhs, matches, col_lhs_start, col_lhs_end = find_pattern_line(item.lhs, line, col, direction, {})
 
   if found_lhs then
+    local opts = {}
     if item.rhs.format and #matches > 0 then
       -- Generate a pattern from `lhs` captures.
       -- This is necessary when the deleted pattern appears in the `rhs`
@@ -669,11 +678,11 @@ local function delete_pattern_pairs(item, line, row, col, direction)
       -- To fix this the captured %w in `lhs` id inject in
       -- the `rhs` pattern using </%s> which producing a string
       -- that corretly matches the first pattern.
-      item.rhs.pattern = string.format(item.rhs.format, table.unpack(matches))
+      opts.pattern = string.format(item.rhs.format, table.unpack(matches))
     end
 
     local peeked_line, _, row_pos, col_pos = peek_non_whitespace(row, col, -direction)
-    local found_rhs, _, col_rhs_start, col_rhs_end = find_pattern_line(item.rhs, peeked_line, col_pos, -direction)
+    local found_rhs, _, col_rhs_start, col_rhs_end = find_pattern_line(item.rhs, peeked_line, col_pos, -direction, opts)
 
     if found_rhs then
       local row_start, col_start = row, col
@@ -831,6 +840,7 @@ local function delete_word(row, col, direction)
     for _, item in ipairs(M.config.delete_pattern.patterns) do
       if not in_ignore_list(filetype, item) then
         if delete_pattern(item, line, row, col, direction) then
+          print(item.pattern)
           return
         end
       end
@@ -901,6 +911,8 @@ local function delete_word(row, col, direction)
   elseif direction == utils.direction.left then
     col_start = col_peek
   end
+
+  print(row_start, col_start, row_end, col_end)
 
   vim.api.nvim_buf_set_text(utils.bufnr, row_start, col_start, row_end, col_end, {})
 end
