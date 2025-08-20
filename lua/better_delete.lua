@@ -312,21 +312,19 @@ local default_delete_pattern_pairs = {
     after = nil,
     prefix = nil,
     suffix = nil,
-    replace = nil,
   },
   rhs = {
     pattern = nil,
     order = nil,
     format = nil,
-    capture_regex = nil,
     before = nil,
     after = nil,
     rule_before = nil,
     rule_after = nil,
     prefix = nil,
     suffix = nil,
-    replace = nil,
   },
+  replace = nil,
   surround_check = nil,
 }
 
