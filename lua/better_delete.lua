@@ -60,6 +60,11 @@ M.setup = function(config)
   M.config = vim.tbl_deep_extend("force", vim.deepcopy(M.config), config or {})
 end
 
+local function place_undo()
+  local mark = vim.api.nvim_replace_termcodes("<c-g>u", true, false, true)
+  vim.api.nvim_feedkeys(mark, "i", false)
+end
+
 local function get_or_create_filetype(filetype)
   local ft = store.filetypes[filetype]
 
@@ -268,6 +273,7 @@ local function delete_from_pattern(line, pattern, char, row, col, direction)
 
   -- Found at least 2 matching pattern.
   if col_end - col_start > 1 then
+    place_undo()
     vim.api.nvim_buf_set_text(utils.bufnr, row, col_start, row, col_end, {})
     return true
   end
@@ -362,6 +368,7 @@ local function delete_symbol(line, char, row, col, direction)
       end
     end
 
+    place_undo()
     vim.api.nvim_buf_set_text(utils.bufnr, row_start, col_start - 1, row_end, col_end, {})
     return true
   end
@@ -487,6 +494,7 @@ local function delete_pattern(item, line, row, col, direction)
   local found, col_start, col_end = find_pattern_line(item, line, col, direction)
 
   if found then
+    place_undo()
     vim.api.nvim_buf_set_text(utils.bufnr, row, col_start, row, col_end, { item.replace })
   end
 
@@ -506,6 +514,7 @@ local function delete_pairs(item, line, row, col, direction)
   local found_lhs, col_lhs_start, col_lhs_end = find_pattern_line(item.lhs, line, col, direction)
 
   if found_lhs then
+    -- @check: cache it
     local peeked_line, _, row_pos, col_pos = peek_non_whitespace(row, col, -direction)
     local found_rhs, col_rhs_start, col_rhs_end = find_pattern_line(item.rhs, peeked_line, col_pos, -direction)
 
@@ -523,6 +532,7 @@ local function delete_pairs(item, line, row, col, direction)
         col_end = col_rhs_end
       end
 
+      place_undo()
       vim.api.nvim_buf_set_text(utils.bufnr, row_start, col_start, row_end, col_end, { item.replace })
     end
 
@@ -563,14 +573,12 @@ end
 local function delete_word(row, col, direction)
   local line = vim.api.nvim_get_current_line()
 
-  local mark = vim.api.nvim_replace_termcodes("<c-g>u", true, false, true)
-
   -- Check if BOL/EOF.
   if col == 0 or col > #line then
     if M.config.delete_empty_lines_until_next_char then
       -- Consume spaces and lines til the next non whitespace char
       -- or begin of the buffer or EOF.
-      vim.api.nvim_feedkeys(mark, "i", false)
+      place_undo()
       consume_spaces_and_lines(row, col, direction)
     else
       -- If `delete_empty_lines_until_next_char` is disabled
@@ -587,8 +595,6 @@ local function delete_word(row, col, direction)
     end
     return
   end
-
-  vim.api.nvim_feedkeys(mark, "i", false)
 
   local char = line:sub(col, col)
 
@@ -697,6 +703,7 @@ local function delete_word(row, col, direction)
     col_start = col_peek
   end
 
+  place_undo()
   vim.api.nvim_buf_set_text(utils.bufnr, row_start, col_start, row_end, col_end, {})
 end
 
@@ -714,25 +721,22 @@ local function delete(row, col, direction)
   if char:match("%p") then
     local bufnr = vim.api.nvim_get_current_buf()
     local filetype = vim.bo[bufnr].filetype
-    local config_filetype = M.config.filetypes[filetype]
-    local filetype_match, config_match = get_match_pairs(config_filetype, direction)
+    local config_filetype = store.filetypes[filetype]
 
-    if not in_ignore_list(filetype, char) then
-      local found = false
-      -- Looks first if there some rule in filetype config and if not found
-      -- fallback to the global config.
-      if filetype_match[char] then
-        found, row_start, col_start, row_end, col_end = find_match_pair(filetype_match[char], row, col, -direction)
+    if config_filetype then
+      for _, index in ipairs(config_filetype.pairs) do
+        local item = store.ft_pairs[index]
+        if delete_pairs(item, line, row, col, direction) then
+          return
+        end
       end
-      if not found and config_match[char] then
-        found, row_start, col_start, row_end, col_end = find_match_pair(config_match[char], row, col, -direction)
-      end
-      if found then
-        local mark = vim.api.nvim_replace_termcodes("<c-g>u", true, false, true)
-        vim.api.nvim_feedkeys(mark, "i", false)
+    end
 
-        vim.api.nvim_buf_set_text(utils.bufnr, row_start, col_start - 1, row_end, col_end, {})
-        return
+    for _, item in ipairs(store.pairs) do
+      if not in_ignore_list(item, filetype) then
+        if delete_pairs(item, line, row, col, direction) then
+          return
+        end
       end
     end
   end
