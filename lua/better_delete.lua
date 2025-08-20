@@ -131,51 +131,51 @@ M.config = {
   delete_pattern_pairs = {
     enable = true,
     patterns = {
-      -- {
-      --   -- lhs = { pattern = ".*(<(%w+).*>)", save_matches = { ignore = { 1 } } },
-      --   -- lhs = { pattern = ".*(<(%w+)>)", save_matches = { ignore = { 1 } } },
-      --   lhs = {
-      --     rule_before = "",
-      --     before = "",
-      --     pattern = "<(%w+) (%w+)>",
-      --     order = { [2] = 1, [1] = 2 },
-      --     capture_regex = true,
-      --   },
-      --   rhs = { rule_after = "", after = "", format = "</%s %s>" },
-      --   surround_check = "%w",
-      -- },
-      -- {
-      --   lhs = { pattern = "<%%=" },
-      --   rhs = { pattern = "%%>" },
-      --   replace = "",
-      --   surround_check = "%w",
-      -- },
-      -- {
-      --   rhs = { pattern = "<%%=" },
-      --   lhs = { pattern = "%%>" },
-      --   replace = "",
-      --   surround_check = "%w",
-      -- },
-      -- {
-      --   lhs = { pattern = "#STRING" },
-      --   rhs = { pattern = "#END" },
-      --   replace = "",
-      --   surround_check = nil,
-      --   -- surround_check = "%w",
-      -- },
-      -- {
-      --   lhs = { pattern = "xxx" },
-      --   rhs = { pattern = "yyy" },
-      --   replace = "",
-      --   surround_check = nil,
-      --   -- surround_check = "%w",
-      -- },
-      -- {
-      --   lhs = { pattern = "yyy" },
-      --   rhs = { pattern = "xxx" },
-      --   replace = "",
-      --   -- surround_check = "%w",
-      -- },
+      {
+        -- lhs = { pattern = ".*(<(%w+).*>)", save_matches = { ignore = { 1 } } },
+        -- lhs = { pattern = ".*(<(%w+)>)", save_matches = { ignore = { 1 } } },
+        lhs = {
+          rule_before = "",
+          before = "",
+          pattern = "<(%w+) (%w+)>",
+          order = { [2] = 1, [1] = 2 },
+          capture_regex = true,
+        },
+        rhs = { rule_after = "", after = "", format = "</%s %s>" },
+        surround_check = "%w",
+      },
+      {
+        lhs = { pattern = "<%%=" },
+        rhs = { pattern = "%%>" },
+        replace = "",
+        surround_check = "%w",
+      },
+      {
+        rhs = { pattern = "<%%=" },
+        lhs = { pattern = "%%>" },
+        replace = "",
+        surround_check = "%w",
+      },
+      {
+        lhs = { pattern = "#STRING" },
+        rhs = { pattern = "#END" },
+        replace = "",
+        surround_check = nil,
+        -- surround_check = "%w",
+      },
+      {
+        lhs = { pattern = "xxx" },
+        rhs = { pattern = "yyy" },
+        replace = "",
+        surround_check = nil,
+        -- surround_check = "%w",
+      },
+      {
+        lhs = { pattern = "yyy" },
+        rhs = { pattern = "xxx" },
+        replace = "",
+        -- surround_check = "%w",
+      },
     },
   },
   delete_pairs = {
@@ -208,6 +208,153 @@ M.config = {
 
 M.setup = function(config)
   M.config = vim.tbl_deep_extend("force", vim.deepcopy(M.config), config or {})
+end
+
+M.add_pattern_to_ignore_list = function(pattern, opts)
+  if not opts.filetypes then
+    -- check if put in a global ignore list
+    return
+  end
+
+  for _, filetype in ipairs(opts.filetypes) do
+    M.config.filetypes[filetype] = M.config.filetypes[filetype] or {}
+    M.config.filetypes[filetype].ignore = M.config.filetypes[filetype] or {}
+    table.insert(M.config.filetypes[filetype].ignore, pattern)
+  end
+end
+
+local default_pattern_pairs = {
+  open_close = {
+    enable = false,
+    match_pairs = {},
+  },
+  close_open = {
+    enable = false,
+    match_pairs = {},
+  },
+}
+
+M.add_pairs = function(config, opts)
+  config = vim.tbl_deep_extend("force", default_pattern_pairs, config or {})
+  local filetypes = opts.filetypes or nil
+  local ignore = opts.ignore or nil
+
+  if ignore then
+    for _, filetype in ipairs(ignore) do
+      table.insert(M.config.filetypes[filetype].ignore, config.lhs.pattern)
+    end
+    return
+  end
+
+  if filetypes then
+    for _, filetype in ipairs(filetypes) do
+      M.config.filetypes[filetype] = M.config.filetypes[filetype] or {}
+      M.config.filetypes[filetype].delete_pairs =
+        table.insert(M.config.filetypes[filetype].delete_pairs.close_open.match_pairs, config)
+    end
+    return
+  end
+
+  table.insert(M.config.delete_pairs.close_open.match_pairs, config)
+end
+
+local default_delete_pattern = {
+  pattern = nil,
+  order = nil,
+  format = nil,
+  capture_regex = nil,
+  before = nil,
+  after = nil,
+  rule_before = nil,
+  rule_after = nil,
+  prefix = nil,
+  suffix = nil,
+  replace = nil,
+}
+
+-- add something to insert it into ignore lists
+M.add_pattern = function(config, opts)
+  config = vim.tbl_deep_extend("force", default_delete_pattern, config or {})
+  local filetypes = opts.filetypes or nil
+  local ignore = opts.ignore or nil
+
+  if not config.pattern then
+    return
+  end
+
+  if ignore then
+    for _, filetype in ipairs(ignore) do
+      table.insert(M.config.filetypes[filetype].ignore, config.lhs.pattern)
+    end
+    return
+  end
+
+  if filetypes then
+    for _, filetype in ipairs(filetypes) do
+      M.config.filetypes[filetype] = M.config.filetypes[filetype] or {}
+      table.insert(M.config.filetypes[filetype].delete_pattern.patterns, config)
+    end
+    return
+  end
+
+  table.insert(M.config.delete_pattern.patterns, config)
+end
+
+local default_delete_pattern_pairs = {
+  lhs = {
+    pattern = nil,
+    order = nil,
+    format = nil,
+    capture_regex = nil,
+    rule_before = nil,
+    rule_after = nil,
+    before = nil,
+    after = nil,
+    prefix = nil,
+    suffix = nil,
+    replace = nil,
+  },
+  rhs = {
+    pattern = nil,
+    order = nil,
+    format = nil,
+    capture_regex = nil,
+    before = nil,
+    after = nil,
+    rule_before = nil,
+    rule_after = nil,
+    prefix = nil,
+    suffix = nil,
+    replace = nil,
+  },
+  surround_check = nil,
+}
+
+M.add_pattern_pairs = function(config, opts)
+  config = vim.tbl_deep_extend("force", default_delete_pattern_pairs, config or {})
+  local filetypes = opts.filetypes or nil
+  local ignore = opts.ignore or nil
+
+  if not config.lhs.pattern then
+    return
+  end
+
+  if ignore then
+    for _, filetype in ipairs(ignore) do
+      table.insert(M.config.filetypes[filetype].ignore, config.lhs.pattern)
+    end
+    return
+  end
+
+  if filetypes then
+    for _, filetype in ipairs(filetypes) do
+      M.config.filetypes[filetype] = M.config.filetypes[filetype] or {}
+      table.insert(M.config.filetypes[filetype].delete_pattern.patterns, config)
+    end
+    return
+  end
+
+  table.insert(M.config.delete_pattern.patterns, config)
 end
 
 local function in_ignore_list(filetype, item)
@@ -635,9 +782,6 @@ end
 local function delete_pattern(item, line, row, col, direction)
   local found, matches, col_start, col_end = find_pattern_line(item, line, col, direction, {})
 
-  print(found, col_start, col_end)
-  print(table.unpack(matches))
-
   if found then
     local replace = item.replace or ""
 
@@ -840,7 +984,6 @@ local function delete_word(row, col, direction)
     for _, item in ipairs(M.config.delete_pattern.patterns) do
       if not in_ignore_list(filetype, item) then
         if delete_pattern(item, line, row, col, direction) then
-          print(item.pattern)
           return
         end
       end
@@ -911,8 +1054,6 @@ local function delete_word(row, col, direction)
   elseif direction == utils.direction.left then
     col_start = col_peek
   end
-
-  print(row_start, col_start, row_end, col_end)
 
   vim.api.nvim_buf_set_text(utils.bufnr, row_start, col_start, row_end, col_end, {})
 end
