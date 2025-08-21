@@ -242,11 +242,6 @@ local function eat_whitespace(line, col, direction)
   return col_current
 end
 
-local function count_spaces(line, pattern, start_col, end_col)
-  local match = line:sub(start_col, end_col):match(pattern)
-  return (match and #match) or 0
-end
-
 local function count_pattern(line, pattern, start_col, end_col)
   local match = line:sub(start_col, end_col):match(pattern)
   print(pattern, line, match, match and #match)
@@ -331,48 +326,6 @@ local function eat_empty_lines(row, col, direction)
   return new_row, new_col
 end
 
----Walk the line through the `direction` specified matching the char using the
----given pattern and returning the new column position.
----@param line string
----@param pattern string
----@param char string
----@param col integer
----@param direction string
----@return integer
-local function walk_line_matching_pattern(line, pattern, char, col, direction)
-  local col_current = col
-  local char_current = char
-
-  while (char_current == pattern or char_current:match(pattern)) and col_current > 0 and col_current <= #line do
-    col_current = col_current + direction
-    char_current = line:sub(col_current, col_current)
-  end
-
-  return col_current
-end
-
----Delete a sequence of characters that match the given pattern.
----@param line string
----@param pattern string
----@param row integer
----@param start_col integer
----@param end_col integer
----@param direction string
----@return boolean
-local function delete_from_pattern(line, pattern, row, start_col, end_col, direction)
-  local count = count_pattern(line, pattern, start_col, end_col)
-
-  -- Found at least 2 matching pattern.
-  if count > 1 then
-    start_col, end_col = calc_col(start_col, end_col, count, direction)
-    insert_undo()
-    vim.api.nvim_buf_set_text(utils.bufnr, row, start_col, row, end_col, {})
-    return true
-  end
-
-  return false
-end
-
 ---Peek the next symbol across lines running by a specified direction,
 ---returninig the char and position.
 ---@param row integer
@@ -448,15 +401,14 @@ local function join_line(row)
   consume_spaces_and_lines(row, #line + 1, utils.direction.right)
 end
 
----@param item table
+---@param pattern string
 ---@param line string
 ---@param row integer
 ---@param start_col integer
 ---@param end_col integer
 ---@param direction string
 ---@return boolean
-local function delete_pattern(item, line, row, start_col, end_col, direction)
-  local pattern = (utils.direction.left and item.pattern.left) or item.pattern.right
+local function delete_pattern(pattern, line, row, start_col, end_col, direction)
   local count = count_pattern(line, pattern, start_col, end_col)
 
   if count > 1 then
@@ -560,8 +512,7 @@ local function delete_word(row, col, direction)
 
   local char = line:sub(col, col)
 
-  if char:match("%s") then
-    consume_spaces(line, row, col, direction)
+  if delete_pattern(M.config.seek_spaces[direction], new_line, row, start_col, end_col, direction) then
     return
   end
 
@@ -592,7 +543,7 @@ local function delete_word(row, col, direction)
 
     for _, index in ipairs(config_filetype.patterns) do
       local item = store.patterns.ft[index]
-      if delete_pattern(item, new_line, row, start_col, end_col, direction) then
+      if delete_pattern(item.pattern[direction], new_line, row, start_col, end_col, direction) then
         return
       end
     end
@@ -615,7 +566,7 @@ local function delete_word(row, col, direction)
 
   for _, item in ipairs(store.patterns.default) do
     if not in_ignore_list(item, filetype) then
-      if delete_pattern(item, line, row, start_col, end_col, direction) then
+      if delete_pattern(item.pattern[direction], line, row, start_col, end_col, direction) then
         return
       end
     end
@@ -630,7 +581,7 @@ local function delete_word(row, col, direction)
   end
 
   if char:match("%p") then
-    if delete_from_pattern(line, M.config.seek_punctuations[direction], row, start_col, end_col, direction) then
+    if delete_pattern(line, M.config.seek_punctuations[direction], row, start_col, end_col, direction) then
       return
     end
   end
@@ -640,19 +591,19 @@ local function delete_word(row, col, direction)
   -- Digits
   if M.config.passthrough_numbers then
     col_peek = count_pattern(line, "%d", start_col, end_col)
-  elseif delete_from_pattern(line, M.config.seek_numbers[direction], row, start_col, end_col, direction) then
+  elseif delete_pattern(line, M.config.seek_numbers[direction], row, start_col, end_col, direction) then
     return
   end
 
   -- Uppercase
   if M.config.passthrough_uppercase then
     col_peek = count_pattern(line, "%u", start_col, end_col)
-  elseif delete_from_pattern(line, M.config.seek_uppercases[direction], row, start_col, end_col, direction) then
+  elseif delete_pattern(line, M.config.seek_uppercases[direction], row, start_col, end_col, direction) then
     return
   end
 
   -- start_col, end_col = calc_col(start_col, end_col, col_peek, direction)
-  if delete_from_pattern(line, M.config.seek_lowercases[direction], row, start_col, end_col, direction) then
+  if delete_pattern(line, M.config.seek_lowercases[direction], row, start_col, end_col, direction) then
     return
   end
 end

@@ -6,6 +6,7 @@ return {
     local delite = require("better_delete")
     delite.setup()
 
+    -- 11::33::44
     delite.insert_pattern({ pattern = "%d%d::%d%d::%d%d" })
     delite.insert_pattern({ pattern = "__[%u]+__" })
     delite.insert_pattern({ pattern = "__aeho__" }, { filetypes = { "lua" } })
