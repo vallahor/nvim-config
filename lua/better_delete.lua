@@ -13,11 +13,28 @@ local utils = {
 }
 
 local store = {
-  pairs = {},
-  ft_pairs = {},
-  patterns = {},
-  ft_patterns = {},
+  pairs = {
+    ft = {},
+    default = {},
+  },
+  rules = {
+    ft = {},
+    default = {},
+  },
+  patterns = {
+    ft = {},
+    default = {},
+  },
   filetypes = {},
+}
+
+local store_index = {
+  ["pairs.ft"] = store.pairs.ft,
+  ["pairs.default"] = store.pairs.default,
+  ["rules.ft"] = store.rules.ft,
+  ["rules.default"] = store.rules.default,
+  ["patterns.ft"] = store.patterns.ft,
+  ["patterns.default"] = store.patterns.default,
 }
 
 M.config = {
@@ -29,14 +46,15 @@ M.config = {
     separator = " ",
     times = 1,
   },
-  -- pairs = {},
-  -- patterns = {},
-  -- ignore = {},
-  -- filetypes = {
-  --   ["lua"] = {
-  --     ignore = { "'", "%d%d::%d%d::%d%d", "<%%=" },
-  --     pairs = {},
-  --     patterns = {},
+  default_pairs = {
+    { left = "(", right = ")", not_filetypes = nil },
+    { left = "{", right = "}", not_filetypes = nil },
+    { left = "[", right = "]", not_filetypes = nil },
+    { left = "'", right = "'", not_filetypes = nil },
+    { left = '"', right = '"', not_filetypes = nil },
+    { left = "`", right = "`", not_filetypes = nil },
+    { left = "<", right = ">", not_filetypes = nil },
+  },
   --     treesitter = {
   --       enable = true,
   --       captures = {
@@ -51,9 +69,6 @@ M.config = {
   --           end,
   --         },
   --       },
-  --     },
-  --   },
-  -- },
 }
 
 M.setup = function(config)
@@ -65,30 +80,28 @@ local function place_undo()
   vim.api.nvim_feedkeys(mark, "i", false)
 end
 
-local function get_or_create_filetype(filetype)
+local function create_filetype(filetype)
   local ft = store.filetypes[filetype]
-
   if not ft then
     ft = {
       index = #store.filetypes + 1,
       pairs = {},
       patterns = {},
+      rules = {},
     }
     store.filetypes[filetype] = ft
   end
-
-  return ft
 end
 
-local function insert_into(store_global, store_ft, elem, opts)
+local function insert_into(store_default, store_ft, elem, opts)
   opts.filetypes = opts.filetypes or nil
   opts.not_filetypes = opts.not_filetypes or nil
 
   if opts.filetypes then
     local store_ft_index = #store_ft + 1
     for _, filetype in ipairs(opts.filetypes) do
-      local ft = get_or_create_filetype(filetype)
-      local ft_list = (opts.type == 1 and ft.pairs) or ft.patterns
+      create_filetype(filetype)
+      local ft_list = store_index[opts.ft]
       table.insert(ft_list, store_ft_index)
     end
     table.insert(store_ft, elem)
@@ -98,11 +111,11 @@ local function insert_into(store_global, store_ft, elem, opts)
   if opts.not_filetypes then
     elem.not_filetypes = elem.not_filetypes or {}
     for _, filetype in ipairs(opts.not_filetypes) do
-      local _ = get_or_create_filetype(filetype)
+      create_filetype(filetype)
       elem.not_filetypes[filetype] = true
     end
   end
-  table.insert(store_global, elem)
+  table.insert(store_default, elem)
 end
 
 M.insert_pair = function(config, opts)
@@ -110,7 +123,8 @@ M.insert_pair = function(config, opts)
     return
   end
   opts = opts or {}
-  opts.type = 1
+  opts.type = opts.type or "pairs.default"
+  opts.ft = opts.ft or "pairs.ft"
 
   local pair = {
     pattern = {
@@ -118,14 +132,16 @@ M.insert_pair = function(config, opts)
       right = config.right,
     },
     not_filetypes = nil,
-    capture = nil,
-    -- capture = {
-    --   format = nil,
-    --   order = nil,
-    -- },
   }
 
-  insert_into(store.pairs, store.ft_pairs, pair, opts)
+  insert_into(store_index[opts.type], store.pairs.ft, pair, opts)
+end
+
+M.insert_rule = function(config, opts)
+  opts = opts or {}
+  opts.type = "rules.default"
+  opts.ft = "rules.ft"
+  M.insert_pair(config, opts)
 end
 
 M.insert_pattern = function(config, opts)
@@ -134,7 +150,8 @@ M.insert_pattern = function(config, opts)
   end
 
   opts = opts or {}
-  opts.type = 2
+  opts.type = "patterns.default"
+  opts.ft = "patterns.ft"
 
   -- Adds wildcards in the pattern and aditional rules.
   -- Right: "^(pattern)item.suffix"
@@ -147,13 +164,8 @@ M.insert_pattern = function(config, opts)
       right = "^" .. config_pattern,
     },
     not_filetypes = nil,
-    capture = nil,
-    -- capture = {
-    --   format = nil,
-    --   order = nil,
-    -- },
   }
-  insert_into(store.patterns, store.ft_patterns, pattern, opts)
+  insert_into(store_index[opts.type], store.patterns.ft, pattern, opts)
 end
 
 local function in_ignore_list(item, filetype)
@@ -426,8 +438,8 @@ end
 ---@return boolean
 local function delete_pattern(item, line, row, col, direction)
   local pattern = (utils.direction.left and item.pattern.left) or item.pattern.right
-
   local found, col_start, col_end = find_pattern_line(pattern, line, col, direction)
+
   if found then
     place_undo()
     vim.api.nvim_buf_set_text(utils.bufnr, row, col_start, row, col_end, { item.replace })
@@ -538,23 +550,32 @@ local function delete_word(row, col, direction)
     --     return
     --   end
     -- end
-
-    for _, index in ipairs(config_filetype.pairs) do
-      local item = store.ft_pairs[index]
-      if delete_pairs(item, line, row, col, direction) then
+    print(vim.inspect(config_filetype.rules))
+    for _, index in ipairs(config_filetype.rules) do
+      local item = store.frules.ft[index]
+      if delete_pattern(item, line, row, col, direction) then
         return
       end
     end
 
     for _, index in ipairs(config_filetype.patterns) do
-      local item = store.ft_patterns[index]
+      local item = store.patterns.ft[index]
       if delete_pattern(item, line, row, col, direction) then
+        return
+      end
+    end
+
+    for _, index in ipairs(config_filetype.pairs) do
+      local item = store.pairs.ft[index]
+      if delete_pairs(item, line, row, col, direction) then
         return
       end
     end
   end
 
-  for _, item in ipairs(store.pairs) do
+  for _, item in ipairs(store.rules.default) do
+    vim.inspect(store.rules)
+    vim.inspect(item)
     if not in_ignore_list(item, filetype) then
       if delete_pairs(item, line, row, col, direction) then
         return
@@ -562,9 +583,17 @@ local function delete_word(row, col, direction)
     end
   end
 
-  for _, item in ipairs(store.patterns) do
+  for _, item in ipairs(store.patterns.default) do
     if not in_ignore_list(item, filetype) then
       if delete_pattern(item, line, row, col, direction) then
+        return
+      end
+    end
+  end
+
+  for _, item in ipairs(store.pairs.default) do
+    if not in_ignore_list(item, filetype) then
+      if delete_pairs(item, line, row, col, direction) then
         return
       end
     end
@@ -648,14 +677,14 @@ local function delete(row, col, direction)
 
     if config_filetype then
       for _, index in ipairs(config_filetype.pairs) do
-        local item = store.ft_pairs[index]
+        local item = store.pairs.ft[index]
         if delete_pairs(item, line, row, col, direction) then
           return
         end
       end
     end
 
-    for _, item in ipairs(store.pairs) do
+    for _, item in ipairs(store.pairs.default) do
       if not in_ignore_list(item, filetype) then
         if delete_pairs(item, line, row, col, direction) then
           return

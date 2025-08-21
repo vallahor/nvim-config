@@ -7,11 +7,12 @@ return {
     delite.setup()
 
     delite.insert_pattern({ pattern = "%d%d::%d%d::%d%d" })
+    delite.insert_pattern({ pattern = "__[%u]+__" })
     -- order matters
     delite.insert_pair({ left = "%%{", right = "}" }, { filetypes = { "elixir" } })
-    delite.insert_pair({ left = "'", right = "'" }, { not_filetypes = { "ocaml" } })
-    delite.insert_pair({ left = "{", right = "}" })
     delite.insert_pair({ left = "birl", right = "birl" }, { filetypes = { "lua" } })
+
+    delite.insert_rule({ left = "aeho", right = "aeho" }, { filetypes = { "lua" } })
 
     vim.keymap.set("i", "<c-bs>", delite.previous_word)
     vim.keymap.set("i", "<c-del>", delite.next_word)
