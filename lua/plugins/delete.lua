@@ -12,7 +12,11 @@ return {
     -- order matters
     delite.insert_pair({ left = "%%{", right = "}" }, { filetypes = { "elixir" } })
 
-    delite.insert_rule({ left = "aeho", right = "aeho" }, { filetypes = { "lua" } })
+    delite.insert_rule({ left = "aeho", right = "aeho" })
+    delite.insert_rule({ left = "aeho", right = "ehoa" })
+    delite.insert_rule({ left = "aeho", right = "hob" })
+    delite.insert_rule({ left = "aeho", right = "oc" })
+    delite.insert_rule({ left = "aeho", right = "d" })
 
     vim.keymap.set("i", "<c-bs>", delite.previous_word)
     vim.keymap.set("i", "<c-del>", delite.next_word)

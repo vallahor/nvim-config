@@ -2,3 +2,4 @@
 package-lock.json
 lazy-lock.json
 playground/
+*.dump

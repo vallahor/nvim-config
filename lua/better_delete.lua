@@ -10,6 +10,10 @@ local utils = {
     left = -1,
     right = 1,
   },
+  seek_spaces = {
+    [-1] = "[%s].*$",
+    [1] = "^[%s].*",
+  },
 }
 
 local store = {
@@ -71,10 +75,6 @@ M.config = {
   --       },
 }
 
-local function escape_pattern(text)
-  return text:gsub("([%(%)%.%%%+%-%*%?%[%^%$])", "%%%1")
-end
-
 M.setup = function(config)
   M.config = vim.tbl_deep_extend("force", vim.deepcopy(M.config), config or {})
   if M.config.default_pairs then
@@ -83,7 +83,7 @@ M.setup = function(config)
       pair.not_filetypes = pair.not_filetypes or nil
 
       M.insert_pair(
-        { left = escape_pattern(pair.left), right = escape_pattern(pair.right) },
+        { left = pair.left, right = pair.right },
         { filetypes = pair.filetypes, not_filetypes = pair.not_filetypes }
       )
     end
@@ -135,6 +135,10 @@ local function insert_into(store_default, store_ft, elem, opts)
     end
   end
   table.insert(store_default, elem)
+end
+
+local function escape_pattern(text)
+  return text:gsub("([%(%)%.%%%+%-%*%?%[%^%$])", "%%%1")
 end
 
 M.insert_pair_rule = function(config, opts)
@@ -216,6 +220,11 @@ local function eat_whitespace(line, col, direction)
 
   return col_current
 end
+
+-- local function count_spaces(line, pattern, start_col, end_col)
+--   local match = line:sub(start_col, end_col):match(pattern)
+--   return (match and #match) or 0
+-- end
 
 local function get_line_and_pos(row, direction)
   local new_row = row + direction
@@ -328,6 +337,8 @@ local function peek_non_whitespace(row, col, direction)
   local line = vim.api.nvim_buf_get_lines(utils.bufnr, row, row + 1, false)[1] or ""
   local row_pos = row
   local col_pos = col + direction
+
+  print("AEHO")
 
   if col > #line then
     col_pos = col
@@ -448,8 +459,6 @@ local function find_pattern_line(pattern, line, col, direction)
   end
 
   local slice = line:sub(col_start, col_end)
-  -- print(pattern)
-  -- print(slice)
   local match = slice:match(pattern)
 
   if match then
@@ -483,40 +492,46 @@ local function delete_pattern(item, line, row, col, direction)
   return found
 end
 
----@param item table
+---@param cache table
+---@param left string
+---@param right string
 ---@param line string
 ---@param row integer
 ---@param col integer
 ---@param direction integer
 ---@return boolean
-local function delete_pairs(item, line, row, col, direction)
-  local left_match, col_lhs_start, col_lhs_end = find_pattern_line(item.pattern.left, line, col, direction)
+local function delete_pairs(cache, left, right, line, row, col, direction)
+  if direction == utils.direction.right then
+    left, right = right, left
+  end
+
+  local left_match, col_lhs_start, col_lhs_end = find_pattern_line(left, line, col, direction)
 
   if left_match then
-    -- @check: cache it
-    local peeked_line, _, row_pos, col_pos = peek_non_whitespace(row, col, -direction)
-    local found_rhs, col_rhs_start, col_rhs_end =
-      find_pattern_line(item.pattern.right, peeked_line, col_pos, -direction)
+    if not cache.line then
+      cache.line, _, cache.row, cache.col = peek_non_whitespace(row, col, -direction)
+    end
+    local right_match, col_rhs_start, col_rhs_end = find_pattern_line(right, cache.line, cache.col, -direction)
 
-    if found_rhs then
-      local row_start, col_start = row, col
-      local row_end, col_end = row, col
+    if right_match then
+      local start_row, start_col = row, col
+      local end_row, end_col = row, col
 
       if direction == utils.direction.right then
-        row_start = row_pos
-        col_start = col_rhs_start
-        col_end = col_lhs_end
+        start_row = cache.row
+        start_col = col_rhs_start
+        end_col = col_lhs_end
       elseif direction == utils.direction.left then
-        col_start = col_lhs_start
-        row_end = row_pos
-        col_end = col_rhs_end
+        start_col = col_lhs_start
+        end_row = cache.row
+        end_col = col_rhs_end
       end
 
       insert_undo()
-      vim.api.nvim_buf_set_text(utils.bufnr, row_start, col_start, row_end, col_end, { item.replace })
+      vim.api.nvim_buf_set_text(utils.bufnr, start_row, start_col, end_row, end_col, {})
     end
 
-    return left_match and found_rhs
+    return left_match and right_match
   end
 
   return left_match
@@ -579,6 +594,12 @@ local function delete_word(row, col, direction)
   local filetype = vim.bo[bufnr].filetype
   local config_filetype = store.filetypes[filetype]
 
+  local cache = {
+    line = nil,
+    row = 0,
+    col = 0,
+  }
+
   if config_filetype then
     -- for _, item in ipairs(config_filetype.treesitter.captures) do
     --   if delete_capture(item, row, col, direction) then
@@ -588,7 +609,7 @@ local function delete_word(row, col, direction)
 
     for _, index in ipairs(config_filetype.rules) do
       local item = store.rules.ft[index]
-      if delete_pairs(item, line, row, col, direction) then
+      if delete_pairs(cache, item.pattern.left, item.pattern.right, line, row, col, direction) then
         return
       end
     end
@@ -602,17 +623,15 @@ local function delete_word(row, col, direction)
 
     for _, index in ipairs(config_filetype.pairs) do
       local item = store.pairs.ft[index]
-      if delete_pairs(item, line, row, col, direction) then
+      if delete_pairs(cache, item.pattern.left, item.pattern.right, line, row, col, direction) then
         return
       end
     end
   end
 
   for _, item in ipairs(store.rules.default) do
-    vim.inspect(store.rules)
-    vim.inspect(item)
     if not in_ignore_list(item, filetype) then
-      if delete_pairs(item, line, row, col, direction) then
+      if delete_pairs(cache, item.pattern.left, item.pattern.right, line, row, col, direction) then
         return
       end
     end
@@ -628,7 +647,7 @@ local function delete_word(row, col, direction)
 
   for _, item in ipairs(store.pairs.default) do
     if not in_ignore_list(item, filetype) then
-      if delete_pairs(item, line, row, col, direction) then
+      if delete_pairs(cache, item.pattern.left, item.pattern.right, line, row, col, direction) then
         return
       end
     end
@@ -710,10 +729,16 @@ local function delete(row, col, direction)
     local filetype = vim.bo[bufnr].filetype
     local config_filetype = store.filetypes[filetype]
 
+    local cache = {
+      line = nil,
+      row = 0,
+      col = 0,
+    }
+
     if config_filetype then
       for _, index in ipairs(config_filetype.pairs) do
         local item = store.pairs.ft[index]
-        if delete_pairs(item, line, row, col, direction) then
+        if delete_pairs(cache, item.pattern.left, item.pattern.right, line, row, col, direction) then
           return
         end
       end
@@ -721,7 +746,7 @@ local function delete(row, col, direction)
 
     for _, item in ipairs(store.pairs.default) do
       if not in_ignore_list(item, filetype) then
-        if delete_pairs(item, line, row, col, direction) then
+        if delete_pairs(cache, item.pattern.left, item.pattern.right, line, row, col, direction) then
           return
         end
       end
