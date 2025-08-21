@@ -137,15 +137,7 @@ local function insert_into(store_default, store_ft, elem, opts)
   table.insert(store_default, elem)
 end
 
-M.insert_pair = function(config, opts)
-  if not config or not config.left and config.right then
-    return
-  end
-  opts = opts or {}
-  opts.type = opts.type or "pairs.default"
-  opts.ft = opts.ft or "pairs.ft"
-  opts.ft_list = opts.ft_list or "pairs"
-
+M.insert_pair_rule = function(config, opts)
   local pair = {
     pattern = {
       left = config.left,
@@ -157,12 +149,33 @@ M.insert_pair = function(config, opts)
   insert_into(store_index[opts.type], store_index[opts.ft], pair, opts)
 end
 
+M.insert_pair = function(config, opts)
+  if not config or not config.left and config.right then
+    return
+  end
+
+  opts = opts or {}
+  opts.type = "pairs.default"
+  opts.ft = "pairs.ft"
+  opts.ft_list = "pairs"
+
+  config.left = escape_pattern(config.left)
+  config.right = escape_pattern(config.right)
+
+  M.insert_pair_rule(config, opts)
+end
+
 M.insert_rule = function(config, opts)
+  if not config or not config.left and config.right then
+    return
+  end
+
   opts = opts or {}
   opts.type = "rules.default"
   opts.ft = "rules.ft"
   opts.ft_list = "rules"
-  M.insert_pair(config, opts)
+
+  M.insert_pair_rule(config, opts)
 end
 
 M.insert_pattern = function(config, opts)

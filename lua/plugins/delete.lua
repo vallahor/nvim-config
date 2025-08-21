@@ -11,7 +11,6 @@ return {
     delite.insert_pattern({ pattern = "__aeho__" }, { filetypes = { "lua" } })
     -- order matters
     delite.insert_pair({ left = "%%{", right = "}" }, { filetypes = { "elixir" } })
-    delite.insert_pair({ left = "birl", right = "birl" }, { filetypes = { "lua" } })
 
     delite.insert_rule({ left = "aeho", right = "aeho" }, { filetypes = { "lua" } })
 
