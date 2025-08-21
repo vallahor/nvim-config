@@ -7,24 +7,12 @@ local utils = {
     del = "<del>",
   },
   direction = {
-    left = -1,
-    right = 1,
+    left = "left",
+    right = "right",
   },
-  seek_spaces = {
-    [-1] = "[%s]*$",
-    [1] = "^[%s]*",
-  },
-  seek_punctuations = {
-    [-1] = "[%p]*$",
-    [1] = "^[%p]*",
-  },
-  seek_numbers = {
-    [-1] = "[%d]*$",
-    [1] = "^[%d]*",
-  },
-  seek_uppercases = {
-    [-1] = "[%u]*$",
-    [1] = "^[%u]*",
+  opposite = {
+    left = "right",
+    right = "left",
   },
 }
 
@@ -55,7 +43,8 @@ local store_index = {
 
 M.config = {
   delete_empty_lines_until_next_char = true,
-  delete_repeated_punctuation = true,
+  -- repeated_allowed = nil,
+  repeated_allowed = nil,
   passthrough_numbers = false,
   passthrough_uppercase = false,
   join_line = {
@@ -70,6 +59,26 @@ M.config = {
     { left = '"', right = '"', not_filetypes = nil },
     { left = "`", right = "`", not_filetypes = nil },
     { left = "<", right = ">", not_filetypes = nil },
+  },
+  seek_spaces = {
+    ["left"] = "[%s]*$",
+    ["right"] = "^[%s]*",
+  },
+  seek_punctuations = {
+    ["left"] = "[%p]*$",
+    ["right"] = "^[%p]*",
+  },
+  seek_numbers = {
+    ["left"] = "[%d]*$",
+    ["right"] = "^[%d]*",
+  },
+  seek_uppercases = {
+    ["left"] = "[%u]*$",
+    ["right"] = "^[%u]*",
+  },
+  seek_lowercases = {
+    ["left"] = "%u?[%l]*%d?$",
+    ["right"] = "^[%l]*",
   },
   --     treesitter = {
   --       enable = true,
@@ -240,6 +249,7 @@ end
 
 local function count_pattern(line, pattern, start_col, end_col)
   local match = line:sub(start_col, end_col):match(pattern)
+  print(pattern, line, match, match and #match)
   return (match and #match) or 0
 end
 
@@ -327,7 +337,7 @@ end
 ---@param pattern string
 ---@param char string
 ---@param col integer
----@param direction integer
+---@param direction string
 ---@return integer
 local function walk_line_matching_pattern(line, pattern, char, col, direction)
   local col_current = col
@@ -347,7 +357,7 @@ end
 ---@param row integer
 ---@param start_col integer
 ---@param end_col integer
----@param direction integer
+---@param direction string
 ---@return boolean
 local function delete_from_pattern(line, pattern, row, start_col, end_col, direction)
   local count = count_pattern(line, pattern, start_col, end_col)
@@ -367,7 +377,7 @@ end
 ---returninig the char and position.
 ---@param row integer
 ---@param col integer
----@param direction integer
+---@param direction string
 ---@return string
 ---@return string
 ---@return integer
@@ -393,7 +403,7 @@ end
 
 ---@param row integer
 ---@param col integer
----@param direction integer
+---@param direction string
 local function consume_spaces_and_lines(row, col, direction)
   local left_row, left_start_col = row, col
   local right_row, right_end_col = row, col
@@ -423,10 +433,10 @@ end
 ---@param line string
 ---@param row integer
 ---@param col integer
----@param direction integer
+---@param direction string
 local function consume_spaces(line, row, col, direction)
   local start_col, end_col = get_range_line(col, #line, direction)
-  local count = count_spaces(line, utils.seek_spaces[direction], start_col, end_col)
+  local count = count_spaces(line, M.config.seek_spaces[direction], start_col, end_col)
   start_col, end_col = calc_col(start_col, end_col, count, direction)
 
   vim.api.nvim_buf_set_text(utils.bufnr, row, start_col, row, end_col, {})
@@ -438,42 +448,25 @@ local function join_line(row)
   consume_spaces_and_lines(row, #line + 1, utils.direction.right)
 end
 
----@param pattern string
----@param line string
----@param col integer
----@param direction integer
----@return boolean
----@return integer
----@return integer
-local function find_pattern_line(pattern, line, col, direction)
-  local start_col, end_col = get_range_line(col, #line, direction)
-
-  local slice = line:sub(start_col, end_col)
-  local match = slice:match(pattern)
-
-  if match then
-    start_col, end_col = calc_col(start_col, end_col, #match, direction)
-  end
-
-  return match, start_col, end_col
-end
-
 ---@param item table
 ---@param line string
 ---@param row integer
----@param col integer
----@param direction integer
+---@param start_col integer
+---@param end_col integer
+---@param direction string
 ---@return boolean
-local function delete_pattern(item, line, row, col, direction)
+local function delete_pattern(item, line, row, start_col, end_col, direction)
   local pattern = (utils.direction.left and item.pattern.left) or item.pattern.right
-  local found, col_start, col_end = find_pattern_line(pattern, line, col, direction)
+  local count = count_pattern(line, pattern, start_col, end_col)
 
-  if found then
+  if count > 1 then
+    start_col, end_col = calc_col(start_col, end_col, count, direction)
     insert_undo()
-    vim.api.nvim_buf_set_text(utils.bufnr, row, col_start, row, col_end, { item.replace })
+    vim.api.nvim_buf_set_text(utils.bufnr, row, start_col, row, end_col, {})
+    return true
   end
 
-  return found
+  return false
 end
 
 ---@param cache table
@@ -481,40 +474,46 @@ end
 ---@param right string
 ---@param line string
 ---@param row integer
----@param col integer
----@param direction integer
+---@param start_col integer
+---@param end_col integer
+---@param direction string
 ---@return boolean
-local function delete_pairs(cache, left, right, line, row, col, direction)
+local function delete_pairs(cache, left, right, line, row, start_col, end_col, direction)
   if direction == utils.direction.right then
     left, right = right, left
   end
 
-  local left_match, left_start_col, left_end_col = find_pattern_line(left, line, col, direction)
+  local left_count = count_pattern(line, left, start_col, end_col)
 
-  if left_match then
+  if left_count > 1 then
     if not cache.line then
-      cache.line, _, cache.row, cache.col = peek_non_whitespace(row, col, -direction)
+      cache.line, _, cache.row, cache.start_col, cache.end_col =
+        peek_non_whitespace(row, start_col, utils.opposite[direction])
     end
-    local right_match, right_start_col, right_end_col = find_pattern_line(right, cache.line, cache.col, -direction)
+    local right_count = count_pattern(cache.line, left, start_col, end_col)
 
-    if right_match then
-      local start_row, start_col, end_row, end_col =
+    if right_count > 1 then
+      local left_start_col, left_end_col = calc_col(start_col, end_col, left_count, direction)
+      local right_start_col, right_end_col =
+        calc_col(cache.start_col, cache.cache_end, right_count, utils.opposite[direction])
+
+      local sr, sc, er, ec =
         get_range_lines(row, left_start_col, left_end_col, cache.row, right_start_col, right_end_col, direction)
       insert_undo()
-      vim.api.nvim_buf_set_text(utils.bufnr, start_row, start_col, end_row, end_col, {})
+      vim.api.nvim_buf_set_text(utils.bufnr, sr, sc, er, ec, {})
     end
 
-    return left_match and right_match
+    return left_count > 1 and right_count > 1
   end
 
-  return left_match
+  return false
 end
 
 ---
 ---@param item table
 ---@param row integer
 ---@param col integer
----@param direction integer
+---@param direction string
 ---@return boolean
 local function delete_capture(item, row, col, direction)
   local node = vim.treesitter.get_node({ pos = { row, col } })
@@ -536,9 +535,12 @@ end
 
 ---@param row integer
 ---@param col integer
----@param direction integer
+---@param direction string
 local function delete_word(row, col, direction)
   local line = vim.api.nvim_get_current_line()
+
+  local start_col, end_col = get_range_line(col, #line, direction)
+  local new_line = line:sub(start_col, end_col)
 
   if col == 0 or col > #line then
     if M.config.delete_empty_lines_until_next_char then
@@ -570,7 +572,8 @@ local function delete_word(row, col, direction)
   local cache = {
     line = nil,
     row = 0,
-    col = 0,
+    start_col = 0,
+    end_col = 0,
   }
 
   if config_filetype then
@@ -582,21 +585,21 @@ local function delete_word(row, col, direction)
 
     for _, index in ipairs(config_filetype.rules) do
       local item = store.rules.ft[index]
-      if delete_pairs(cache, item.pattern.left, item.pattern.right, line, row, col, direction) then
+      if delete_pairs(cache, item.pattern.left, item.pattern.right, line, row, start_col, end_col, direction) then
         return
       end
     end
 
     for _, index in ipairs(config_filetype.patterns) do
       local item = store.patterns.ft[index]
-      if delete_pattern(item, line, row, col, direction) then
+      if delete_pattern(item, new_line, row, start_col, end_col, direction) then
         return
       end
     end
 
     for _, index in ipairs(config_filetype.pairs) do
       local item = store.pairs.ft[index]
-      if delete_pairs(cache, item.pattern.left, item.pattern.right, line, row, col, direction) then
+      if delete_pairs(cache, item.pattern.left, item.pattern.right, line, row, start_col, end_col, direction) then
         return
       end
     end
@@ -604,7 +607,7 @@ local function delete_word(row, col, direction)
 
   for _, item in ipairs(store.rules.default) do
     if not in_ignore_list(item, filetype) then
-      if delete_pairs(cache, item.pattern.left, item.pattern.right, line, row, col, direction) then
+      if delete_pairs(cache, item.pattern.left, item.pattern.right, line, row, start_col, end_col, direction) then
         return
       end
     end
@@ -612,7 +615,7 @@ local function delete_word(row, col, direction)
 
   for _, item in ipairs(store.patterns.default) do
     if not in_ignore_list(item, filetype) then
-      if delete_pattern(item, line, row, col, direction) then
+      if delete_pattern(item, line, row, start_col, end_col, direction) then
         return
       end
     end
@@ -620,81 +623,44 @@ local function delete_word(row, col, direction)
 
   for _, item in ipairs(store.pairs.default) do
     if not in_ignore_list(item, filetype) then
-      if delete_pairs(cache, item.pattern.left, item.pattern.right, line, row, col, direction) then
+      if delete_pairs(cache, item.pattern.left, item.pattern.right, line, row, start_col, end_col, direction) then
         return
       end
     end
   end
 
-  local start_col, end_col = get_range_line(col, #line, direction)
-
-  if delete_from_pattern(line, utils.seek_punctuations[direction], row, start_col, end_col, direction) then
-    return
+  if char:match("%p") then
+    if delete_from_pattern(line, M.config.seek_punctuations[direction], row, start_col, end_col, direction) then
+      return
+    end
   end
 
-  local col_peek = col + direction
+  local col_peek = 0
 
   -- Digits
   if M.config.passthrough_numbers then
     col_peek = count_pattern(line, "%d", start_col, end_col)
-  elseif delete_from_pattern(line, utils.seek_numbers[direction], row, start_col, end_col, direction) then
+  elseif delete_from_pattern(line, M.config.seek_numbers[direction], row, start_col, end_col, direction) then
     return
   end
 
   -- Uppercase
   if M.config.passthrough_uppercase then
     col_peek = count_pattern(line, "%u", start_col, end_col)
-  elseif delete_from_pattern(line, utils.seek_uppercases[direction], row, start_col, end_col, direction) then
+  elseif delete_from_pattern(line, M.config.seek_uppercases[direction], row, start_col, end_col, direction) then
     return
   end
 
-  start_col, end_col = calc_col(start_col, end_col, col_peek, direction)
-
-  -- Limited to the current row
-  -- stops if reachs BOL/EOL
-  while col_peek > 0 and col_peek <= #line do
-    char = line:sub(col_peek, col_peek)
-
-    -- Stops if find space or tab
-    if char:match("%s") then
-      break
-    end
-
-    -- Stops if find punctuation or digit
-    if char:match("[%p%d]") and col_peek ~= col then
-      break
-    end
-
-    -- Stops if find uppercase
-    -- if the direction is `utils.direction.left` it consumes the char
-    if char:match("[%u]") and col_peek ~= col then
-      if direction == utils.direction.left then
-        col_peek = col_peek - 1
-      end
-      break
-    end
-
-    col_peek = col_peek + direction
+  -- start_col, end_col = calc_col(start_col, end_col, col_peek, direction)
+  if delete_from_pattern(line, M.config.seek_lowercases[direction], row, start_col, end_col, direction) then
+    return
   end
-
-  local row_start, col_start = row, col
-  local row_end, col_end = row, col
-
-  if direction == utils.direction.right then
-    col_start = col_start - 1
-    col_end = col_peek - 1
-  elseif direction == utils.direction.left then
-    col_start = col_peek
-  end
-
-  insert_undo()
-  vim.api.nvim_buf_set_text(utils.bufnr, row_start, col_start, row_end, col_end, {})
 end
 
 ---Is <BS> and <DEL> but add the capability of deleting matching pairs.
 ---@param row integer
 ---@param col integer
----@param direction integer
+---@param direction string
 local function delete(row, col, direction)
   local line = vim.api.nvim_get_current_line()
   local char = line:sub(col, col)
@@ -710,13 +676,16 @@ local function delete(row, col, direction)
     local cache = {
       line = nil,
       row = 0,
-      col = 0,
+      start_col = 0,
+      end_col = 0,
     }
+
+    local start_col, end_col = get_range_line(col, #line, direction)
 
     if config_filetype then
       for _, index in ipairs(config_filetype.pairs) do
         local item = store.pairs.ft[index]
-        if delete_pairs(cache, item.pattern.left, item.pattern.right, line, row, col, direction) then
+        if delete_pairs(cache, item.pattern.left, item.pattern.right, line, row, start_col, end_col, direction) then
           return
         end
       end
@@ -724,7 +693,7 @@ local function delete(row, col, direction)
 
     for _, item in ipairs(store.pairs.default) do
       if not in_ignore_list(item, filetype) then
-        if delete_pairs(cache, item.pattern.left, item.pattern.right, line, row, col, direction) then
+        if delete_pairs(cache, item.pattern.left, item.pattern.right, line, row, start_col, end_col, direction) then
           return
         end
       end
