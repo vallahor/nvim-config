@@ -11,8 +11,8 @@ local utils = {
     right = 1,
   },
   seek_spaces = {
-    [-1] = "[%s].*$",
-    [1] = "^[%s].*",
+    [-1] = "[%s]$",
+    [1] = "^[%s]",
   },
 }
 
@@ -221,10 +221,24 @@ local function eat_whitespace(line, col, direction)
   return col_current
 end
 
--- local function count_spaces(line, pattern, start_col, end_col)
---   local match = line:sub(start_col, end_col):match(pattern)
---   return (match and #match) or 0
--- end
+local function count_spaces(line, pattern, start_col, end_col)
+  local match = line:sub(start_col, end_col):match(pattern)
+  return (match and #match) or 0
+end
+
+local function get_range(col, len, direction)
+  if direction == utils.direction.left then
+    return 1, col
+  end
+  return col, len
+end
+
+local function calc_col(start_col, end_col, len, direction)
+  if direction == utils.direction.left then
+    return end_col - len, start_col
+  end
+  return start_col - 1, start_col + len
+end
 
 local function get_line_and_pos(row, direction)
   local new_row = row + direction
@@ -338,8 +352,6 @@ local function peek_non_whitespace(row, col, direction)
   local row_pos = row
   local col_pos = col + direction
 
-  print("AEHO")
-
   if col > #line then
     col_pos = col
   end
@@ -354,9 +366,6 @@ local function peek_non_whitespace(row, col, direction)
   return line, char, row_pos, col_pos
 end
 
----Delete one or more punctuation.
----Can delete matching pairs or repeated punctuation.
----check: `delete_repeated_punctuation`.
 ---@param line string
 ---@param char string
 ---@param row integer
@@ -423,17 +432,25 @@ end
 ---@param col integer
 ---@param direction integer
 local function consume_spaces(line, row, col, direction)
-  local col_start, col_end = col, col
-  local col_current = eat_whitespace(line, col_start, direction)
+  local start_col, end_col = col, col
+  if direction == utils.direction.left then
+    start_col = 1
+    end_col = col
+  elseif direction == utils.direction.right then
+    start_col = col
+    end_col = #line
+  end
+  local col_current = eat_whitespace(line, start_col, direction)
+  -- local count = count_spaces(line, utils.seek_spaces[direction], start_col, end_col)
 
   if direction == utils.direction.right then
-    col_start = col_start - 1
-    col_end = col_current - 1
+    start_col = start_col - 1
+    end_col = col_current - 1
   elseif direction == utils.direction.left then
-    col_start = col_current
+    start_col = col_current
   end
 
-  vim.api.nvim_buf_set_text(utils.bufnr, row, col_start, row, col_end, {})
+  vim.api.nvim_buf_set_text(utils.bufnr, row, start_col, row, end_col, {})
 end
 
 ---@param row integer
