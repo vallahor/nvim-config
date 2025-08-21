@@ -144,8 +144,8 @@ end
 M.insert_pair_rule = function(config, opts)
   local pair = {
     pattern = {
-      left = config.left,
-      right = config.right,
+      left = config.left .. "$",
+      right = "^" .. config.right,
     },
     not_filetypes = nil,
   }
@@ -235,7 +235,7 @@ end
 
 local function calc_col(start_col, end_col, len, direction)
   if direction == utils.direction.left then
-    return end_col - len, start_col
+    return start_col - len, start_col
   end
   return start_col - 1, start_col + len
 end
