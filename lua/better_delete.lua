@@ -80,8 +80,9 @@ local function place_undo()
   vim.api.nvim_feedkeys(mark, "i", false)
 end
 
-local function create_filetype(filetype)
+local function get_or_create_filetype(filetype)
   local ft = store.filetypes[filetype]
+
   if not ft then
     ft = {
       index = #store.filetypes + 1,
@@ -91,6 +92,8 @@ local function create_filetype(filetype)
     }
     store.filetypes[filetype] = ft
   end
+
+  return ft
 end
 
 local function insert_into(store_default, store_ft, elem, opts)
@@ -100,8 +103,8 @@ local function insert_into(store_default, store_ft, elem, opts)
   if opts.filetypes then
     local store_ft_index = #store_ft + 1
     for _, filetype in ipairs(opts.filetypes) do
-      create_filetype(filetype)
-      local ft_list = store_index[opts.ft]
+      local ft = get_or_create_filetype(filetype)
+      local ft_list = ft[opts.ft_list]
       table.insert(ft_list, store_ft_index)
     end
     table.insert(store_ft, elem)
@@ -111,7 +114,7 @@ local function insert_into(store_default, store_ft, elem, opts)
   if opts.not_filetypes then
     elem.not_filetypes = elem.not_filetypes or {}
     for _, filetype in ipairs(opts.not_filetypes) do
-      create_filetype(filetype)
+      local _ = get_or_create_filetype(filetype)
       elem.not_filetypes[filetype] = true
     end
   end
@@ -125,6 +128,7 @@ M.insert_pair = function(config, opts)
   opts = opts or {}
   opts.type = opts.type or "pairs.default"
   opts.ft = opts.ft or "pairs.ft"
+  opts.ft_list = opts.ft_list or "pairs"
 
   local pair = {
     pattern = {
@@ -134,13 +138,14 @@ M.insert_pair = function(config, opts)
     not_filetypes = nil,
   }
 
-  insert_into(store_index[opts.type], store.pairs.ft, pair, opts)
+  insert_into(store_index[opts.type], store_index[opts.ft], pair, opts)
 end
 
 M.insert_rule = function(config, opts)
   opts = opts or {}
   opts.type = "rules.default"
   opts.ft = "rules.ft"
+  opts.ft_list = "rules"
   M.insert_pair(config, opts)
 end
 
@@ -151,13 +156,12 @@ M.insert_pattern = function(config, opts)
 
   opts = opts or {}
   opts.type = "patterns.default"
-  opts.ft = "patterns.ft"
+  opts.ft_list = "patterns"
 
   -- Adds wildcards in the pattern and aditional rules.
   -- Right: "^(pattern)item.suffix"
   -- Left: "item.prefix(pattern)$"
   local config_pattern = (config.prefix or "") .. "(" .. config.pattern .. ")" .. (config.suffix or "")
-
   local pattern = {
     pattern = {
       left = config_pattern .. "$",
@@ -550,10 +554,10 @@ local function delete_word(row, col, direction)
     --     return
     --   end
     -- end
-    print(vim.inspect(config_filetype.rules))
+
     for _, index in ipairs(config_filetype.rules) do
-      local item = store.frules.ft[index]
-      if delete_pattern(item, line, row, col, direction) then
+      local item = store.rules.ft[index]
+      if delete_pairs(item, line, row, col, direction) then
         return
       end
     end

@@ -8,6 +8,7 @@ return {
 
     delite.insert_pattern({ pattern = "%d%d::%d%d::%d%d" })
     delite.insert_pattern({ pattern = "__[%u]+__" })
+    delite.insert_pattern({ pattern = "__aeho__" }, { filetypes = { "lua" } })
     -- order matters
     delite.insert_pair({ left = "%%{", right = "}" }, { filetypes = { "elixir" } })
     delite.insert_pair({ left = "birl", right = "birl" }, { filetypes = { "lua" } })
