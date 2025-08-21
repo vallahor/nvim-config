@@ -71,11 +71,27 @@ M.config = {
   --       },
 }
 
-M.setup = function(config)
-  M.config = vim.tbl_deep_extend("force", vim.deepcopy(M.config), config or {})
+local function escape_pattern(text)
+  return text:gsub("([%(%)%.%%%+%-%*%?%[%^%$])", "%%%1")
 end
 
-local function place_undo()
+M.setup = function(config)
+  M.config = vim.tbl_deep_extend("force", vim.deepcopy(M.config), config or {})
+  if M.config.default_pairs then
+    for _, pair in ipairs(M.config.default_pairs) do
+      pair.filetypes = pair.filetypes or nil
+      pair.not_filetypes = pair.not_filetypes or nil
+
+      M.insert_pair(
+        { left = escape_pattern(pair.left), right = escape_pattern(pair.right) },
+        { filetypes = pair.filetypes, not_filetypes = pair.not_filetypes }
+      )
+    end
+  end
+  M.config.default_pairs = nil
+end
+
+local function insert_undo()
   local mark = vim.api.nvim_replace_termcodes("<c-g>u", true, false, true)
   vim.api.nvim_feedkeys(mark, "i", false)
 end
@@ -278,7 +294,7 @@ local function delete_from_pattern(line, pattern, char, row, col, direction)
 
   -- Found at least 2 matching pattern.
   if col_end - col_start > 1 then
-    place_undo()
+    insert_undo()
     vim.api.nvim_buf_set_text(utils.bufnr, row, col_start, row, col_end, {})
     return true
   end
@@ -342,7 +358,7 @@ local function delete_symbol(line, char, row, col, direction)
       end
     end
 
-    place_undo()
+    insert_undo()
     vim.api.nvim_buf_set_text(utils.bufnr, row_start, col_start - 1, row_end, col_end, {})
     return true
   end
@@ -419,6 +435,8 @@ local function find_pattern_line(pattern, line, col, direction)
   end
 
   local slice = line:sub(col_start, col_end)
+  -- print(pattern)
+  -- print(slice)
   local match = slice:match(pattern)
 
   if match then
@@ -445,7 +463,7 @@ local function delete_pattern(item, line, row, col, direction)
   local found, col_start, col_end = find_pattern_line(pattern, line, col, direction)
 
   if found then
-    place_undo()
+    insert_undo()
     vim.api.nvim_buf_set_text(utils.bufnr, row, col_start, row, col_end, { item.replace })
   end
 
@@ -481,7 +499,7 @@ local function delete_pairs(item, line, row, col, direction)
         col_end = col_rhs_end
       end
 
-      place_undo()
+      insert_undo()
       vim.api.nvim_buf_set_text(utils.bufnr, row_start, col_start, row_end, col_end, { item.replace })
     end
 
@@ -523,7 +541,7 @@ local function delete_word(row, col, direction)
 
   if col == 0 or col > #line then
     if M.config.delete_empty_lines_until_next_char then
-      place_undo()
+      insert_undo()
       consume_spaces_and_lines(row, col, direction)
     else
       if direction == utils.direction.right then
@@ -659,7 +677,7 @@ local function delete_word(row, col, direction)
     col_start = col_peek
   end
 
-  place_undo()
+  insert_undo()
   vim.api.nvim_buf_set_text(utils.bufnr, row_start, col_start, row_end, col_end, {})
 end
 
