@@ -74,7 +74,7 @@ local function get_or_create_filetype(filetype)
       pairs = {},
       patterns = {},
     }
-    table.insert(store.filetypes, ft)
+    store.filetypes[filetype] = ft
   end
 
   return ft
@@ -96,46 +96,33 @@ local function insert_into(store_global, store_ft, elem, opts)
   end
 
   if opts.not_filetypes then
-    for _, filetype in ipairs(opts.filetypes) do
-      local ft = get_or_create_filetype(filetype)
-      elem.not_filetypes[ft.index] = true
+    elem.not_filetypes = elem.not_filetypes or {}
+    for _, filetype in ipairs(opts.not_filetypes) do
+      local _ = get_or_create_filetype(filetype)
+      elem.not_filetypes[filetype] = true
     end
   end
   table.insert(store_global, elem)
 end
 
 M.insert_pair = function(config, opts)
-  if not config or not config.first and (not config.second or config.format) then
+  if not config or not config.left and config.right then
     return
   end
   opts = opts or {}
   opts.type = 1
 
-  local first = vim.tbl_extend("force", {
-    pattern = config.first,
-    prefix = nil,
-    suffix = nil,
-    before = nil,
-    after = nil,
-    rule_before = nil,
-    rule_after = nil,
-  }, opts.first or {})
-
-  local second = vim.tbl_extend("force", {
-    pattern = config.second or "",
-    prefix = nil,
-    suffix = nil,
-    before = nil,
-    after = nil,
-    rule_before = nil,
-    rule_after = nil,
-  }, opts.first or {})
-
   local pair = {
-    lhs = first,
-    rhs = second,
-    format = config.format or "",
-    not_filetypes = {},
+    pattern = {
+      left = config.left,
+      right = config.right,
+    },
+    not_filetypes = nil,
+    capture = nil,
+    -- capture = {
+    --   format = nil,
+    --   order = nil,
+    -- },
   }
 
   insert_into(store.pairs, store.ft_pairs, pair, opts)
@@ -149,21 +136,23 @@ M.insert_pattern = function(config, opts)
   opts = opts or {}
   opts.type = 2
 
-  local pattern = vim.tbl_deep_extend("force", {
-    pattern = "",
-    prefix = nil,
-    suffix = nil,
-    before = nil,
-    after = nil,
-    rule_before = nil,
-    rule_after = nil,
-    not_filetypes = {},
-    capture = {
-      format = nil,
-      order = nil,
-    },
-  }, config)
+  -- Adds wildcards in the pattern and aditional rules.
+  -- Right: "^(pattern)item.suffix"
+  -- Left: "item.prefix(pattern)$"
+  local config_pattern = (config.prefix or "") .. "(" .. config.pattern .. ")" .. (config.suffix or "")
 
+  local pattern = {
+    pattern = {
+      left = config_pattern .. "$",
+      right = "^" .. config_pattern,
+    },
+    not_filetypes = nil,
+    capture = nil,
+    -- capture = {
+    --   format = nil,
+    --   order = nil,
+    -- },
+  }
   insert_into(store.patterns, store.ft_patterns, pattern, opts)
 end
 
@@ -309,36 +298,6 @@ local function peek_non_whitespace(row, col, direction)
   return line, char, row_pos, col_pos
 end
 
----Peek the next char following the given `direction` returning if the `peeked char` and
----the `expected_symbol` matches.
----@param expected_symbol string
----@param row integer
----@param col integer
----@param direction integer
----@return true|false
----@return integer
----@return integer
----@return integer
----@return integer
-local function find_match_pair(expected_symbol, row, col, direction)
-  local row_start, col_start = row, col
-  local row_end, col_end = row, col
-
-  local _, char, row_pos, col_pos = peek_non_whitespace(row_start, col_start, direction)
-  local found = char == expected_symbol
-  if found then
-    if direction == utils.direction.right then
-      row_end = row_pos
-      col_end = col_pos
-    elseif direction == utils.direction.left then
-      row_start = row_pos
-      col_start = col_pos
-    end
-  end
-
-  return found, row_start, col_start, row_end, col_end
-end
-
 ---Delete one or more punctuation.
 ---Can delete matching pairs or repeated punctuation.
 ---check: `delete_repeated_punctuation`.
@@ -352,7 +311,6 @@ local function delete_symbol(line, char, row, col, direction)
   if char:match("%p") then
     local row_start, col_start = row, col
     local row_end, col_end = row, col
-    -- check: receive line
 
     if M.config.delete_repeated_punctuation then
       -- Delete repeated punctuation.
@@ -375,7 +333,6 @@ local function delete_symbol(line, char, row, col, direction)
   return false
 end
 
----Consume spaces, tabs, and lines.
 ---@param row integer
 ---@param col integer
 ---@param direction integer
@@ -414,8 +371,6 @@ local function consume_spaces(line, row, col, direction)
   local col_current = eat_whitespace(line, col_start, direction)
 
   if direction == utils.direction.right then
-    -- its col_(start|end) - 1 because the start is inclusive
-    -- and the end is the non whitespace char.
     col_start = col_start - 1
     col_end = col_current - 1
   elseif direction == utils.direction.left then
@@ -425,52 +380,33 @@ local function consume_spaces(line, row, col, direction)
   vim.api.nvim_buf_set_text(utils.bufnr, row, col_start, row, col_end, {})
 end
 
----Join line consuming spaces, tabs, and lines using a separator.
 ---@param row integer
 local function join_line(row)
   local line = vim.api.nvim_get_current_line()
   consume_spaces_and_lines(row, #line + 1, utils.direction.right)
 end
 
----Finds if the pattern exists in the given line.
----@param item table
+---@param pattern string
 ---@param line string
 ---@param col integer
 ---@param direction integer
 ---@return boolean
 ---@return integer
 ---@return integer
-local function find_pattern_line(item, line, col, direction)
-  print(item)
-  print(vim.inspect(item))
+local function find_pattern_line(pattern, line, col, direction)
   local col_start, col_end = col, col
 
-  local pattern = (item.prefix or "") .. "(" .. item.pattern .. ")" .. (item.suffix or "")
-
-  -- Adds wildcards in the pattern and aditional rules.
-  -- Right: "^(pattern)item.after|[item.rule_after|.*]"
-  -- Left: "[.*|item.rule_before]|item.before(pattern)$"
-  --
-  -- Note: The outer most capture group it's used to get the
-  -- length of the string generated by the pattern and it does not
-  -- counts the `item.rule_(before|after)` and `item.(before|after)`.
   if direction == utils.direction.right then
-    pattern = "^" .. pattern .. (item.after or "") .. (item.rule_after or ".*")
     col_end = #line
   elseif direction == utils.direction.left then
-    pattern = (item.rule_before or ".*") .. (item.before or "") .. pattern .. "$"
     col_start = 1
   end
 
-  -- Try to match the pattern first and if not exists in the slice early
-  -- return else extract the values from the match if it's a regex.
   local slice = line:sub(col_start, col_end)
   local match = slice:match(pattern)
 
   if match then
-    -- Can safelly sub/add the length because the line
-    -- has the given pattern.
-    local length = #match + (item.prefix and #item.prefix or 0) + (item.suffix and #item.suffix or 0)
+    local length = #match
     if direction == utils.direction.right then
       col_start = col - 1
       col_end = col + length - 1
@@ -482,8 +418,6 @@ local function find_pattern_line(item, line, col, direction)
   return match, col_start, col_end
 end
 
----Delete string slice from a given pattern. Matches regex and literal string.
----NOTE: For the regex the length must be provided to match correctly.
 ---@param item table
 ---@param line string
 ---@param row integer
@@ -491,8 +425,9 @@ end
 ---@param direction integer
 ---@return boolean
 local function delete_pattern(item, line, row, col, direction)
-  local found, col_start, col_end = find_pattern_line(item, line, col, direction)
+  local pattern = (utils.direction.left and item.pattern.left) or item.pattern.right
 
+  local found, col_start, col_end = find_pattern_line(pattern, line, col, direction)
   if found then
     place_undo()
     vim.api.nvim_buf_set_text(utils.bufnr, row, col_start, row, col_end, { item.replace })
@@ -501,9 +436,6 @@ local function delete_pattern(item, line, row, col, direction)
   return found
 end
 
----Delete pairs from a given pattern. Matches regex and literal string.
----Multiple lines.
----NOTE: For the regex the length must be provided to match correctly.
 ---@param item table
 ---@param line string
 ---@param row integer
@@ -511,12 +443,13 @@ end
 ---@param direction integer
 ---@return boolean
 local function delete_pairs(item, line, row, col, direction)
-  local found_lhs, col_lhs_start, col_lhs_end = find_pattern_line(item.lhs, line, col, direction)
+  local left_match, col_lhs_start, col_lhs_end = find_pattern_line(item.pattern.left, line, col, direction)
 
-  if found_lhs then
+  if left_match then
     -- @check: cache it
     local peeked_line, _, row_pos, col_pos = peek_non_whitespace(row, col, -direction)
-    local found_rhs, col_rhs_start, col_rhs_end = find_pattern_line(item.rhs, peeked_line, col_pos, -direction)
+    local found_rhs, col_rhs_start, col_rhs_end =
+      find_pattern_line(item.pattern.right, peeked_line, col_pos, -direction)
 
     if found_rhs then
       local row_start, col_start = row, col
@@ -536,10 +469,10 @@ local function delete_pairs(item, line, row, col, direction)
       vim.api.nvim_buf_set_text(utils.bufnr, row_start, col_start, row_end, col_end, { item.replace })
     end
 
-    return found_lhs and found_rhs
+    return left_match and found_rhs
   end
 
-  return found_lhs
+  return left_match
 end
 
 ---
@@ -566,25 +499,17 @@ local function delete_capture(item, row, col, direction)
   -- return true -- DEV DELETE IT
 end
 
----Delete word or punctuation following the specified `direction`.
 ---@param row integer
 ---@param col integer
 ---@param direction integer
 local function delete_word(row, col, direction)
   local line = vim.api.nvim_get_current_line()
 
-  -- Check if BOL/EOF.
   if col == 0 or col > #line then
     if M.config.delete_empty_lines_until_next_char then
-      -- Consume spaces and lines til the next non whitespace char
-      -- or begin of the buffer or EOF.
       place_undo()
       consume_spaces_and_lines(row, col, direction)
     else
-      -- If `delete_empty_lines_until_next_char` is disabled
-      -- it fallback to <bs>/<del>.
-      --
-      -- Note: if that keys are set in the keymap it will fallback to them
       if direction == utils.direction.right then
         local delete = vim.api.nvim_replace_termcodes(utils.keys.del, true, false, true)
         vim.api.nvim_feedkeys(delete, "i", false)
@@ -607,8 +532,6 @@ local function delete_word(row, col, direction)
   local filetype = vim.bo[bufnr].filetype
   local config_filetype = store.filetypes[filetype]
 
-  -- First look if there are any config related with the filetype
-  -- if nothing matches fallback to global config.
   if config_filetype then
     -- for _, item in ipairs(config_filetype.treesitter.captures) do
     --   if delete_capture(item, row, col, direction) then
@@ -624,7 +547,7 @@ local function delete_word(row, col, direction)
     end
 
     for _, index in ipairs(config_filetype.patterns) do
-      local item = store.ft_pairs[index]
+      local item = store.ft_patterns[index]
       if delete_pattern(item, line, row, col, direction) then
         return
       end
