@@ -66,24 +66,24 @@ M.config = {
     { left = "<", right = ">", not_filetypes = nil },
   },
   seek_punctuation = {
-    ["left"] = "%p$",
-    ["right"] = "^%p",
+    left = "%p$",
+    right = "^%p",
   },
   seek_allowed_punctuations = {
-    ["left"] = "[%.%,%!%?%:%;%-%/%@%#%$%%%^%&%*%_%+%=%~%|%\\]*$",
-    ["right"] = "^[%.%,%!%?%:%;%-%/%@%#%$%%%^%&%*%_%+%=%~%|%\\]*",
+    left = "[%.%,%!%?%:%;%-%/%@%#%$%%%^%&%*%_%+%=%~%|%\\]*$",
+    right = "^[%.%,%!%?%:%;%-%/%@%#%$%%%^%&%*%_%+%=%~%|%\\]*",
   },
   seek_numbers = {
-    ["left"] = "%d*$",
-    ["right"] = "^%d*",
+    left = "%d*$",
+    right = "^%d*",
   },
   seek_uppercases = {
-    ["left"] = "%u*$",
-    ["right"] = "^%u*",
+    left = "%u*$",
+    right = "^%u*",
   },
   seek_lowercases = {
-    ["left"] = "%u?%l*[%d%u]?$",
-    ["right"] = "^%u?%l*%d?",
+    left = "%u?%l*[%d%u]?$",
+    right = "^%u?%l*%d?",
   },
 }
 
