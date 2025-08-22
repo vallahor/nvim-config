@@ -267,57 +267,56 @@ local function get_col(start_col, end_col, direction)
   return end_col
 end
 
-local function eat_empty_lines(cache, direction)
+local function eat_empty_lines(text, row, col, direction)
   local rows = vim.api.nvim_buf_line_count(0)
   local direction_step = utils.direction_step[direction]
-  local row = cache.line.row + direction_step
+  row = row + direction_step
 
-  if (row < 0 and cache.line.col > #cache.line.text) or row + 1 > rows then
+  -- print("AEHO", text:sub(col, #text))
+
+  if (col < 0 and row < 0) or (col > #text and row + 1 >= rows) then
     return nil, -1, -1
   end
 
-  local start_col, end_col = get_range_line(cache.line.col, #cache.line.text, direction)
-  local count = count_pattern(cache.line.text:sub(start_col, end_col), M.config.seek_spaces[direction])
-  start_col, end_col = calc_col(cache.line.col, count, direction)
+  local start_col, end_col = get_range_line(col, #text, direction)
+  local slice = text:sub(start_col, end_col)
+  local count = count_pattern(slice, M.config.seek_spaces[direction])
+  start_col, end_col = get_range_line(#text - count, #text, direction)
 
-  if start_col > 0 and end_col < #cache.line.text then
-    local line = cache.line.text:sub(start_col, end_col)
-    return line, cache.line.row, get_col(start_col, end_col, direction)
+  if start_col > 0 and end_col < #text then
+    return slice, row, col
   end
 
   local line = vim.api.nvim_buf_get_lines(utils.bufnr, row, row + 1, false)[1] or ""
-  while row > 0 and row < rows do
+  while row >= 0 and row <= rows do
     if not line:match("^%s*$") then
       break
     end
     line = vim.api.nvim_buf_get_lines(utils.bufnr, row, row + 1, false)[1] or ""
     row = row + direction_step
-    print(row, line)
   end
 
   count = count_pattern(line, M.config.seek_spaces[direction])
-  print(count, line)
-  start_col, end_col = get_range_line(count, #line, utils.opposite[direction])
-  -- start_col, end_col = get_range_line(count, #line, direction)
-  -- if direction == utils.direction.right then
-  --   end_col = start_col
-  -- end
+  col = get_col(#line - count, count, direction)
+  start_col, end_col = get_range_line(col, #line, direction)
   line = line:sub(start_col, end_col)
-  print(count, line)
-  return line, row, get_col(start_col, end_col, direction)
+  row = math.min(rows - 1, math.max(row, 0))
+  return line, row, col
 end
 
 local function consume_spaces_and_lines(cache, separator)
-  local line, row, col = eat_empty_lines(cache, cache.direction)
+  local line, row, col = eat_empty_lines(cache.line.text, cache.line.row, cache.line.col, cache.direction)
 
   if not line then
     return
   end
 
-  print(#line, line, row, col)
-
   local left_row, left_col, right_row, right_col =
     get_range_lines(cache.line.row, cache.line.col, row, col, cache.direction)
+
+  if cache.direction == utils.direction.right then
+    left_col = left_col - 1
+  end
 
   print(left_row, left_col, right_row, right_col)
 
@@ -359,34 +358,29 @@ local function delete_pairs(cache, left, right)
 
   local left_count = count_pattern(cache.line.slice, left_pattern)
 
-  if left_count > 1 then
-    if not cache.lookup_line then
-      -- local start_col, end_col = get_range_line(cache.line.col, #cache.line.text, utils.opposite[cache.direction])
-      cache.lookup_line.slice, cache.lookup_line.row, cache.lookup_line.col =
-        eat_empty_lines(cache, utils.opposite[cache.direction])
-      print(vim.inspect(cache.lookup_line))
+  if left_count > 0 then
+    if not cache.lookup_line.slice then
+      local slice, row, col =
+        eat_empty_lines(cache.line.text, cache.line.row, cache.line.col + 1, utils.opposite[cache.direction])
+      cache.lookup_line.slice = slice
+      cache.lookup_line.row = row
+      cache.lookup_line.col = col
+      -- print(vim.inspect(cache.lookup_line))
     end
+    -- print(vim.inspect(cache.lookup_line))
+
     local right_count = count_pattern(cache.lookup_line.slice, right_pattern)
+    print(right_count, cache.lookup_line.slice)
 
-    if right_count > 1 then
-      local left_start_col, left_end_col = calc_col(cache.line.col, left_count, cache.direction)
-      local right_start_col, right_end_col =
-        calc_col(cache.lookup_line.col, right_count, utils.opposite[cache.direction])
-
-      local sr, sc, er, ec = get_range_lines(
-        cache.line.row,
-        left_start_col,
-        left_end_col,
-        cache.lookup_line.row,
-        right_start_col,
-        right_end_col,
-        cache.direction
-      )
+    if right_count > 0 then
+      local sr, sc, er, ec =
+        get_range_lines(cache.line.row, cache.line.col, cache.lookup_line.row, cache.lookup_line.col)
       insert_undo()
+      print(sr, sc, er, ec)
       vim.api.nvim_buf_set_text(utils.bufnr, sr, sc, er, ec, {})
     end
 
-    return left_count > 1 and right_count > 1
+    return left_count > 0 and right_count > 0
   end
 
   return false
@@ -433,7 +427,7 @@ local function delete_word(row, col, direction)
       row = row,
       col = col,
     },
-    lookup_line = nil,
+    lookup_line = {},
   }
 
   if col == 0 or col > #line then
@@ -450,10 +444,6 @@ local function delete_word(row, col, direction)
         vim.api.nvim_feedkeys(backspace, "i", false)
       end
     end
-    return
-  end
-
-  if true then
     return
   end
 
