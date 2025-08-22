@@ -52,6 +52,7 @@ local store_index = {
 M.config = {
   delete_empty_lines_until_next_char = true,
   repeated_punctuation = true,
+  disable_undo = false,
   disable_right = false,
   disable_right_default_pairs = false,
   join_line = {
@@ -107,8 +108,10 @@ M.setup = function(config)
 end
 
 local function insert_undo()
-  local mark = vim.api.nvim_replace_termcodes("<c-g>u", true, false, true)
-  vim.api.nvim_feedkeys(mark, "i", false)
+  if not M.config.disable_undo then
+    local mark = vim.api.nvim_replace_termcodes("<c-g>u", true, false, true)
+    vim.api.nvim_feedkeys(mark, "i", false)
+  end
 end
 
 local function get_or_create_filetype(filetype)
