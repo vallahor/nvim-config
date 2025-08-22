@@ -150,7 +150,7 @@ local function insert_into(store_default, store_ft, elem, opts)
 end
 
 local function escape_pattern(text)
-  return text:gsub("([%(%)%.%%%+%-%*%?%[%^%$])", "%%%1")
+  return text:gsub("([%p])", "%%%1")
 end
 
 M.insert_pair_rule = function(config, opts)
