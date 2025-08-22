@@ -306,12 +306,13 @@ local function eat_empty_lines(text, row, col, direction)
   while row >= 0 and row <= rows do
     text, row, col = seek_line(row, direction)
     if not text:match("^%s*$") then
-      start_col, end_col = get_range_line(col, #text, direction)
-      slice = text:sub(start_col, end_col)
-      start_col, end_col = seek_spaces(slice, col, utils.opposite[direction])
-      return text:sub(start_col, end_col), row, get_col(start_col, end_col, utils.opposite[direction])
+      break
     end
   end
+  start_col, end_col = get_range_line(col, #text, direction)
+  slice = text:sub(start_col, end_col)
+  start_col, end_col = seek_spaces(slice, col, utils.opposite[direction])
+  return text:sub(start_col, end_col), row, get_col(start_col, end_col, utils.opposite[direction])
 end
 
 local function consume_spaces_and_lines(cache, separator)
