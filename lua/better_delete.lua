@@ -52,6 +52,8 @@ local store_index = {
 M.config = {
   delete_empty_lines_until_next_char = true,
   repeated_punctuation = true,
+  disable_right = false,
+  disable_right_default_pairs = false,
   join_line = {
     separator = " ",
     times = 1,
@@ -94,10 +96,11 @@ M.setup = function(config)
       pair.filetypes = pair.filetypes or nil
       pair.not_filetypes = pair.not_filetypes or nil
 
-      M.insert_pair(
-        { left = pair.left, right = pair.right },
-        { filetypes = pair.filetypes, not_filetypes = pair.not_filetypes }
-      )
+      M.insert_pair({
+        left = pair.left,
+        right = pair.right,
+        disable_right = M.config.disable_right_default_pairs or false,
+      }, { filetypes = pair.filetypes, not_filetypes = pair.not_filetypes })
     end
   end
   M.config.default_pairs = nil
@@ -159,6 +162,7 @@ M.insert_pair_rule = function(config, opts)
       left = config.left .. "$",
       right = "^" .. config.right,
     },
+    disable_right = config.disable_right or false,
     not_filetypes = nil,
   }
 
@@ -212,8 +216,10 @@ M.insert_pattern = function(config, opts)
       left = config_pattern .. "$",
       right = "^" .. config_pattern,
     },
+    disable_right = config.disable_right or false,
     not_filetypes = nil,
   }
+  -- print(vim.inspect(pattern))
   insert_into(store_index[opts.type], store.patterns.ft, pattern, opts)
 end
 
@@ -450,61 +456,72 @@ local function delete_word(row, col, direction)
   local filetype = vim.bo[bufnr].filetype
   local config_filetype = store.filetypes[filetype]
 
+  local is_right = direction == utils.direction.right
+  local ignore_right = M.config.disable_right and is_right
+
   if config_filetype then
-    for _, index in ipairs(config_filetype.rules) do
-      if not context.lookup_line.valid then
-        break
-      end
-      local item = store.rules.ft[index]
-      if delete_pairs(context, item.pattern.left, item.pattern.right) then
-        return
+    if not ignore_right then
+      for _, index in ipairs(config_filetype.rules) do
+        if not context.lookup_line.valid then
+          break
+        end
+        local item = store.rules.ft[index]
+        if not (item.disable_right and is_right) and delete_pairs(context, item.pattern.left, item.pattern.right) then
+          return
+        end
       end
     end
 
     for _, index in ipairs(config_filetype.patterns) do
       local item = store.patterns.ft[index]
-      if delete_pattern(context, item.pattern[direction], 0) then
+      if not (item.disable_right and is_right) and delete_pattern(context, item.pattern[direction], 0) then
         return
       end
     end
 
-    for _, index in ipairs(config_filetype.pairs) do
-      if not context.lookup_line.valid then
-        break
-      end
-      local item = store.pairs.ft[index]
-      if delete_pairs(context, item.pattern.left, item.pattern.right) then
-        return
+    if not ignore_right then
+      for _, index in ipairs(config_filetype.pairs) do
+        if not context.lookup_line.valid then
+          break
+        end
+        local item = store.pairs.ft[index]
+        if not (item.disable_right and is_right) and delete_pairs(context, item.pattern.left, item.pattern.right) then
+          return
+        end
       end
     end
   end
 
-  for _, item in ipairs(store.rules.default) do
-    if not context.lookup_line.valid then
-      break
-    end
-    if not in_ignore_list(item, filetype) then
-      if delete_pairs(context, item.pattern.left, item.pattern.right) then
-        return
+  if not ignore_right then
+    for _, item in ipairs(store.rules.default) do
+      if not context.lookup_line.valid then
+        break
+      end
+      if not (item.disable_right and is_right) and not in_ignore_list(item, filetype) then
+        if delete_pairs(context, item.pattern.left, item.pattern.right) then
+          return
+        end
       end
     end
   end
 
   for _, item in ipairs(store.patterns.default) do
-    if not in_ignore_list(item, filetype) then
+    if not (item.disable_right and is_right) and not in_ignore_list(item, filetype) then
       if delete_pattern(context, item.pattern[direction], 0) then
         return
       end
     end
   end
 
-  for _, item in ipairs(store.pairs.default) do
-    if not context.lookup_line.valid then
-      break
-    end
-    if not in_ignore_list(item, filetype) then
-      if delete_pairs(context, item.pattern.left, item.pattern.right) then
-        return
+  if not ignore_right then
+    for _, item in ipairs(store.pairs.default) do
+      if not context.lookup_line.valid then
+        break
+      end
+      if not (item.disable_right and is_right) and not in_ignore_list(item, filetype) then
+        if delete_pairs(context, item.pattern.left, item.pattern.right) then
+          return
+        end
       end
     end
   end

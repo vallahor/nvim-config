@@ -4,7 +4,9 @@ return {
   config = function()
     -- local delete = require("delete")
     local delite = require("better_delete")
-    delite.setup()
+    delite.setup({
+      disable_right = true,
+    })
 
     -- 11::33::44
     delite.insert_pattern({ pattern = "%d%d::%d%d::%d%d" })
@@ -12,8 +14,8 @@ return {
     delite.insert_pattern({ pattern = "__aeho__" }, { filetypes = { "lua" } })
     -- order matters
     -- delite.insert_pair({ left = "%{", right = "}" }, { filetypes = { "elixir" } })
-    delite.insert_rule({ left = "%%{", right = "}" })
-    delite.insert_rule({ left = "```%w*", right = "```" })
+    delite.insert_rule({ left = "%%{", right = "}", disable_right = true })
+    delite.insert_rule({ left = "```", right = "```" })
     delite.insert_rule({ left = "<>", right = "</>" })
 
     vim.keymap.set("i", "<c-bs>", delite.previous_word)
