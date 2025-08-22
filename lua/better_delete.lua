@@ -296,7 +296,7 @@ end
 ---@return integer
 local function eat_empty_lines(text, row, col, direction)
   local rows = vim.api.nvim_buf_line_count(0)
-  if (col <= 0 and row <= 0) or (col > #text and row + 1 > rows) then
+  if (col <= 0 and row <= 0) or (col > #text and row + 1 >= rows) then
     return nil, row, col
   end
 
@@ -318,11 +318,11 @@ local function eat_empty_lines(text, row, col, direction)
   start_col, end_col = get_range_line(col, #text, direction)
   slice = text:sub(start_col, end_col)
   slice, col = seek_spaces(slice, col, direction)
+  row = math.min(rows - 1, math.max(row, 0))
   return slice, row, col
 end
 
 local function consume_spaces_and_lines(text, row, col, direction, separator)
-  print(text, row, col, direction, separator)
   local line, new_row, new_col = eat_empty_lines(text, row, col, direction)
 
   if not line then
@@ -336,8 +336,6 @@ local function consume_spaces_and_lines(text, row, col, direction, separator)
     right_col = right_col - 1
   end
 
-  print(left_row, left_col, right_row, right_col)
-
   vim.api.nvim_buf_set_text(utils.bufnr, left_row, left_col, right_row, right_col, { separator })
 end
 
@@ -349,7 +347,6 @@ local function join_line(row, opts)
 
   local line = vim.api.nvim_get_current_line()
   local separator = string.rep(opts.separator, opts.times)
-  print(line, #line + 1, utils.direction.right, separator)
   consume_spaces_and_lines(line, row, #line + 1, utils.direction.right, separator)
 end
 
@@ -380,7 +377,6 @@ local function delete_pairs(cache, left, right)
   end
 
   local left_count = count_pattern(cache.line.slice, left_pattern)
-  print(left_pattern, left_count)
 
   if left_count > 0 then
     -- we should account the end of file and begin of file
@@ -399,8 +395,6 @@ local function delete_pairs(cache, left, right)
     end
 
     local right_count = count_pattern(cache.lookup_line.slice, right_pattern)
-    print("aa: ", cache.lookup_line.slice, right_pattern)
-    print("Counts: ", left_count, right_count)
 
     if right_count > 0 then
       local sr, sc, er, ec = get_range_lines(
@@ -410,7 +404,6 @@ local function delete_pairs(cache, left, right)
         cache.lookup_line.col,
         utils.opposite[cache.direction]
       )
-      print("before", sr, sc, er, ec)
       if cache.direction == utils.direction.left then
         sc = sc - left_count
         ec = ec + right_count - 1
@@ -418,7 +411,6 @@ local function delete_pairs(cache, left, right)
         sc = sc - right_count
         ec = ec + left_count - 1
       end
-      print("after", sr, sc, er, ec)
       insert_undo()
       vim.api.nvim_buf_set_text(utils.bufnr, sr, sc, er, ec, {})
     end
@@ -531,7 +523,6 @@ local function delete_word(row, col, direction)
 
   for _, item in ipairs(store.rules.default) do
     if not in_ignore_list(item, filetype) then
-      -- print(vim.inspect(item.pattern))
       if delete_pairs(cache, item.pattern.left, item.pattern.right) then
         return
       end
