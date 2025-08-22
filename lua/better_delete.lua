@@ -70,12 +70,12 @@ M.config = {
   },
   defaults = {
     {
-      left = "%d*%d$",
-      right = "^%d%d*",
+      left = "%d%d+$",
+      right = "^%d%d+",
     },
     {
-      left = "%u*%u$",
-      right = "^%u%u*",
+      left = "%u%u+$",
+      right = "^%u%u+",
     },
     {
       left = "%u?%l*[%d%u]?$",
@@ -225,6 +225,14 @@ M.insert_pattern = function(config, opts)
     not_filetypes = nil,
   }
   insert_into(store_index[opts.type], store.patterns.ft, pattern, opts)
+end
+
+M.insert_default = function(config)
+  if not config or not config.left or not config.right then
+    return
+  end
+
+  table.insert(M.config.defaults, config)
 end
 
 local function in_ignore_list(item, filetype)
@@ -543,6 +551,7 @@ local function delete_word(row, col, direction)
 
   for _, default in pairs(M.config.defaults) do
     if delete_pattern(context, default[direction]) then
+      print(default[direction])
       return
     end
   end
