@@ -19,8 +19,8 @@ local utils = {
     right = 1,
   },
   seek_spaces = {
-    ["left"] = "%s*$",
-    ["right"] = "^%s*",
+    left = "%s*$",
+    right = "^%s*",
   },
 }
 
