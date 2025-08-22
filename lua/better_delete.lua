@@ -65,8 +65,8 @@ M.config = {
     { left = "<", right = ">", not_filetypes = nil },
   },
   seek_spaces = {
-    ["left"] = "[%s]*$",
-    ["right"] = "^[%s]*",
+    ["left"] = "%s*$",
+    ["right"] = "^%s*",
   },
   seek_punctuations = {
     ["left"] = "[%p]*$",
@@ -267,41 +267,51 @@ local function get_col(start_col, end_col, direction)
   return end_col
 end
 
+local function seek_spaces(text, col, direction)
+  local match = text:match(M.config.seek_spaces[direction])
+  print(direction, M.config.seek_spaces[direction], match)
+  if direction == utils.direction.left then
+    return col - #match, col
+  elseif direction == utils.direction.right then
+    return col, col + #match + 1
+  end
+end
+
+local function seek_line(row, direction)
+  row = row + utils.direction_step[direction]
+  local line = vim.api.nvim_buf_get_lines(utils.bufnr, row, row + 1, false)[1] or ""
+  local col = (direction == utils.direction.left and 1) or #line
+  return line, row, col
+end
+
 local function eat_empty_lines(text, row, col, direction)
   local rows = vim.api.nvim_buf_line_count(0)
-  local direction_step = utils.direction_step[direction]
-  row = row + direction_step
-
-  -- print("AEHO", text:sub(col, #text))
-
-  if (col < 0 and row < 0) or (col > #text and row + 1 >= rows) then
-    return nil, -1, -1
-  end
 
   local start_col, end_col = get_range_line(col, #text, direction)
   local slice = text:sub(start_col, end_col)
-  local count = count_pattern(slice, M.config.seek_spaces[direction])
-  start_col, end_col = get_range_line(#text - count, #text, direction)
+  start_col, end_col = seek_spaces(slice, col, direction)
+
+  print(start_col, end_col)
+  print(text:sub(start_col, end_col), row, col)
+  print(col, row, col, #text, row + 1, rows)
+  print(col < 0, row < 0, col > #text, row + 1 > rows)
+  if (col < 0 and row < 0) or (col > #text and row + 1 > rows) then
+    return text:sub(start_col, end_col), row, get_col(start_col, end_col, direction)
+  end
 
   if start_col > 0 and end_col < #text then
-    return slice, row, col
+    return text:sub(start_col, end_col), row, get_col(start_col, end_col, direction)
   end
 
-  local line = vim.api.nvim_buf_get_lines(utils.bufnr, row, row + 1, false)[1] or ""
   while row >= 0 and row <= rows do
-    if not line:match("^%s*$") then
-      break
+    text, row, col = seek_line(row, direction)
+    if not text:match("^%s*$") then
+      start_col, end_col = get_range_line(col, #text, direction)
+      slice = text:sub(start_col, end_col)
+      start_col, end_col = seek_spaces(slice, col, utils.opposite[direction])
+      return text:sub(start_col, end_col), row, get_col(start_col, end_col, utils.opposite[direction])
     end
-    line = vim.api.nvim_buf_get_lines(utils.bufnr, row, row + 1, false)[1] or ""
-    row = row + direction_step
   end
-
-  count = count_pattern(line, M.config.seek_spaces[direction])
-  col = get_col(#line - count, count, direction)
-  start_col, end_col = get_range_line(col, #line, direction)
-  line = line:sub(start_col, end_col)
-  row = math.min(rows - 1, math.max(row, 0))
-  return line, row, col
 end
 
 local function consume_spaces_and_lines(cache, separator)
@@ -357,25 +367,46 @@ local function delete_pairs(cache, left, right)
   end
 
   local left_count = count_pattern(cache.line.slice, left_pattern)
+  -- print(cache.direction, left_pattern, left_count, cache.line.slice)
 
   if left_count > 0 then
+    print("AAAAAAAAAAAA")
     if not cache.lookup_line.slice then
-      local slice, row, col =
-        eat_empty_lines(cache.line.text, cache.line.row, cache.line.col + 1, utils.opposite[cache.direction])
+      local col = cache.line.col
+      if utils.direction.left then
+        col = col + 1
+      end
+      local slice = nil
+      local row = 0
+      slice, row, col = eat_empty_lines(cache.line.text, cache.line.row, col, utils.opposite[cache.direction])
       cache.lookup_line.slice = slice
       cache.lookup_line.row = row
       cache.lookup_line.col = col
+      print(slice, row, col)
       -- print(vim.inspect(cache.lookup_line))
     end
-    -- print(vim.inspect(cache.lookup_line))
+    print(vim.inspect(cache.lookup_line))
 
     local right_count = count_pattern(cache.lookup_line.slice, right_pattern)
-    print(right_count, cache.lookup_line.slice)
+    print(right_pattern, right_count, cache.lookup_line.slice)
 
     if right_count > 0 then
-      local sr, sc, er, ec =
-        get_range_lines(cache.line.row, cache.line.col, cache.lookup_line.row, cache.lookup_line.col)
+      local sr, sc, er, ec = get_range_lines(
+        cache.line.row,
+        cache.line.col - left_count,
+        cache.lookup_line.row,
+        cache.lookup_line.col + right_count,
+        utils.opposite[cache.direction]
+      )
+      if cache.direction == utils.direction.left then
+        ec = ec - 1
+      elseif cache.direction == utils.direction.right then
+        print(sc)
+        sc = sc - 1
+        print(sc)
+      end
       insert_undo()
+      print(cache.line.row, cache.line.col, cache.lookup_line.row, cache.lookup_line.col, cache.direction)
       print(sr, sc, er, ec)
       vim.api.nvim_buf_set_text(utils.bufnr, sr, sc, er, ec, {})
     end
@@ -520,14 +551,14 @@ local function delete_word(row, col, direction)
 
   -- Digits
   if M.config.passthrough_numbers then
-    col_peek = count_pattern(line, "%d", start_col, end_col)
+    col_peek = count_pattern(new_line, "%d")
   elseif delete_pattern(cache, M.config.seek_numbers[direction]) then
     return
   end
 
   -- Uppercase
   if M.config.passthrough_uppercase then
-    col_peek = count_pattern(line, "%u", start_col, end_col)
+    col_peek = count_pattern(new_line, "%u")
   elseif delete_pattern(cache, M.config.seek_uppercases[direction]) then
     return
   end
@@ -611,8 +642,6 @@ local function delete(row, col, direction)
   elseif direction == utils.direction.left then
     if col > 0 then
       col_start = col - 1
-    -- In BOL and not at the fist line.
-    -- ps.: the `col == 0` is redundant because it's an `elseif`.
     elseif row > 0 then
       row_start = row - 1
       line = vim.api.nvim_buf_get_lines(utils.bufnr, row_start, row_start + 1, true)[1]
