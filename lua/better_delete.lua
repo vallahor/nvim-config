@@ -304,8 +304,6 @@ local function eat_empty_lines(text, row, col, direction)
   local slice = text:sub(start_col, end_col)
   slice, col = seek_spaces(slice, col, direction)
 
-  print("first")
-  print(slice, col, #text)
   if col > 0 and col <= #text then
     return slice, row, col
   end
@@ -317,28 +315,25 @@ local function eat_empty_lines(text, row, col, direction)
     end
   end
 
-  print("multiple")
-  print(col, #text, direction)
   start_col, end_col = get_range_line(col, #text, direction)
-  print(start_col, end_col)
   slice = text:sub(start_col, end_col)
   slice, col = seek_spaces(slice, col, direction)
-  print(slice, col)
   return slice, row, col
 end
 
-local function consume_spaces_and_lines(cache, separator)
-  local line, row, col = eat_empty_lines(cache.line.text, cache.line.row, cache.line.col, cache.direction)
+local function consume_spaces_and_lines(text, row, col, direction, separator)
+  print(text, row, col, direction, separator)
+  local line, new_row, new_col = eat_empty_lines(text, row, col, direction)
 
   if not line then
     return
   end
 
-  local left_row, left_col, right_row, right_col =
-    get_range_lines(cache.line.row, cache.line.col, row, col, cache.direction)
+  local left_row, left_col, right_row, right_col = get_range_lines(row, col, new_row, new_col, direction)
 
-  if cache.direction == utils.direction.right then
+  if direction == utils.direction.right then
     left_col = left_col - 1
+    right_col = right_col - 1
   end
 
   print(left_row, left_col, right_row, right_col)
@@ -346,11 +341,16 @@ local function consume_spaces_and_lines(cache, separator)
   vim.api.nvim_buf_set_text(utils.bufnr, left_row, left_col, right_row, right_col, { separator })
 end
 
----@param row integer
-local function join_line(row)
+---@param opts table
+local function join_line(row, opts)
+  opts = opts or {}
+  opts.separator = opts.separator or M.config.join_line.separator or ""
+  opts.times = opts.times or M.config.join_line.times or 1
+
   local line = vim.api.nvim_get_current_line()
-  local separator = string.rep(M.config.join_line.separator, M.config.join_line.times)
-  -- consume_spaces_and_lines(row, #line + 1, utils.direction.right)
+  local separator = string.rep(opts.separator, opts.times)
+  print(line, #line + 1, utils.direction.right, separator)
+  consume_spaces_and_lines(line, row, #line + 1, utils.direction.right, separator)
 end
 
 ---@param cache table
@@ -476,7 +476,7 @@ local function delete_word(row, col, direction)
   if col == 0 or col > #line then
     if M.config.delete_empty_lines_until_next_char then
       insert_undo()
-      consume_spaces_and_lines(cache, "")
+      consume_spaces_and_lines(line, row, col, direction, "")
       return
     else
       if direction == utils.direction.right then
@@ -685,9 +685,9 @@ M.next = function()
   delete(row - 1, col + 1, utils.direction.right)
 end
 
-M.join = function()
+M.join = function(opts)
   local row, _ = unpack(vim.api.nvim_win_get_cursor(0))
-  join_line(row - 1)
+  join_line(row - 1, opts)
 end
 
 return M
