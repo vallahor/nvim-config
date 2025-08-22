@@ -20,7 +20,7 @@ return {
     vim.keymap.set("i", "<c-del>", delite.next_word)
 
     vim.keymap.set("i", "<bs>", delite.previous)
-    -- vim.keymap.set("i", "<del>", delite.next)
+    vim.keymap.set("i", "<del>", delite.next)
 
     vim.keymap.set("i", "<c-j>", delite.join)
     vim.keymap.set("n", "J", delite.join)
