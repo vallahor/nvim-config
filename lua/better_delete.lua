@@ -606,10 +606,9 @@ local function delete(row, col, direction)
         text = line,
         slice = line:sub(start_col, end_col),
         row = row,
-        start_col = start_col,
-        end_col = end_col,
+        col = col,
       },
-      lookup_line = nil,
+      lookup_line = {},
     }
 
     if config_filetype then
