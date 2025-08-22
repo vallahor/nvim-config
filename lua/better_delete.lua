@@ -219,7 +219,6 @@ M.insert_pattern = function(config, opts)
     disable_right = config.disable_right or false,
     not_filetypes = nil,
   }
-  -- print(vim.inspect(pattern))
   insert_into(store_index[opts.type], store.patterns.ft, pattern, opts)
 end
 
