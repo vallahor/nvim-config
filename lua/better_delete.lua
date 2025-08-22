@@ -330,68 +330,73 @@ local function join_line(row, opts)
   consume_spaces_and_lines(line, row, #line + 1, utils.direction.right, separator)
 end
 
----@param cache table
+---@param context table
 ---@param pattern string
 ---@return boolean
-local function delete_pattern(cache, pattern, min)
-  local count = count_pattern(cache.line.slice, pattern)
+local function delete_pattern(context, pattern, min)
+  local count = count_pattern(context.line.slice, pattern)
 
   if count > min then
-    local start_col, end_col = calc_col(cache.line.col, count, cache.direction)
+    local start_col, end_col = calc_col(context.line.col, count, context.direction)
     insert_undo()
-    vim.api.nvim_buf_set_text(utils.bufnr, cache.line.row, start_col, cache.line.row, end_col, {})
+    vim.api.nvim_buf_set_text(utils.bufnr, context.line.row, start_col, context.line.row, end_col, {})
     return true
   end
 
   return false
 end
 
----@param cache table
+---@param context table
 ---@param left string
 ---@param right string
 ---@return boolean
-local function delete_pairs(cache, left, right)
+local function delete_pairs(context, left, right)
   local left_pattern, right_pattern = left, right
-  if cache.direction == utils.direction.right then
+  if context.direction == utils.direction.right then
     left_pattern, right_pattern = right, left
   end
 
-  local left_count = count_pattern(cache.line.slice, left_pattern)
+  local left_count = count_pattern(context.line.slice, left_pattern)
 
   if left_count > 0 then
-    if not cache.lookup_line.slice then
-      local col = cache.line.col + utils.direction_step[utils.opposite[cache.direction]]
+    if not context.lookup_line.slice then
+      local col = context.line.col + utils.direction_step[utils.opposite[context.direction]]
       local slice = nil
       local row = 0
-      slice, row, col = eat_empty_lines(cache.line.text, cache.line.row, col, utils.opposite[cache.direction])
+
+      slice, row, col = eat_empty_lines(context.line.text, context.line.row, col, utils.opposite[context.direction])
+
       if not slice then
-        cache.lookup_line.valid = false
+        context.lookup_line.valid = false
         return false
       end
-      cache.lookup_line.slice = slice
-      cache.lookup_line.row = row
-      cache.lookup_line.col = col
+
+      context.lookup_line.slice = slice
+      context.lookup_line.row = row
+      context.lookup_line.col = col
     end
 
-    local right_count = count_pattern(cache.lookup_line.slice, right_pattern)
+    local right_count = count_pattern(context.lookup_line.slice, right_pattern)
 
     if right_count > 0 then
-      local sr, sc, er, ec = get_range_lines(
-        cache.line.row,
-        cache.line.col,
-        cache.lookup_line.row,
-        cache.lookup_line.col,
-        utils.opposite[cache.direction]
+      local left_row, left_col, right_row, right_col = get_range_lines(
+        context.line.row,
+        context.line.col,
+        context.lookup_line.row,
+        context.lookup_line.col,
+        utils.opposite[context.direction]
       )
-      if cache.direction == utils.direction.left then
-        sc = sc - left_count
-        ec = ec + right_count - 1
-      elseif cache.direction == utils.direction.right then
-        sc = sc - right_count
-        ec = ec + left_count - 1
+
+      if context.direction == utils.direction.left then
+        left_col = left_col - left_count
+        right_col = right_col + right_count - 1
+      elseif context.direction == utils.direction.right then
+        left_col = left_col - right_count
+        right_col = right_col + left_count - 1
       end
+
       insert_undo()
-      vim.api.nvim_buf_set_text(utils.bufnr, sr, sc, er, ec, {})
+      vim.api.nvim_buf_set_text(utils.bufnr, left_row, left_col, right_row, right_col, {})
     end
 
     return left_count > 0 and right_count > 0
@@ -407,7 +412,7 @@ local function delete_word(row, col, direction)
   local line = vim.api.nvim_get_current_line()
   local start_col, end_col = get_range_line(col, #line, direction)
 
-  local cache = {
+  local context = {
     direction = direction,
     line = {
       text = line,
@@ -437,9 +442,7 @@ local function delete_word(row, col, direction)
     return
   end
 
-  local char = line:sub(col, col)
-
-  if delete_pattern(cache, utils.seek_spaces[direction], 0) then
+  if delete_pattern(context, utils.seek_spaces[direction], 0) then
     return
   end
 
@@ -449,39 +452,39 @@ local function delete_word(row, col, direction)
 
   if config_filetype then
     for _, index in ipairs(config_filetype.rules) do
-      if not cache.lookup_line.valid then
+      if not context.lookup_line.valid then
         break
       end
       local item = store.rules.ft[index]
-      if delete_pairs(cache, item.pattern.left, item.pattern.right) then
+      if delete_pairs(context, item.pattern.left, item.pattern.right) then
         return
       end
     end
 
     for _, index in ipairs(config_filetype.patterns) do
       local item = store.patterns.ft[index]
-      if delete_pattern(cache, item.pattern[direction], 0) then
+      if delete_pattern(context, item.pattern[direction], 0) then
         return
       end
     end
 
     for _, index in ipairs(config_filetype.pairs) do
-      if not cache.lookup_line.valid then
+      if not context.lookup_line.valid then
         break
       end
       local item = store.pairs.ft[index]
-      if delete_pairs(cache, item.pattern.left, item.pattern.right) then
+      if delete_pairs(context, item.pattern.left, item.pattern.right) then
         return
       end
     end
   end
 
   for _, item in ipairs(store.rules.default) do
-    if not cache.lookup_line.valid then
+    if not context.lookup_line.valid then
       break
     end
     if not in_ignore_list(item, filetype) then
-      if delete_pairs(cache, item.pattern.left, item.pattern.right) then
+      if delete_pairs(context, item.pattern.left, item.pattern.right) then
         return
       end
     end
@@ -489,57 +492,53 @@ local function delete_word(row, col, direction)
 
   for _, item in ipairs(store.patterns.default) do
     if not in_ignore_list(item, filetype) then
-      if delete_pattern(cache, item.pattern[direction], 0) then
+      if delete_pattern(context, item.pattern[direction], 0) then
         return
       end
     end
   end
 
   for _, item in ipairs(store.pairs.default) do
-    if not cache.lookup_line.valid then
+    if not context.lookup_line.valid then
       break
     end
     if not in_ignore_list(item, filetype) then
-      if delete_pairs(cache, item.pattern.left, item.pattern.right) then
+      if delete_pairs(context, item.pattern.left, item.pattern.right) then
         return
       end
     end
   end
 
-  if char:match("%p") then
+  if line:sub(col, col):match("%p") then
     if M.config.repeated_punctuation then
-      if delete_pattern(cache, M.config.seek_allowed_punctuations[direction], 0) then
+      if delete_pattern(context, M.config.seek_allowed_punctuations[direction], 0) then
         return
       end
     end
-    if delete_pattern(cache, M.config.seek_punctuation[direction], 0) then
+    if delete_pattern(context, M.config.seek_punctuation[direction], 0) then
       return
     end
   end
 
-  if delete_pattern(cache, M.config.seek_numbers[direction], 1) then
+  if delete_pattern(context, M.config.seek_numbers[direction], 1) then
     return
   end
 
-  if delete_pattern(cache, M.config.seek_uppercases[direction], 1) then
+  if delete_pattern(context, M.config.seek_uppercases[direction], 1) then
     return
   end
 
-  if delete_pattern(cache, M.config.seek_lowercases[direction], 0) then
+  if delete_pattern(context, M.config.seek_lowercases[direction], 0) then
     return
   end
 end
 
----Is <BS> and <DEL> but add the capability of deleting matching pairs.
 ---@param row integer
 ---@param col integer
 ---@param direction string
 local function delete(row, col, direction)
   local line = vim.api.nvim_get_current_line()
   local char = line:sub(col, col)
-
-  local row_start, col_start = row, col
-  local row_end, col_end = row, col
 
   if char:match("%p") then
     local bufnr = vim.api.nvim_get_current_buf()
@@ -548,7 +547,7 @@ local function delete(row, col, direction)
 
     local start_col, end_col = get_range_line(col, #line, direction)
 
-    local cache = {
+    local context = {
       direction = direction,
       line = {
         text = line,
@@ -563,22 +562,22 @@ local function delete(row, col, direction)
 
     if config_filetype then
       for _, index in ipairs(config_filetype.pairs) do
-        if not cache.lookup_line.valid then
+        if not context.lookup_line.valid then
           break
         end
         local item = store.pairs.ft[index]
-        if delete_pairs(cache, item.pattern.left, item.pattern.right) then
+        if delete_pairs(context, item.pattern.left, item.pattern.right) then
           return
         end
       end
     end
 
     for _, item in ipairs(store.pairs.default) do
-      if not cache.lookup_line.valid then
+      if not context.lookup_line.valid then
         break
       end
       if not in_ignore_list(item, filetype) then
-        if delete_pairs(cache, item.pattern.left, item.pattern.right) then
+        if delete_pairs(context, item.pattern.left, item.pattern.right) then
           return
         end
       end
@@ -593,30 +592,31 @@ local function delete(row, col, direction)
   --- generating way more <bs>/<del> than required deleting more than
   --- expected.
   local rows = vim.api.nvim_buf_line_count(0)
-
-  -- Empty buffer
   if rows == 1 and #line == 0 or col > #line and row + 1 >= rows then
     return
   end
 
+  local start_row, start_col = row, col
+  local end_row, end_col = row, col
+
   if direction == utils.direction.right then
-    col_start = col - 1
+    start_col = col - 1
 
     if col > #line and row + 1 < rows then
-      row_end = row + 1
-      col_end = 0
+      end_row = row + 1
+      end_col = 0
     end
   elseif direction == utils.direction.left then
     if col > 0 then
-      col_start = col - 1
+      start_col = col - 1
     elseif row > 0 then
-      row_start = row - 1
-      line = vim.api.nvim_buf_get_lines(utils.bufnr, row_start, row_start + 1, true)[1]
-      col_start = #line
+      start_row = row - 1
+      line = vim.api.nvim_buf_get_lines(utils.bufnr, start_row, start_row + 1, true)[1]
+      start_col = #line
     end
   end
 
-  vim.api.nvim_buf_set_text(utils.bufnr, row_start, col_start, row_end, col_end, {})
+  vim.api.nvim_buf_set_text(utils.bufnr, start_row, start_col, end_row, end_col, {})
 end
 
 M.previous_word = function()
