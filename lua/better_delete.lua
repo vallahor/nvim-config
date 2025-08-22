@@ -68,6 +68,20 @@ M.config = {
     { left = "`", right = "`", not_filetypes = nil },
     { left = "<", right = ">", not_filetypes = nil },
   },
+  defaults = {
+    {
+      left = "%d*%d$",
+      right = "^%d%d*",
+    },
+    {
+      left = "%u*%u$",
+      right = "^%u%u*",
+    },
+    {
+      left = "%u?%l*[%d%u]?$",
+      right = "^%u?%l*%d?",
+    },
+  },
   seek_punctuation = {
     left = "%p$",
     right = "^%p",
@@ -75,18 +89,6 @@ M.config = {
   seek_allowed_punctuations = {
     left = "[%.%,%!%?%:%;%-%/%@%#%$%%%^%&%*%_%+%=%~%|%\\]*$",
     right = "^[%.%,%!%?%:%;%-%/%@%#%$%%%^%&%*%_%+%=%~%|%\\]*",
-  },
-  seek_numbers = {
-    left = "%d*$",
-    right = "^%d*",
-  },
-  seek_uppercases = {
-    left = "%u*$",
-    right = "^%u*",
-  },
-  seek_lowercases = {
-    left = "%u?%l*[%d%u]?$",
-    right = "^%u?%l*%d?",
   },
 }
 
@@ -341,10 +343,10 @@ end
 ---@param context table
 ---@param pattern string
 ---@return boolean
-local function delete_pattern(context, pattern, min)
+local function delete_pattern(context, pattern)
   local count = count_pattern(context.line.slice, pattern)
 
-  if count > min then
+  if count > 0 then
     local start_col, end_col = calc_col(context.line.col, count, context.direction)
     insert_undo()
     vim.api.nvim_buf_set_text(utils.bufnr, context.line.row, start_col, context.line.row, end_col, {})
@@ -450,7 +452,7 @@ local function delete_word(row, col, direction)
     return
   end
 
-  if delete_pattern(context, utils.seek_spaces[direction], 0) then
+  if delete_pattern(context, utils.seek_spaces[direction]) then
     return
   end
 
@@ -476,7 +478,7 @@ local function delete_word(row, col, direction)
 
     for _, index in ipairs(config_filetype.patterns) do
       local item = store.patterns.ft[index]
-      if not (item.disable_right and is_right) and delete_pattern(context, item.pattern[direction], 0) then
+      if not (item.disable_right and is_right) and delete_pattern(context, item.pattern[direction]) then
         return
       end
     end
@@ -509,7 +511,7 @@ local function delete_word(row, col, direction)
 
   for _, item in ipairs(store.patterns.default) do
     if not (item.disable_right and is_right) and not in_ignore_list(item, filetype) then
-      if delete_pattern(context, item.pattern[direction], 0) then
+      if delete_pattern(context, item.pattern[direction]) then
         return
       end
     end
@@ -530,25 +532,19 @@ local function delete_word(row, col, direction)
 
   if line:sub(col, col):match("%p") then
     if M.config.repeated_punctuation then
-      if delete_pattern(context, M.config.seek_allowed_punctuations[direction], 0) then
+      if delete_pattern(context, M.config.seek_allowed_punctuations[direction]) then
         return
       end
     end
-    if delete_pattern(context, M.config.seek_punctuation[direction], 0) then
+    if delete_pattern(context, M.config.seek_punctuation[direction]) then
       return
     end
   end
 
-  if delete_pattern(context, M.config.seek_numbers[direction], 1) then
-    return
-  end
-
-  if delete_pattern(context, M.config.seek_uppercases[direction], 1) then
-    return
-  end
-
-  if delete_pattern(context, M.config.seek_lowercases[direction], 0) then
-    return
+  for _, default in pairs(M.config.defaults) do
+    if delete_pattern(context, default[direction]) then
+      return
+    end
   end
 end
 

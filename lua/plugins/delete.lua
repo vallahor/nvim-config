@@ -8,9 +8,10 @@ return {
 
     -- 11::33::44
     delite.insert_pattern({ pattern = "%d%d::%d%d::%d%d" })
-    delite.insert_pattern({ pattern = "__[%u]+__" })
+    delite.insert_pattern({ pattern = "__[%u%l]+__" })
     delite.insert_pattern({ pattern = "%x%x%x%x%x%x", prefix = "0x" })
     delite.insert_pattern({ pattern = "__aeho__" })
+    delite.insert_pattern({ pattern = "%w*%)", prefix = "cast%(" })
     -- order matters
     -- delite.insert_pair({ left = "%{", right = "}" }, { filetypes = { "elixir" } })
     delite.insert_rule({ left = "%%{", right = "}", disable_right = true })
