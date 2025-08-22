@@ -69,20 +69,20 @@ M.config = {
     ["right"] = "^%s*",
   },
   seek_punctuations = {
-    ["left"] = "[%p]*$",
-    ["right"] = "^[%p]*",
+    ["left"] = "%p*$",
+    ["right"] = "^%p*",
   },
   seek_numbers = {
-    ["left"] = "[%d]*$",
-    ["right"] = "^[%d]*",
+    ["left"] = "%d*$",
+    ["right"] = "^%d*",
   },
   seek_uppercases = {
-    ["left"] = "[%u]*$",
-    ["right"] = "^[%u]*",
+    ["left"] = "%u*$",
+    ["right"] = "^%u*",
   },
   seek_lowercases = {
-    ["left"] = "%u?[%l]*%d?$",
-    ["right"] = "^[%l]*",
+    ["left"] = "%u?%l*[%d%u]?$",
+    ["right"] = "^%u?%l*%d?",
   },
   --     treesitter = {
   --       enable = true,
@@ -353,10 +353,10 @@ end
 ---@param cache table
 ---@param pattern string
 ---@return boolean
-local function delete_pattern(cache, pattern)
+local function delete_pattern(cache, pattern, min)
   local count = count_pattern(cache.line.slice, pattern)
 
-  if count >= 1 then
+  if count > min then
     local start_col, end_col = calc_col(cache.line.col, count, cache.direction)
     insert_undo()
     vim.api.nvim_buf_set_text(utils.bufnr, cache.line.row, start_col, cache.line.row, end_col, {})
@@ -484,7 +484,7 @@ local function delete_word(row, col, direction)
 
   local char = line:sub(col, col)
 
-  if delete_pattern(cache, M.config.seek_spaces[direction]) then
+  if delete_pattern(cache, M.config.seek_spaces[direction], 0) then
     return
   end
 
@@ -508,7 +508,7 @@ local function delete_word(row, col, direction)
 
     for _, index in ipairs(config_filetype.patterns) do
       local item = store.patterns.ft[index]
-      if delete_pattern(cache, item.pattern[direction]) then
+      if delete_pattern(cache, item.pattern[direction], 0) then
         return
       end
     end
@@ -531,7 +531,7 @@ local function delete_word(row, col, direction)
 
   for _, item in ipairs(store.patterns.default) do
     if not in_ignore_list(item, filetype) then
-      if delete_pattern(cache, item.pattern[direction]) then
+      if delete_pattern(cache, item.pattern[direction], 0) then
         return
       end
     end
@@ -546,7 +546,7 @@ local function delete_word(row, col, direction)
   end
 
   if char:match("%p") then
-    if delete_pattern(cache, M.config.seek_punctuations[direction]) then
+    if delete_pattern(cache, M.config.seek_punctuations[direction], 1) then
       return
     end
   end
@@ -556,19 +556,19 @@ local function delete_word(row, col, direction)
   -- Digits
   if M.config.passthrough_numbers then
     col_peek = count_pattern(new_line, "%d")
-  elseif delete_pattern(cache, M.config.seek_numbers[direction]) then
+  elseif delete_pattern(cache, M.config.seek_numbers[direction], 1) then
     return
   end
 
   -- Uppercase
   if M.config.passthrough_uppercase then
     col_peek = count_pattern(new_line, "%u")
-  elseif delete_pattern(cache, M.config.seek_uppercases[direction]) then
+  elseif delete_pattern(cache, M.config.seek_uppercases[direction], 1) then
     return
   end
 
   -- start_col, end_col = calc_col(start_col, end_col, col_peek, direction)
-  if delete_pattern(cache, M.config.seek_lowercases[direction]) then
+  if delete_pattern(cache, M.config.seek_lowercases[direction], 0) then
     return
   end
 end

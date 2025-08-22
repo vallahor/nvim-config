@@ -14,6 +14,7 @@ return {
     -- delite.insert_pair({ left = "%{", right = "}" }, { filetypes = { "elixir" } })
     delite.insert_rule({ left = "%%{", right = "}" })
     delite.insert_rule({ left = "```%w*", right = "```" })
+    delite.insert_rule({ left = "<>", right = "</>" })
 
     vim.keymap.set("i", "<c-bs>", delite.previous_word)
     vim.keymap.set("i", "<c-del>", delite.next_word)
