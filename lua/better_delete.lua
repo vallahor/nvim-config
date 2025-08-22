@@ -14,6 +14,10 @@ local utils = {
     left = "right",
     right = "left",
   },
+  direction_step = {
+    left = -1,
+    right = 1,
+  },
 }
 
 local store = {
@@ -230,21 +234,8 @@ local function in_ignore_list(item, filetype)
   return item.not_filetypes and item.not_filetypes[filetype]
 end
 
-local function eat_whitespace(line, col, direction)
-  local char = line:sub(col, col)
-  local col_current = col
-
-  while char:match("%s") and col_current > 0 and col_current <= #line do
-    col_current = col_current + direction
-    char = line:sub(col_current, col_current)
-  end
-
-  return col_current
-end
-
-local function count_pattern(line, pattern, start_col, end_col)
-  local match = line:sub(start_col, end_col):match(pattern)
-  print(pattern, line, match, match and #match)
+local function count_pattern(line, pattern)
+  local match = line:match(pattern)
   return (match and #match) or 0
 end
 
@@ -255,147 +246,99 @@ local function get_range_line(col, len, direction)
   return col, len
 end
 
-local function get_range_lines(
-  left_row,
-  left_start_col,
-  left_end_col,
-  right_row,
-  right_start_col,
-  right_end_col,
-  direction
-)
+local function get_range_lines(left_row, left_col, right_row, right_col, direction)
   if direction == utils.direction.left then
-    return left_row, left_start_col, right_row, right_end_col
+    return right_row, right_col, left_row, left_col
   end
-  return right_row, right_start_col, left_row, left_end_col
+  return left_row, left_col, right_row, right_col
 end
 
-local function calc_col(cache_line, len, direction)
+local function calc_col(col, len, direction)
   if direction == utils.direction.left then
-    return cache_line.end_col - len, cache_line.end_col
+    return col - len, col
   end
-  return cache_line.start_col - 1, cache_line.start_col + len - 1
+  return col - 1, col + len - 1
 end
 
-local function get_line_and_pos(row, direction)
-  local new_row = row + direction
-  local line = vim.api.nvim_buf_get_lines(utils.bufnr, new_row, new_row + 1, false)[1] or ""
-  local col = (direction == utils.direction.right and 1) or #line
-  return line, new_row, col
+local function get_col(start_col, end_col, direction)
+  if direction == utils.direction.left then
+    return start_col
+  end
+  return end_col
 end
 
-local function eat_empty_lines(row, col, direction)
-  local buf_rows = vim.api.nvim_buf_line_count(0)
+local function eat_empty_lines(cache, direction)
+  local rows = vim.api.nvim_buf_line_count(0)
+  local direction_step = utils.direction_step[direction]
+  local row = cache.line.row + direction_step
+
+  if (row < 0 and cache.line.col > #cache.line.text) or row + 1 > rows then
+    return nil, -1, -1
+  end
+
+  local start_col, end_col = get_range_line(cache.line.col, #cache.line.text, direction)
+  local count = count_pattern(cache.line.text:sub(start_col, end_col), M.config.seek_spaces[direction])
+  start_col, end_col = calc_col(cache.line.col, count, direction)
+
+  if start_col > 0 and end_col < #cache.line.text then
+    local line = cache.line.text:sub(start_col, end_col)
+    return line, cache.line.row, get_col(start_col, end_col, direction)
+  end
+
   local line = vim.api.nvim_buf_get_lines(utils.bufnr, row, row + 1, false)[1] or ""
-  local new_row, new_col = row, col + direction
-
-  -- Empty buffer
-  if buf_rows == 1 and #line == 0 then
-    return row, col
-  end
-
-  -- Out of bounds
-  if (row < 0 and new_col < 0) or (row + 1 >= buf_rows and new_col > #line) then
-    return row, col
-  end
-
-  -- Change line if in BOL/EOL
-  if col <= 0 or col > #line then
-    line, new_row, new_col = get_line_and_pos(row, direction)
-  end
-
-  local char = line:sub(new_col, new_col)
-  while char:match("%s") or char == "" do
-    -- Out of bounds
-    if new_row < 0 or new_row + 1 > buf_rows then
+  while row > 0 and row < rows do
+    if not line:match("^%s*$") then
       break
     end
-
-    -- Change line if line is empty or in BOL/EOL
-    if line:match("^[%s]*$") or (new_col < 1 or new_col >= #line) then
-      line, new_row, new_col = get_line_and_pos(new_row, direction)
-    end
-
-    new_col = eat_whitespace(line, new_col, direction)
-    char = line:sub(new_col, new_col)
+    line = vim.api.nvim_buf_get_lines(utils.bufnr, row, row + 1, false)[1] or ""
+    row = row + direction_step
+    print(row, line)
   end
 
-  -- `consume_spaces_and_lines` excceed 1 if the remaining lines are empty
-  -- or -1 if the all previous lines are empty.
-  new_row = math.min(buf_rows - 1, math.max(new_row, 0))
-  return new_row, new_col
+  count = count_pattern(line, M.config.seek_spaces[direction])
+  print(count, line)
+  start_col, end_col = get_range_line(count, #line, utils.opposite[direction])
+  -- start_col, end_col = get_range_line(count, #line, direction)
+  -- if direction == utils.direction.right then
+  --   end_col = start_col
+  -- end
+  line = line:sub(start_col, end_col)
+  print(count, line)
+  return line, row, get_col(start_col, end_col, direction)
 end
 
----Peek the next symbol across lines running by a specified direction,
----returninig the char and position.
----@param row integer
----@param col integer
----@param direction string
----@return string
----@return string
----@return integer
----@return integer
-local function peek_non_whitespace(row, col, direction)
-  local line = vim.api.nvim_buf_get_lines(utils.bufnr, row, row + 1, false)[1] or ""
-  local row_pos = row
-  local col_pos = col + direction
+local function consume_spaces_and_lines(cache, separator)
+  local line, row, col = eat_empty_lines(cache, cache.direction)
 
-  if col > #line then
-    col_pos = col
+  if not line then
+    return
   end
 
-  local char = line:sub(col_pos, col_pos)
-  if char:match("%s") or col_pos < 1 or col_pos > #line then
-    row_pos, col_pos = eat_empty_lines(row_pos, col_pos, direction)
-    line = vim.api.nvim_buf_get_lines(utils.bufnr, row_pos, row_pos + 1, false)[1] or ""
-    char = line:sub(col_pos, col_pos)
-  end
+  print(#line, line, row, col)
 
-  return line, char, row_pos, col_pos
-end
+  local left_row, left_col, right_row, right_col =
+    get_range_lines(cache.line.row, cache.line.col, row, col, cache.direction)
 
----@param row integer
----@param col integer
----@param direction string
-local function consume_spaces_and_lines(row, col, direction)
-  local left_row, left_start_col = row, col
-  local right_row, right_end_col = row, col
+  print(left_row, left_col, right_row, right_col)
 
-  local row_pos, col_pos = eat_empty_lines(row, col, direction)
-
-  if direction == utils.direction.right then
-    right_row = row_pos
-    left_start_col = left_start_col - 1
-    right_end_col = (col_pos == 0 and 1) or col_pos - 1
-  elseif direction == utils.direction.left then
-    left_row = row_pos
-    left_start_col = col_pos
-  end
-
-  vim.api.nvim_buf_set_text(
-    utils.bufnr,
-    left_row,
-    left_start_col,
-    right_row,
-    right_end_col,
-    { string.rep(M.config.join_line.separator, M.config.join_line.times) }
-  )
+  vim.api.nvim_buf_set_text(utils.bufnr, left_row, left_col, right_row, right_col, { separator })
 end
 
 ---@param row integer
 local function join_line(row)
   local line = vim.api.nvim_get_current_line()
-  consume_spaces_and_lines(row, #line + 1, utils.direction.right)
+  local separator = string.rep(M.config.join_line.separator, M.config.join_line.times)
+  -- consume_spaces_and_lines(row, #line + 1, utils.direction.right)
 end
 
 ---@param cache table
 ---@param pattern string
 ---@return boolean
 local function delete_pattern(cache, pattern)
-  local count = count_pattern(cache.line.text, pattern, cache.line.start_col, cache.line.end_col)
+  local count = count_pattern(cache.line.slice, pattern)
 
   if count >= 1 then
-    local start_col, end_col = calc_col(cache.line, count, cache.direction)
+    local start_col, end_col = calc_col(cache.line.col, count, cache.direction)
     insert_undo()
     vim.api.nvim_buf_set_text(utils.bufnr, cache.line.row, start_col, cache.line.row, end_col, {})
     return true
@@ -414,18 +357,21 @@ local function delete_pairs(cache, left, right)
     left_pattern, right_pattern = right, left
   end
 
-  local left_count = count_pattern(cache.line.text, left_pattern, cache.line.start_col, cache.line.end_col)
+  local left_count = count_pattern(cache.line.slice, left_pattern)
 
   if left_count > 1 then
     if not cache.lookup_line then
-      peek_non_whitespace(cache, row, start_col, utils.opposite[direction])
+      -- local start_col, end_col = get_range_line(cache.line.col, #cache.line.text, utils.opposite[cache.direction])
+      cache.lookup_line.slice, cache.lookup_line.row, cache.lookup_line.col =
+        eat_empty_lines(cache, utils.opposite[cache.direction])
+      print(vim.inspect(cache.lookup_line))
     end
-    local right_count =
-      count_pattern(cache.lookup_line.text, right_pattern, cache.lookup_line.start_col, cache.lookup_line.end_col)
+    local right_count = count_pattern(cache.lookup_line.slice, right_pattern)
 
     if right_count > 1 then
-      local left_start_col, left_end_col = calc_col(cache.line, left_count, cache.direction)
-      local right_start_col, right_end_col = calc_col(cache.lookup_line, right_count, utils.opposite[cache.direction])
+      local left_start_col, left_end_col = calc_col(cache.line.col, left_count, cache.direction)
+      local right_start_col, right_end_col =
+        calc_col(cache.lookup_line.col, right_count, utils.opposite[cache.direction])
 
       local sr, sc, er, ec = get_range_lines(
         cache.line.row,
@@ -479,10 +425,22 @@ local function delete_word(row, col, direction)
   local start_col, end_col = get_range_line(col, #line, direction)
   local new_line = line:sub(start_col, end_col)
 
+  local cache = {
+    direction = direction,
+    line = {
+      text = line,
+      slice = new_line,
+      row = row,
+      col = col,
+    },
+    lookup_line = nil,
+  }
+
   if col == 0 or col > #line then
     if M.config.delete_empty_lines_until_next_char then
       insert_undo()
-      consume_spaces_and_lines(row, col, direction)
+      consume_spaces_and_lines(cache, "")
+      return
     else
       if direction == utils.direction.right then
         local delete = vim.api.nvim_replace_termcodes(utils.keys.del, true, false, true)
@@ -495,18 +453,11 @@ local function delete_word(row, col, direction)
     return
   end
 
-  local char = line:sub(col, col)
+  if true then
+    return
+  end
 
-  local cache = {
-    direction = direction,
-    line = {
-      text = new_line,
-      row = row,
-      start_col = start_col,
-      end_col = end_col,
-    },
-    lookup_line = nil,
-  }
+  local char = line:sub(col, col)
 
   if delete_pattern(cache, M.config.seek_spaces[direction]) then
     return
@@ -613,14 +564,19 @@ local function delete(row, col, direction)
     local filetype = vim.bo[bufnr].filetype
     local config_filetype = store.filetypes[filetype]
 
-    local cache = {
-      line = nil,
-      row = 0,
-      start_col = 0,
-      end_col = 0,
-    }
-
     local start_col, end_col = get_range_line(col, #line, direction)
+
+    local cache = {
+      direction = direction,
+      line = {
+        text = line,
+        slice = line:sub(start_col, end_col),
+        row = row,
+        start_col = start_col,
+        end_col = end_col,
+      },
+      lookup_line = nil,
+    }
 
     if config_filetype then
       for _, index in ipairs(config_filetype.pairs) do
