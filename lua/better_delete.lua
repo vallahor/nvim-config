@@ -22,6 +22,10 @@ local utils = {
     left = "%s*$",
     right = "^%s*",
   },
+  seek_punctuation = {
+    left = "%p$",
+    right = "^%p",
+  },
 }
 
 local store = {
@@ -69,24 +73,23 @@ M.config = {
     { left = "<", right = ">", not_filetypes = nil },
   },
   defaults = {
+    -- One or more digits.
     {
       left = "%d%d+$",
       right = "^%d%d+",
     },
+    -- One or more uppercases.
     {
       left = "%u%u+$",
       right = "^%u%u+",
     },
+    -- Word deletion.
     {
       left = "%u?%l*[%d%u]?$",
       right = "^%u?%l*%d?",
     },
   },
-  seek_punctuation = {
-    left = "%p$",
-    right = "^%p",
-  },
-  seek_allowed_punctuations = {
+  allowed_multi_punctuation = {
     left = "[%.%,%!%?%:%;%-%/%@%#%$%%%^%&%*%_%+%=%~%|%\\]*$",
     right = "^[%.%,%!%?%:%;%-%/%@%#%$%%%^%&%*%_%+%=%~%|%\\]*",
   },
@@ -540,11 +543,11 @@ local function delete_word(row, col, direction)
 
   if line:sub(col, col):match("%p") then
     if M.config.multi_punctuation then
-      if delete_pattern(context, M.config.seek_allowed_punctuations[direction]) then
+      if delete_pattern(context, M.config.allowed_multi_punctuation[direction]) then
         return
       end
     end
-    if delete_pattern(context, M.config.seek_punctuation[direction]) then
+    if delete_pattern(context, store.seek_punctuation[direction]) then
       return
     end
   end
