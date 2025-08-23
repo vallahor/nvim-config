@@ -50,17 +50,17 @@ local store_index = {
 }
 
 M.config = {
-  delete_empty_lines_until_next_char = true,
-  repeated_punctuation = true,
-  disable_undo = false,
-  disable_right = false,
-  disable_right_default_pairs = false,
+  delete_blank_lines_until_non_whitespace = true, -- Deletes all blank lines, spaces, and tabs until a non-whitespace character or EOF.
+  multi_punctuation = true, -- Matches repeated punctuation sequences like `!==`, `...`, `++`, `===`. See `seek_allowed_punctuations`.
+  disable_undo = false, -- Prevents grouping edits into a single undo step; each deletion starts a new undo chunk.
+  disable_right = false, -- Disables all pairs and rules for the right side.
+  disable_right_default_pairs = false, -- Disables right-side behavior only for the default pairs.
   join_line = {
     separator = " ",
     times = 1,
   },
   default_pairs = {
-    { left = "(", right = ")", not_filetypes = nil },
+    { left = "(", right = ")", not_filetypes = nil, disable_right = true },
     { left = "{", right = "}", not_filetypes = nil },
     { left = "[", right = "]", not_filetypes = nil },
     { left = "'", right = "'", not_filetypes = nil },
@@ -102,7 +102,7 @@ M.setup = function(config)
       M.insert_pair({
         left = pair.left,
         right = pair.right,
-        disable_right = M.config.disable_right_default_pairs or false,
+        disable_right = pair.disable_right or M.config.disable_right_default_pairs or false,
       }, { filetypes = pair.filetypes, not_filetypes = pair.not_filetypes })
     end
   end
@@ -539,7 +539,7 @@ local function delete_word(row, col, direction)
   end
 
   if line:sub(col, col):match("%p") then
-    if M.config.repeated_punctuation then
+    if M.config.multi_punctuation then
       if delete_pattern(context, M.config.seek_allowed_punctuations[direction]) then
         return
       end
@@ -551,7 +551,6 @@ local function delete_word(row, col, direction)
 
   for _, default in pairs(M.config.defaults) do
     if delete_pattern(context, default[direction]) then
-      print(default[direction])
       return
     end
   end
@@ -583,26 +582,30 @@ local function delete(row, col, direction)
         valid = true,
       },
     }
+    local is_right = direction == utils.direction.right
+    local ignore_right = M.config.disable_right and M.config.disable_right_default_pairs and is_right
 
-    if config_filetype then
-      for _, index in ipairs(config_filetype.pairs) do
+    if not ignore_right then
+      if config_filetype then
+        for _, index in ipairs(config_filetype.pairs) do
+          if not context.lookup_line.valid then
+            break
+          end
+          local item = store.pairs.ft[index]
+          if not item.disable_right and delete_pairs(context, item.pattern.left, item.pattern.right) then
+            return
+          end
+        end
+      end
+
+      for _, item in ipairs(store.pairs.default) do
         if not context.lookup_line.valid then
           break
         end
-        local item = store.pairs.ft[index]
-        if delete_pairs(context, item.pattern.left, item.pattern.right) then
-          return
-        end
-      end
-    end
-
-    for _, item in ipairs(store.pairs.default) do
-      if not context.lookup_line.valid then
-        break
-      end
-      if not in_ignore_list(item, filetype) then
-        if delete_pairs(context, item.pattern.left, item.pattern.right) then
-          return
+        if not item.disable_right and not in_ignore_list(item, filetype) then
+          if delete_pairs(context, item.pattern.left, item.pattern.right) then
+            return
+          end
         end
       end
     end
