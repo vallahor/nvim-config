@@ -64,7 +64,7 @@ M.config = {
     times = 1,
   },
   default_pairs = {
-    { left = "(", right = ")", not_filetypes = nil, disable_right = true },
+    { left = "(", right = ")", not_filetypes = nil },
     { left = "{", right = "}", not_filetypes = nil },
     { left = "[", right = "]", not_filetypes = nil },
     { left = "'", right = "'", not_filetypes = nil },
@@ -218,15 +218,16 @@ M.insert_pattern = function(config, opts)
   -- Adds wildcards in the pattern and aditional rules.
   -- Right: "^(pattern)item.suffix"
   -- Left: "item.prefix(pattern)$"
-  local config_pattern = (config.prefix or "") .. "(" .. config.pattern .. ")" .. (config.suffix or "")
+  local config_pattern = "(" .. config.pattern .. ")"
   local pattern = {
     pattern = {
-      left = config_pattern .. "$",
-      right = "^" .. config_pattern,
+      left = (config.prefix or "") .. config_pattern .. "$",
+      right = "^" .. config_pattern .. (config.suffix or ""),
     },
     disable_right = config.disable_right or false,
     not_filetypes = nil,
   }
+
   insert_into(store_index[opts.type], store.patterns.ft, pattern, opts)
 end
 
@@ -236,6 +237,40 @@ M.insert_default = function(config)
   end
 
   table.insert(M.config.defaults, config)
+end
+
+M.edit_default_pairs = function(pattern, config)
+  if not config then
+    return
+  end
+
+  local left = config.left or nil
+  local right = config.right or nil
+  local not_filetypes = config.not_filetypes or nil
+  pattern = escape_pattern(pattern) .. "$"
+
+  local default_pairs = store_index["pairs.default"]
+  for _, pair in ipairs(default_pairs) do
+    if pair.pattern.left == pattern then
+      if left then
+        pair.pattern.left = left
+      end
+
+      if right then
+        pair.pattern.right = right
+      end
+
+      if not_filetypes then
+        pair.not_filetypes = pair.not_filetypes or {}
+        for _, filetype in ipairs(not_filetypes) do
+          local _ = get_or_create_filetype(filetype)
+          pair.not_filetypes[filetype] = true
+        end
+      end
+
+      break
+    end
+  end
 end
 
 local function in_ignore_list(item, filetype)
@@ -547,7 +582,7 @@ local function delete_word(row, col, direction)
         return
       end
     end
-    if delete_pattern(context, store.seek_punctuation[direction]) then
+    if delete_pattern(context, utils.seek_punctuation[direction]) then
       return
     end
   end

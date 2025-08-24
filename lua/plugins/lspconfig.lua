@@ -203,7 +203,7 @@ return {
           "zls",
           "rust_analyzer",
           -- "phpactor",
-          "laravel_ls",
+          -- "laravel_ls",
           "intelephense",
           -- "glsl_analyzer",
           -- "gopls",
