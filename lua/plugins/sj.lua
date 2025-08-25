@@ -14,10 +14,9 @@ return {
         sj.run({
           forward_search = true,
           inclusive = true,
-          -- max_pattern_length = 2,
+          max_pattern_length = 2,
           pattern_type = "lua_plain",
           use_overlay = false,
-          separator = ";",
         })
       end)
 

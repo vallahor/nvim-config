@@ -15,7 +15,7 @@ return {
     vim.keymap.set("i", "<c-bs>", delite.previous_word)
     vim.keymap.set("i", "<c-del>", delite.next_word)
 
-    -- vim.keymap.set("i", "<bs>", delite.previous)
+    vim.keymap.set("i", "<bs>", delite.previous)
     -- vim.keymap.set("i", "<del>", delite.next)
 
     vim.keymap.set("n", "<c-bs>", delite.previous_word_normal_mode)
