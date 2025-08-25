@@ -223,6 +223,12 @@ vim.keymap.set("n", "dx", '"_d') -- delete without copying to register @check wo
 vim.keymap.set("n", "*", [[<Cmd>let @/='\<'.expand('<cword>').'\>'<bar>set hlsearch<CR>]]) -- highlight all occurencies of the current word
 vim.keymap.set("v", "*", '"sy/\\V<c-r>s<cr>``') -- highlight all occurencies of the curren selection
 
+vim.keymap.set("i", "<c-;>", function()
+  local row = vim.api.nvim_win_get_cursor(0)[1] - 1
+  local len = vim.fn.col("$") - 1
+  vim.api.nvim_buf_set_text(0, row, len, row, len, { ";" })
+end)
+
 -- go to beginning of the line function like DOOM Emacs
 local beginning_of_the_line = function()
   local old_pos = vim.fn.col(".")
@@ -233,8 +239,6 @@ local beginning_of_the_line = function()
   end
 end
 
-vim.keymap.set("i", "<c-h>", beginning_of_the_line)
-vim.keymap.set("i", "<c-;>", "<end>")
 if vim.g.skeletyl then
   vim.keymap.set("i", "<home>", beginning_of_the_line) -- go to beginning of the line
   vim.keymap.set({ "n", "v" }, "(", beginning_of_the_line) -- go to beginning of the line
@@ -326,10 +330,6 @@ vim.keymap.set({ "v", "x" }, "p", "P")
 
 -- insert mode - paste
 vim.keymap.set("i", "<c-v>", "<c-o>p")
-
--- maybe blink related (fallback keys)
-vim.keymap.set("n", "<cr>", "<nop>")
--- vim.keymap.set("c", "<tab>", "<nop>")
 
 -- vim.keymap.set("n", ";", "m'")
 -- add mark after insert | <c-o> and <c-i>

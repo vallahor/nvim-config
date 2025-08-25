@@ -4,10 +4,7 @@ return {
     local delite = require("delite")
     delite.setup({})
 
-    delite.insert_pattern({ pattern = "__[%u%l]+__" })
-    delite.insert_rule({ left = "%%{", right = "}" })
-    delite.insert_rule({ left = "```", right = "```" })
-    delite.insert_rule({ left = "--%(", right = "%)%-%-" }, { filetypes = { "lua" } })
+    -- delite.insert_pattern({ pattern = "__[%u%l]+__" })
 
     delite.insert_default_pairs_priority({ left = "%{", right = "}" }, { not_filetypes = { "lua" } })
 
@@ -24,8 +21,8 @@ return {
     vim.keymap.set("n", "<c-bs>", delite.previous_word_normal_mode)
     vim.keymap.set("n", "<c-del>", delite.next_word_normal_mode)
 
-    vim.keymap.set("n", "<bs>", delite.previous)
-    vim.keymap.set("n", "<del>", delite.next)
+    vim.keymap.set("n", "<bs>", delite.previous_normal_mode)
+    vim.keymap.set("n", "<del>", delite.next_normal_mode)
 
     vim.keymap.set("n", "J", delite.join)
   end,
