@@ -31,25 +31,44 @@ return {
       vim.api.nvim_create_autocmd({ "LspDetach" }, {
         group = vim.api.nvim_create_augroup("LspStopWithLastClient", { clear = true }),
         callback = function(args)
-          local client = vim.lsp.get_client_by_id(args.data.client_id)
-          if not client or not client.attached_buffers then
-            return
-          end
-          for buf_id in pairs(client.attached_buffers) do
-            if buf_id ~= args.buf then
-              return
-            end
-          end
+          local client_id = args.data.client_id
+          local client = vim.lsp.get_client_by_id(client_id)
+          local current_buf = args.buf
 
-          client:request("shutdown", nil, function(err)
-            if err then
-              client:stop(true)
+          if client then
+            local clients = vim.lsp.get_clients({ id = client_id })
+            local count = 0
+
+            if clients and #clients > 0 then
+              local remaining_client = clients[1]
+
+              if remaining_client.attached_buffers then
+                for buf_id in pairs(remaining_client.attached_buffers) do
+                  if buf_id ~= current_buf then
+                    count = count + 1
+                  end
+                end
+              end
             end
-          end)
+
+            if count == 0 then
+              local original_notify = vim.notify
+              vim.notify = function() end
+
+              client:stop(true)
+
+              vim.defer_fn(function()
+                vim.notify = original_notify
+              end, 200)
+            end
+          end
         end,
       })
 
-      vim.lsp.config.lua_ls = {
+      require("lspconfig").intelephense.setup({})
+      require("lspconfig").laravel_ls.setup({})
+
+      vim.lsp.config("lua_ls", {
         on_init = function(client)
           if client.workspace_folders then
             local path = client.workspace_folders[1].name
@@ -80,9 +99,9 @@ return {
         settings = {
           Lua = {},
         },
-      }
+      })
 
-      vim.lsp.config.basedpyright = {
+      vim.lsp.config("basedpyright", {
         settings = {
           basedpyright = {
             analysis = {
@@ -90,10 +109,10 @@ return {
             },
           },
         },
-      }
+      })
 
       -- rustup component add rust-src
-      vim.lsp.config.rust_analyzer = {
+      vim.lsp.config("rust_analyzer", {
         settings = {
           ["rust-analyzer"] = {
             cargo = {
@@ -101,9 +120,9 @@ return {
             },
           },
         },
-      }
+      })
 
-      vim.lsp.config.elixirls = {
+      vim.lsp.config("elixirls", {
         settings = {
           elixirLS = {
             dialyzerEnabled = false,
@@ -112,23 +131,23 @@ return {
             suggestSpecs = false,
           },
         },
-      }
+      })
 
-      vim.lsp.config.zls = {
+      vim.lsp.config("zls", {
         settings = {
           zls = {
             enable_build_on_save = true,
             build_on_save_step = "check",
           },
         },
-      }
+      })
 
       local port = os.getenv("GDScript_Port") or "6005"
-      vim.lsp.config.gdscript = {
+      vim.lsp.config("gdscript", {
         cmd = { "ncat", "localhost", port },
-      }
+      })
 
-      vim.lsp.config.tailwindcss = {
+      vim.lsp.config("tailwindcss", {
         on_attach = function(_, bufnr)
           on_attach(_, bufnr)
           vim.api.nvim_create_autocmd({ "BufWritePre" }, {
@@ -144,9 +163,9 @@ return {
             end,
           })
         end,
-      }
+      })
 
-      vim.lsp.config.vtsls = {
+      vim.lsp.config("vtsls", {
         settings = {
           vtsls = {
             tsserver = {
@@ -163,7 +182,7 @@ return {
           },
         },
         filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue" },
-      }
+      })
     end,
   },
   {
@@ -196,7 +215,7 @@ return {
           "intelephense",
         },
         automatic_enable = {
-          exclude = { "ruff" },
+          exclude = { "ruff", "intelephense", "laravel_ls" },
         },
       })
     end,

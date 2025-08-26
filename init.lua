@@ -189,10 +189,6 @@ vim.keymap.set("n", "`", "<C-^>") -- back to last buffer
 vim.keymap.set("n", "<f1>", "<cmd>Inspect<CR>") -- inspect current token treesitter
 vim.keymap.set("n", "<f2>", "<cmd>InspectTree<CR>") -- inspect current token treesitter
 
--- move lines @note: the visual ones are bellow
-vim.keymap.set("n", "<", "<<", { nowait = true, remap = true }) -- indent left
-vim.keymap.set("n", ">", ">>", { nowait = true, remap = true }) -- indent right
-
 -- when it's not in lsp
 vim.keymap.set("n", "K", "<nop>")
 
@@ -214,10 +210,8 @@ vim.keymap.set("n", "K", "<nop>")
 vim.keymap.set({ "v", "x" }, "p", "P")
 
 -- insert mode - paste
--- vim.keymap.set("i", "<c-v>", "<c-o>p")
 vim.keymap.set("i", "<c-v>", "<c-o>P")
 
--- vim.keymap.set("n", ";", "m'")
 -- add mark after insert | <c-o> and <c-i>
 vim.api.nvim_create_autocmd("InsertEnter", {
   callback = function(_)
@@ -275,6 +269,9 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.opt.tabstop = 2
   end,
 })
+
+vim.keymap.set("n", "<", "<<", { nowait = true, remap = true }) -- indent left
+vim.keymap.set("n", ">", ">>", { nowait = true, remap = true }) -- indent right
 
 -- movements with timeout
 vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
