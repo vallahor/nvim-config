@@ -27,6 +27,7 @@ return {
         "luau",
         "odin",
         "python",
+        "blade",
         "php",
         "php_only",
         "phpdoc",

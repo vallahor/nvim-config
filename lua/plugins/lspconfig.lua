@@ -41,14 +41,11 @@ return {
             end
           end
 
-          local original_notify = vim.notify
-          vim.notify = function() end
-
-          client:stop(true)
-
-          vim.defer_fn(function()
-            vim.notify = original_notify
-          end, 200)
+          client:request("shutdown", nil, function(err)
+            if err then
+              client:stop(true)
+            end
+          end)
         end,
       })
 
@@ -147,12 +144,6 @@ return {
             end,
           })
         end,
-        settings = {
-          includeLanguages = {
-            elixir = "phoenix-heex",
-            heex = "phoenix-heex",
-          },
-        },
       }
 
       vim.lsp.config.vtsls = {
@@ -180,7 +171,7 @@ return {
     opts = {},
   },
   {
-    "williamboman/mason-lspconfig.nvim",
+    "mason-org/mason-lspconfig.nvim",
     dependencies = {
       "nvim-lspconfig",
       "mason.nvim",
@@ -198,16 +189,11 @@ return {
           "lua_ls",
           "tailwindcss",
           "vtsls",
-          "vue_ls",
           "ols",
           "zls",
           "rust_analyzer",
-          -- "phpactor",
-          -- "laravel_ls",
+          "laravel_ls",
           "intelephense",
-          -- "glsl_analyzer",
-          -- "gopls",
-          -- "sqlls",
         },
         automatic_enable = {
           exclude = { "ruff" },
