@@ -34,39 +34,21 @@ return {
           autocmd FileType odin setlocal commentstring=//\ %s
       ]])
 
-      if not vim.g.skeletyl then
-        require("mini.move").setup({
-          mappings = {
-            -- Move visual selection in Visual mode. Defaults are Alt (Meta) + hjkl.
-            left = "",
-            right = "",
-            down = "J",
-            up = "K",
+      require("mini.move").setup({
+        mappings = {
+          -- Move visual selection in Visual mode. Defaults are Alt (Meta) + hjkl.
+          left = "",
+          right = "",
+          down = "<down>",
+          up = "<up>",
 
-            -- Move current line in Normal mode
-            line_left = "",
-            line_right = "",
-            line_down = "",
-            line_up = "",
-          },
-        })
-      else
-        require("mini.move").setup({
-          mappings = {
-            -- Move visual selection in Visual mode. Defaults are Alt (Meta) + hjkl.
-            left = "",
-            right = "",
-            down = "<down>",
-            up = "<up>",
-
-            -- Move current line in Normal mode
-            line_left = "",
-            line_right = "",
-            line_down = "",
-            line_up = "",
-          },
-        })
-      end
+          -- Move current line in Normal mode
+          line_left = "",
+          line_right = "",
+          line_down = "",
+          line_up = "",
+        },
+      })
 
       -- Statusline
 
@@ -138,14 +120,11 @@ return {
       -- Buf Remove
       require("mini.bufremove").setup()
 
-      if vim.g.skeletyl then
-        vim.keymap.set("n", "<c-w>", "<cmd>lua MiniBufremove.delete(0, false)<CR>")
-        vim.keymap.set("n", "<a-w>", "<cmd>lua MiniBufremove.delete(0, true)<CR>")
-        vim.keymap.set("n", "<c-x>", "<cmd>lua MiniBufremove.delete(0, true)<CR>")
-      else
-        vim.keymap.set("n", "<c-w>", "<cmd>lua MiniBufremove.delete(0, false)<CR>")
-        vim.keymap.set("n", "<a-w>", "<cmd>lua MiniBufremove.delete(0, true)<CR>")
-      end
+      vim.keymap.set("n", "<c-w>", "<cmd>lua MiniBufremove.delete(0, false)<CR>")
+      vim.keymap.set("n", "<c-x>", "<cmd>lua MiniBufremove.delete(0, true)<CR>")
+      -- closes the current window and buffer
+      -- to close the current buffer and not the window use <c-w>
+      vim.keymap.set("n", "<c-s-w>", "<cmd>bd<cr>") -- close current buffer and window
 
       -- Cursor Word
       require("mini.cursorword").setup({

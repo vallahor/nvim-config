@@ -19,17 +19,10 @@ return {
     virtual = true,
     config = function()
       local cow = require("close_other_window")
-      if vim.g.skeletyl then
-        vim.keymap.set({ "n", "v" }, "<c-left>", cow.left)
-        vim.keymap.set({ "n", "v" }, "<c-down>", cow.down)
-        vim.keymap.set({ "n", "v" }, "<c-up>", cow.up)
-        vim.keymap.set({ "n", "v" }, "<c-right>", cow.right)
-      else
-        vim.keymap.set({ "n", "v" }, "<c-s-h>", cow.left)
-        vim.keymap.set({ "n", "v" }, "<c-s-j>", cow.down)
-        vim.keymap.set({ "n", "v" }, "<c-s-k>", cow.up)
-        vim.keymap.set({ "n", "v" }, "<c-s-l>", cow.right)
-      end
+      vim.keymap.set({ "n", "v" }, "<c-left>", cow.left)
+      vim.keymap.set({ "n", "v" }, "<c-down>", cow.down)
+      vim.keymap.set({ "n", "v" }, "<c-up>", cow.up)
+      vim.keymap.set({ "n", "v" }, "<c-right>", cow.right)
     end,
   },
   {
@@ -59,6 +52,13 @@ return {
   {
     "habamax/vim-godot",
     config = function()
+      vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead", "BufEnter", "BufWinEnter" }, {
+        pattern = "*.gd",
+        callback = function()
+          vim.opt_local.expandtab = false
+        end,
+      })
+
       vim.cmd([[
         setlocal tabstop=4
         setlocal shiftwidth=4

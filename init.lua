@@ -12,7 +12,6 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 vim.g.mapleader = " "
-vim.g.skeletyl = true
 
 vim.env.LANG = "en_US.UTF-8"
 
@@ -70,11 +69,6 @@ vim.wo.signcolumn = "no"
 vim.wo.relativenumber = true
 vim.wo.wrap = false
 
-if vim.wo.wrap then
-  vim.keymap.set({ "n", "v" }, "j", "gj", { noremap = true }) -- wrap up
-  vim.keymap.set({ "n", "v" }, "k", "gk", { noremap = true }) -- wrap up
-end
-
 vim.bo.autoread = true
 vim.bo.copyindent = true
 vim.bo.grepprg = "rg"
@@ -105,43 +99,9 @@ end
 
 vim.keymap.set("n", "<esc>", esc_normal_mode)
 
-if false or not vim.g.skeletyl then
-  -- if vim.g.skeletyl then
-  --   vim.keymap.set("i", "_{", "<esc>")
-  --   vim.keymap.set("i", "{_", "<esc>")
-  -- end
-  vim.keymap.set("i", "jk", "<esc>")
-  vim.keymap.set("i", "kj", "<esc>")
-
-  vim.keymap.set("i", "jK", "<esc>")
-  vim.keymap.set("i", "kJ", "<esc>")
-
-  vim.keymap.set("i", "Jk", "<esc>")
-  vim.keymap.set("i", "Kj", "<esc>")
-
-  vim.keymap.set("i", "JK", "<esc>")
-  vim.keymap.set("i", "KJ", "<esc>")
-
-  vim.keymap.set("c", "jk", "<c-c><Esc>")
-  vim.keymap.set("c", "kj", "<c-c><Esc>")
-
-  vim.keymap.set("t", "jk", "<C-\\><C-n>")
-  vim.keymap.set("t", "kj", "<C-\\><C-n>")
-end
-
-vim.keymap.set({ "i" }, "<enter>", "<c-u><enter>")
-vim.keymap.set({ "n", "v" }, "<c-enter>", "<cmd>w!<CR><esc>") -- save file
 vim.keymap.set({ "n", "v" }, "<c-s>", "<cmd>w!<CR><esc>") -- save file
-vim.keymap.set({ "n", "v" }, "<s-s>", "<cmd>w!<CR><esc>") -- save file
-vim.keymap.set({ "n", "v" }, "<leader>fs", "<cmd>w!<CR><esc>") -- save file
 
 vim.keymap.set("n", "Y", "yg$") -- yank to end of line considering line wrap
-
-vim.keymap.set("n", "<c-i>", "<c-i>zzzz") -- center <c-i>
-vim.keymap.set("n", "<c-o>", "<c-o>zzzz") -- center <c-o>
-
-vim.keymap.set("i", "<c-o>", "<end><cr>") -- new line bellow - insert
-vim.keymap.set("i", "<c-s-o>", "<up><end><cr>") -- new line above - insert
 
 vim.keymap.set({ "n", "v" }, "<PageUp>", "<c-u>zzzz", { noremap = true }) -- page up
 vim.keymap.set({ "n", "v" }, "<PageDown>", "<c-d>zzzz", { noremap = true }) -- page down
@@ -149,72 +109,35 @@ vim.keymap.set({ "n", "v" }, "<PageDown>", "<c-d>zzzz", { noremap = true }) -- p
 vim.keymap.set("i", "<PageUp>", "<nop>", { noremap = true }) -- page up
 vim.keymap.set("i", "<PageDown>", "<nop>", { noremap = true }) -- page down
 
-if vim.g.skeletyl then
-  vim.keymap.set("n", "\\", "<cmd>clo<cr>") -- close current window
-  vim.keymap.set("n", "|", "<cmd>vs<cr>") -- split vertical window
-  -- vim.keymap.set("n", "-", "<cmd>sp<cr>") -- split horizontal window
-  vim.keymap.set("n", "_", "<cmd>sp<cr>") -- split horizontal window
-  vim.keymap.set("n", "<c-9>", "<c-w>o") -- close other windows
-  vim.keymap.set("n", "<c-8>", "<c-w>r") -- rotate windows
+vim.keymap.set("n", "\\", "<cmd>clo<cr>") -- close current window
+vim.keymap.set("n", "|", "<cmd>vs<cr>") -- split vertical window
+-- vim.keymap.set("n", "-", "<cmd>sp<cr>") -- split horizontal window
+vim.keymap.set("n", "_", "<cmd>sp<cr>") -- split horizontal window
+vim.keymap.set("n", "<c-9>", "<c-w>o") -- close other windows
+vim.keymap.set("n", "<c-8>", "<c-w>r") -- rotate windows
 
-  -- closes the current window and buffer
-  -- to close the current buffer and not the window use <c-w>
-  vim.keymap.set("n", "<c-!>", "<cmd>bd<cr>") -- close current buffer and window
+-- resize windows
+vim.keymap.set("n", "<c-=>", "<cmd>wincmd =<cr>") -- resize all windows
+-- vim.keymap.set("n", "<leader>=", "<cmd>wincmd =<cr>")
 
-  -- resize windows
-  vim.keymap.set("n", "<c-=>", "<cmd>wincmd =<cr>") -- resize all windows
-  -- vim.keymap.set("n", "<leader>=", "<cmd>wincmd =<cr>")
+vim.keymap.set("n", "<a-6>", [[<cmd>vertical   resize +2<cr>]]) -- make the window biger   vertically
+vim.keymap.set("n", "<a-4>", [[<cmd>vertical   resize -2<cr>]]) -- make the window smaller vertically
+vim.keymap.set("n", "<a-8>", [[<cmd>horizontal resize +2<cr>]]) -- make the window bigger  horizontally
+vim.keymap.set("n", "<a-5>", [[<cmd>horizontal resize -2<cr>]]) -- make the window smaller horizontally
 
-  vim.keymap.set("n", "<a-6>", [[<cmd>vertical   resize +2<cr>]]) -- make the window biger   vertically
-  vim.keymap.set("n", "<a-4>", [[<cmd>vertical   resize -2<cr>]]) -- make the window smaller vertically
-  vim.keymap.set("n", "<a-8>", [[<cmd>horizontal resize +2<cr>]]) -- make the window bigger  horizontally
-  vim.keymap.set("n", "<a-5>", [[<cmd>horizontal resize -2<cr>]]) -- make the window smaller horizontally
-
-  vim.keymap.set("n", "<left>", "<cmd>wincmd h<cr>") -- move to window left
-  vim.keymap.set("n", "<down>", "<cmd>wincmd j<cr>") -- move to window down
-  vim.keymap.set("n", "<up>", "<cmd>wincmd k<cr>") -- move to window up
-  vim.keymap.set("n", "<right>", "<cmd>wincmd l<cr>") -- move to window right
-else
-  vim.keymap.set("n", "<c-\\>", "<cmd>clo<cr>") -- close current    window
-  vim.keymap.set("n", "<c-=>", "<cmd>vs<cr>") -- split vertical   window
-  vim.keymap.set("n", "<c-->", "<cmd>sp<cr>") -- split horizontal window
-  vim.keymap.set("n", "<c-0>", "<c-w>o") -- close other windows
-  vim.keymap.set("n", "<c-9>", "<c-w>r") -- rotate windows
-  vim.keymap.set("n", "|", "<cmd>bd<cr>") -- close current buffer and window
-
-  -- resize windows
-  vim.keymap.set("n", "<a-=>", "<cmd>wincmd =<cr>") -- resize all windows
-
-  vim.keymap.set("n", "<a-s-l>", [[<cmd>vertical   resize +2<cr>]]) -- make the window biger   vertically
-  vim.keymap.set("n", "<a-s-h>", [[<cmd>vertical   resize -2<cr>]]) -- make the window smaller vertically
-  vim.keymap.set("n", "<a-s-k>", [[<cmd>horizontal resize +2<cr>]]) -- make the window bigger  horizontally
-  vim.keymap.set("n", "<a-s-j>", [[<cmd>horizontal resize -2<cr>]]) -- make the window smaller horizontally
-
-  -- vim.keymap.set("n", "<leader>=", "<c-w>=")
-
-  vim.keymap.set({ "n", "v" }, "<c-h>", "<cmd>wincmd h<cr>") -- move to window left
-  vim.keymap.set({ "n", "v" }, "<c-j>", "<cmd>wincmd j<cr>") -- move to window down
-  vim.keymap.set({ "n", "v" }, "<c-k>", "<cmd>wincmd k<cr>") -- move to window up
-  vim.keymap.set({ "n", "v" }, "<c-l>", "<cmd>wincmd l<cr>") -- move to window right
-end
+vim.keymap.set("n", "<left>", "<cmd>wincmd h<cr>") -- move to window left
+vim.keymap.set("n", "<down>", "<cmd>wincmd j<cr>") -- move to window down
+vim.keymap.set("n", "<up>", "<cmd>wincmd k<cr>") -- move to window up
+vim.keymap.set("n", "<right>", "<cmd>wincmd l<cr>") -- move to window right
 
 vim.keymap.set("c", "<c-v>", "<c-r>*") -- paste to command line mode
 
 vim.keymap.set("v", "v", "V") -- visual line mode
 
--- vim.keymap.set("n", "n", "nzzzz") -- center next
--- vim.keymap.set("n", "N", "Nzzzz") -- center previous
-
 vim.keymap.set("c", "<c-bs>", "<c-w>") -- delete previous word (cmd)
--- delete previous word (insert)
--- vim.keymap.set("i", "<bs>", function()
---   delete.previous({ open_close = {
---     [">"] = "<",
---   } })
--- end)
 
 vim.keymap.set("n", "x", '"_x') -- delete current char without copying
-vim.keymap.set("n", "<c-s-d>", '"_dd') -- delete line without copying
+vim.keymap.set("n", "<c-d>", '"_dd') -- delete line without copying
 vim.keymap.set("v", "x", '"_d') -- delete char in visual mode without copying
 vim.keymap.set({ "n", "v" }, "c", '"_c') -- change verb without copying
 
@@ -239,33 +162,17 @@ local beginning_of_the_line = function()
   end
 end
 
-if vim.g.skeletyl then
-  vim.keymap.set("i", "<home>", beginning_of_the_line) -- go to beginning of the line
-  vim.keymap.set({ "n", "v" }, "(", beginning_of_the_line) -- go to beginning of the line
-  vim.keymap.set("n", ")", "$") -- go to end of line
-  vim.keymap.set("v", ")", "$h") -- go to end of line (for some reason it's goes to wrong place in visual mode)
-else
-  vim.keymap.set({ "n", "v" }, "0", beginning_of_the_line) -- go to beginning of the line
-  vim.keymap.set("n", "-", "$") -- go to end of line
-  vim.keymap.set("v", "-", "$h") -- go to end of line (for some reason it's go to wrong place in visual mode)
-end
+vim.keymap.set("i", "<home>", beginning_of_the_line) -- go to beginning of the line
+vim.keymap.set({ "n", "v" }, "(", beginning_of_the_line) -- go to beginning of the line
+vim.keymap.set("n", ")", "$") -- go to end of line
+vim.keymap.set("v", ")", "$h") -- go to end of line (for some reason it's goes to wrong place in visual mode)
 
-if vim.g.skeletyl then
-  vim.keymap.set("n", "<f4>", "<cmd>:e $MYVIMRC<CR>") -- open config file (vimrc or init.lua)
-  vim.keymap.set("n", "<f5>", "<cmd>so %<CR>") -- execute current file (vim or lua)
-  vim.keymap.set("n", "<f7>", "<cmd>:e ~/.config/ghostty/config<CR>") -- open ghostty config file (vimrc or init.lua)
-  vim.keymap.set("n", "<f11>", "<cmd>echo wordcount().words<CR>") -- execute current file (vim or lua)
-else
-  vim.keymap.set("n", "<f4>", "<cmd>:e $MYVIMRC<CR>") -- open config file (vimrc or init.lua)
-  vim.keymap.set("n", "<f12>", "<cmd>:e c:/projects/gruvballish/colors/targino.vim<CR>") -- open config file (vimrc or init.lua)
-  vim.keymap.set("n", "<f5>", "<cmd>so %<CR>") -- execute current file (vim or lua)
-  vim.keymap.set("n", "<f11>", "<cmd>echo wordcount().words<CR>") -- execute current file (vim or lua)
-end
+vim.keymap.set("n", "<f4>", "<cmd>:e $MYVIMRC<CR>") -- open config file (vimrc or init.lua)
+vim.keymap.set("n", "<f5>", "<cmd>so %<CR>") -- execute current file (vim or lua)
+vim.keymap.set("n", "<f7>", "<cmd>:e ~/.config/ghostty/config<CR>") -- open ghostty config file (vimrc or init.lua)
+vim.keymap.set("n", "<f11>", "<cmd>echo wordcount().words<CR>") -- execute current file (vim or lua)
 
 -- duplicate line and lines
-vim.keymap.set("n", "<c-d>", '"0yy"0p') -- duplicate line down
-vim.keymap.set("v", "<c-d>", '"0y"0Pgv') -- like sublime duplicate line
-
 vim.keymap.set("n", "<c-c>", '"0yy"0p') -- duplicate line down
 vim.keymap.set("v", "<c-c>", '"0y"0Pgv') -- like sublime duplicate line
 
@@ -280,7 +187,7 @@ end)
 vim.keymap.set("n", "`", "<C-^>") -- back to last buffer
 
 vim.keymap.set("n", "<f1>", "<cmd>Inspect<CR>") -- inspect current token treesitter
-vim.keymap.set("n", "<f6>", "<cmd>InspectTree<CR>") -- inspect current token treesitter
+vim.keymap.set("n", "<f2>", "<cmd>InspectTree<CR>") -- inspect current token treesitter
 
 -- move lines @note: the visual ones are bellow
 vim.keymap.set("n", "<", "<<", { nowait = true, remap = true }) -- indent left
@@ -302,34 +209,13 @@ vim.keymap.set("n", "K", "<nop>")
 -- vim.keymap.set("i", ")", ")<c-g>u")
 -- vim.keymap.set("i", ",", ",<c-g>u")
 -- vim.keymap.set("i", ".", ".<c-g>u")
--- vim.keymap.set("i", "=", "=<c-g>u")
--- vim.keymap.set("i", "-", "-<c-g>u")
--- vim.keymap.set("i", "+", "+<c-g>u")
--- vim.keymap.set("i", "~", "~<c-g>u")
--- vim.keymap.set("i", "$", "$<c-g>u")
--- vim.keymap.set("i", '"', '"<c-g>u')
--- vim.keymap.set("i", "'", "'<c-g>u")
--- vim.keymap.set("i", "/", "/<c-g>u")
--- vim.keymap.set("i", ":", ":<c-g>u")
--- vim.keymap.set("i", "?", "?<c-g>u")
--- vim.keymap.set("i", "^", "^<c-g>u")
--- vim.keymap.set("i", "!", "!<c-g>u")
--- vim.keymap.set("i", "@", "@<c-g>u")
--- vim.keymap.set("i", "_", "_<c-g>u")
--- vim.keymap.set("i", "&", "&<c-g>u")
--- vim.keymap.set("i", "*", "*<c-g>u")
--- vim.keymap.set("i", "%", "%<c-g>u")
--- vim.keymap.set("i", "|", "|<c-g>u")
--- vim.keymap.set("i", "#", "#<c-g>u")
--- vim.keymap.set("i", "<", "<<c-g>u")
--- vim.keymap.set("i", ">", "><c-g>u")
--- vim.keymap.set("i", ";", ";<c-g>u")
 
 -- visual mode - paste without copying
 vim.keymap.set({ "v", "x" }, "p", "P")
 
 -- insert mode - paste
-vim.keymap.set("i", "<c-v>", "<c-o>p")
+-- vim.keymap.set("i", "<c-v>", "<c-o>p")
+vim.keymap.set("i", "<c-v>", "<c-o>P")
 
 -- vim.keymap.set("n", ";", "m'")
 -- add mark after insert | <c-o> and <c-i>
@@ -394,18 +280,12 @@ vim.api.nvim_create_autocmd("FileType", {
 vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
   pattern = "*",
   callback = function()
-    if vim.g.skeletyl then
-      vim.keymap.set({ "n", "v", "x" }, "[", function()
-        vim.diagnostic.jump({ count = -1, float = false })
-      end, { nowait = true, buffer = true }) -- paragraph up
-      vim.keymap.set({ "n", "v", "x" }, "]", function()
-        vim.diagnostic.jump({ count = 1, float = false })
-      end, { nowait = true, buffer = true }) -- paragraph up
-    else
-      -- move paragraphs
-      vim.keymap.set({ "n", "v", "x" }, "[", "{", { nowait = true, buffer = true }) -- paragraph up
-      vim.keymap.set({ "n", "v", "x" }, "]", "}", { nowait = true, buffer = true }) -- paragraph down
-    end
+    vim.keymap.set({ "n", "v", "x" }, "[", function()
+      vim.diagnostic.jump({ count = -1, float = false })
+    end, { nowait = true, buffer = true }) -- paragraph up
+    vim.keymap.set({ "n", "v", "x" }, "]", function()
+      vim.diagnostic.jump({ count = 1, float = false })
+    end, { nowait = true, buffer = true }) -- paragraph up
     -- move indentation
     vim.keymap.set({ "v", "x" }, "<", "<gv", { nowait = true, buffer = true, remap = true }) -- indent left in visual mode
     vim.keymap.set({ "v", "x" }, ">", ">gv", { nowait = true, buffer = true, remap = true }) -- indent right in visual mode
@@ -419,18 +299,15 @@ vim.api.nvim_create_autocmd("TextYankPost", {
   end,
 })
 
-vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead" }, {
-  pattern = { "*.gs", "*.vs", "*.fs", "*.vert", "*.frag", "*.geom" },
-  callback = function()
-    vim.bo.filetype = "glsl"
-  end,
-})
-
-vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead", "BufEnter", "BufWinEnter" }, {
-  pattern = "*.gd",
-  callback = function()
-    vim.opt_local.expandtab = false
-  end,
+vim.filetype.add({
+  pattern = {
+    ["*.gs"] = "glsl",
+    ["*.vs"] = "glsl",
+    ["*.fs"] = "glsl",
+    ["*.vert"] = "glsl",
+    ["*.frag"] = "glsl",
+    ["*.geom"] = "glsl",
+  },
 })
 
 vim.api.nvim_create_autocmd("BufWritePre", {
@@ -442,12 +319,12 @@ vim.api.nvim_create_autocmd("BufWritePre", {
   end,
 })
 
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "elixir", "heex", "eex" },
-  callback = function()
-    vim.bo.cindent = false
-  end,
-})
+-- vim.api.nvim_create_autocmd("FileType", {
+--   pattern = { "elixir", "heex", "eex" },
+--   callback = function()
+--     vim.bo.cindent = false
+--   end,
+-- })
 
 if vim.g.neovide then
   vim.g.neovide_cursor_animation_length = 0

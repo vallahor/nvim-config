@@ -44,21 +44,11 @@ return {
               text = " ",
               bg = function(buffer)
                 if buffer.is_focused then
-                  -- return get_hex("ColorColumn", "bg")
                   return "#3f303f"
                 end
                 return "#191319"
               end,
             },
-            -- {
-            --   text = " ",
-            --   bg = function(buffer)
-            --     if buffer.is_focused then
-            --       return get_hex("ColorColumn", "bg")
-            --     end
-            --     return "#3d3339"
-            --   end,
-            -- },
             {
               text = function(buffer)
                 return buffer.unique_prefix .. buffer.filename
@@ -66,9 +56,6 @@ return {
               italic = function(buffer)
                 return buffer.is_modified
               end,
-              -- undercurl = function(buffer)
-              --   return buffer.diagnostics.errors > 0 or buffer.diagnostics.warnings > 0
-              -- end,
               fg = function(buffer)
                 if buffer.diagnostics.errors > 0 then
                   return errors_fg
@@ -82,7 +69,6 @@ return {
               end,
               bg = function(buffer)
                 if buffer.is_focused then
-                  -- return get_hex("ColorColumn", "bg")
                   return "#3f303f"
                 end
                 return "#191319"
@@ -92,39 +78,21 @@ return {
               text = " ",
               bg = function(buffer)
                 if buffer.is_focused then
-                  -- return get_hex("ColorColumn", "bg")
                   return "#3f303f"
                 end
                 return "#191319"
               end,
             },
-            -- {
-            --   text = " ",
-            --   bg = function(buffer)
-            --     if buffer.is_focused then
-            --       return get_hex("ColorColumn", "bg")
-            --     end
-            --     return "#3d3339"
-            --   end,
-            -- },
           },
         })
       end
 
-      if vim.g.skeletyl then
-        -- Re-order to previous/next
-        vim.keymap.set("n", "<home>", "<Plug>(cokeline-focus-prev)", { silent = true })
-        vim.keymap.set("n", "<end>", "<Plug>(cokeline-focus-next)", { silent = true })
+      -- Re-order to previous/next
+      vim.keymap.set("n", "<home>", "<Plug>(cokeline-focus-prev)", { silent = true })
+      vim.keymap.set("n", "<end>", "<Plug>(cokeline-focus-next)", { silent = true })
 
-        vim.keymap.set("n", "<c-home>", "<Plug>(cokeline-switch-prev)", { silent = true })
-        vim.keymap.set("n", "<c-end>", "<Plug>(cokeline-switch-next)", { silent = true })
-      else
-        vim.keymap.set("n", "<c-,>", "<Plug>(cokeline-focus-prev)", { silent = true })
-        vim.keymap.set("n", "<c-.>", "<Plug>(cokeline-focus-next)", { silent = true })
-        -- Re-order to previous/next
-        vim.keymap.set("n", "<a-,>", "<Plug>(cokeline-switch-prev)", { silent = true })
-        vim.keymap.set("n", "<a-.>", "<Plug>(cokeline-switch-next)", { silent = true })
-      end
+      vim.keymap.set("n", "<c-home>", "<Plug>(cokeline-switch-prev)", { silent = true })
+      vim.keymap.set("n", "<c-end>", "<Plug>(cokeline-switch-next)", { silent = true })
     end,
   },
 }
