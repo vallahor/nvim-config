@@ -52,21 +52,11 @@ return {
             end
 
             if count == 0 then
-              local original_notify = vim.notify
-              vim.notify = function() end
-
               client:stop(true)
-
-              vim.defer_fn(function()
-                vim.notify = original_notify
-              end, 200)
             end
           end
         end,
       })
-
-      require("lspconfig").intelephense.setup({})
-      require("lspconfig").laravel_ls.setup({})
 
       vim.lsp.config("lua_ls", {
         on_init = function(client)
@@ -92,6 +82,7 @@ return {
               checkThirdParty = false,
               library = {
                 vim.env.VIMRUNTIME,
+                "${3rd}/love2d/library",
               },
             },
           })
@@ -210,12 +201,9 @@ return {
           "vtsls",
           "ols",
           "zls",
-          "rust_analyzer",
-          "laravel_ls",
-          "intelephense",
         },
         automatic_enable = {
-          exclude = { "ruff", "intelephense", "laravel_ls" },
+          exclude = { "ruff" },
         },
       })
     end,
