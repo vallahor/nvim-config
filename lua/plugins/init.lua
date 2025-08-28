@@ -26,30 +26,6 @@ return {
     end,
   },
   {
-    "mattn/emmet-vim",
-    config = function()
-      vim.api.nvim_create_autocmd("FileType", {
-        pattern = {
-          "typescriptreact",
-          "javascripreact",
-          "html",
-          "heex",
-          "eex",
-          "elixir",
-        },
-        command = "EmmetInstall",
-      })
-      vim.keymap.set("i", "<c-y>", "<nop>")
-      vim.keymap.set("i", "<c-y>", "<Plug>(emmet-expand-abbr)", { nowait = true, silent = true })
-
-      vim.keymap.set("n", "<leader>mc", "<cmd>call emmet#toggleComment()<cr>")
-      vim.keymap.set("v", "<leader>ma", '<cmd>call emmet#expandAbbr(2,"")<cr>')
-      vim.keymap.set("n", "<leader>md", "<cmd>call emmet#removeTag()<cr>")
-
-      vim.g.user_emmet_install_global = 0
-    end,
-  },
-  {
     "habamax/vim-godot",
     config = function()
       vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead", "BufEnter", "BufWinEnter" }, {
@@ -66,22 +42,22 @@ return {
       ]])
     end,
   },
-  {
-    "luckasRanarison/tailwind-tools.nvim",
-    build = ":UpdateRemotePlugins",
-    dependencies = { "nvim-treesitter" },
-    opts = {
-      server = {
-        override = false,
-      },
-      document_color = {
-        enabled = false,
-      },
-      keymaps = {
-        smart_increment = {
-          enabled = false,
-        },
-      },
-    },
-  },
+  -- {
+  --   "luckasRanarison/tailwind-tools.nvim",
+  --   build = ":UpdateRemotePlugins",
+  --   dependencies = { "nvim-treesitter" },
+  --   opts = {
+  --     server = {
+  --       override = false,
+  --     },
+  --     document_color = {
+  --       enabled = false,
+  --     },
+  --     keymaps = {
+  --       smart_increment = {
+  --         enabled = false,
+  --       },
+  --     },
+  --   },
+  -- },
 }

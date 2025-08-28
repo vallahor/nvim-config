@@ -3,8 +3,6 @@ return {
     "saghen/blink.cmp",
     dependencies = { "rafamadriz/friendly-snippets", "mini.nvim" },
     version = "1.5.*",
-    ---@module 'blink.cmp'
-    -- ---@type blink.cmp.Config
     opts = {
       keymap = {
         preset = "none",
@@ -17,7 +15,6 @@ return {
         ["<C-p>"] = { "snippet_backward" },
         ["<PageUp>"] = { "scroll_documentation_up", "fallback" },
         ["<PageDown>"] = { "scroll_documentation_down", "fallback" },
-        -- ["<C-h>"] = { "show", "show_documentation", "hide_documentation" },
       },
 
       completion = {
