@@ -4,10 +4,11 @@ return {
     event = { "BufReadPre", "BufNewFile" },
     config = function()
       local capabilities = require("blink.cmp").get_lsp_capabilities()
-      local on_attach = function(_, bufnr)
-        vim.lsp.document_color.enable(true, bufnr, {
-          style = "virtual",
-        })
+      local on_attach = function(client, bufnr)
+        -- vim.lsp.document_color.enable(true, bufnr, {
+        --   style = "virtual",
+        -- })
+        vim.lsp.semantic_tokens.stop(bufnr, client.id)
 
         local opts = { buffer = bufnr }
         vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
@@ -22,7 +23,7 @@ return {
         capabilities = capabilities,
         on_attach = on_attach,
       })
-      vim.lsp.semantic_tokens.enable(false)
+      -- vim.lsp.semantic_tokens.enable(false)
       vim.lsp.log.set_level(vim.log.levels.ERROR)
 
       vim.lsp.enable({ "gdscript" })
@@ -102,28 +103,6 @@ return {
         },
       })
 
-      -- rustup component add rust-src
-      vim.lsp.config("rust_analyzer", {
-        settings = {
-          ["rust-analyzer"] = {
-            cargo = {
-              allTargets = false,
-            },
-          },
-        },
-      })
-
-      vim.lsp.config("elixirls", {
-        settings = {
-          elixirLS = {
-            dialyzerEnabled = false,
-            fetchDeps = false,
-            enableTestLenses = false,
-            suggestSpecs = false,
-          },
-        },
-      })
-
       vim.lsp.config("zls", {
         settings = {
           zls = {
@@ -174,6 +153,26 @@ return {
         },
         filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue" },
       })
+
+      local lspconfig = require("lspconfig")
+      lspconfig.laravel_ls.setup({})
+      lspconfig.intelephense.setup({
+        settings = {
+          intelephense = {
+            files = {
+              maxSize = 10000000,
+              exclude = {
+                -- "**/vendor/**",
+                "**/node_modules/**",
+              },
+            },
+            environment = {
+              phpVersion = "8.4.1",
+            },
+            maxMemory = 1024,
+          },
+        },
+      })
     end,
   },
   {
@@ -193,17 +192,18 @@ return {
           "basedpyright",
           "clangd",
           "cssls",
-          "elixirls",
           "html",
           "jsonls",
           "lua_ls",
           "tailwindcss",
+          "laravel_ls",
+          "intelephense",
           "vtsls",
           "ols",
           "zls",
         },
         automatic_enable = {
-          exclude = { "ruff" },
+          exclude = { "ruff", "laravel_ls", "intelephense" },
         },
       })
     end,
