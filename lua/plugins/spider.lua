@@ -63,8 +63,8 @@ return {
           whenObjectNotFound = false,
         },
       })
-      -- vim.keymap.set({ "o", "x" }, "au", "aw")
-      -- vim.keymap.set({ "o", "x" }, "iu", "iw")
+      vim.keymap.set({ "o", "x" }, "au", "aw")
+      vim.keymap.set({ "o", "x" }, "iu", "iw")
       vim.keymap.set({ "o", "x" }, "aw", '<cmd>lua require("various-textobjs").subword("outer")<CR>', { silent = true })
       vim.keymap.set({ "o", "x" }, "iw", '<cmd>lua require("various-textobjs").subword("inner")<CR>', { silent = true })
     end,
