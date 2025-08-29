@@ -117,24 +117,6 @@ return {
         cmd = { "ncat", "localhost", port },
       })
 
-      -- vim.lsp.config("tailwindcss", {
-      --   on_attach = function(_, bufnr)
-      --     on_attach(_, bufnr)
-      --     vim.api.nvim_create_autocmd({ "BufWritePre" }, {
-      --       group = vim.api.nvim_create_augroup("TailwindSort", { clear = true }),
-      --       callback = function(args)
-      --         local clients = vim.lsp.get_clients({ bufnr = args.buf, name = "tailwindcss" })
-
-      --         if not clients[1] then
-      --           return
-      --         end
-
-      --         vim.cmd.TailwindSort()
-      --       end,
-      --     })
-      --   end,
-      -- })
-
       vim.lsp.config("vtsls", {
         settings = {
           vtsls = {
@@ -162,7 +144,6 @@ return {
             files = {
               maxSize = 10000000,
               exclude = {
-                -- "**/vendor/**",
                 "**/node_modules/**",
               },
             },
