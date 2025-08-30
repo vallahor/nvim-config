@@ -187,7 +187,7 @@ end)
 vim.keymap.set("n", "`", "<C-^>") -- back to last buffer
 
 vim.keymap.set("n", "<f1>", "<cmd>Inspect<CR>") -- inspect current token treesitter
-vim.keymap.set("n", "<f2>", "<cmd>InspectTree<CR>") -- inspect current token treesitter
+vim.keymap.set("n", "<f3>", "<cmd>InspectTree<CR>") -- inspect current token treesitter
 
 -- when it's not in lsp
 vim.keymap.set("n", "K", "<nop>")
@@ -261,7 +261,7 @@ vim.api.nvim_create_autocmd("FileType", {
     "elixir",
     "html",
     "lua",
-    "svelte",
+    "vue",
   },
   callback = function()
     vim.opt.shiftwidth = 2
