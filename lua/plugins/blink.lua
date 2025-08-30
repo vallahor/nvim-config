@@ -83,6 +83,7 @@ return {
         -- ghost_text = { enabled = true },
       },
 
+      -- https://code.visualstudio.com/docs/editing/userdefinedsnippets
       sources = {
         default = { "lsp", "path", "snippets", "buffer" },
         providers = {
