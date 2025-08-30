@@ -1,7 +1,7 @@
 return {
   {
     "saghen/blink.cmp",
-    dependencies = { "rafamadriz/friendly-snippets", "mini.nvim" },
+    dependencies = { "mini.nvim" },
     version = "1.5.*",
     opts = {
       keymap = {

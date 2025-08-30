@@ -1,0 +1,26 @@
+{
+  "vue component tag": {
+    "prefix": "vct",
+    "body": [
+      "<script setup lang=\"ts\">",
+      "</script>",
+      "<template>",
+      "  <div>",
+      "    ${1}",
+      "  </div>",
+      "</template>"
+    ]
+  },
+  "vue component script": {
+    "prefix": "vcs",
+    "body": [
+      "<script setup lang=\"ts\">",
+      "${1}",
+      "</script>",
+      "<template>",
+      "  <div>",
+      "  </div>",
+      "</template>"
+    ]
+  }
+}
