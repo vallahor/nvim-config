@@ -178,6 +178,7 @@ return {
           "lua_ls",
           "tailwindcss",
           "laravel_ls",
+          "vue_ls",
           "intelephense",
           "vtsls",
           "ols",
