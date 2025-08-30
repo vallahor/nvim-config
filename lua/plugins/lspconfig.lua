@@ -8,7 +8,7 @@ return {
         -- vim.lsp.document_color.enable(true, bufnr, {
         --   style = "virtual",
         -- })
-        vim.lsp.semantic_tokens.stop(bufnr, client.id)
+        client.server_capabilities.semanticTokensProvider = nil
 
         local opts = { buffer = bufnr }
         vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
