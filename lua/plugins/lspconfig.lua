@@ -137,12 +137,29 @@ return {
       })
 
       vim.lsp.config("emmet_language_server", {
+        filetypes = {
+          {
+            "astro",
+            "css",
+            "eruby",
+            "html",
+            "htmlangular",
+            "htmldjango",
+            "less",
+            "pug",
+            "sass",
+            "scss",
+            "templ",
+          },
+        },
         init_options = {
           includeLanguages = {
             eelixir = "html-eex",
             elixir = "phoenix-heex",
             heex = "phoenix-heex",
             vue = "vue",
+            typescriptreact = "typescriptreact",
+            javascriptreact = "javascriptreact",
           },
         },
       })
