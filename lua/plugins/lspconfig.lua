@@ -29,35 +29,35 @@ return {
       vim.lsp.enable({ "gdscript" })
 
       -- https://www.reddit.com/r/neovim/comments/1jibjpp/comment/mjgigww/
-      vim.api.nvim_create_autocmd({ "LspDetach" }, {
-        group = vim.api.nvim_create_augroup("LspStopWithLastClient", { clear = true }),
-        callback = function(args)
-          local client_id = args.data.client_id
-          local client = vim.lsp.get_client_by_id(client_id)
-          local current_buf = args.buf
+      -- vim.api.nvim_create_autocmd({ "LspDetach" }, {
+      --   group = vim.api.nvim_create_augroup("LspStopWithLastClient", { clear = true }),
+      --   callback = function(args)
+      --     local client_id = args.data.client_id
+      --     local client = vim.lsp.get_client_by_id(client_id)
+      --     local current_buf = args.buf
 
-          if client then
-            local clients = vim.lsp.get_clients({ id = client_id })
-            local count = 0
+      --     if client then
+      --       local clients = vim.lsp.get_clients({ id = client_id })
+      --       local count = 0
 
-            if clients and #clients > 0 then
-              local remaining_client = clients[1]
+      --       if clients and #clients > 0 then
+      --         local remaining_client = clients[1]
 
-              if remaining_client.attached_buffers then
-                for buf_id in pairs(remaining_client.attached_buffers) do
-                  if buf_id ~= current_buf then
-                    count = count + 1
-                  end
-                end
-              end
-            end
+      --         if remaining_client.attached_buffers then
+      --           for buf_id in pairs(remaining_client.attached_buffers) do
+      --             if buf_id ~= current_buf then
+      --               count = count + 1
+      --             end
+      --           end
+      --         end
+      --       end
 
-            if count == 0 then
-              client:stop(true)
-            end
-          end
-        end,
-      })
+      --       if count == 0 then
+      --         client:stop(true)
+      --       end
+      --     end
+      --   end,
+      -- })
 
       vim.lsp.config("lua_ls", {
         on_init = function(client)
@@ -136,6 +136,17 @@ return {
         filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue" },
       })
 
+      vim.lsp.config("emmet_language_server", {
+        init_options = {
+          includeLanguages = {
+            eelixir = "html-eex",
+            elixir = "phoenix-heex",
+            heex = "phoenix-heex",
+            vue = "vue",
+          },
+        },
+      })
+
       local lspconfig = require("lspconfig")
       lspconfig.laravel_ls.setup({})
       lspconfig.intelephense.setup({
@@ -144,13 +155,22 @@ return {
             files = {
               maxSize = 10000000,
               exclude = {
+                "**/.git/**",
+                "**/.svn/**",
+                "**/.hg/**",
+                "**/CVS/**",
+                "**/.DS_Store/**",
                 "**/node_modules/**",
+                "**/bower_components/**",
+                "**/vendor/**/{Test,test,Tests,tests}/**",
+                "*.twig",
+                "*.js",
               },
+              maxMemory = 1024,
+              -- environment = {
+              --   phpVersion = "8.4.1",
+              -- },
             },
-            environment = {
-              phpVersion = "8.4.1",
-            },
-            maxMemory = 1024,
           },
         },
       })
@@ -173,15 +193,16 @@ return {
           "basedpyright",
           "clangd",
           "cssls",
+          "emmet_language_server",
           "html",
-          "jsonls",
-          "lua_ls",
-          "tailwindcss",
-          "laravel_ls",
-          "vue_ls",
           "intelephense",
-          "vtsls",
+          "jsonls",
+          "laravel_ls",
+          "lua_ls",
           "ols",
+          "tailwindcss",
+          "vtsls",
+          "vue_ls",
           "zls",
         },
         automatic_enable = {
