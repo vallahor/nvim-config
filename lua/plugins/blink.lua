@@ -2,7 +2,7 @@ return {
   {
     "saghen/blink.cmp",
     dependencies = { "mini.nvim" },
-    version = "1.5.*",
+    version = "1.*",
     opts = {
       keymap = {
         preset = "none",
@@ -117,7 +117,7 @@ return {
       },
 
       fuzzy = {
-        implementation = "prefer_rust_with_warning",
+        implementation = "rust",
         sorts = {
           "exact",
           "score",
