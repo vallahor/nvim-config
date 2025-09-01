@@ -11,7 +11,6 @@ return {
         python = { "ruff_format" },
         typescript = { "prettierd", "prettier", stop_after_first = true },
         typescriptreact = { "prettierd", "prettier", stop_after_first = true },
-        rust = { "rustfmt" },
         -- gdscript = { "gdformat" },
       },
       format_on_save = {

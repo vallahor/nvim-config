@@ -28,7 +28,7 @@ return {
                     return "■"
                   end
                   local kind_icon, _, _ = require("mini.icons").get("lsp", ctx.kind)
-                  return kind_icon
+                  return kind_icon .. ctx.icon_gap
                 end,
                 highlight = function(ctx)
                   if ctx.kind == "Color" then
