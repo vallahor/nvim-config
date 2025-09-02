@@ -1,5 +1,5 @@
 return {
-  dir = "c:/projects/delite.nvim",
+  "vallahor/delite.nvim",
   config = function()
     local delite = require("delite")
     delite.setup({})

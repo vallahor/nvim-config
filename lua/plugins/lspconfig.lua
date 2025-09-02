@@ -4,11 +4,11 @@ return {
     event = { "BufReadPre", "BufNewFile" },
     config = function()
       local capabilities = require("blink.cmp").get_lsp_capabilities()
-      local on_attach = function(client, bufnr)
-        -- vim.lsp.document_color.enable(true, bufnr, {
-        --   style = "virtual",
-        -- })
-        client.server_capabilities.semanticTokensProvider = nil
+      local on_attach = function(_, bufnr)
+        vim.lsp.document_color.enable(true, bufnr, {
+          style = "virtual",
+        })
+        -- client.server_capabilities.semanticTokensProvider = nil
 
         local opts = { buffer = bufnr }
         vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
@@ -23,7 +23,7 @@ return {
         capabilities = capabilities,
         on_attach = on_attach,
       })
-      -- vim.lsp.semantic_tokens.enable(false)
+      vim.lsp.semantic_tokens.enable(false)
       vim.lsp.log.set_level(vim.log.levels.ERROR)
 
       vim.lsp.enable({ "gdscript" })
@@ -212,6 +212,8 @@ return {
           "cssls",
           "emmet_language_server",
           "html",
+          -- "expert",
+          "elixirls",
           "intelephense",
           "jsonls",
           "laravel_ls",
