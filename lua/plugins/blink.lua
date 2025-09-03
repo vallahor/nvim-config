@@ -2,7 +2,8 @@ return {
   {
     "saghen/blink.cmp",
     dependencies = { "mini.nvim" },
-    version = "1.*",
+    build = "cargo build --release",
+    -- version = "*",
     opts = {
       keymap = {
         preset = "none",

@@ -78,7 +78,7 @@ return {
       })
 
       local MiniStatusline = require("mini.statusline")
-      local location = " L%l/%L C%c "
+      local location = "L%l/%L C%c"
       local get_filename = function()
         if vim.bo.buftype == "terminal" then
           return "%t"

@@ -8,7 +8,6 @@ return {
         vim.lsp.document_color.enable(true, bufnr, {
           style = "virtual",
         })
-        -- client.server_capabilities.semanticTokensProvider = nil
 
         local opts = { buffer = bufnr }
         vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
@@ -183,7 +182,7 @@ return {
                 "*.twig",
                 "*.js",
               },
-              maxMemory = 1024,
+              -- maxMemory = 1024,
               -- environment = {
               --   phpVersion = "8.4.1",
               -- },
@@ -212,7 +211,6 @@ return {
           "cssls",
           "emmet_language_server",
           "html",
-          -- "expert",
           "elixirls",
           "intelephense",
           "jsonls",
