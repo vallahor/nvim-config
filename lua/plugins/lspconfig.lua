@@ -8,6 +8,7 @@ return {
         vim.lsp.document_color.enable(true, bufnr, {
           style = "virtual",
         })
+        vim.lsp.semantic_tokens.enable(false, { bufnr = bufnr })
 
         local opts = { buffer = bufnr }
         vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
@@ -22,7 +23,6 @@ return {
         capabilities = capabilities,
         on_attach = on_attach,
       })
-      vim.lsp.semantic_tokens.enable(false)
       vim.lsp.log.set_level(vim.log.levels.ERROR)
 
       vim.lsp.enable({ "gdscript" })
