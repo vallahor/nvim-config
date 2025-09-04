@@ -11,6 +11,7 @@ return {
         python = { "ruff_format" },
         typescript = { "prettierd", "prettier", stop_after_first = true },
         typescriptreact = { "prettierd", "prettier", stop_after_first = true },
+        php = { "mago_format" },
         -- gdscript = { "gdformat" },
       },
       format_on_save = {
