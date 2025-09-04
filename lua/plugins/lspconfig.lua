@@ -8,7 +8,6 @@ return {
         vim.lsp.document_color.enable(true, bufnr, {
           style = "virtual",
         })
-        vim.lsp.semantic_tokens.enable(false, { bufnr = bufnr })
 
         local opts = { buffer = bufnr }
         vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
@@ -23,40 +22,10 @@ return {
         capabilities = capabilities,
         on_attach = on_attach,
       })
+      vim.lsp.semantic_tokens.enable(false)
       vim.lsp.log.set_level(vim.log.levels.ERROR)
 
       vim.lsp.enable({ "gdscript" })
-
-      -- https://www.reddit.com/r/neovim/comments/1jibjpp/comment/mjgigww/
-      -- vim.api.nvim_create_autocmd({ "LspDetach" }, {
-      --   group = vim.api.nvim_create_augroup("LspStopWithLastClient", { clear = true }),
-      --   callback = function(args)
-      --     local client_id = args.data.client_id
-      --     local client = vim.lsp.get_client_by_id(client_id)
-      --     local current_buf = args.buf
-
-      --     if client then
-      --       local clients = vim.lsp.get_clients({ id = client_id })
-      --       local count = 0
-
-      --       if clients and #clients > 0 then
-      --         local remaining_client = clients[1]
-
-      --         if remaining_client.attached_buffers then
-      --           for buf_id in pairs(remaining_client.attached_buffers) do
-      --             if buf_id ~= current_buf then
-      --               count = count + 1
-      --             end
-      --           end
-      --         end
-      --       end
-
-      --       if count == 0 then
-      --         client:stop(true)
-      --       end
-      --     end
-      --   end,
-      -- })
 
       vim.lsp.config("lua_ls", {
         on_init = function(client)
@@ -182,10 +151,6 @@ return {
                 "*.twig",
                 "*.js",
               },
-              -- maxMemory = 1024,
-              -- environment = {
-              --   phpVersion = "8.4.1",
-              -- },
             },
           },
         },

@@ -30,11 +30,7 @@ return {
     require("nvim-tree").setup({
       on_attach = my_on_attach,
       update_focused_file = {
-        enable = false,
-      },
-      view = {
-        -- width = 35,
-        -- width = 33,
+        enable = true,
       },
       git = {
         enable = false,
@@ -47,16 +43,11 @@ return {
       renderer = {
         indent_markers = {
           enable = true,
-          -- icons = {
-          --   corner = "│",
-          --   edge = "│",
-          --   item = "│",
-          --   bottom = "│",
-          -- },
         },
         icons = {
           show = {
             git = false,
+            folder_arrow = false,
           },
         },
       },
@@ -64,8 +55,5 @@ return {
 
     vim.keymap.set("n", "<c-t>", "<cmd>NvimTreeFocus<cr>", { silent = true })
     vim.keymap.set("n", "<c-b>", "<cmd>NvimTreeClose<cr>", { silent = true })
-
-    -- vim.keymap.set("n", "t", "<cmd>NvimTreeFocus<cr>", { silent = true })
-    -- vim.keymap.set("n", "T", "<cmd>NvimTreeClose<cr>", { silent = true })
   end,
 }
