@@ -30,16 +30,16 @@ return {
       end)
 
       -- Add or skip adding a new cursor by matching word/selection
-      vim.keymap.set({ "n", "x" }, "<c-.>", function()
+      vim.keymap.set({ "n", "x" }, "<c-l>", function()
         mc.matchAddCursor(1)
       end)
-      vim.keymap.set({ "n", "x" }, "<c->>", function()
+      vim.keymap.set({ "n", "x" }, "<c-s-l>", function()
         mc.matchSkipCursor(1)
       end)
-      vim.keymap.set({ "n", "x" }, "<c-,>", function()
+      vim.keymap.set({ "n", "x" }, "<c-h>", function()
         mc.matchAddCursor(-1)
       end)
-      vim.keymap.set({ "n", "x" }, "<c-<>", function()
+      vim.keymap.set({ "n", "x" }, "<c-s-h>", function()
         mc.matchSkipCursor(-1)
       end)
 
@@ -82,16 +82,6 @@ return {
           mc.enableCursors()
         end)
       end)
-
-      -- Customize how cursors look.
-      local hl = vim.api.nvim_set_hl
-      hl(0, "MultiCursorCursor", { link = "Cursor" })
-      hl(0, "MultiCursorVisual", { link = "Visual" })
-      hl(0, "MultiCursorSign", { link = "Cursor" })
-      hl(0, "MultiCursorMatchPreview", { link = "Search" })
-      hl(0, "MultiCursorDisabledCursor", { link = "Cursor" })
-      hl(0, "MultiCursorDisabledVisual", { link = "Visual" })
-      hl(0, "MultiCursorDisabledSign", { link = "Cursor" })
     end,
   },
 }

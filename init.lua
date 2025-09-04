@@ -130,7 +130,8 @@ vim.keymap.set("n", "<down>", "<cmd>wincmd j<cr>") -- move to window down
 vim.keymap.set("n", "<up>", "<cmd>wincmd k<cr>") -- move to window up
 vim.keymap.set("n", "<right>", "<cmd>wincmd l<cr>") -- move to window right
 
-vim.keymap.set({ "i", "c" }, "<c-v>", [[<c-r>"]]) -- paste to command line mode
+vim.keymap.set("i", "<c-v>", [[<c-r>"]]) -- paste to command line mode
+vim.keymap.set("c", "<c-v>", [[<c-r>+]]) -- paste to command line mode
 
 vim.keymap.set("v", "v", "V") -- visual line mode
 
