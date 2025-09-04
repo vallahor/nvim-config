@@ -8,7 +8,7 @@ return {
     vim.g.loaded_netrwPlugin = 1
     vim.g.neo_tree_remove_legacy_commands = 1
 
-    local function my_on_attach(bufnr)
+    local function on_attach(bufnr)
       local api = require("nvim-tree.api")
 
       api.config.mappings.default_on_attach(bufnr)
@@ -22,9 +22,9 @@ return {
     end
 
     require("nvim-tree").setup({
-      on_attach = my_on_attach,
+      on_attach = on_attach,
       update_focused_file = {
-        enable = true,
+        enable = false,
       },
       git = {
         enable = false,
@@ -47,7 +47,9 @@ return {
       },
     })
 
-    vim.keymap.set("n", "<c-t>", "<cmd>NvimTreeFocus<cr>", { silent = true })
-    vim.keymap.set("n", "<c-b>", "<cmd>NvimTreeClose<cr>", { silent = true })
+    vim.keymap.set("n", "<c-t>", "<cmd>NvimTreeFocus<cr>")
+    vim.keymap.set("n", "<c-b>", "<cmd>NvimTreeClose<cr>")
+
+    vim.keymap.set("n", "<c-f>", "<cmd>NvimTreeFindFile<cr>")
   end,
 }
