@@ -1,0 +1,26 @@
+{
+  "def render": {
+    "prefix": "defr",
+    "body": [
+      "def render(assigns) do",
+      "  ~H\"\"\"",
+      "    ${1}",
+      "  \"\"\"",
+      "end"
+    ]
+  },
+  "def component": {
+    "prefix": "defc",
+    "body": [
+      "def ${1}(assigns) do",
+      "  ~H\"\"\"",
+      "    ${2}",
+      "  \"\"\"",
+      "end"
+    ]
+  },
+  "match struct/map": {
+    "prefix": "ms",
+    "body": ["%{\"${1}\" => ${2}}"]
+  }
+}
