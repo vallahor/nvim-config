@@ -21,6 +21,10 @@
   },
   "match struct/map": {
     "prefix": "ms",
+    "body": ["%{\"${1}\" => ${1}}"]
+  },
+  "match struct/map dirent naming": {
+    "prefix": "md",
     "body": ["%{\"${1}\" => ${2}}"]
   }
 }
