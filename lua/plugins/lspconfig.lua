@@ -4,10 +4,20 @@ return {
     event = { "BufReadPre", "BufNewFile" },
     config = function()
       local capabilities = require("blink.cmp").get_lsp_capabilities()
-      local on_attach = function(_, bufnr)
+      local on_attach = function(client, bufnr)
         vim.lsp.document_color.enable(true, bufnr, {
           style = "virtual",
         })
+
+        if client and client.name == "elixirls" then
+          -- https://www.mitchellhanberg.com/modern-format-on-save-in-neovim/
+          vim.api.nvim_create_autocmd("BufWritePre", {
+            buffer = bufnr,
+            callback = function()
+              vim.lsp.buf.format({ async = false, id = client.id })
+            end,
+          })
+        end
 
         local opts = { buffer = bufnr }
         vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
@@ -118,18 +128,26 @@ return {
             "sass",
             "scss",
             "templ",
+            "heex",
+            "eex",
+            "elixir",
           },
         },
         init_options = {
           includeLanguages = {
-            eelixir = "html-eex",
-            elixir = "phoenix-heex",
-            heex = "phoenix-heex",
             vue = "vue",
             typescriptreact = "typescriptreact",
             javascriptreact = "javascriptreact",
           },
+          syntaxProfiles = {
+            html = { self_closing_tag = true },
+            jsx = { self_closing_tag = true },
+          },
         },
+      })
+
+      vim.lsp.config("html", {
+        filetypes = { "html", "heex", "eex", "elixir" },
       })
 
       local lspconfig = require("lspconfig")
