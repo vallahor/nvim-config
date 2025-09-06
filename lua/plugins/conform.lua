@@ -15,12 +15,12 @@ return {
         -- elixir = { "mix", lsp_format = "fallback" },
         -- gdscript = { "gdformat" },
       },
-      -- format_on_save = {
-      --   timeout_ms = 500,
-      --   lsp_format = "fallback",
-      --   quiet = true,
-      --   async = false,
-      -- },
+      format_on_save = {
+        -- timeout_ms = 500,
+        -- lsp_format = "fallback",
+        quiet = true,
+        async = false,
+      },
     })
   end,
 }

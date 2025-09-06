@@ -114,37 +114,6 @@ return {
         filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue" },
       })
 
-      vim.lsp.config("emmet_language_server", {
-        filetypes = {
-          {
-            "astro",
-            "css",
-            "eruby",
-            "html",
-            "htmlangular",
-            "htmldjango",
-            "less",
-            "pug",
-            "sass",
-            "scss",
-            "templ",
-            "heex",
-            "eex",
-            "elixir",
-          },
-        },
-        init_options = {
-          includeLanguages = {
-            vue = "vue",
-            typescriptreact = "typescriptreact",
-            javascriptreact = "javascriptreact",
-          },
-          syntaxProfiles = {
-            html = { self_closing_tag = true },
-            jsx = { self_closing_tag = true },
-          },
-        },
-      })
 
       vim.lsp.config("html", {
         filetypes = { "html", "heex", "eex", "elixir" },
@@ -192,7 +161,6 @@ return {
           "basedpyright",
           "clangd",
           "cssls",
-          "emmet_language_server",
           "html",
           "elixirls",
           "intelephense",

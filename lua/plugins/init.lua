@@ -42,4 +42,25 @@ return {
       ]])
     end,
   },
+  {
+    "mattn/emmet-vim",
+    config = function()
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = {
+          "typescriptreact",
+          "javascripreact",
+          "html",
+          "vue",
+          "heex",
+          "eex",
+          "elixir",
+        },
+        command = "EmmetInstall",
+      })
+      vim.keymap.set("i", "<c-y>", "<nop>")
+      vim.keymap.set("i", "<c-y>", "<Plug>(emmet-expand-abbr)", { nowait = true, silent = true })
+
+      vim.g.user_emmet_install_global = 0
+    end,
+  },
 }
