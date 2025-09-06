@@ -99,6 +99,11 @@ end
 
 vim.keymap.set("n", "<esc>", esc_normal_mode)
 
+vim.keymap.set({ "i", "s" }, "<esc>", function()
+  vim.snippet.stop()
+  return "<esc>"
+end, { expr = true })
+
 vim.keymap.set({ "n", "v" }, "<c-s>", "<cmd>w!<CR><esc>") -- save file
 
 vim.keymap.set("n", "Y", "yg$") -- yank to end of line considering line wrap

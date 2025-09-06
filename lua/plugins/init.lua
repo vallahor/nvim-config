@@ -61,6 +61,7 @@ return {
       vim.keymap.set("i", "<c-y>", "<Plug>(emmet-expand-abbr)", { nowait = true, silent = true })
 
       vim.g.user_emmet_install_global = 0
+      vim.g.user_emmet_mode = "i"
     end,
   },
 }

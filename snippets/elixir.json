@@ -19,6 +19,67 @@
       "end"
     ]
   },
+  "def handle_event": {
+    "prefix": "defhe",
+    "body": [
+      "def handle_event(\"${1}\", %${2}{\"${3}\" => ${3}}, socket) do",
+      "    ${0}",
+      "  {:noreply, socket}",
+      "end"
+    ]
+  },
+  "def handle_event default": {
+    "prefix": "defhed",
+    "body": [
+      "def handle_event(\"${1}\", _params, socket) do",
+      "    ${0}",
+      "  {:noreply, socket}",
+      "end"
+    ]
+  },
+  "def handle_params": {
+    "prefix": "defhp",
+    "body": [
+      "def handle_params(%${\"${1}\" => ${1}}, _uri, socket) do",
+      "    ${0}",
+      "  {:noreply, socket}",
+      "end"
+    ]
+  },
+  "def handle_params default": {
+    "prefix": "defhpd",
+    "body": [
+      "def handle_params(_params, _uri, socket) do",
+      "    ${0}",
+      "  {:noreply, socket}",
+      "end"
+    ]
+  },
+  "def mount": {
+    "prefix": "defm",
+    "body": [
+      "def mount(_params, _session, socket) do",
+      "    ${0}",
+      "  {:ok, socket}",
+      "end"
+    ]
+  },
+  "function component": {
+    "prefix": "fc",
+    "body": ["<.${1}>", "</.${1}>"]
+  },
+  "function component self closed": {
+    "prefix": "fcc",
+    "body": ["<.${1} />"]
+  },
+  "function component slot": {
+    "prefix": "fcs",
+    "body": ["<:${1}>", "</:${1}>"]
+  },
+  "function component slot self closed": {
+    "prefix": "fccs",
+    "body": ["<:${1} />"]
+  },
   "match struct/map": {
     "prefix": "ms",
     "body": ["%{\"${1}\" => ${1}}"]
@@ -26,5 +87,13 @@
   "match struct/map different naming": {
     "prefix": "md",
     "body": ["%{\"${1}\" => ${2}}"]
+  },
+  "match typed struct/map": {
+    "prefix": "msd",
+    "body": ["%${1}{\"${2}\" => ${2}}"]
+  },
+  "match typed struct/map different naming": {
+    "prefix": "mdt",
+    "body": ["%${1}{\"${2}\" => ${3}}"]
   }
 }
