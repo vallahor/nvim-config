@@ -49,7 +49,7 @@
   "def handle_params default": {
     "prefix": "defhpd",
     "body": [
-      "def handle_params(_params, _uri, socket) do",
+      "def handle_params(${1:_params}, _uri, socket) do",
       "    ${0}",
       "  {:noreply, socket}",
       "end"
