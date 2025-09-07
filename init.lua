@@ -104,6 +104,9 @@ vim.keymap.set({ "i", "s" }, "<esc>", function()
   return "<esc>"
 end, { expr = true })
 
+vim.keymap.set("i", "<s-enter>", "<c-o>O") -- new line up
+vim.keymap.set("i", "<c-enter>", "<c-o>o") -- new line down
+
 vim.keymap.set({ "n", "v" }, "<c-s>", "<cmd>w!<CR><esc>") -- save file
 
 vim.keymap.set("n", "Y", "yg$") -- yank to end of line considering line wrap
