@@ -22,7 +22,7 @@
   "def handle_event": {
     "prefix": "defhe",
     "body": [
-      "def handle_event(\"${1}\", %${2}{\"${3}\" => ${3}${4}}, socket) do",
+      "def handle_event(\"${1}\", %{\"${2}\" => ${2}${3}}, socket) do",
       "    ${0}",
       "  {:noreply, socket}",
       "end"
