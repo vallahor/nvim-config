@@ -5,9 +5,10 @@ return {
     config = function()
       local capabilities = require("blink.cmp").get_lsp_capabilities()
       local on_attach = function(client, bufnr)
-        vim.lsp.document_color.enable(true, bufnr, {
-          style = "virtual",
-        })
+        -- vim.lsp.document_color.enable(true, bufnr, {
+        --   style = "virtual",
+        -- })
+        client.server_capabilities.semanticTokensProvider = nil
 
         if client and client.name == "elixirls" then
           -- https://www.mitchellhanberg.com/modern-format-on-save-in-neovim/
@@ -32,7 +33,7 @@ return {
         capabilities = capabilities,
         on_attach = on_attach,
       })
-      vim.lsp.semantic_tokens.enable(false)
+      -- vim.lsp.semantic_tokens.enable(false)
       vim.lsp.log.set_level(vim.log.levels.ERROR)
 
       vim.lsp.enable({ "gdscript" })
@@ -113,7 +114,6 @@ return {
         },
         filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue" },
       })
-
 
       vim.lsp.config("html", {
         filetypes = { "html", "heex", "eex", "elixir" },
