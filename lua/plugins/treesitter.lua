@@ -13,6 +13,7 @@ return {
         "elixir",
         "erlang",
         "heex",
+        "c_sharp",
         "gdscript",
         "gdshader",
         "godot_resource",

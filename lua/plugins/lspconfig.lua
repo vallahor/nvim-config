@@ -209,6 +209,7 @@ return {
         "ruff",
         "stylua",
         "gdformat",
+        "csharpier",
       },
     },
   },

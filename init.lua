@@ -361,12 +361,27 @@ end
 -- endlocal
 local started_godot_server = false
 
-local addr = "./godot.pipe"
+-- paths to check for project.godot file
+local paths_to_check = { "/", "/../" }
+local godot_project_path = ""
+local cwd = vim.fn.getcwd()
+
+-- iterate over paths and check
+for _, value in pairs(paths_to_check) do
+  if vim.uv.fs_stat(cwd .. value .. "project.godot") then
+    godot_project_path = cwd .. value
+    break
+  end
+end
+
+local is_server_running = vim.uv.fs_stat(godot_project_path .. "/server.pipe")
+
+local addr = godot_project_path .. "/server.pipe"
 if vim.fn.has("win32") == 1 then
   addr = "127.0.0.1:6004"
 end
 
-if vim.fn.filereadable(vim.fn.getcwd() .. "/project.godot") == 1 then
+if vim.fn.filereadable(cwd .. "/project.godot") == 1 and not is_server_running then
   if vim.v.servername ~= addr then
     local ok = pcall(function()
       vim.fn.serverstart(addr)

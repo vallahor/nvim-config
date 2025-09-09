@@ -12,6 +12,7 @@ return {
         typescript = { "prettierd", "prettier", stop_after_first = true },
         typescriptreact = { "prettierd", "prettier", stop_after_first = true },
         php = { "mago_format" },
+        cs = { "csharpier" },
         -- elixir = { "mix", lsp_format = "fallback" },
         -- gdscript = { "gdformat" },
       },
