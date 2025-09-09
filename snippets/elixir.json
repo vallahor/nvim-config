@@ -56,7 +56,7 @@
     ]
   },
   "def mount": {
-    "prefix": "defm",
+    "prefix": "defmd",
     "body": [
       "def mount(_params, _session, socket) do",
       "    ${0}",
@@ -64,36 +64,16 @@
       "end"
     ]
   },
-  "function component": {
-    "prefix": "fc",
-    "body": ["<.${1}>", "</.${1}>"]
-  },
-  "function component self closed": {
-    "prefix": "fcc",
-    "body": ["<.${1} />"]
-  },
   "function component slot": {
     "prefix": "fcs",
     "body": ["<:${1}>", "</:${1}>"]
   },
-  "function component slot self closed": {
-    "prefix": "fccs",
-    "body": ["<:${1} />"]
-  },
   "match struct/map": {
     "prefix": "ms",
-    "body": ["%{\"${1}\" => ${1}}"]
-  },
-  "match struct/map different naming": {
-    "prefix": "md",
-    "body": ["%{\"${1}\" => ${2}}"]
+    "body": ["%{\"${1}\" => ${1}${0}}"]
   },
   "match typed struct/map": {
-    "prefix": "msd",
-    "body": ["%${1}{\"${2}\" => ${2}}"]
-  },
-  "match typed struct/map different naming": {
-    "prefix": "mdt",
-    "body": ["%${1}{\"${2}\" => ${3}}"]
+    "prefix": "mst",
+    "body": ["%${1}{\"${2}\" => ${2}${0}}"]
   }
 }
