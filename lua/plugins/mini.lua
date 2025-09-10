@@ -233,5 +233,13 @@ return {
         pick.builtin.buffers({ include_current = true }, { mappings = buffer_mappings })
       end)
     end,
+
+    require("mini.indentscope").setup({
+      draw = {
+        dalay = 0,
+        animation = require("mini.indentscope").gen_animation.none(),
+      },
+      symbol = "▏",
+    }),
   },
 }
