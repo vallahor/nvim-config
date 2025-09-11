@@ -3,6 +3,10 @@
   "contributes": {
     "snippets": [
       {
+        "language": "php",
+        "path": "./php.json"
+      },
+      {
         "language": "vue",
         "path": "./vue.json"
       },

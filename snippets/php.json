@@ -1,0 +1,19 @@
+{
+  "PHP Service Class": {
+    "prefix": ["phpservice", "ms"],
+    "body": [
+      "<?php",
+      "",
+      "namespace App\\Services;",
+      "",
+      "class $TM_FILENAME_BASE",
+      "{",
+      "    public function ${1:__construct}()",
+      "    {",
+      "        ${0}",
+      "    }",
+      "}"
+    ],
+    "description": "Creates a basic PHP service class structure."
+  }
+}
