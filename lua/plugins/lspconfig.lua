@@ -146,6 +146,7 @@ return {
   },
   {
     "mason-org/mason.nvim",
+    build = ":MasonUpdate",
     opts = {
       registries = {
         "github:mason-org/mason-registry",
