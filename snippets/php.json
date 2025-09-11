@@ -1,6 +1,6 @@
 {
   "PHP Service Class": {
-    "prefix": ["phpservice", "ms"],
+    "prefix": "phpservice",
     "body": [
       "<?php",
       "",
@@ -15,5 +15,19 @@
       "}"
     ],
     "description": "Creates a basic PHP service class structure."
+  },
+  "PHP Enum Class": {
+    "prefix": "phpenum",
+    "body": [
+      "<?php",
+      "",
+      "namespace App\\Enums;",
+      "",
+      "enum $TM_FILENAME_BASE: ${1}",
+      "{",
+      "        ${0}",
+      "}"
+    ],
+    "description": "Creates a basic PHP enum structure."
   }
 }
