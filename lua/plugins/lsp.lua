@@ -36,7 +36,7 @@ return {
       vim.lsp.semantic_tokens.enable(false)
       vim.lsp.log.set_level(vim.log.levels.ERROR)
 
-      vim.lsp.enable({ "gdscript" })
+      vim.lsp.enable({ "gdscript", "nushell" })
 
       vim.lsp.config("lua_ls", {
         on_init = function(client)
