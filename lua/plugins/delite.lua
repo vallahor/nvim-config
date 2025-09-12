@@ -25,5 +25,6 @@ return {
     vim.keymap.set("n", "<del>", delite.next_normal_mode)
 
     vim.keymap.set("n", "J", delite.join)
+    vim.keymap.set("i", "<c-j>", delite.join)
   end,
 }
