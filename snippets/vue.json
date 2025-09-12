@@ -4,6 +4,7 @@
     "body": [
       "<script setup lang=\"ts\">",
       "</script>",
+      "",
       "<template>",
       "  <div>",
       "    ${1}",
@@ -17,6 +18,7 @@
       "<script setup lang=\"ts\">",
       "${1}",
       "</script>",
+      "",
       "<template>",
       "  <div>",
       "  </div>",
