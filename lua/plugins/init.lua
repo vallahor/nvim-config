@@ -64,4 +64,5 @@ return {
       vim.g.user_emmet_mode = "i"
     end,
   },
+  { "nvim-tree/nvim-web-devicons", opts = {} },
 }

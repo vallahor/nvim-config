@@ -136,10 +136,6 @@ return {
         { pattern = { "NvimTree" }, command = "lua vim.b.minicursorword_disable=true" }
       )
 
-      local mini_icons = require("mini.icons")
-      mini_icons.setup()
-      mini_icons.mock_nvim_web_devicons()
-
       -- Picker
       local pick = require("mini.pick")
       pick.setup({

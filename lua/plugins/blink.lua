@@ -1,7 +1,7 @@
 return {
   {
     "saghen/blink.cmp",
-    dependencies = { "mini.nvim" },
+    dependencies = { "nvim-web-devicons", "onsails/lspkind.nvim" },
     build = "cargo build --release",
     -- version = "*",
     opts = {
@@ -28,8 +28,19 @@ return {
                   if ctx.kind == "Color" then
                     return "■"
                   end
-                  local kind_icon, _, _ = require("mini.icons").get("lsp", ctx.kind)
-                  return kind_icon .. ctx.icon_gap
+                  local icon = ctx.kind_icon
+                  if vim.tbl_contains({ "Path" }, ctx.source_name) then
+                    local dev_icon, _ = require("nvim-web-devicons").get_icon(ctx.label)
+                    if dev_icon then
+                      icon = dev_icon
+                    end
+                  else
+                    icon = require("lspkind").symbolic(ctx.kind, {
+                      mode = "symbol",
+                    })
+                  end
+
+                  return icon .. ctx.icon_gap
                 end,
                 highlight = function(ctx)
                   if ctx.kind == "Color" then
@@ -41,7 +52,13 @@ return {
               },
               kind = {
                 highlight = function(ctx)
-                  local _, hl, _ = require("mini.icons").get("lsp", ctx.kind)
+                  local hl = ctx.kind_hl
+                  if vim.tbl_contains({ "Path" }, ctx.source_name) then
+                    local dev_icon, dev_hl = require("nvim-web-devicons").get_icon(ctx.label)
+                    if dev_icon then
+                      hl = dev_hl
+                    end
+                  end
                   return hl
                 end,
               },
