@@ -107,7 +107,7 @@ end, { expr = true })
 vim.keymap.set("i", "<s-enter>", "<c-o>O") -- new line up
 vim.keymap.set("i", "<c-enter>", "<c-o>o") -- new line down
 
-vim.keymap.set({ "n", "v" }, "<c-s>", "<cmd>w!<CR><esc>") -- save file
+vim.keymap.set({ "n", "v" }, "<c-s>", "<cmd>w!<cr><esc>") -- save file
 
 vim.keymap.set("n", "Y", "yg$") -- yank to end of line considering line wrap
 
@@ -151,7 +151,7 @@ vim.keymap.set({ "n", "v" }, "c", '"_c') -- change verb without copying
 
 vim.keymap.set("n", "dx", '"_d') -- delete without copying to register @check working ok with default timeoutlen
 
-vim.keymap.set("n", "*", [[<Cmd>let @/='\<'.expand('<cword>').'\>'<bar>set hlsearch<CR>]]) -- highlight all occurencies of the current word
+vim.keymap.set("n", "*", [[<Cmd>let @/='\<'.expand('<cword>').'\>'<bar>set hlsearch<cr>]]) -- highlight all occurencies of the current word
 vim.keymap.set("v", "*", '"sy/\\V<c-r>s<cr>``') -- highlight all occurencies of the curren selection
 
 vim.keymap.set({ "n", "i" }, "<c-;>", function()
@@ -170,15 +170,14 @@ local beginning_of_the_line = function()
   end
 end
 
-vim.keymap.set("i", "<home>", beginning_of_the_line) -- go to beginning of the line
-vim.keymap.set({ "n", "v" }, "(", beginning_of_the_line) -- go to beginning of the line
-vim.keymap.set("n", ")", "$") -- go to end of line
-vim.keymap.set("v", ")", "$h") -- go to end of line (for some reason it's goes to wrong place in visual mode)
+vim.keymap.set({ "n", "i", "v" }, "<home>", beginning_of_the_line) -- go to beginning of the line
+vim.keymap.set("n", "<end>", "$") -- go to end of line
+vim.keymap.set("v", "<end>", "$h") -- go to end of line (for some reason it's goes to wrong place in visual mode)
 
-vim.keymap.set("n", "<f4>", "<cmd>:e $MYVIMRC<CR>") -- open config file (vimrc or init.lua)
-vim.keymap.set("n", "<f5>", "<cmd>so %<CR>") -- execute current file (vim or lua)
-vim.keymap.set("n", "<f7>", "<cmd>:e ~/.config/ghostty/config<CR>") -- open ghostty config file (vimrc or init.lua)
-vim.keymap.set("n", "<f11>", "<cmd>echo wordcount().words<CR>") -- execute current file (vim or lua)
+vim.keymap.set("n", "<f4>", "<cmd>:e $MYVIMRC<cr>") -- open config file (vimrc or init.lua)
+vim.keymap.set("n", "<f5>", "<cmd>so %<cr>") -- execute current file (vim or lua)
+vim.keymap.set("n", "<f7>", "<cmd>:e ~/.config/ghostty/config<cr>") -- open ghostty config file (vimrc or init.lua)
+vim.keymap.set("n", "<f11>", "<cmd>echo wordcount().words<cr>") -- execute current file (vim or lua)
 
 -- duplicate line and lines
 vim.keymap.set("n", "<c-c>", '"0yy"0p') -- duplicate line down
@@ -194,8 +193,8 @@ end)
 
 vim.keymap.set("n", "`", "<C-^>") -- back to last buffer
 
-vim.keymap.set("n", "<f1>", "<cmd>Inspect<CR>") -- inspect current token treesitter
-vim.keymap.set("n", "<f3>", "<cmd>InspectTree<CR>") -- inspect current token treesitter
+vim.keymap.set("n", "<f1>", "<cmd>Inspect<cr>") -- inspect current token treesitter
+vim.keymap.set("n", "<f3>", "<cmd>InspectTree<cr>") -- inspect current token treesitter
 
 -- when it's not in lsp
 vim.keymap.set("n", "K", "<nop>")
@@ -230,9 +229,9 @@ vim.api.nvim_create_autocmd("InsertEnter", {
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "qf" },
   callback = function()
-    vim.keymap.set("n", "<cr>", "<CR><cmd>cclose<CR>", { buffer = true })
-    vim.keymap.set("n", "q", "<cmd>cclose<CR>", { buffer = true })
-    vim.keymap.set("n", "<c-w>", "<cmd>cclose<CR>", { buffer = true })
+    vim.keymap.set("n", "<cr>", "<cr><cmd>cclose<cr>", { buffer = true })
+    vim.keymap.set("n", "q", "<cmd>cclose<cr>", { buffer = true })
+    vim.keymap.set("n", "<c-w>", "<cmd>cclose<cr>", { buffer = true })
   end,
 })
 
@@ -356,7 +355,7 @@ end
 -- if %ERRORLEVEL% NEQ 0 (
 --     start C:\apps\neovide\neovide.exe --no-vsync -- +":e %FILE%" +":call cursor(%LINE%,%COL%)"
 -- ) else (
---     nvim --server %SERVER% --remote-send "<esc>:e %FILE%<CR>:call cursor(%LINE%,%COL%)<CR>"
+--     nvim --server %SERVER% --remote-send "<esc>:e %FILE%<cr>:call cursor(%LINE%,%COL%)<cr>"
 -- )
 -- endlocal
 local started_godot_server = false
