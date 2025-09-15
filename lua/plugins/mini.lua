@@ -187,6 +187,8 @@ return {
           "--no-require-git",
           "--glob",
           "!.git",
+          "--glob",
+          "!.zig-cache",
           "--sortr=modified",
         }
         local show_with_icons = function(buf_id, items, query)

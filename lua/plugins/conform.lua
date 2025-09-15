@@ -13,6 +13,7 @@ return {
         typescriptreact = { "prettierd", "prettier", stop_after_first = true },
         php = { "mago_format" },
         cs = { "csharpier" },
+        zig = { "zigfmt" },
         -- elixir = { "mix", lsp_format = "fallback" },
         -- gdscript = { "gdformat" },
       },

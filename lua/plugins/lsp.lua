@@ -36,6 +36,16 @@ return {
       vim.lsp.semantic_tokens.enable(false)
       vim.lsp.log.set_level(vim.log.levels.ERROR)
 
+      vim.api.nvim_create_autocmd("BufWritePre", {
+        pattern = { "*.zig", "*.zon" },
+        callback = function(_)
+          vim.lsp.buf.code_action({
+            context = { only = { "source.fixAll" } },
+            apply = true,
+          })
+        end,
+      })
+
       vim.lsp.enable({ "gdscript", "nushell" })
 
       vim.lsp.config("lua_ls", {
@@ -78,15 +88,6 @@ return {
             analysis = {
               typeCheckingMode = "standard",
             },
-          },
-        },
-      })
-
-      vim.lsp.config("zls", {
-        settings = {
-          zls = {
-            enable_build_on_save = true,
-            build_on_save_step = "check",
           },
         },
       })
@@ -146,7 +147,6 @@ return {
   },
   {
     "mason-org/mason.nvim",
-    build = ":MasonUpdate",
     opts = {
       registries = {
         "github:mason-org/mason-registry",
@@ -186,7 +186,6 @@ return {
           "jsonls",
           "laravel_ls",
           "lua_ls",
-          "ols",
           "tailwindcss",
           "vtsls",
           "vue_ls",
