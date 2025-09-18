@@ -5,9 +5,11 @@ return {
     config = function()
       local capabilities = require("blink.cmp").get_lsp_capabilities()
       local on_attach = function(client, bufnr)
-        vim.lsp.document_color.enable(true, bufnr, {
-          style = "virtual",
-        })
+        if vim.lsp.document_color then
+          vim.lsp.document_color.enable(true, bufnr, {
+            style = "virtual",
+          })
+        end
         -- client.server_capabilities.semanticTokensProvider = nil
 
         if client and client.name == "elixirls" then
@@ -190,6 +192,7 @@ return {
           "vtsls",
           "vue_ls",
           "zls",
+          "ols",
         },
         automatic_enable = {
           exclude = { "ruff", "laravel_ls", "intelephense" },
