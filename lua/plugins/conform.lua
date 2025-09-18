@@ -14,6 +14,7 @@ return {
         php = { "mago_format" },
         cs = { "csharpier" },
         zig = { "zigfmt" },
+        odin = { lsp_format = "fallback" },
         -- elixir = { "mix", lsp_format = "fallback" },
         -- gdscript = { "gdformat" },
       },
