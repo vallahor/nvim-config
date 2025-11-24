@@ -46,12 +46,6 @@ return {
                   if ctx.kind == "Color" then
                     return ctx.item.kind_hl
                   end
-                  local _, hl, _ = require("mini.icons").get("lsp", ctx.kind)
-                  return hl
-                end,
-              },
-              kind = {
-                highlight = function(ctx)
                   local hl = ctx.kind_hl
                   if vim.tbl_contains({ "Path" }, ctx.source_name) then
                     local dev_icon, dev_hl = require("nvim-web-devicons").get_icon(ctx.label)

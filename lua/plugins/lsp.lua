@@ -10,7 +10,6 @@ return {
             style = "virtual",
           })
         end
-        -- client.server_capabilities.semanticTokensProvider = nil
 
         if client and client.name == "elixirls" then
           -- https://www.mitchellhanberg.com/modern-format-on-save-in-neovim/
@@ -35,20 +34,22 @@ return {
         capabilities = capabilities,
         on_attach = on_attach,
       })
-      vim.lsp.semantic_tokens.enable(false)
-      vim.lsp.log.set_level(vim.log.levels.ERROR)
 
-      vim.api.nvim_create_autocmd("BufWritePre", {
-        pattern = { "*.zig", "*.zon" },
-        callback = function(_)
-          vim.lsp.buf.code_action({
-            context = { only = { "source.fixAll" } },
-            apply = true,
-          })
-        end,
+      vim.lsp.config("rust_analyzer", {
+        capabilities = capabilities,
+        on_attach = on_attach,
       })
 
-      vim.lsp.enable({ "gdscript", "nushell" })
+      vim.lsp.enable({ "gdscript", "nushell", "rust_analyzer", "laravel_ls", "intelephense" })
+
+      -- vim.lsp.semantic_tokens.enable(false)
+      vim.api.nvim_create_autocmd("LspAttach", {
+        callback = function(ev)
+          local client = vim.lsp.get_client_by_id(ev.data.client_id)
+          local bufnr = ev.buf
+          client.server_capabilities.semanticTokensProvider = nil
+        end,
+      })
 
       vim.lsp.config("lua_ls", {
         on_init = function(client)
@@ -122,9 +123,8 @@ return {
         filetypes = { "html", "heex", "eex", "elixir" },
       })
 
-      local lspconfig = require("lspconfig")
-      lspconfig.laravel_ls.setup({})
-      lspconfig.intelephense.setup({
+      vim.lsp.config("laravel_ls", {})
+      vim.lsp.config("intelephense", {
         settings = {
           intelephense = {
             files = {
@@ -184,14 +184,14 @@ return {
           "cssls",
           "html",
           "elixirls",
+          "gopls",
           "intelephense",
-          "jsonls",
           "laravel_ls",
+          "jsonls",
           "lua_ls",
           "tailwindcss",
           "vtsls",
           "vue_ls",
-          "zls",
           "ols",
         },
         automatic_enable = {
@@ -213,6 +213,7 @@ return {
         "stylua",
         "gdformat",
         "csharpier",
+        "golines",
       },
     },
   },

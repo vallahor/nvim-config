@@ -5,6 +5,7 @@ return {
       formatters_by_ft = {
         json = { "prettierd", "prettier", stop_after_first = true },
         javascript = { "prettierd", "prettier", stop_after_first = true },
+        svelte = { "prettierd", "prettier", stop_after_first = true },
         javascriptreact = { "prettierd", "prettier", stop_after_first = true },
         vue = { "prettierd", "prettier", stop_after_first = true },
         lua = { "stylua" },
@@ -14,7 +15,9 @@ return {
         php = { "mago_format" },
         cs = { "csharpier" },
         zig = { "zigfmt" },
+        rust = { "rustfmt" },
         odin = { lsp_format = "fallback" },
+        go = { "goimports", "golines", "gofmt", lsp_format = "fallback" },
         -- elixir = { "mix", lsp_format = "fallback" },
         -- gdscript = { "gdformat" },
       },
