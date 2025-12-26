@@ -46,8 +46,10 @@ return {
       vim.api.nvim_create_autocmd("LspAttach", {
         callback = function(ev)
           local client = vim.lsp.get_client_by_id(ev.data.client_id)
-          local bufnr = ev.buf
-          client.server_capabilities.semanticTokensProvider = nil
+          if client then
+            -- local bufnr = ev.buf
+            client.server_capabilities.semanticTokensProvider = nil
+          end
         end,
       })
 

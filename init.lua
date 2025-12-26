@@ -170,9 +170,10 @@ local beginning_of_the_line = function()
   end
 end
 
-vim.keymap.set({ "n", "i", "v" }, "<home>", beginning_of_the_line) -- go to beginning of the line
-vim.keymap.set("n", "<end>", "$") -- go to end of line
-vim.keymap.set("v", "<end>", "$h") -- go to end of line (for some reason it's goes to wrong place in visual mode)
+vim.keymap.set("i", "<home>", beginning_of_the_line) -- go to beginning of the line
+vim.keymap.set({ "n", "v" }, "(", beginning_of_the_line) -- go to beginning of the line
+vim.keymap.set("n", ")", "$") -- go to end of line
+vim.keymap.set("v", ")", "$h") -- go to end of line (for some reason it's goes to wrong place in visual mode)
 
 vim.keymap.set("n", "<f4>", "<cmd>:e $MYVIMRC<cr>") -- open config file (vimrc or init.lua)
 vim.keymap.set("n", "<f5>", "<cmd>so %<cr>") -- execute current file (vim or lua)
