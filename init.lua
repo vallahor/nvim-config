@@ -22,7 +22,7 @@ require("lazy").setup("plugins", {
 })
 
 -- SETTINGS --
-vim.opt.guifont = { "JetBrainsMono Nerd Font:h11" }
+vim.opt.guifont = { "JetBrainsMonoNL Nerd Font:h11" }
 vim.opt.shiftwidth = 4
 vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
@@ -171,9 +171,9 @@ local beginning_of_the_line = function()
 end
 
 vim.keymap.set("i", "<home>", beginning_of_the_line) -- go to beginning of the line
-vim.keymap.set({ "n", "v" }, "(", beginning_of_the_line) -- go to beginning of the line
-vim.keymap.set("n", ")", "$") -- go to end of line
-vim.keymap.set("v", ")", "$h") -- go to end of line (for some reason it's goes to wrong place in visual mode)
+vim.keymap.set({ "n", "v" }, "<home>", beginning_of_the_line) -- go to beginning of the line
+vim.keymap.set("n", "<end>", "$") -- go to end of line
+vim.keymap.set("v", "<end>", "$h") -- go to end of line (for some reason it's goes to wrong place in visual mode)
 
 vim.keymap.set("n", "<f4>", "<cmd>:e $MYVIMRC<cr>") -- open config file (vimrc or init.lua)
 vim.keymap.set("n", "<f5>", "<cmd>so %<cr>") -- execute current file (vim or lua)
@@ -323,13 +323,6 @@ vim.api.nvim_create_autocmd("BufWritePre", {
   end,
 })
 
--- vim.api.nvim_create_autocmd("FileType", {
---   pattern = { "elixir", "heex", "eex" },
---   callback = function()
---     vim.bo.cindent = false
---   end,
--- })
-
 if vim.g.neovide then
   vim.g.neovide_cursor_animation_length = 0
   vim.g.neovide_scroll_animation_length = 0
@@ -339,70 +332,6 @@ if vim.g.neovide then
   vim.g.neovide_cursor_animate_in_insert_mode = false
   vim.g.neovide_cursor_animate_in_command_line = false
 end
-
--- GODOT BEGIN
--- vim_godot.{bat|sh}: {file} {line} {col}
--- batch file to run as the external editor
--- @echo off
--- setlocal
--- set FILE=%1
--- set LINE=%2
--- set COL=%3
--- set "FILE=%FILE:\=/%"
-
--- set SERVER=127.0.0.1:6004
-
--- netstat -ano | findstr :6004 >nul
--- if %ERRORLEVEL% NEQ 0 (
---     start C:\apps\neovide\neovide.exe --no-vsync -- +":e %FILE%" +":call cursor(%LINE%,%COL%)"
--- ) else (
---     nvim --server %SERVER% --remote-send "<esc>:e %FILE%<cr>:call cursor(%LINE%,%COL%)<cr>"
--- )
--- endlocal
-local started_godot_server = false
-
--- paths to check for project.godot file
-local paths_to_check = { "/", "/../" }
-local godot_project_path = ""
-local cwd = vim.fn.getcwd()
-
--- iterate over paths and check
-for _, value in pairs(paths_to_check) do
-  if vim.uv.fs_stat(cwd .. value .. "project.godot") then
-    godot_project_path = cwd .. value
-    break
-  end
-end
-
-local is_server_running = vim.uv.fs_stat(godot_project_path .. "/server.pipe")
-
-local addr = godot_project_path .. "/server.pipe"
-if vim.fn.has("win32") == 1 then
-  addr = "127.0.0.1:6004"
-end
-
-if vim.fn.filereadable(cwd .. "/project.godot") == 1 and not is_server_running then
-  if vim.v.servername ~= addr then
-    local ok = pcall(function()
-      vim.fn.serverstart(addr)
-    end)
-
-    if ok then
-      started_godot_server = true
-    end
-  end
-end
-
-vim.api.nvim_create_autocmd("VimLeavePre", {
-  callback = function()
-    if started_godot_server then
-      pcall(function()
-        vim.fn.serverstop(addr)
-      end)
-    end
-  end,
-})
--- GODOT END
 
 vim.diagnostic.config({
   virtual_text = {

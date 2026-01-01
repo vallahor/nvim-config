@@ -26,23 +26,6 @@ return {
     end,
   },
   {
-    "habamax/vim-godot",
-    config = function()
-      vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead", "BufEnter", "BufWinEnter" }, {
-        pattern = "*.gd",
-        callback = function()
-          vim.opt_local.expandtab = false
-        end,
-      })
-
-      vim.cmd([[
-        setlocal tabstop=4
-        setlocal shiftwidth=4
-        setlocal indentexpr=
-      ]])
-    end,
-  },
-  {
     "mattn/emmet-vim",
     config = function()
       vim.api.nvim_create_autocmd("FileType", {
