@@ -333,28 +333,29 @@ if vim.g.neovide then
   vim.g.neovide_cursor_animate_in_command_line = false
 end
 
-vim.diagnostic.config({
-  virtual_text = {
-    prefix = "",
-  },
-  float = {
-    show_header = false,
-  },
-  jump = {
-    on_jump = function() end,
-  },
-  signs = {
-    linehl = {
-      [vim.diagnostic.severity.ERROR] = "DiagnosticLinehlError",
-      [vim.diagnostic.severity.WARN] = "DiagnosticLinehlWarn",
-      [vim.diagnostic.severity.INFO] = "DiagnosticLinehlInfo",
-      [vim.diagnostic.severity.HINT] = "DiagnosticLinehlHint",
-    },
-    numhl = {
-      [vim.diagnostic.severity.ERROR] = "DiagnosticNumhlError",
-      [vim.diagnostic.severity.WARN] = "DiagnosticNumhlWarn",
-      [vim.diagnostic.severity.INFO] = "DiagnosticNumhlInfo",
-      [vim.diagnostic.severity.HINT] = "DiagnosticNumhlHint",
-    },
-  },
-})
+vim.diagnostic.enable(false)
+-- vim.diagnostic.config({
+--   virtual_text = {
+--     prefix = "",
+--   },
+--   float = {
+--     show_header = false,
+--   },
+--   jump = {
+--     on_jump = function() end,
+--   },
+--   signs = {
+--     linehl = {
+--       [vim.diagnostic.severity.ERROR] = "DiagnosticLinehlError",
+--       [vim.diagnostic.severity.WARN] = "DiagnosticLinehlWarn",
+--       [vim.diagnostic.severity.INFO] = "DiagnosticLinehlInfo",
+--       [vim.diagnostic.severity.HINT] = "DiagnosticLinehlHint",
+--     },
+--     numhl = {
+--       [vim.diagnostic.severity.ERROR] = "DiagnosticNumhlError",
+--       [vim.diagnostic.severity.WARN] = "DiagnosticNumhlWarn",
+--       [vim.diagnostic.severity.INFO] = "DiagnosticNumhlInfo",
+--       [vim.diagnostic.severity.HINT] = "DiagnosticNumhlHint",
+--     },
+--   },
+-- })

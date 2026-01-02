@@ -2,8 +2,8 @@ return {
   {
     "saghen/blink.cmp",
     dependencies = { "nvim-web-devicons", "onsails/lspkind.nvim" },
-    build = "cargo build --release",
-    -- version = "*",
+    -- build = "cargo build --release",
+    version = "*",
     opts = {
       keymap = {
         preset = "none",
@@ -20,40 +20,13 @@ return {
 
       completion = {
         menu = {
+          border = "none",
           draw = {
             components = {
               kind_icon = {
                 ellipsis = false,
                 text = function(ctx)
-                  if ctx.kind == "Color" then
-                    return "■"
-                  end
-                  local icon = ctx.kind_icon
-                  if vim.tbl_contains({ "Path" }, ctx.source_name) then
-                    local dev_icon, _ = require("nvim-web-devicons").get_icon(ctx.label)
-                    if dev_icon then
-                      icon = dev_icon
-                    end
-                  else
-                    icon = require("lspkind").symbolic(ctx.kind, {
-                      mode = "symbol",
-                    })
-                  end
-
-                  return icon .. ctx.icon_gap
-                end,
-                highlight = function(ctx)
-                  if ctx.kind == "Color" then
-                    return ctx.item.kind_hl
-                  end
-                  local hl = ctx.kind_hl
-                  if vim.tbl_contains({ "Path" }, ctx.source_name) then
-                    local dev_icon, dev_hl = require("nvim-web-devicons").get_icon(ctx.label)
-                    if dev_icon then
-                      hl = dev_hl
-                    end
-                  end
-                  return hl
+                  return ""
                 end,
               },
               label = {
@@ -97,7 +70,8 @@ return {
 
       -- https://code.visualstudio.com/docs/editing/userdefinedsnippets
       sources = {
-        default = { "lsp", "path", "snippets", "buffer" },
+        -- default = { "lsp", "path", "snippets", "buffer" },
+        default = { "path", "buffer" },
         providers = {
           lsp = {
             transform_items = function(_, items)
@@ -150,6 +124,7 @@ return {
 
         completion = {
           menu = {
+            border = "none",
             auto_show = true,
           },
 

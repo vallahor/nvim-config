@@ -4,20 +4,10 @@ return {
     event = { "BufReadPre", "BufNewFile" },
     config = function()
       local capabilities = require("blink.cmp").get_lsp_capabilities()
-      local on_attach = function(client, bufnr)
+      local on_attach = function(_, bufnr)
         if vim.lsp.document_color then
           vim.lsp.document_color.enable(true, bufnr, {
             style = "virtual",
-          })
-        end
-
-        if client and client.name == "elixirls" then
-          -- https://www.mitchellhanberg.com/modern-format-on-save-in-neovim/
-          vim.api.nvim_create_autocmd("BufWritePre", {
-            buffer = bufnr,
-            callback = function()
-              vim.lsp.buf.format({ async = false, id = client.id })
-            end,
           })
         end
 
@@ -35,12 +25,13 @@ return {
         on_attach = on_attach,
       })
 
-      vim.lsp.config("rust_analyzer", {
-        capabilities = capabilities,
-        on_attach = on_attach,
-      })
+      -- vim.lsp.config("rust_analyzer", {
+      --   capabilities = capabilities,
+      --   on_attach = on_attach,
+      -- })
 
-      vim.lsp.enable({ "gdscript", "nushell", "rust_analyzer", "laravel_ls", "intelephense" })
+      -- vim.lsp.enable({ "gdscript", "nushell", "rust_analyzer", "laravel_ls", "intelephense" })
+      vim.lsp.enable({ "laravel_ls", "intelephense" })
 
       -- vim.lsp.semantic_tokens.enable(false)
       vim.api.nvim_create_autocmd("LspAttach", {
@@ -97,11 +88,6 @@ return {
         },
       })
 
-      local port = os.getenv("GDScript_Port") or "6005"
-      vim.lsp.config("gdscript", {
-        cmd = { "ncat", "localhost", port },
-      })
-
       vim.lsp.config("vtsls", {
         settings = {
           vtsls = {
@@ -151,25 +137,7 @@ return {
   },
   {
     "mason-org/mason.nvim",
-    opts = {
-      registries = {
-        "github:mason-org/mason-registry",
-        "github:Crashdummyy/mason-registry",
-      },
-      ensure_installed = {
-        "roslyn",
-      },
-    },
-    config = function(_, opts)
-      require("mason").setup(opts)
-      local mr = require("mason-registry")
-      for _, tool in ipairs(opts.ensure_installed) do
-        local p = mr.get_package(tool)
-        if not p:is_installed() then
-          p:install()
-        end
-      end
-    end,
+    opts = {},
   },
   {
     "mason-org/mason-lspconfig.nvim",
@@ -213,8 +181,6 @@ return {
         "prettierd",
         "ruff",
         "stylua",
-        "gdformat",
-        "csharpier",
         "golines",
       },
     },
