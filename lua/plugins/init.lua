@@ -29,15 +29,6 @@ return {
     "mattn/emmet-vim",
     config = function()
       vim.api.nvim_create_autocmd("FileType", {
-        pattern = {
-          "typescriptreact",
-          "javascripreact",
-          "html",
-          "vue",
-          "heex",
-          "eex",
-          "elixir",
-        },
         command = "EmmetInstall",
       })
       vim.keymap.set("i", "<c-y>", "<nop>")
@@ -48,14 +39,4 @@ return {
     end,
   },
   { "nvim-tree/nvim-web-devicons", opts = {} },
-  {
-    "ricardoramirezr/blade-nav.nvim",
-    dependencies = {
-      "saghen/blink.cmp",
-    },
-    ft = { "blade", "php" }, -- optional, improves startup time
-    opts = {
-      close_tag_on_complete = true, -- default: true
-    },
-  },
 }

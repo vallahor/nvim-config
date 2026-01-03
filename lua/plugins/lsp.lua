@@ -25,13 +25,12 @@ return {
         on_attach = on_attach,
       })
 
-      -- vim.lsp.config("rust_analyzer", {
-      --   capabilities = capabilities,
-      --   on_attach = on_attach,
-      -- })
+      vim.lsp.config("rust_analyzer", {
+        capabilities = capabilities,
+        on_attach = on_attach,
+      })
 
-      -- vim.lsp.enable({ "gdscript", "nushell", "rust_analyzer", "laravel_ls", "intelephense" })
-      vim.lsp.enable({ "laravel_ls", "intelephense" })
+      vim.lsp.enable({ "nushell", "rust_analyzer" })
 
       -- vim.lsp.semantic_tokens.enable(false)
       vim.api.nvim_create_autocmd("LspAttach", {
@@ -68,7 +67,6 @@ return {
               checkThirdParty = false,
               library = {
                 vim.env.VIMRUNTIME,
-                "${3rd}/love2d/library",
               },
             },
           })
@@ -83,52 +81,6 @@ return {
           basedpyright = {
             analysis = {
               typeCheckingMode = "standard",
-            },
-          },
-        },
-      })
-
-      vim.lsp.config("vtsls", {
-        settings = {
-          vtsls = {
-            tsserver = {
-              globalPlugins = {
-                {
-                  name = "@vue/typescript-plugin",
-                  location = vim.fn.stdpath("data")
-                    .. "/mason/packages/vue-language-server/node_modules/@vue/language-server",
-                  languages = { "vue" },
-                  configNamespace = "typescript",
-                },
-              },
-            },
-          },
-        },
-        filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue" },
-      })
-
-      vim.lsp.config("html", {
-        filetypes = { "html", "heex", "eex", "elixir" },
-      })
-
-      vim.lsp.config("laravel_ls", {})
-      vim.lsp.config("intelephense", {
-        settings = {
-          intelephense = {
-            files = {
-              maxSize = 10000000,
-              exclude = {
-                "**/.git/**",
-                "**/.svn/**",
-                "**/.hg/**",
-                "**/CVS/**",
-                "**/.DS_Store/**",
-                "**/node_modules/**",
-                "**/bower_components/**",
-                "**/vendor/**/{Test,test,Tests,tests}/**",
-                "*.twig",
-                "*.js",
-              },
             },
           },
         },
@@ -153,19 +105,15 @@ return {
           "clangd",
           "cssls",
           "html",
-          "elixirls",
-          "gopls",
-          "intelephense",
-          "laravel_ls",
           "jsonls",
           "lua_ls",
+          "ols",
+          "rust_analyzer",
           "tailwindcss",
           "vtsls",
-          "vue_ls",
-          "ols",
         },
         automatic_enable = {
-          exclude = { "ruff", "laravel_ls", "intelephense" },
+          exclude = { "ruff" },
         },
       })
     end,
@@ -181,7 +129,6 @@ return {
         "prettierd",
         "ruff",
         "stylua",
-        "golines",
       },
     },
   },
