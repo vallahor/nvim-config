@@ -341,7 +341,7 @@ end
 -- vim.diagnostic.enable(false)
 
 vim.diagnostic.config({
-  virtual_text = false,
+  -- virtual_text = false,
   virtual_text = {
     prefix = "",
   },
