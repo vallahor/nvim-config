@@ -23,16 +23,17 @@ return {
           border = "none",
           draw = {
             components = {
-              kind_icon = {
-                ellipsis = false,
-                text = function(ctx)
-                  return ""
-                end,
-              },
+              -- kind_icon = {
+              --   ellipsis = false,
+              --   text = function(_)
+              --     return ""
+              --   end,
+              -- },
               label = {
-                width = { max = 40 },
+                width = { fill = true, max = 40 },
               },
             },
+            columns = { { "label", "label_description", gap = 1 }, { "kind" } },
           },
         },
 
@@ -70,8 +71,8 @@ return {
 
       -- https://code.visualstudio.com/docs/editing/userdefinedsnippets
       sources = {
-        -- default = { "lsp", "path", "snippets", "buffer" },
-        default = { "path", "buffer" },
+        default = { "lsp", "path", "snippets", "buffer" },
+        -- default = { "path", "buffer" },
         providers = {
           lsp = {
             transform_items = function(_, items)
@@ -97,12 +98,6 @@ return {
               get_cwd = function(_)
                 return vim.fn.getcwd()
               end,
-            },
-          },
-          ["blade-nav"] = {
-            module = "blade-nav.blink",
-            opts = {
-              close_tag_on_complete = true,
             },
           },
         },

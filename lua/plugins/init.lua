@@ -39,4 +39,55 @@ return {
     end,
   },
   { "nvim-tree/nvim-web-devicons", opts = {} },
+  {
+    "habamax/vim-godot",
+    config = function()
+      vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead", "BufEnter", "BufWinEnter" }, {
+        pattern = "*.gd",
+        callback = function()
+          vim.opt_local.expandtab = false
+        end,
+      })
+
+      vim.cmd([[
+              setlocal tabstop=4
+              setlocal shiftwidth=4
+          setlocal indentexpr=
+            ]])
+    end,
+  },
+  {
+    "stevearc/oil.nvim",
+    lazy = false,
+    enabled = true,
+    opts = {
+      columns = {
+        "size",
+        "mtime",
+      },
+      delete_to_trash = true,
+      lsp_file_methods = { enabled = false },
+      skip_confirm_for_simple_edits = true,
+      keymaps = {
+        ["<C-s>"] = false,
+        ["+"] = "actions.select",
+        [")"] = "actions.select",
+        ["("] = { "actions.parent", mode = "n" },
+        ["q"] = "actions.close",
+        ["<esc>"] = "actions.close",
+      },
+      view_options = {
+        is_always_hidden = function(_, _)
+          return false
+        end,
+        sort = {
+          { "mtime", "desc" },
+        },
+      },
+    },
+    keys = {
+      -- { "-", "<cmd>lua require('oil').toggle_float()<cr>", desc = "Open file browser" },
+      { "<c-t>", "<cmd>Oil<cr>", desc = "Open file browser" },
+    },
+  },
 }

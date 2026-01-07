@@ -191,10 +191,11 @@ return {
           "!.zig-cache",
           "--sortr=modified",
         }
-        local show_with_icons = function(buf_id, items, query)
-          return pick.default_show(buf_id, items, query, { show_icons = true })
-        end
-        local source = { name = "Files rg", show = show_with_icons }
+        -- local show_with_icons = function(buf_id, items, query)
+        --   return pick.default_show(buf_id, items, query, { show_icons = true })
+        -- end
+        -- local source = { name = "Files rg", show = show_with_icons }
+        local source = { name = "Files rg" }
         return pick.builtin.cli({ command = command }, { source = source })
       end
 

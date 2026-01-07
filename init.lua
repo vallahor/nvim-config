@@ -59,7 +59,8 @@ vim.opt.timeoutlen = 300
 vim.opt.ttimeoutlen = 100
 vim.opt.updatetime = 50
 vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
-vim.opt.winborder = "single"
+-- vim.opt.winborder = "single"
+vim.opt.winborder = "none"
 vim.opt.isfname:append("(") -- " @windows: nextjs and sveltkit folder name pattern
 vim.opt.swapfile = false
 vim.opt.wrap = false
@@ -332,6 +333,70 @@ if vim.g.neovide then
   vim.g.neovide_cursor_animate_in_insert_mode = false
   vim.g.neovide_cursor_animate_in_command_line = false
 end
+
+-- GODOT BEGIN
+-- vim_godot.{bat|sh}: {file} {line} {col}
+-- batch file to run as the external editor
+-- @echo off
+-- setlocal
+-- set FILE=%1
+-- set LINE=%2
+-- set COL=%3
+-- set "FILE=%FILE:\=/%"
+
+-- set SERVER=127.0.0.1:6004
+
+-- netstat -ano | findstr :6004 >nul
+-- if %ERRORLEVEL% NEQ 0 (
+--     start C:\apps\neovide\neovide.exe --no-vsync -- +":e %FILE%" +":call cursor(%LINE%,%COL%)"
+-- ) else (
+--     nvim --server %SERVER% --remote-send "<esc>:e %FILE%<cr>:call cursor(%LINE%,%COL%)<cr>"
+-- )
+-- endlocal
+local started_godot_server = false
+
+-- paths to check for project.godot file
+local paths_to_check = { "/", "/../" }
+local godot_project_path = ""
+local cwd = vim.fn.getcwd()
+
+-- iterate over paths and check
+for _, value in pairs(paths_to_check) do
+  if vim.uv.fs_stat(cwd .. value .. "project.godot") then
+    godot_project_path = cwd .. value
+    break
+  end
+end
+
+local is_server_running = vim.uv.fs_stat(godot_project_path .. "/server.pipe")
+
+local addr = godot_project_path .. "/server.pipe"
+if vim.fn.has("win32") == 1 then
+  addr = "127.0.0.1:6004"
+end
+
+if vim.fn.filereadable(cwd .. "/project.godot") == 1 and not is_server_running then
+  if vim.v.servername ~= addr then
+    local ok = pcall(function()
+      vim.fn.serverstart(addr)
+    end)
+
+    if ok then
+      started_godot_server = true
+    end
+  end
+end
+
+vim.api.nvim_create_autocmd("VimLeavePre", {
+  callback = function()
+    if started_godot_server then
+      pcall(function()
+        vim.fn.serverstop(addr)
+      end)
+    end
+  end,
+})
+-- GODOT END
 
 -- vim.api.nvim_set_hl(0, "DiagnosticNumhlError", { fg = "#832936" })
 -- vim.api.nvim_set_hl(0, "DiagnosticNumhlWarn", { fg = "#825c3e" })

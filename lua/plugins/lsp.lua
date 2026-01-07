@@ -25,12 +25,7 @@ return {
         on_attach = on_attach,
       })
 
-      vim.lsp.config("rust_analyzer", {
-        capabilities = capabilities,
-        on_attach = on_attach,
-      })
-
-      vim.lsp.enable({ "nushell", "rust_analyzer" })
+      vim.lsp.enable({ "gdscript", "nushell", "rust_analyzer" })
 
       -- vim.lsp.semantic_tokens.enable(false)
       vim.api.nvim_create_autocmd("LspAttach", {
@@ -41,6 +36,16 @@ return {
             client.server_capabilities.semanticTokensProvider = nil
           end
         end,
+      })
+
+      local port = os.getenv("GDScript_Port") or "6005"
+      vim.lsp.config("gdscript", {
+        cmd = { "ncat", "localhost", port },
+      })
+
+      vim.lsp.config("rust_analyzer", {
+        capabilities = capabilities,
+        on_attach = on_attach,
       })
 
       vim.lsp.config("lua_ls", {
