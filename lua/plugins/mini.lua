@@ -231,6 +231,15 @@ return {
       vim.keymap.set("n", "<tab>", function()
         pick.builtin.buffers({ include_current = true }, { mappings = buffer_mappings })
       end)
+      vim.api.nvim_create_autocmd("BufWritePost", {
+        callback = function(args)
+          if vim.bo[args.buf].filetype == "oil" then
+            pcall(function()
+              require("mini.pick").refresh()
+            end)
+          end
+        end,
+      })
     end,
   },
 }
