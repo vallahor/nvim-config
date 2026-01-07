@@ -468,5 +468,5 @@ function _G.StatusColumn()
     hl = "%#LineNr#"
   end
 
-  return hl .. string.format("%4d ", rel)
+  return hl .. string.format("%3d ", rel)
 end
