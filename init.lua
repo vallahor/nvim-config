@@ -431,3 +431,58 @@ vim.diagnostic.config({
     },
   },
 })
+
+vim.api.nvim_set_hl(0, "VisualNr", { fg = "#a1495c", bg = "#2d1524" })
+vim.o.statuscolumn = "%!v:lua.StatusColumn()"
+
+local function in_visual()
+  local m = vim.fn.mode()
+  return m == "v" or m == "V" or m == "\x16"
+end
+
+local function line_in_visual(lnum)
+  if not in_visual() then
+    return false
+  end
+
+  local v1 = vim.fn.getpos("v")[2]
+  local v2 = vim.fn.getpos(".")[2]
+  local start = math.min(v1, v2)
+  local finish = math.max(v1, v2)
+
+  return lnum >= start and lnum <= finish
+end
+
+function _G.StatusColumn()
+  local lnum = vim.v.lnum
+  local cur = vim.fn.line(".")
+
+  local rel = math.abs(lnum - cur)
+
+  local hl
+  if lnum == cur and not in_visual() then
+    hl = "%#CursorLineNr#"
+  elseif line_in_visual(lnum) then
+    hl = "%#VisualNr#"
+  else
+    hl = "%#LineNr#"
+  end
+
+  return hl .. string.format("%4d ", rel)
+end
+
+-- Visual mode change the LineNr
+-- local function is_visual()
+--   local m = vim.fn.mode()
+--   return m == "v" or m == "V" or m == "\x16"
+-- end
+
+-- vim.api.nvim_create_autocmd("ModeChanged", {
+--   callback = function()
+--     if is_visual() then
+--       vim.opt_local.winhighlight = "LineNr:VisualNr,CursorLineNr:VisualNr"
+--     else
+--       vim.opt_local.winhighlight = ""
+--     end
+--   end,
+-- })
