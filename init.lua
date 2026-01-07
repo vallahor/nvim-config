@@ -432,7 +432,8 @@ vim.diagnostic.config({
   },
 })
 
-vim.api.nvim_set_hl(0, "VisualNr", { fg = "#a1495c", bg = "#2d1524" })
+vim.api.nvim_set_hl(0, "CursorVisualNr", { fg = "#a1495c", bg = "#2d1524" })
+vim.api.nvim_set_hl(0, "VisualNr", { fg = "#493441", bg = "#2d1524" })
 vim.o.statuscolumn = "%!v:lua.StatusColumn()"
 
 local function in_visual()
@@ -462,6 +463,8 @@ function _G.StatusColumn()
   local hl
   if lnum == cur and not in_visual() then
     hl = "%#CursorLineNr#"
+  elseif lnum == cur and in_visual() then
+    hl = "%#CursorVisualNr#"
   elseif line_in_visual(lnum) then
     hl = "%#VisualNr#"
   else
