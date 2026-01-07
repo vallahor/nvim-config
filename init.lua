@@ -470,19 +470,3 @@ function _G.StatusColumn()
 
   return hl .. string.format("%4d ", rel)
 end
-
--- Visual mode change the LineNr
--- local function is_visual()
---   local m = vim.fn.mode()
---   return m == "v" or m == "V" or m == "\x16"
--- end
-
--- vim.api.nvim_create_autocmd("ModeChanged", {
---   callback = function()
---     if is_visual() then
---       vim.opt_local.winhighlight = "LineNr:VisualNr,CursorLineNr:VisualNr"
---     else
---       vim.opt_local.winhighlight = ""
---     end
---   end,
--- })
