@@ -436,16 +436,12 @@ vim.api.nvim_set_hl(0, "CursorVisualNr", { fg = "#a1495c", bg = "#2d1524" })
 vim.api.nvim_set_hl(0, "VisualNr", { fg = "#493441", bg = "#2d1524" })
 vim.o.statuscolumn = "%!v:lua.StatusColumn()"
 
-local function in_visual()
+local function in_visual_mode()
   local m = vim.fn.mode()
   return m == "v" or m == "V" or m == "\x16"
 end
 
 local function line_in_visual(lnum)
-  if not in_visual() then
-    return false
-  end
-
   local v1 = vim.fn.getpos("v")[2]
   local v2 = vim.fn.getpos(".")[2]
   local start = math.min(v1, v2)
@@ -460,12 +456,12 @@ function _G.StatusColumn()
 
   local rel = math.abs(lnum - cur)
 
+  local in_visual = in_visual_mode()
+
   local hl
-  if lnum == cur and not in_visual() then
-    hl = "%#CursorLineNr#"
-  elseif lnum == cur and in_visual() then
-    hl = "%#CursorVisualNr#"
-  elseif line_in_visual(lnum) then
+  if lnum == cur then
+    hl = (in_visual and "%#CursorVisualNr#") or "%#CursorLineNr#"
+  elseif in_visual and line_in_visual(lnum) then
     hl = "%#VisualNr#"
   else
     hl = "%#LineNr#"
