@@ -74,7 +74,7 @@ return {
         [")"] = "actions.select",
         ["("] = { "actions.parent", mode = "n" },
         ["q"] = "actions.close",
-        ["<esc>"] = "actions.close",
+        -- ["<esc>"] = "actions.close",
       },
       view_options = {
         is_always_hidden = function(_, _)

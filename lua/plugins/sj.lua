@@ -17,7 +17,7 @@ return {
           inclusive = true,
           max_pattern_length = 1,
           pattern_type = "lua_plain",
-          search_scope = "current_line",
+          -- search_scope = "current_line",
           use_overlay = false,
         })
       end)
@@ -29,7 +29,18 @@ return {
           inclusive = false,
           max_pattern_length = 1,
           pattern_type = "lua_plain",
-          search_scope = "current_line",
+          -- search_scope = "current_line",
+          use_overlay = false,
+        })
+      end)
+
+      vim.keymap.set({ "n", "v", "o" }, "s", function()
+        sj.run({
+          auto_jump = false,
+          forward_search = true,
+          inclusive = false,
+          max_pattern_length = 2,
+          pattern_type = "lua_plain",
           use_overlay = false,
         })
       end)

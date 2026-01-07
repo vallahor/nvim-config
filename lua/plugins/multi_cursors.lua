@@ -78,7 +78,7 @@ return {
         layerSet("n", "<esc>", function()
           mc.clearCursors()
         end)
-        layerSet("n", "<c-s-q>", function()
+        layerSet("n", "<c-m>", function()
           mc.enableCursors()
         end)
       end)
