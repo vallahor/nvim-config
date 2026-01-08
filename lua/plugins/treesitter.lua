@@ -6,6 +6,7 @@ return {
     opts = {
       ensure_installed = {
         "bash",
+        "blade",
         "c",
         "cpp",
         "css",
@@ -19,6 +20,9 @@ return {
         "markdown",
         "markdown_inline",
         "odin",
+        "php",
+        "php_only",
+        "phpdoc",
         "python",
         "rust",
         "tsx",
@@ -34,6 +38,7 @@ return {
         enable = true,
         disable = {
           "cpp",
+          "gdscript",
           "odin",
           "python",
           "rust",

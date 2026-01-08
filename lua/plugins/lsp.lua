@@ -25,7 +25,7 @@ return {
         on_attach = on_attach,
       })
 
-      vim.lsp.enable({ "gdscript", "nushell", "rust_analyzer" })
+      vim.lsp.enable({ "gdscript", "nushell", "rust_analyzer", "laravel_ls", "intelephense" })
 
       -- vim.lsp.semantic_tokens.enable(false)
       vim.api.nvim_create_autocmd("LspAttach", {
@@ -90,6 +90,29 @@ return {
           },
         },
       })
+
+      vim.lsp.config("laravel_ls", {})
+      vim.lsp.config("intelephense", {
+        settings = {
+          intelephense = {
+            files = {
+              maxSize = 10000000,
+              exclude = {
+                "**/.git/**",
+                "**/.svn/**",
+                "**/.hg/**",
+                "**/CVS/**",
+                "**/.DS_Store/**",
+                "**/node_modules/**",
+                "**/bower_components/**",
+                "**/vendor/**/{Test,test,Tests,tests}/**",
+                "*.twig",
+                "*.js",
+              },
+            },
+          },
+        },
+      })
     end,
   },
   {
@@ -114,11 +137,13 @@ return {
           "lua_ls",
           "ols",
           "rust_analyzer",
+          "intelephense",
+          "laravel_ls",
           "tailwindcss",
           "vtsls",
         },
         automatic_enable = {
-          exclude = { "ruff" },
+          exclude = { "ruff", "intelephense", "laravel_ls" },
         },
       })
     end,
@@ -134,6 +159,7 @@ return {
         "prettierd",
         "ruff",
         "stylua",
+        "gdtoolkit",
       },
     },
   },
