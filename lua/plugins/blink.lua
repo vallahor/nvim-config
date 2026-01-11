@@ -20,7 +20,6 @@ return {
 
       completion = {
         menu = {
-          border = "none",
           draw = {
             components = {
               -- kind_icon = {
@@ -119,7 +118,6 @@ return {
 
         completion = {
           menu = {
-            border = "none",
             auto_show = true,
           },
 
