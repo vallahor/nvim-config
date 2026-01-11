@@ -171,10 +171,14 @@ local beginning_of_the_line = function()
   end
 end
 
+-- vim.keymap.set("i", "<home>", beginning_of_the_line) -- go to beginning of the line
+-- vim.keymap.set({ "n", "v" }, "<home>", beginning_of_the_line) -- go to beginning of the line
+-- vim.keymap.set("n", "<end>", "$") -- go to end of line
+-- vim.keymap.set("v", "<end>", "$h") -- go to end of line (for some reason it's goes to wrong place in visual mode)
 vim.keymap.set("i", "<home>", beginning_of_the_line) -- go to beginning of the line
-vim.keymap.set({ "n", "v" }, "<home>", beginning_of_the_line) -- go to beginning of the line
-vim.keymap.set("n", "<end>", "$") -- go to end of line
-vim.keymap.set("v", "<end>", "$h") -- go to end of line (for some reason it's goes to wrong place in visual mode)
+vim.keymap.set({ "n", "v" }, "(", beginning_of_the_line) -- go to beginning of the line
+vim.keymap.set("n", ")", "$") -- go to end of line
+vim.keymap.set("v", ")", "$h") -- go to end of line (for some reason it's goes to wrong place in visual mode)
 
 vim.keymap.set("n", "<f4>", "<cmd>:e $MYVIMRC<cr>") -- open config file (vimrc or init.lua)
 vim.keymap.set("n", "<f5>", "<cmd>so %<cr>") -- execute current file (vim or lua)
@@ -295,48 +299,49 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
       vim.diagnostic.jump({ count = 1, float = false })
     end, { nowait = true, buffer = true }) -- paragraph up
 
-    vim.keymap.set("n", "[", function()
-      local l = vim.fn.getqflist({ idx = 0 })
-      if l.idx == 1 then
-        vim.cmd("silent! clast")
-      else
-        vim.cmd("silent! cprev")
-      end
-    end)
+    -- vim.keymap.set("n", "[", function()
+    --   local l = vim.fn.getqflist({ idx = 0 })
+    --   if l.idx == 1 then
+    --     vim.cmd("silent! clast")
+    --   else
+    --     vim.cmd("silent! cprev")
+    --   end
+    -- end)
 
-    vim.keymap.set("n", "]", function()
-      local idx = vim.fn.getqflist({ idx = 0 }).idx
-      local len = #vim.fn.getqflist()
-      if idx == len then
-        vim.cmd("silent! cfirst")
-      else
-        vim.cmd("silent! cnext")
-      end
-    end)
+    -- vim.keymap.set("n", "]", function()
+    --   local idx = vim.fn.getqflist({ idx = 0 }).idx
+    --   local len = #vim.fn.getqflist()
+    --   if idx == len then
+    --     vim.cmd("silent! cfirst")
+    --   else
+    --     vim.cmd("silent! cnext")
+    --   end
+    -- end)
+
     -- move indentation
     vim.keymap.set({ "v", "x" }, "<", "<gv", { nowait = true, buffer = true, remap = true }) -- indent left in visual mode
     vim.keymap.set({ "v", "x" }, ">", ">gv", { nowait = true, buffer = true, remap = true }) -- indent right in visual mode
   end,
 })
 
-vim.api.nvim_create_autocmd("QuickFixCmdPost", {
-  desc = "Sort quickfix list by line number",
-  group = vim.api.nvim_create_augroup("quickfix-sort", { clear = true }),
-  callback = function()
-    local q = vim.fn.getqflist()
-    table.sort(q, function(a, b)
-      return a.bufnr == b.bufnr and a.lnum < b.lnum or a.bufnr < b.bufnr
-    end)
-    vim.fn.setqflist(q, "r")
-  end,
-})
+-- vim.api.nvim_create_autocmd("QuickFixCmdPost", {
+--   desc = "Sort quickfix list by line number",
+--   group = vim.api.nvim_create_augroup("quickfix-sort", { clear = true }),
+--   callback = function()
+--     local q = vim.fn.getqflist()
+--     table.sort(q, function(a, b)
+--       return a.bufnr == b.bufnr and a.lnum < b.lnum or a.bufnr < b.bufnr
+--     end)
+--     vim.fn.setqflist(q, "r")
+--   end,
+-- })
 
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = "qf",
-  callback = function()
-    vim.cmd("resize 5")
-  end,
-})
+-- vim.api.nvim_create_autocmd("FileType", {
+--   pattern = "qf",
+--   callback = function()
+--     vim.cmd("resize 5")
+--   end,
+-- })
 
 vim.api.nvim_create_autocmd("TextYankPost", {
   group = vim.api.nvim_create_augroup("highlight-yank", { clear = true }),
@@ -444,34 +449,34 @@ vim.api.nvim_create_autocmd("VimLeavePre", {
 -- vim.api.nvim_set_hl(0, "DiagnosticNumhlInfo", { fg = "#5d595d" })
 -- vim.api.nvim_set_hl(0, "DiagnosticNumhlHint", { fg = "#5d595d" })
 
-vim.diagnostic.enable(false)
+-- vim.diagnostic.enable(false)
 
--- vim.diagnostic.config({
---   -- virtual_text = false,
---   virtual_text = {
---     prefix = "",
---   },
---   float = {
---     show_header = false,
---   },
---   jump = {
---     on_jump = function() end,
---   },
---   signs = {
---     linehl = {
---       [vim.diagnostic.severity.ERROR] = "DiagnosticLinehlError",
---       [vim.diagnostic.severity.WARN] = "DiagnosticLinehlWarn",
---       [vim.diagnostic.severity.INFO] = "DiagnosticLinehlInfo",
---       [vim.diagnostic.severity.HINT] = "DiagnosticLinehlHint",
---     },
---     numhl = {
---       [vim.diagnostic.severity.ERROR] = "DiagnosticNumhlError",
---       [vim.diagnostic.severity.WARN] = "DiagnosticNumhlWarn",
---       [vim.diagnostic.severity.INFO] = "DiagnosticNumhlInfo",
---       [vim.diagnostic.severity.HINT] = "DiagnosticNumhlHint",
---     },
---   },
--- })
+vim.diagnostic.config({
+  -- virtual_text = false,
+  virtual_text = {
+    prefix = "",
+  },
+  float = {
+    show_header = false,
+  },
+  jump = {
+    on_jump = function() end,
+  },
+  signs = {
+    linehl = {
+      [vim.diagnostic.severity.ERROR] = "DiagnosticLinehlError",
+      [vim.diagnostic.severity.WARN] = "DiagnosticLinehlWarn",
+      [vim.diagnostic.severity.INFO] = "DiagnosticLinehlInfo",
+      [vim.diagnostic.severity.HINT] = "DiagnosticLinehlHint",
+    },
+    numhl = {
+      [vim.diagnostic.severity.ERROR] = "DiagnosticNumhlError",
+      [vim.diagnostic.severity.WARN] = "DiagnosticNumhlWarn",
+      [vim.diagnostic.severity.INFO] = "DiagnosticNumhlInfo",
+      [vim.diagnostic.severity.HINT] = "DiagnosticNumhlHint",
+    },
+  },
+})
 
 vim.api.nvim_set_hl(0, "CursorVisualNr", { fg = "#a1495c", bg = "#2d1524" })
 vim.api.nvim_set_hl(0, "VisualNr", { fg = "#493441", bg = "#2d1524" })
