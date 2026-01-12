@@ -45,9 +45,12 @@ return {
       skip_confirm_for_simple_edits = true,
       keymaps = {
         ["<C-s>"] = false,
+        ["-"] = false,
         ["+"] = "actions.select",
         [")"] = "actions.select",
         ["("] = { "actions.parent", mode = "n" },
+        ["<c-.>"] = "actions.select",
+        ["<c-,>"] = { "actions.parent", mode = "n" },
         ["q"] = "actions.close",
         -- ["<esc>"] = "actions.close",
       },
