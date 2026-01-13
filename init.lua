@@ -342,6 +342,13 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
     if vim.g.normal_kbd then
       vim.keymap.set({ "n", "v", "x" }, "[", "{", { nowait = true, buffer = true }) -- paragraph up
       vim.keymap.set({ "n", "v", "x" }, "]", "}", { nowait = true, buffer = true }) -- paragraph up
+
+      vim.keymap.set({ "n", "v", "x" }, "{", function()
+        vim.diagnostic.jump({ count = -1, float = false })
+      end, { nowait = true, buffer = true }) -- paragraph up
+      vim.keymap.set({ "n", "v", "x" }, "}", function()
+        vim.diagnostic.jump({ count = 1, float = false })
+      end, { nowait = true, buffer = true }) -- paragraph up
     else
       vim.keymap.set({ "n", "v", "x" }, "[", function()
         vim.diagnostic.jump({ count = -1, float = false })

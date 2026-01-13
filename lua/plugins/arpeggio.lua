@@ -23,7 +23,7 @@ return {
         end
 
         vim.cmd([[
-          let g:arpeggio_timeoutlen = 100
+          let g:arpeggio_timeoutlen = 65
 
           call arpeggio#map('n', '', 0, 'jk', '<cmd>lua EscNormalMode()<cr>')
           call arpeggio#map('n', '', 0, 'kj', '<cmd>lua EscNormalMode()<cr>')

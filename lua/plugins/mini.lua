@@ -106,7 +106,7 @@ return {
 
       vim.keymap.set("n", "<c-w>", "<cmd>lua MiniBufremove.delete(0, false)<CR>")
       if vim.g.normal_kbd then
-        vim.keymap.set("n", "<a-x>", "<cmd>lua MiniBufremove.delete(0, true)<CR>")
+        vim.keymap.set("n", "<a-w>", "<cmd>lua MiniBufremove.delete(0, true)<CR>")
       else
         vim.keymap.set("n", "<c-x>", "<cmd>lua MiniBufremove.delete(0, true)<CR>")
       end
