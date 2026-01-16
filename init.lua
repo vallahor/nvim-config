@@ -11,7 +11,7 @@ if not vim.uv.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
-vim.g.normal_kbd = true
+vim.g.normal_kbd = false
 vim.g.mapleader = " "
 
 vim.env.LANG = "en_US.UTF-8"

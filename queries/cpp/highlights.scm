@@ -1,4 +1,4 @@
-; extends cpp
+; inherits: cpp
 
 (function_definition
  (function_declarator
