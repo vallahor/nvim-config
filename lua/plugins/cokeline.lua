@@ -31,14 +31,17 @@ return {
           },
           components = {
             {
-              text = function(buffer)
-                if buffer.is_first then
-                  return " "
-                else
-                  return ""
-                end
+              -- text = function(buffer)
+              text = function()
+                -- if buffer.is_first then
+                --   return ""
+                -- else
+                --   return ""
+                -- end
+                return ""
               end,
-              bg = get_hex("StatusLineNC", "bg"),
+              -- bg = get_hex("StatusLineNC", "bg"),
+              bg = get_hex("Normal", "bg"),
             },
             {
               text = " ",

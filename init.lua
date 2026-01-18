@@ -499,6 +499,11 @@ vim.diagnostic.config({
   },
 })
 
+-- vim.api.nvim_set_hl(0, "@attribute.gdscript", { fg = "#9B668F" })
+vim.api.nvim_set_hl(0, "@attribute.gdscript", { fg = "#96674E" })
+-- vim.api.nvim_set_hl(0, "@string.special.url.gdscript", { fg = "#926C83" })
+vim.api.nvim_set_hl(0, "@string.special.url.gdscript", { fg = "#9B668F" })
+
 vim.api.nvim_set_hl(0, "CursorVisualNr", { fg = "#a1495c", bg = "#2d1524" })
 vim.api.nvim_set_hl(0, "VisualNr", { fg = "#493441", bg = "#2d1524" })
 vim.o.statuscolumn = "%!v:lua.StatusColumn()"
