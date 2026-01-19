@@ -120,6 +120,26 @@ return {
           mc.enableCursors()
         end)
       end)
+
+      local hl = vim.api.nvim_set_hl
+      hl(0, "MultiCursorCursor", { link = "Cursor" })
+      -- hl(0, "MultiCursorCursor", { reverse = true })
+      hl(0, "MultiCursorVisual", { link = "Visual" })
+      hl(0, "MultiCursorSign", { link = "SignColumn" })
+      hl(0, "MultiCursorMatchPreview", { link = "Search" })
+      hl(0, "MultiCursorDisabledCursor", { reverse = true })
+      hl(0, "MultiCursorDisabledVisual", { link = "Visual" })
+      hl(0, "MultiCursorDisabledSign", { link = "SignColumn" })
+
+      mc.onSafeState(function()
+        local disable = mc.hasCursors()
+        if vim.b.minicursorword_disable == disable then
+          return
+        end
+
+        vim.b.minicursorword_disable = disable
+        vim.api.nvim_exec_autocmds("CursorMoved", { buffer = 0 })
+      end)
     end,
   },
 }

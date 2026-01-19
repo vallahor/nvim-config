@@ -1,7 +1,7 @@
 return {
   {
     "saghen/blink.cmp",
-    dependencies = { "nvim-web-devicons", "onsails/lspkind.nvim" },
+    -- dependencies = { "nvim-web-devicons", "onsails/lspkind.nvim" },
     -- build = "cargo build --release",
     version = "*",
     opts = {

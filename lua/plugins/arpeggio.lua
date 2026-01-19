@@ -2,14 +2,15 @@ return {
   {
     "kana/vim-arpeggio",
     config = function()
-      if not vim.g.normal_kbd then
-        vim.cmd([[
-          let g:arpeggio_timeoutlen = 100
+      -- if not vim.g.normal_kbd then
+      --   vim.cmd([[
+      --     let g:arpeggio_timeoutlen = 100
 
-          call arpeggio#map('i', '', 0, 'jk', '<Esc>')
-          call arpeggio#map('i', '', 0, 'kj', '<Esc>')
-        ]])
-      else
+      --     call arpeggio#map('i', '', 0, 'jk', '<Esc>')
+      --     call arpeggio#map('i', '', 0, 'kj', '<Esc>')
+      --   ]])
+      -- else
+      if vim.g.normal_kbd then
         function EscNormalMode()
           for _, win in ipairs(vim.api.nvim_list_wins()) do
             local config = vim.api.nvim_win_get_config(win)

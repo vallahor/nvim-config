@@ -114,10 +114,10 @@ return {
       -- to close the current buffer and not the window use <c-w>
       -- vim.keymap.set("n", "<c-s-w>", "<cmd>bd<cr>") -- close current buffer and window -- not work with ghostty (combination in use)
 
-      -- -- Cursor Word
-      -- require("mini.cursorword").setup({
-      --   delay = 0,
-      -- })
+      -- Cursor Word
+      require("mini.cursorword").setup({
+        delay = 0,
+      })
 
       -- vim.api.nvim_create_autocmd(
       --   "FileType",
