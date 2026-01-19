@@ -132,13 +132,11 @@ return {
       hl(0, "MultiCursorDisabledSign", { link = "SignColumn" })
 
       mc.onSafeState(function()
-        local disable = mc.hasCursors()
-        if vim.b.minicursorword_disable == disable then
-          return
+        local has_cursors = mc.hasCursors()
+        if vim.b.minicursorword_disable ~= has_cursors then
+          vim.b.minicursorword_disable = has_cursors
+          vim.api.nvim_exec_autocmds("CursorMoved", { buffer = 0 })
         end
-
-        vim.b.minicursorword_disable = disable
-        vim.api.nvim_exec_autocmds("CursorMoved", { buffer = 0 })
       end)
     end,
   },
