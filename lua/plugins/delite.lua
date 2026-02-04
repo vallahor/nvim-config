@@ -2,10 +2,13 @@ return {
   "vallahor/delite.nvim",
   config = function()
     local delite = require("delite")
-    delite.setup({
-      disable_right = true,
-      -- default_pairs = {},
-    })
+    if vim.g.normal_kbd then
+      delite.setup({
+        default_pairs = {},
+      })
+    else
+      delite.setup({})
+    end
 
     -- delite.insert_pattern({ pattern = "__[%u%l]+__" })
 

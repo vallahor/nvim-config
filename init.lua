@@ -60,8 +60,8 @@ vim.opt.timeoutlen = 300
 vim.opt.ttimeoutlen = 100
 vim.opt.updatetime = 50
 vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
--- vim.opt.winborder = "single"
-vim.opt.winborder = "none"
+vim.opt.winborder = "single"
+-- vim.opt.winborder = "none"
 vim.opt.isfname:append("(") -- " @windows: nextjs and sveltkit folder name pattern
 vim.opt.swapfile = false
 vim.opt.wrap = false
@@ -325,6 +325,7 @@ vim.api.nvim_create_autocmd("FileType", {
     "html",
     "lua",
     "vue",
+    "svelte",
   },
   callback = function()
     vim.opt.shiftwidth = 2
@@ -541,12 +542,3 @@ function _G.StatusColumn()
 
   return hl .. string.format("%3d ", rel)
 end
-
-vim.cmd([[
-  " hi MiniCursorword        guisp=none guifg=none guibg=#1c212f gui=none
-  " hi MiniCursorwordCurrent guisp=none guifg=none guibg=#1c212f gui=none
-  hi MiniCursorword        guisp=none guifg=none guibg=#2D2829 gui=none
-  hi MiniCursorwordCurrent guisp=none guifg=none guibg=#2D2829 gui=none
-  " hi MiniCursorword        guisp=#87787b guifg=none guibg=none gui=underline
-  " hi MiniCursorwordCurrent guisp=#87787b guifg=none guibg=none gui=underline
-]])

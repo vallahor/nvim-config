@@ -121,23 +121,22 @@ return {
         end)
       end)
 
-      local hl = vim.api.nvim_set_hl
-      hl(0, "MultiCursorCursor", { link = "Cursor" })
-      -- hl(0, "MultiCursorCursor", { reverse = true })
-      hl(0, "MultiCursorVisual", { link = "Visual" })
-      hl(0, "MultiCursorSign", { link = "SignColumn" })
-      hl(0, "MultiCursorMatchPreview", { link = "Search" })
-      hl(0, "MultiCursorDisabledCursor", { reverse = true })
-      hl(0, "MultiCursorDisabledVisual", { link = "Visual" })
-      hl(0, "MultiCursorDisabledSign", { link = "SignColumn" })
+      vim.api.nvim_set_hl(0, "MultiCursorCursor", { link = "Cursor" })
+      -- vim.api.nvim_set_hl(0, "MultiCursorCursor", { reverse = true })
+      vim.api.nvim_set_hl(0, "MultiCursorVisual", { link = "Visual" })
+      vim.api.nvim_set_hl(0, "MultiCursorSign", { link = "SignColumn" })
+      vim.api.nvim_set_hl(0, "MultiCursorMatchPreview", { link = "Search" })
+      vim.api.nvim_set_hl(0, "MultiCursorDisabledCursor", { reverse = true })
+      vim.api.nvim_set_hl(0, "MultiCursorDisabledVisual", { link = "Visual" })
+      vim.api.nvim_set_hl(0, "MultiCursorDisabledSign", { link = "SignColumn" })
 
-      mc.onSafeState(function()
-        local has_cursors = mc.hasCursors()
-        if vim.b.minicursorword_disable ~= has_cursors then
-          vim.b.minicursorword_disable = has_cursors
-          vim.api.nvim_exec_autocmds("CursorMoved", { buffer = 0 })
-        end
-      end)
+      -- mc.onSafeState(function()
+      --   local has_cursors = mc.hasCursors()
+      --   if vim.b.minicursorword_disable ~= has_cursors then
+      --     vim.b.minicursorword_disable = has_cursors
+      --     vim.api.nvim_exec_autocmds("CursorMoved", { buffer = 0 })
+      --   end
+      -- end)
     end,
   },
 }

@@ -4,28 +4,50 @@ return {
     event = { "BufReadPre", "BufNewFile" },
     config = function()
       local capabilities = require("blink.cmp").get_lsp_capabilities()
-      local on_attach = function(_, bufnr)
-        if vim.lsp.document_color then
-          vim.lsp.document_color.enable(true, bufnr, {
-            style = "virtual",
-          })
-        end
+      -- local on_attach = function(_, bufnr)
+      --   if vim.lsp.document_color then
+      --     vim.lsp.document_color.enable(true, bufnr, {
+      --       style = "virtual",
+      --     })
+      --   end
 
-        local opts = { buffer = bufnr }
-        vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
-        vim.keymap.set("n", "<c-a>", vim.lsp.buf.code_action, opts)
-        vim.keymap.set("n", "K", function()
-          vim.lsp.buf.hover({ silent = true })
-        end, opts)
-        vim.keymap.set("n", "&", vim.diagnostic.open_float, opts)
-        vim.keymap.set("n", "<f2>", vim.lsp.buf.rename, opts)
-      end
+      --   local opts = { buffer = bufnr }
+      --   vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+      --   vim.keymap.set("n", "<c-a>", vim.lsp.buf.code_action, opts)
+      --   vim.keymap.set("n", "K", function()
+      --     vim.lsp.buf.hover({ silent = true })
+      --   end, opts)
+      --   vim.keymap.set("n", "&", vim.diagnostic.open_float, opts)
+      --   vim.keymap.set("n", "<f2>", vim.lsp.buf.rename, opts)
+      -- end
       vim.lsp.config("*", {
         capabilities = capabilities,
-        on_attach = on_attach,
+        -- on_attach = on_attach,
       })
 
-      vim.lsp.enable({ "gdscript", "nushell", "rust_analyzer", "laravel_ls", "intelephense" })
+      local lsp_augroup = vim.api.nvim_create_augroup("UserLspConfig", { clear = true })
+      vim.api.nvim_create_autocmd("LspAttach", {
+        group = lsp_augroup,
+        callback = function(args)
+          local bufnr = args.buf
+          if vim.lsp.document_color then
+            vim.lsp.document_color.enable(true, bufnr, {
+              style = "virtual",
+            })
+          end
+
+          local opts = { buffer = bufnr }
+          vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+          vim.keymap.set("n", "<c-a>", vim.lsp.buf.code_action, opts)
+          vim.keymap.set("n", "K", function()
+            vim.lsp.buf.hover({ silent = true })
+          end, opts)
+          vim.keymap.set("n", "&", vim.diagnostic.open_float, opts)
+          vim.keymap.set("n", "<f2>", vim.lsp.buf.rename, opts)
+        end,
+      })
+
+      vim.lsp.enable({ "gdscript", "nushell", "rust_analyzer", "laravel_ls", "intelephense", "svelte" })
 
       -- vim.lsp.semantic_tokens.enable(false)
       vim.api.nvim_create_autocmd("LspAttach", {
@@ -45,39 +67,33 @@ return {
 
       vim.lsp.config("rust_analyzer", {
         capabilities = capabilities,
-        on_attach = on_attach,
       })
 
       vim.lsp.config("lua_ls", {
-        on_init = function(client)
-          if client.workspace_folders then
-            local path = client.workspace_folders[1].name
-            if
-              path ~= vim.fn.stdpath("config")
-              and (vim.uv.fs_stat(path .. "/.luarc.json") or vim.uv.fs_stat(path .. "/.luarc.jsonc"))
-            then
-              return
-            end
-          end
-
-          client.config.settings.Lua = vim.tbl_deep_extend("force", client.config.settings.Lua, {
+        capabilities = capabilities,
+        settings = {
+          Lua = {
             runtime = {
+              -- Tell the language server which version of Lua you're using
+              -- (most likely LuaJIT in the case of Neovim)
               version = "LuaJIT",
-              path = {
-                "lua/?.lua",
-                "lua/?/init.lua",
+            },
+            diagnostics = {
+              -- Get the language server to recognize the `vim` global
+              globals = {
+                "vim",
+                "require",
               },
             },
             workspace = {
-              checkThirdParty = false,
-              library = {
-                vim.env.VIMRUNTIME,
-              },
+              -- Make the server aware of Neovim runtime files
+              library = vim.api.nvim_get_runtime_file("", true),
             },
-          })
-        end,
-        settings = {
-          Lua = {},
+            -- Do not send telemetry data containing a randomized but unique identifier
+            telemetry = {
+              enable = false,
+            },
+          },
         },
       })
 
@@ -141,6 +157,7 @@ return {
           "laravel_ls",
           "tailwindcss",
           "vtsls",
+          -- "svelte",
         },
         automatic_enable = {
           exclude = { "ruff", "intelephense", "laravel_ls" },

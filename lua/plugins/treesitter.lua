@@ -24,6 +24,7 @@ return {
         "php_only",
         "phpdoc",
         "python",
+        "svelte",
         "rust",
         "tsx",
         "typescript",
