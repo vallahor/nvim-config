@@ -14,6 +14,7 @@ return {
             call arpeggio#map('i', '', 0, 'kj', '<Esc>')
           ]])
       else
+        local mc = require("multicursor-nvim")
         function EscNormalMode()
           for _, win in ipairs(vim.api.nvim_list_wins()) do
             local config = vim.api.nvim_win_get_config(win)
@@ -24,6 +25,7 @@ return {
           vim.snippet.stop()
           vim.cmd.nohl()
           vim.cmd.normal({ "", bang = true })
+          mc.clearCursors()
         end
 
         vim.cmd([[
