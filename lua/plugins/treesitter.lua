@@ -73,6 +73,12 @@ return {
           autocmd BufRead *.scm set filetype=query
       ]])
 
+      vim.filetype.add({
+        pattern = {
+          [".*%.blade%.php"] = "blade",
+        },
+      })
+
       require("nvim-treesitter.configs").setup(opts)
     end,
   },

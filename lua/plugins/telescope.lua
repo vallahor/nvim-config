@@ -71,4 +71,6 @@ if vim.g.normal_kbd then
       vim.keymap.set("n", "<cr>", "<nop>")
     end,
   }
+else
+  return {}
 end

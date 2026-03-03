@@ -11,7 +11,7 @@ if not vim.uv.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
-vim.g.normal_kbd = true
+vim.g.normal_kbd = false
 vim.g.mapleader = " "
 
 vim.env.LANG = "en_US.UTF-8"
@@ -189,7 +189,6 @@ end)
 -- go to beginning of the line function like DOOM Emacs
 local beginning_of_the_line = function()
   local old_pos = vim.fn.col(".")
-  vim.fn.setpos(".", { 0, vim.fn.line("."), 0, 0 })
   vim.fn.execute("normal ^")
   if old_pos == vim.fn.col(".") then
     vim.fn.setpos(".", { 0, vim.fn.line("."), 0, 0 })

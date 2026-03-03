@@ -97,6 +97,25 @@ return {
         },
       })
 
+      vim.lsp.config("vtsls", {
+        settings = {
+          vtsls = {
+            tsserver = {
+              globalPlugins = {
+                {
+                  name = "@vue/typescript-plugin",
+                  location = vim.fn.stdpath("data")
+                    .. "/mason/packages/vue-language-server/node_modules/@vue/language-server",
+                  languages = { "vue" },
+                  configNamespace = "typescript",
+                },
+              },
+            },
+          },
+        },
+        filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue" },
+      })
+
       vim.lsp.config("basedpyright", {
         settings = {
           basedpyright = {
@@ -105,6 +124,10 @@ return {
             },
           },
         },
+      })
+
+      vim.lsp.config("html", {
+        filetypes = { "html", "heex", "eex", "elixir" },
       })
 
       vim.lsp.config("laravel_ls", {})
@@ -157,6 +180,7 @@ return {
           "laravel_ls",
           "tailwindcss",
           "vtsls",
+          "vue_ls",
           -- "svelte",
         },
         automatic_enable = {
