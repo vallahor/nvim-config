@@ -11,6 +11,10 @@
         "path": "./vue.json"
       },
       {
+        "language": "svelte",
+        "path": "./svelte.json"
+      },
+      {
         "language": "elixir",
         "path": "./elixir.json"
       },

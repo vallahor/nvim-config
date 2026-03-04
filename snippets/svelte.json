@@ -1,0 +1,65 @@
+{
+  "svelte component tag": {
+    "prefix": "#sct",
+    "body": [
+      "<script lang=\"ts\">",
+      "</script>",
+      "",
+      "<div>",
+      "\t${1}",
+      "</div>"
+    ]
+  },
+  "svelte component script": {
+    "prefix": "#sc",
+    "body": ["<script lang=\"ts\">", "${1}", "</script>", "", "<div>", "</div>"]
+  },
+  "svelte if": {
+    "prefix": "#if",
+    "body": ["{#if ${1}}", "\t${2}", "{/if}"]
+  },
+  "svelte if else": {
+    "prefix": "#if_else",
+    "body": ["{#if ${1}}", "\t${2}", "{:else}", "\t${3}", "{/if}"]
+  },
+  "svelte else if": {
+    "prefix": "#elseif",
+    "body": ["{:else if ${1}}", "\t${2}", "{:else}", "\t${3}"]
+  },
+  "svelte if else if": {
+    "prefix": "#if_else_if",
+    "body": ["{#if ${1}}", "\t${2}", "{:else if ${3}}", "\t${4}", "{/if}"]
+  },
+  "svelte each": {
+    "prefix": "#each",
+    "body": ["{#each ${1}}", "\t${2}", "{/each}"]
+  },
+  "svelte key": {
+    "prefix": "#key",
+    "body": ["{#key ${1}}", "\t${2}", "{/key}"]
+  },
+  "svelte await": {
+    "prefix": "#await",
+    "body": ["{#await ${1}}", "\t${2}", "{/await}"]
+  },
+  "svelte await then": {
+    "prefix": "#await_then",
+    "body": ["{#await ${1}}", "\t${2}", "{:then ${3}}", "\t${4}", "{/await}"]
+  },
+  "svelte await catch": {
+    "prefix": "#await_catch",
+    "body": [
+      "{#await ${1}}",
+      "\t${2}",
+      "{:then ${3}}",
+      "\t${4}",
+      "{:catch ${5}}",
+      "\t${6}",
+      "{/await}"
+    ]
+  },
+  "svelte snippet": {
+    "prefix": "#snippet",
+    "body": ["{#snippet ${1}}", "\t${2}", "{/snippet}"]
+  }
+}
