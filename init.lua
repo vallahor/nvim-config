@@ -12,6 +12,7 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 vim.g.normal_kbd = false
+vim.g.cur_word_underline = false
 vim.g.mapleader = " "
 
 vim.env.LANG = "en_US.UTF-8"

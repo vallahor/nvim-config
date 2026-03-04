@@ -8,10 +8,10 @@
       "",
       "class $TM_FILENAME_BASE",
       "{",
-      "    public function ${1:__construct}()",
-      "    {",
-      "        ${0}",
-      "    }",
+      "\tpublic function ${1:__construct}()",
+      "\t{",
+      "\t\t${0}",
+      "\t}",
       "}"
     ],
     "description": "Creates a basic PHP service class structure."
@@ -25,7 +25,7 @@
       "",
       "enum $TM_FILENAME_BASE: ${1}",
       "{",
-      "        ${0}",
+      "\t${0}",
       "}"
     ],
     "description": "Creates a basic PHP enum structure."

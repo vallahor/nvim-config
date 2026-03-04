@@ -130,13 +130,15 @@ return {
       vim.api.nvim_set_hl(0, "MultiCursorDisabledVisual", { link = "Visual" })
       vim.api.nvim_set_hl(0, "MultiCursorDisabledSign", { link = "SignColumn" })
 
-      -- mc.onSafeState(function()
-      --   local has_cursors = mc.hasCursors()
-      --   if vim.b.minicursorword_disable ~= has_cursors then
-      --     vim.b.minicursorword_disable = has_cursors
-      --     vim.api.nvim_exec_autocmds("CursorMoved", { buffer = 0 })
-      --   end
-      -- end)
+      if not vim.g.cur_word_underline then
+        mc.onSafeState(function()
+          local has_cursors = mc.hasCursors()
+          if vim.b.minicursorword_disable ~= has_cursors then
+            vim.b.minicursorword_disable = has_cursors
+            vim.api.nvim_exec_autocmds("CursorMoved", { buffer = 0 })
+          end
+        end)
+      end
     end,
   },
 }
