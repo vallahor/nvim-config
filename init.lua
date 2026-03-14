@@ -133,7 +133,15 @@ if vim.g.normal_kbd then
   vim.keymap.set("n", "<c-k>", "<cmd>wincmd k<cr>") -- move to window up
   vim.keymap.set("n", "<c-l>", "<cmd>wincmd l<cr>") -- move to window right
 else
-  vim.keymap.set({ "n", "v" }, "<c-s>", "<cmd>w!<cr><esc>") -- save file
+  vim.keymap.set({ "n", "v" }, "<c-s>", function()
+    require("conform").format({
+      quiet = true,
+      async = false,
+    })
+    vim.cmd("w!")
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
+  end) -- save file
+  vim.keymap.set({ "n", "v" }, "<c-s-s>", "<cmd>w!<cr><esc>") -- save file
 
   vim.keymap.set("n", "\\", "<cmd>clo<cr>") -- close current window
   vim.keymap.set("n", "|", "<cmd>vs<cr>") -- split vertical window
@@ -217,14 +225,14 @@ if vim.g.normal_kbd then
   vim.keymap.set("v", "<c-j>", ":m '>+1<CR>gv=gv")
   vim.keymap.set("v", "<c-k>", ":m '<-2<CR>gv=gv")
 else
-  -- vim.keymap.set("i", "<home>", beginning_of_the_line) -- go to beginning of the line
-  -- vim.keymap.set({ "n", "v" }, "<home>", beginning_of_the_line) -- go to beginning of the line
-  -- vim.keymap.set("n", "<end>", "$") -- go to end of line
-  -- vim.keymap.set("v", "<end>", "$h") -- go to end of line (for some reason it's goes to wrong place in visual mode)
   vim.keymap.set("i", "<home>", beginning_of_the_line) -- go to beginning of the line
-  vim.keymap.set({ "n", "v" }, "(", beginning_of_the_line) -- go to beginning of the line
-  vim.keymap.set("n", ")", "$") -- go to end of line
-  vim.keymap.set("v", ")", "$h") -- go to end of line (for some reason it's goes to wrong place in visual mode)
+  vim.keymap.set({ "n", "v" }, "<home>", beginning_of_the_line) -- go to beginning of the line
+  vim.keymap.set("n", "<end>", "$") -- go to end of line
+  vim.keymap.set("v", "<end>", "$h") -- go to end of line (for some reason it's goes to wrong place in visual mode)
+  -- vim.keymap.set("i", "<home>", beginning_of_the_line) -- go to beginning of the line
+  -- vim.keymap.set({ "n", "v" }, "(", beginning_of_the_line) -- go to beginning of the line
+  -- vim.keymap.set("n", ")", "$") -- go to end of line
+  -- vim.keymap.set("v", ")", "$h") -- go to end of line (for some reason it's goes to wrong place in visual mode)
 
   -- duplicate line and lines
   vim.keymap.set("n", "<c-c>", '"0yy"0p') -- duplicate line down
@@ -380,6 +388,7 @@ vim.filetype.add({
     ["*.vert"] = "glsl",
     ["*.frag"] = "glsl",
     ["*.geom"] = "glsl",
+    [".*%.blade%.php"] = "blade",
   },
 })
 
