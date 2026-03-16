@@ -142,6 +142,7 @@ else
     vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
   end) -- save file
   vim.keymap.set({ "n", "v" }, "<c-s-s>", "<cmd>w!<cr><esc>") -- save file
+  vim.keymap.set({ "n", "v" }, "<s-s>", "<cmd>w!<cr><esc>") -- save file
 
   vim.keymap.set("n", "\\", "<cmd>clo<cr>") -- close current window
   vim.keymap.set("n", "|", "<cmd>vs<cr>") -- split vertical window

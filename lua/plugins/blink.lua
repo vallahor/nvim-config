@@ -3,7 +3,7 @@ return {
     "saghen/blink.cmp",
     -- dependencies = { "nvim-web-devicons", "onsails/lspkind.nvim" },
     -- build = "cargo build --release",
-    version = "*",
+    version = "1.*",
     opts = {
       keymap = {
         preset = "none",
@@ -74,6 +74,7 @@ return {
       -- https://code.visualstudio.com/docs/editing/userdefinedsnippets
       sources = {
         default = { "lsp", "path", "snippets", "buffer" },
+        -- default = { "lsp", "path", "snippets", "buffer", "blade-nav" },
         -- default = { "path", "buffer" },
         providers = {
           lsp = {
