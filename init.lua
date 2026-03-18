@@ -287,6 +287,24 @@ vim.keymap.set({ "v", "x" }, "p", "P")
 
 vim.keymap.set("n", "<c-i>", "<c-i>")
 
+-- Lose the initial position
+-- https://pawelgrzybek.com/nvim-incremental-selection/
+-- vim.keymap.set({ "n", "x", "o" }, "M", function()
+--   if vim.treesitter.get_parser(nil, nil, { error = false }) then
+--     require("vim.treesitter._select").select_child(vim.v.count1)
+--   else
+--     vim.lsp.buf.selection_range(-vim.v.count1)
+--   end
+-- end)
+--
+-- vim.keymap.set({ "n", "x", "o" }, "m", function()
+--   if vim.treesitter.get_parser(nil, nil, { error = false }) then
+--     require("vim.treesitter._select").select_parent(vim.v.count1)
+--   else
+--     vim.lsp.buf.selection_range(vim.v.count1)
+--   end
+-- end)
+
 -- add mark after insert | <c-o> and <c-i>
 vim.api.nvim_create_autocmd("InsertEnter", {
   callback = function(_)

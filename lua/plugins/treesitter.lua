@@ -4,7 +4,7 @@ return {
     version = false,
     lazy = false,
     build = ":TSUpdate",
-    config = function(_, opts)
+    config = function()
       local treesitter = require("nvim-treesitter")
 
       treesitter.setup({
@@ -99,5 +99,22 @@ return {
     config = function()
       require("nvim-ts-autotag").setup({})
     end,
+  },
+  {
+    {
+      "MeanderingProgrammer/treesitter-modules.nvim",
+      dependencies = { "nvim-treesitter/nvim-treesitter" },
+      opts = {
+        incremental_selection = {
+          enable = true,
+          keymaps = {
+            init_selection = "m",
+            node_incremental = "m",
+            node_decremental = "M",
+            scope_incremental = "<nop>",
+          },
+        },
+      },
+    },
   },
 }
