@@ -127,7 +127,7 @@ return {
       })
 
       vim.lsp.config("html", {
-        filetypes = { "html", "heex", "eex", "elixir" },
+        filetypes = { "html", "heex", "eex", "elixir", "blade" },
       })
 
       vim.lsp.config("laravel_ls", {})
