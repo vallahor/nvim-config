@@ -1,39 +1,8 @@
 return {
   {
     "echasnovski/mini.nvim",
-    dependencies = {
-      { "JoosepAlviste/nvim-ts-context-commentstring", lazy = true },
-    },
     version = false,
     config = function()
-      -- Comment
-      require("mini.comment").setup({
-        options = {
-          ignore_blank_line = true,
-          custom_commentstring = function()
-            return require("ts_context_commentstring.internal").calculate_commentstring() or vim.bo.commentstring
-          end,
-        },
-        hooks = {
-          pre = function()
-            require("ts_context_commentstring.internal").update_commentstring({})
-          end,
-        },
-        mappings = {
-          comment = "gc",
-          comment_line = "gc",
-          comment_visual = "gc",
-        },
-      })
-
-      vim.cmd([[
-          autocmd FileType gdscript setlocal commentstring=#\ %s
-          autocmd FileType c setlocal commentstring=//\ %s
-          autocmd FileType cs setlocal commentstring=//\ %s
-          autocmd FileType cpp setlocal commentstring=//\ %s
-          autocmd FileType odin setlocal commentstring=//\ %s
-      ]])
-
       -- Statusline
 
       -- https://github.com/echasnovski/mini.nvim/blob/main/lua/mini/statusline.lua#L557

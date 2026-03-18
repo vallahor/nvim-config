@@ -181,7 +181,7 @@ return {
           "tailwindcss",
           "vtsls",
           "vue_ls",
-          -- "svelte",
+          "svelte",
         },
         automatic_enable = {
           exclude = { "ruff", "intelephense", "laravel_ls" },

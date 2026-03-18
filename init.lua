@@ -102,6 +102,10 @@ end
 
 vim.keymap.set("n", "<esc>", esc_normal_mode)
 
+vim.keymap.set("n", "gc", function()
+  vim.cmd.norm("gcc")
+end, { noremap = true, silent = true })
+
 vim.keymap.set({ "i", "s" }, "<esc>", function()
   vim.snippet.stop()
   return "<esc>"
