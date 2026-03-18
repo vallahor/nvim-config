@@ -78,8 +78,6 @@ return {
       vim.cmd([[
           autocmd BufRead *.scm set filetype=query
       ]])
-
-      -- require("nvim-treesitter.configs").setup(opts)
     end,
   },
   {
