@@ -1,77 +1,63 @@
 return {
   {
     "nvim-treesitter/nvim-treesitter",
-    version = false,
     lazy = false,
     build = ":TSUpdate",
     config = function()
+      local languages = {
+        "bash",
+        "blade",
+        "c",
+        "cpp",
+        "css",
+        "gdscript",
+        "gdshader",
+        "godot_resource",
+        "html",
+        "javascript",
+        "json",
+        "lua",
+        "markdown",
+        "markdown_inline",
+        "nu",
+        "hyprlang",
+        "odin",
+        "php",
+        "php_only",
+        "phpdoc",
+        "python",
+        "rust",
+        "svelte",
+        "tsx",
+        "typescript",
+        "vim",
+        "vimdoc",
+        "zig",
+      }
       local treesitter = require("nvim-treesitter")
+      treesitter.install(languages)
 
-      treesitter.setup({
-        ensure_installed = {
-          "bash",
-          "blade",
-          "c",
-          "cpp",
-          "css",
-          "gdscript",
-          "gdshader",
-          "godot_resource",
-          "html",
-          "javascript",
-          "json",
-          "lua",
-          "markdown",
-          "markdown_inline",
-          "nu",
-          "hyprlang",
-          "odin",
-          "php",
-          "php_only",
-          "phpdoc",
-          "python",
-          "rust",
-          "svelte",
-          "tsx",
-          "typescript",
-          "vim",
-          "vimdoc",
-          "zig",
-        },
-        highlight = {
-          enable = true,
-        },
-        indent = {
-          enable = true,
-          disable = {
-            "cpp",
-            "gdscript",
-            "odin",
-            "python",
-            "rust",
-            "zig",
-          },
-        },
-        incremental_selection = {
-          enable = true,
-          keymaps = {
-            init_selection = "m",
-            node_incremental = "m",
-            node_decremental = "M",
-            scope_incremental = "<nop>",
-          },
-        },
-        -- disable auto install of languages when opening files
-        auto_install = false,
-        -- disable for files bigger than 100 KB
-        disable = function(_, buf)
-          local max_filesize = 100 * 1024 -- 100 KB
-          local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
-          if ok and stats and stats.size > max_filesize then
-            return true
-          end
+      local languages_disable_indent = {
+        "cpp",
+        "gdscript",
+        "odin",
+        "python",
+        "rust",
+        "zig",
+      }
+
+      languages = vim.tbl_filter(function(lang)
+        return not languages_disable_indent[lang]
+      end, languages)
+
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = languages,
+        callback = function()
+          vim.treesitter.start()
+          vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
         end,
       })
+
       -- require("nvim-treesitter.install").compilers = { "clang" }
       require("nvim-treesitter.install").compilers = { "zig" }
 
