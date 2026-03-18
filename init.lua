@@ -226,14 +226,14 @@ if vim.g.normal_kbd then
   vim.keymap.set("v", "<c-j>", ":m '>+1<CR>gv=gv")
   vim.keymap.set("v", "<c-k>", ":m '<-2<CR>gv=gv")
 else
-  vim.keymap.set("i", "<home>", beginning_of_the_line) -- go to beginning of the line
-  vim.keymap.set({ "n", "v" }, "<home>", beginning_of_the_line) -- go to beginning of the line
-  vim.keymap.set("n", "<end>", "$") -- go to end of line
-  vim.keymap.set("v", "<end>", "$h") -- go to end of line (for some reason it's goes to wrong place in visual mode)
   -- vim.keymap.set("i", "<home>", beginning_of_the_line) -- go to beginning of the line
-  -- vim.keymap.set({ "n", "v" }, "(", beginning_of_the_line) -- go to beginning of the line
-  -- vim.keymap.set("n", ")", "$") -- go to end of line
-  -- vim.keymap.set("v", ")", "$h") -- go to end of line (for some reason it's goes to wrong place in visual mode)
+  -- vim.keymap.set({ "n", "v" }, "<home>", beginning_of_the_line) -- go to beginning of the line
+  -- vim.keymap.set("n", "<end>", "$") -- go to end of line
+  -- vim.keymap.set("v", "<end>", "$h") -- go to end of line (for some reason it's goes to wrong place in visual mode)
+  vim.keymap.set("i", "<home>", beginning_of_the_line) -- go to beginning of the line
+  vim.keymap.set({ "n", "v" }, "(", beginning_of_the_line) -- go to beginning of the line
+  vim.keymap.set("n", ")", "$") -- go to end of line
+  vim.keymap.set("v", ")", "$h") -- go to end of line (for some reason it's goes to wrong place in visual mode)
 
   -- duplicate line and lines
   vim.keymap.set("n", "<c-c>", '"0yy"0p') -- duplicate line down
