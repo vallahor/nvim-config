@@ -4,25 +4,9 @@ return {
     event = { "BufReadPre", "BufNewFile" },
     config = function()
       local capabilities = require("blink.cmp").get_lsp_capabilities()
-      -- local on_attach = function(_, bufnr)
-      --   if vim.lsp.document_color then
-      --     vim.lsp.document_color.enable(true, bufnr, {
-      --       style = "virtual",
-      --     })
-      --   end
 
-      --   local opts = { buffer = bufnr }
-      --   vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
-      --   vim.keymap.set("n", "<c-a>", vim.lsp.buf.code_action, opts)
-      --   vim.keymap.set("n", "K", function()
-      --     vim.lsp.buf.hover({ silent = true })
-      --   end, opts)
-      --   vim.keymap.set("n", "&", vim.diagnostic.open_float, opts)
-      --   vim.keymap.set("n", "<f2>", vim.lsp.buf.rename, opts)
-      -- end
       vim.lsp.config("*", {
         capabilities = capabilities,
-        -- on_attach = on_attach,
       })
 
       local lsp_augroup = vim.api.nvim_create_augroup("UserLspConfig", { clear = true })
@@ -49,16 +33,16 @@ return {
 
       vim.lsp.enable({ "gdscript", "nushell", "rust_analyzer", "laravel_ls", "intelephense", "svelte" })
 
-      -- vim.lsp.semantic_tokens.enable(false)
-      vim.api.nvim_create_autocmd("LspAttach", {
-        callback = function(ev)
-          local client = vim.lsp.get_client_by_id(ev.data.client_id)
-          if client then
-            -- local bufnr = ev.buf
-            client.server_capabilities.semanticTokensProvider = nil
-          end
-        end,
-      })
+      vim.lsp.semantic_tokens.enable(false)
+      -- vim.api.nvim_create_autocmd("LspAttach", {
+      --   callback = function(ev)
+      --     local client = vim.lsp.get_client_by_id(ev.data.client_id)
+      --     if client then
+      --       -- local bufnr = ev.buf
+      --       client.server_capabilities.semanticTokensProvider = nil
+      --     end
+      --   end,
+      -- })
 
       local port = os.getenv("GDScript_Port") or "6005"
       vim.lsp.config("gdscript", {

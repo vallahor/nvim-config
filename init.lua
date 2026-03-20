@@ -541,36 +541,26 @@ vim.api.nvim_set_hl(0, "CursorVisualNr", { fg = "#a1495c", bg = "#2d1524" })
 vim.api.nvim_set_hl(0, "VisualNr", { fg = "#493441", bg = "#2d1524" })
 vim.o.statuscolumn = "%!v:lua.StatusColumn()"
 
-local function in_visual_mode()
-  local m = vim.fn.mode()
-  return m == "v" or m == "V" or m == "\x16"
-end
-
-local function line_in_visual(lnum)
-  local v1 = vim.fn.getpos("v")[2]
-  local v2 = vim.fn.getpos(".")[2]
-  local start = math.min(v1, v2)
-  local finish = math.max(v1, v2)
-
-  return lnum >= start and lnum <= finish
-end
-
 function _G.StatusColumn()
-  local lnum = vim.v.lnum
-  local cur = vim.fn.line(".")
+  local relnum = vim.v.relnum
+  local m = vim.fn.mode()
+  local in_visual = m == "v" or m == "V" or m == "\x16"
 
-  local rel = math.abs(lnum - cur)
-
-  local in_visual = in_visual_mode()
-
-  local hl
-  if lnum == cur then
-    hl = (in_visual and "%#CursorVisualNr#") or "%#CursorLineNr#"
-  elseif in_visual and line_in_visual(lnum) then
-    hl = "%#VisualNr#"
-  else
-    hl = "%#LineNr#"
+  local hl = "%#LineNr#"
+  if relnum == 0 then
+    if in_visual and vim.g.statusline_winid == vim.api.nvim_get_current_win() then
+      hl = "%#CursorVisualNr#"
+    else
+      hl = "%#CursorLineNr#"
+    end
+  elseif in_visual then
+    local lnum = vim.v.lnum
+    local v1 = vim.fn.getpos("v")[2]
+    local v2 = vim.fn.getpos(".")[2]
+    if (lnum >= v1 and lnum <= v2) or (lnum >= v2 and lnum <= v1) then
+      hl = "%#VisualNr#"
+    end
   end
 
-  return hl .. string.format("%3d ", rel)
+  return hl .. string.format("%3d ", vim.v.relnum)
 end
