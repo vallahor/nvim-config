@@ -102,8 +102,10 @@ end
 
 vim.keymap.set("n", "<esc>", esc_normal_mode)
 
+vim.keymap.del("n", "gcc")
 vim.keymap.set("n", "gc", function()
-  vim.cmd.norm("gcc")
+  local row = vim.api.nvim_win_get_cursor(0)[1]
+  require("vim._comment").toggle_lines(row, row)
 end, { noremap = true, silent = true })
 
 vim.keymap.set({ "i", "s" }, "<esc>", function()
@@ -541,10 +543,16 @@ vim.api.nvim_set_hl(0, "CursorVisualNr", { fg = "#a1495c", bg = "#2d1524" })
 vim.api.nvim_set_hl(0, "VisualNr", { fg = "#493441", bg = "#2d1524" })
 vim.o.statuscolumn = "%!v:lua.StatusColumn()"
 
+local in_visual = false
+vim.api.nvim_create_autocmd("ModeChanged", {
+  callback = function()
+    local m = vim.fn.mode()
+    in_visual = m == "v" or m == "V" or m == "\x16"
+  end,
+})
+
 function _G.StatusColumn()
   local relnum = vim.v.relnum
-  local m = vim.fn.mode()
-  local in_visual = m == "v" or m == "V" or m == "\x16"
 
   local hl = "%#LineNr#"
   if relnum == 0 then
