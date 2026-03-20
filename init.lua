@@ -275,6 +275,7 @@ vim.keymap.set("n", "K", "<nop>")
 -- vim.keymap.set("i", "<enter>", "<c-g>u<enter>")
 -- vim.keymap.set("i", "<tab>", "<c-g>u<tab>")
 -- vim.keymap.set("i", "<bs>", "<c-g>u<bs>")
+-- vim.keymap.set("i", "<c-bs>", "<c-g>u<c-bs>")
 -- vim.keymap.set("i", "[", "[<c-g>u")
 -- vim.keymap.set("i", "{", "{<c-g>u")
 -- vim.keymap.set("i", "(", "(<c-g>u")
@@ -505,10 +506,7 @@ vim.api.nvim_create_autocmd("VimLeavePre", {
 -- vim.api.nvim_set_hl(0, "DiagnosticNumhlInfo", { fg = "#5d595d" })
 -- vim.api.nvim_set_hl(0, "DiagnosticNumhlHint", { fg = "#5d595d" })
 
--- vim.diagnostic.enable(false)
-
 vim.diagnostic.config({
-  -- virtual_text = false,
   virtual_text = {
     prefix = "",
   },

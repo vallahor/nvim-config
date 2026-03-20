@@ -73,8 +73,8 @@ return {
 
       -- https://code.visualstudio.com/docs/editing/userdefinedsnippets
       sources = {
-        default = { "lsp", "path", "snippets", "buffer" },
-        -- default = { "lsp", "path", "snippets", "buffer", "blade-nav" },
+        -- default = { "lsp", "path", "snippets", "buffer" },
+        default = { "lsp", "path", "snippets", "buffer", "blade-nav" },
         -- default = { "path", "buffer" },
         providers = {
           lsp = {
@@ -101,6 +101,12 @@ return {
               get_cwd = function(_)
                 return vim.fn.getcwd()
               end,
+            },
+          },
+          ["blade-nav"] = {
+            module = "blade-nav.blink",
+            opts = {
+              close_tag_on_complete = true, -- default: true,
             },
           },
         },

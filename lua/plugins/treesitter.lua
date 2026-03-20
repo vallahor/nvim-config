@@ -47,15 +47,22 @@ return {
         "zig",
       }
 
-      languages = vim.tbl_filter(function(lang)
-        return not disable_indent[lang]
-      end, languages)
+      local filetype_map = { tsx = { "typescriptreact", "javascriptreact" } }
 
       vim.api.nvim_create_autocmd("FileType", {
-        pattern = languages,
-        callback = function()
+        pattern = vim
+          .iter(languages)
+          :map(function(l)
+            return filetype_map[l] or l
+          end)
+          :flatten()
+          :totable(),
+        callback = function(ev)
           vim.treesitter.start()
-          vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+          local lang = vim.bo[ev.buf].filetype
+          if not disable_indent[lang] then
+            vim.bo[ev.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+          end
         end,
       })
 

@@ -20,6 +20,11 @@ return {
             })
           end
 
+          local client = vim.lsp.get_client_by_id(args.data.client_id)
+          if client then
+            client.server_capabilities.semanticTokensProvider = nil
+          end
+
           local opts = { buffer = bufnr }
           vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
           vim.keymap.set("n", "<c-a>", vim.lsp.buf.code_action, opts)
