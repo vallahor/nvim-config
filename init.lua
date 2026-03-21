@@ -290,24 +290,6 @@ vim.keymap.set({ "v", "x" }, "p", "P")
 
 vim.keymap.set("n", "<c-i>", "<c-i>")
 
--- Lose the initial position
--- https://pawelgrzybek.com/nvim-incremental-selection/
--- vim.keymap.set({ "n", "x", "o" }, "M", function()
---   if vim.treesitter.get_parser(nil, nil, { error = false }) then
---     require("vim.treesitter._select").select_child(vim.v.count1)
---   else
---     vim.lsp.buf.selection_range(-vim.v.count1)
---   end
--- end)
---
--- vim.keymap.set({ "n", "x", "o" }, "m", function()
---   if vim.treesitter.get_parser(nil, nil, { error = false }) then
---     require("vim.treesitter._select").select_parent(vim.v.count1)
---   else
---     vim.lsp.buf.selection_range(vim.v.count1)
---   end
--- end)
-
 -- add mark after insert | <c-o> and <c-i>
 vim.api.nvim_create_autocmd("InsertEnter", {
   callback = function(_)
@@ -570,3 +552,45 @@ function _G.StatusColumn()
 
   return hl .. string.format("%3d ", vim.v.relnum)
 end
+
+-- https://pawelgrzybek.com/nvim-incremental-selection/
+local _select = require("vim.treesitter._select")
+local stack = {}
+local esc = vim.keycode("<Esc>")
+local ctrlv = vim.keycode("<C-\\><C-n>v")
+local feedkeys = vim.api.nvim_feedkeys
+local setcursor = vim.api.nvim_win_set_cursor
+local getmode = vim.api.nvim_get_mode
+
+local function decrement_selection()
+  local r = stack[#stack]
+  stack[#stack] = nil
+  if not r or #stack == 0 then
+    stack = {}
+    feedkeys(esc, "nx", true)
+    if r then
+      setcursor(0, { r[1] + 1, r[2] })
+    end
+    return
+  end
+  setcursor(0, { r[1] + 1, r[2] })
+  feedkeys(ctrlv, "nx", true)
+  if not pcall(setcursor, 0, { r[3] + 1, r[4] - 1 }) then
+    setcursor(0, { r[3], #vim.fn.getline(r[3]) })
+  end
+end
+
+local function increment_selection()
+  if getmode().mode ~= "v" then
+    stack = {}
+  end
+  local p1, p2 = vim.fn.getpos("v"), vim.fn.getpos(".")
+  if p1[2] > p2[2] or (p1[2] == p2[2] and p1[3] > p2[3]) then
+    p1, p2 = p2, p1
+  end
+  stack[#stack + 1] = { p1[2] - 1, p1[3] - 1, p2[2] - 1, p2[3] }
+  _select.select_parent(vim.v.count1)
+end
+
+vim.keymap.set({ "n", "x", "o" }, "m", increment_selection)
+vim.keymap.set({ "n", "x", "o" }, "M", decrement_selection)
