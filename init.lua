@@ -568,15 +568,13 @@ local function decrement_selection()
   if not range or #stack == 0 then
     stack = {}
     vim.api.nvim_feedkeys(esc, "nx", true)
-    if range then
-      vim.api.nvim_win_set_cursor(0, { range[1] + 1, range[2] })
-    end
     return
   end
-  vim.api.nvim_win_set_cursor(0, { range[1] + 1, range[2] })
+  local srow, scol, erow, ecol = range[1], range[2], range[3], range[4]
+  vim.api.nvim_win_set_cursor(0, { srow + 1, scol })
   vim.api.nvim_feedkeys(ctrlv, "nx", true)
-  if not pcall(vim.api.nvim_win_set_cursor, 0, { range[3] + 1, range[4] - 1 }) then
-    vim.api.nvim_win_set_cursor(0, { range[3], #vim.fn.getline(range[3]) })
+  if not pcall(vim.api.nvim_win_set_cursor, 0, { erow + 1, ecol - 1 }) then
+    vim.api.nvim_win_set_cursor(0, { erow, #vim.fn.getline(erow) })
   end
 end
 
