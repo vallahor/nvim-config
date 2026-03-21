@@ -16,7 +16,9 @@ return {
           local bufnr = args.buf
           if vim.lsp.document_color then
             vim.lsp.document_color.enable(true, { bufnr = bufnr }, {
-              style = "virtual",
+              -- style = "virtual",
+              style = "● ",
+              -- style = "■ ",
             })
           end
 
