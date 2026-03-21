@@ -15,7 +15,7 @@ return {
         callback = function(args)
           local bufnr = args.buf
           if vim.lsp.document_color then
-            vim.lsp.document_color.enable(true, bufnr, {
+            vim.lsp.document_color.enable(true, { bufnr = bufnr }, {
               style = "virtual",
             })
           end
