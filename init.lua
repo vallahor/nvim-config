@@ -560,7 +560,10 @@ local esc = vim.keycode("<Esc>")
 local ctrlv = vim.keycode("<C-\\><C-n>v")
 
 local function decrement_selection()
-  local r = stack[#stack]
+  if vim.api.nvim_get_mode().mode ~= "v" then
+    return
+  end
+  local range = stack[#stack]
   stack[#stack] = nil
   if not range or #stack == 0 then
     stack = {}
