@@ -558,30 +558,27 @@ local _select = require("vim.treesitter._select")
 local stack = {}
 local esc = vim.keycode("<Esc>")
 local ctrlv = vim.keycode("<C-\\><C-n>v")
-local feedkeys = vim.api.nvim_feedkeys
-local setcursor = vim.api.nvim_win_set_cursor
-local getmode = vim.api.nvim_get_mode
 
 local function decrement_selection()
   local r = stack[#stack]
   stack[#stack] = nil
   if not r or #stack == 0 then
     stack = {}
-    feedkeys(esc, "nx", true)
+    vim.api.nvim_feedkeys(esc, "nx", true)
     if r then
-      setcursor(0, { r[1] + 1, r[2] })
+      vim.api.nvim_win_set_cursor(0, { r[1] + 1, r[2] })
     end
     return
   end
-  setcursor(0, { r[1] + 1, r[2] })
-  feedkeys(ctrlv, "nx", true)
-  if not pcall(setcursor, 0, { r[3] + 1, r[4] - 1 }) then
-    setcursor(0, { r[3], #vim.fn.getline(r[3]) })
+  vim.api.nvim_win_set_cursor(0, { r[1] + 1, r[2] })
+  vim.api.nvim_feedkeys(ctrlv, "nx", true)
+  if not pcall(vim.api.nvim_win_set_cursor, 0, { r[3] + 1, r[4] - 1 }) then
+    vim.api.nvim_win_set_cursor(0, { r[3], #vim.fn.getline(r[3]) })
   end
 end
 
 local function increment_selection()
-  if getmode().mode ~= "v" then
+  if vim.api.nvim_get_mode().mode ~= "v" then
     stack = {}
   end
   local p1, p2 = vim.fn.getpos("v"), vim.fn.getpos(".")
