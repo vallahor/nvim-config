@@ -562,18 +562,18 @@ local ctrlv = vim.keycode("<C-\\><C-n>v")
 local function decrement_selection()
   local r = stack[#stack]
   stack[#stack] = nil
-  if not r or #stack == 0 then
+  if not range or #stack == 0 then
     stack = {}
     vim.api.nvim_feedkeys(esc, "nx", true)
-    if r then
-      vim.api.nvim_win_set_cursor(0, { r[1] + 1, r[2] })
+    if range then
+      vim.api.nvim_win_set_cursor(0, { range[1] + 1, range[2] })
     end
     return
   end
-  vim.api.nvim_win_set_cursor(0, { r[1] + 1, r[2] })
+  vim.api.nvim_win_set_cursor(0, { range[1] + 1, range[2] })
   vim.api.nvim_feedkeys(ctrlv, "nx", true)
-  if not pcall(vim.api.nvim_win_set_cursor, 0, { r[3] + 1, r[4] - 1 }) then
-    vim.api.nvim_win_set_cursor(0, { r[3], #vim.fn.getline(r[3]) })
+  if not pcall(vim.api.nvim_win_set_cursor, 0, { range[3] + 1, range[4] - 1 }) then
+    vim.api.nvim_win_set_cursor(0, { range[3], #vim.fn.getline(range[3]) })
   end
 end
 
