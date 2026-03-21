@@ -544,7 +544,7 @@ vim.o.statuscolumn = "%!v:lua.StatusColumn()"
 local in_visual = false
 vim.api.nvim_create_autocmd("ModeChanged", {
   callback = function()
-    local m = vim.fn.mode()
+    local m = vim.api.nvim_get_mode().mode
     in_visual = m == "v" or m == "V" or m == "\x16"
   end,
 })
