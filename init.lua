@@ -584,11 +584,12 @@ local function increment_selection()
   if vim.api.nvim_get_mode().mode ~= "v" then
     stack = {}
   end
-  local p1, p2 = vim.fn.getpos("v"), vim.fn.getpos(".")
-  if p1[2] > p2[2] or (p1[2] == p2[2] and p1[3] > p2[3]) then
-    p1, p2 = p2, p1
+  local vline, vcol = vim.fn.line("v"), vim.fn.col("v")
+  local cline, ccol = vim.fn.line("."), vim.fn.col(".")
+  if vline > cline or (vline == cline and vcol > ccol) then
+    vline, vcol, cline, ccol = cline, ccol, vline, vcol
   end
-  stack[#stack + 1] = { p1[2] - 1, p1[3] - 1, p2[2] - 1, p2[3] }
+  stack[#stack + 1] = { vline - 1, vcol - 1, cline - 1, ccol }
   _select.select_parent(vim.v.count1)
 end
 
