@@ -543,8 +543,8 @@ function _G.StatusColumn()
     end
   elseif in_visual then
     local lnum = vim.v.lnum
-    local v1 = vim.fn.getpos("v")[2]
-    local v2 = vim.fn.getpos(".")[2]
+    local v1 = vim.fn.line("v")
+    local v2 = vim.fn.line(".")
     if (lnum >= v1 and lnum <= v2) or (lnum >= v2 and lnum <= v1) then
       hl = "%#VisualNr#"
     end
