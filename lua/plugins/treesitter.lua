@@ -17,6 +17,7 @@ return {
         "javascript",
         "json",
         "lua",
+        "luadoc",
         "markdown",
         "markdown_inline",
         "nu",
@@ -47,21 +48,15 @@ return {
         "zig",
       }
 
-      local filetype_map = { tsx = { "typescriptreact", "javascriptreact" } }
-
       vim.api.nvim_create_autocmd("FileType", {
-        pattern = vim
-          .iter(languages)
-          :map(function(l)
-            return filetype_map[l] or l
-          end)
-          :flatten()
-          :totable(),
+        pattern = "*",
         callback = function(ev)
-          vim.treesitter.start()
-          local lang = vim.bo[ev.buf].filetype
-          if not disable_indent[lang] then
-            vim.bo[ev.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+          if vim.treesitter.get_parser(nil, nil, { error = false }) then
+            vim.treesitter.start()
+            local lang = vim.bo[ev.buf].filetype
+            if not disable_indent[lang] then
+              vim.bo[ev.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+            end
           end
         end,
       })
