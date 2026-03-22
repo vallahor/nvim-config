@@ -600,5 +600,5 @@ vim.keymap.set({ "n", "x", "o" }, "m", increment_selection)
 vim.keymap.set({ "n", "x", "o" }, "M", decrement_selection)
 vim.keymap.set("x", "<Esc>", function()
   stack = {}
-  vim.cmd("normal! \27")
+  vim.api.nvim_feedkeys(esc, "nx", true)
 end)
