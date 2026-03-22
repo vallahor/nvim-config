@@ -565,9 +565,11 @@ local function decrement_selection()
   end
   local range = stack[#stack]
   stack[#stack] = nil
-  if not range or #stack == 0 then
-    stack = {}
+  if #stack == 0 then
     vim.api.nvim_feedkeys(esc, "nx", true)
+    if range then
+      vim.api.nvim_win_set_cursor(0, { range[1] + 1, range[2] })
+    end
     return
   end
   local srow, scol, erow, ecol = range[1], range[2], range[3], range[4]
@@ -579,6 +581,9 @@ local function decrement_selection()
 end
 
 local function increment_selection()
+  if not vim.treesitter.get_parser(nil, nil, { error = false }) then
+    return
+  end
   if vim.api.nvim_get_mode().mode ~= "v" then
     stack = {}
   end
