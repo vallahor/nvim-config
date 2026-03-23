@@ -12,6 +12,7 @@ return {
 
         local errors_fg = get_hex("DiagnosticError", "fg")
         local warning_fg = get_hex("DiagnosticWarn", "fg")
+        local win_sep_fg = get_hex("WinSeparator", "fg")
 
         local label = "Explorer" -- or any text you want, e.g. " Explorer"
         local label_len = vim.fn.strwidth(label)
@@ -48,6 +49,20 @@ return {
             },
           },
           components = {
+            {
+              text = function(buffer)
+                if view.is_visible() and buffer.is_first then
+                  return "│"
+                end
+                return ""
+              end,
+              fg = function()
+                return win_sep_fg
+              end,
+              bg = function()
+                return "#191319"
+              end,
+            },
             {
               text = " ",
               bg = function(buffer)
