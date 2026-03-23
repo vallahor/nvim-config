@@ -14,7 +14,7 @@ return {
         local warning_fg = get_hex("DiagnosticWarn", "fg")
         local win_sep_fg = get_hex("WinSeparator", "fg")
 
-        local label = "Explorer" -- or any text you want, e.g. " Explorer"
+        local label = "Explorer"
         local label_len = vim.fn.strwidth(label)
         local ok_view, view = pcall(require, "nvim-tree.view")
 
@@ -38,7 +38,6 @@ return {
                   end
                 end,
                 fg = get_hex("Normal", "fg"),
-                -- bg = get_hex("StatusLineNC", "bg"),
                 bg = function(buffer)
                   if buffer.is_focused then
                     return "#3f303f"
