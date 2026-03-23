@@ -121,15 +121,22 @@ return {
         end)
       end)
 
-      -- vim.api.nvim_set_hl(0, "MultiCursorCursor", { link = "Cursor" })
-      vim.api.nvim_set_hl(0, "MultiCursorVisual", { link = "Visual", conceal = true })
-      vim.api.nvim_set_hl(0, "MultiCursorCursor", { bg = "#222022", fg = "#A98D92", reverse = true })
+      vim.api.nvim_set_hl(0, "MultiCursorCursor", { link = "Cursor" })
+      vim.api.nvim_set_hl(0, "MultiCursorVisual", { link = "Visual" })
+      -- vim.api.nvim_set_hl(0, "MultiCursorVisual", { reverse = true })
       -- vim.api.nvim_set_hl(0, "MultiCursorVisual", { fg = "#2d1524", bg = "#A98D92", reverse = true })
       vim.api.nvim_set_hl(0, "MultiCursorSign", { link = "SignColumn" })
       vim.api.nvim_set_hl(0, "MultiCursorMatchPreview", { link = "Search" })
       vim.api.nvim_set_hl(0, "MultiCursorDisabledCursor", { reverse = true })
       vim.api.nvim_set_hl(0, "MultiCursorDisabledVisual", { link = "Visual" })
       vim.api.nvim_set_hl(0, "MultiCursorDisabledSign", { link = "SignColumn" })
+
+      -- mc.onSafeState(function()
+      --   local ft = vim.bo.filetype
+      --   if ft == "NvimTree" or ft == "neo-tree" or ft == "SidebarNvim" then
+      --     return
+      --   end
+      -- end)
 
       local mc_ns = nil
       local mc_match_ids = {}
