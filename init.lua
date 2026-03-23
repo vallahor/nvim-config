@@ -508,7 +508,6 @@ vim.diagnostic.config({
   float = {
     show_header = false,
   },
-  -- severity_sort = true,
   jump = {
     on_jump = function() end,
   },
@@ -537,6 +536,12 @@ vim.api.nvim_set_hl(0, "CursorVisualNr", { fg = "#a1495c", bg = "#2d1524" })
 vim.api.nvim_set_hl(0, "VisualNr", { fg = "#493441", bg = "#2d1524" })
 vim.o.statuscolumn = "%!v:lua.StatusColumn()"
 
+local numhl = vim.diagnostic.config().signs.numhl or {}
+local numhl_map = {}
+for severity, hl_name in pairs(numhl) do
+  numhl_map[severity] = "%#" .. hl_name .. "#"
+end
+
 local in_visual = false
 local has_cursors = false
 local mc = require("multicursor-nvim")
@@ -548,38 +553,32 @@ vim.api.nvim_create_autocmd("ModeChanged", {
   end,
 })
 
-local numhl_map = {
-  [vim.diagnostic.severity.ERROR] = "%#DiagnosticNumhlError#",
-  [vim.diagnostic.severity.WARN] = "%#DiagnosticNumhlWarn#",
-  [vim.diagnostic.severity.INFO] = "%#DiagnosticNumhlInfo#",
-  [vim.diagnostic.severity.HINT] = "%#DiagnosticNumhlHint#",
-}
-
-function _G.StatusColumn()
-  local relnum = vim.v.relnum
-
-  local hl = "%#LineNr#"
-  if relnum == 0 then
+local get_linenr_color = function()
+  if vim.v.relnum == 0 then
     if in_visual and vim.g.statusline_winid == vim.api.nvim_get_current_win() and not has_cursors then
-      hl = "%#CursorVisualNr#"
+      return "%#CursorVisualNr#"
     else
-      hl = "%#CursorLineNr#"
+      return "%#CursorLineNr#"
     end
   elseif in_visual and not has_cursors then
     local lnum = vim.v.lnum
     local v1 = vim.fn.line("v")
     local v2 = vim.fn.line(".")
     if (lnum >= v1 and lnum <= v2) or (lnum >= v2 and lnum <= v1) then
-      hl = "%#VisualNr#"
-    end
-  else
-    local diags = vim.diagnostic.get(vim.api.nvim_win_get_buf(vim.g.statusline_winid), { lnum = vim.v.lnum - 1 })
-    if #diags > 0 then
-      hl = numhl_map[diags[#diags].severity]
+      return "%#VisualNr#"
     end
   end
 
-  return hl .. string.format("%3d ", vim.v.relnum)
+  local diags = vim.diagnostic.get(vim.api.nvim_win_get_buf(vim.g.statusline_winid), { lnum = vim.v.lnum - 1 })
+  if #diags > 0 then
+    return numhl_map[diags[#diags].severity]
+  end
+
+  return "%#LineNr#"
+end
+
+function _G.StatusColumn()
+  return get_linenr_color() .. string.format("%3d ", vim.v.relnum)
 end
 
 -- https://pawelgrzybek.com/nvim-incremental-selection/
