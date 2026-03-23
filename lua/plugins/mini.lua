@@ -30,13 +30,6 @@ return {
         end,
       })
 
-      vim.api.nvim_create_autocmd("FileType", {
-        pattern = { "NvimTree", "neo-tree", "SidebarNvim" },
-        callback = function()
-          vim.b.ministatusline_disable = true
-        end,
-      })
-
       local MiniStatusline = require("mini.statusline")
       local location = "L%l/%L C%c"
       local get_filename = function()
@@ -107,61 +100,27 @@ return {
         delay = 0,
       })
 
-      vim.api.nvim_create_autocmd(
-        "FileType",
-        { pattern = { "NvimTree" }, command = "lua vim.b.minicursorword_disable=true" }
-      )
+      vim.api.nvim_set_hl(0, "MiniCursorword", {
+        sp = "none",
+        fg = "none",
+        bg = "#2D2829",
+      })
+      vim.api.nvim_set_hl(0, "MiniCursorwordCurrent", {
+        sp = "none",
+        fg = "none",
+        bg = "#2D2829",
+      })
 
-      vim.cmd([[
-        " hi MiniCursorword        guisp=none guifg=none guibg=#1c212f gui=none
-        " hi MiniCursorwordCurrent guisp=none guifg=none guibg=#1c212f gui=none
-        hi MiniCursorword        guisp=none guifg=none guibg=#2D2829 gui=none
-        hi MiniCursorwordCurrent guisp=none guifg=none guibg=#2D2829 gui=none
-        " hi MiniCursorword        guisp=#87787b guifg=none guibg=none gui=underline
-        " hi MiniCursorwordCurrent guisp=#87787b guifg=none guibg=none gui=underline
-      ]])
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = { "NvimTree", "neo-tree", "SidebarNvim" },
+        callback = function()
+          vim.b.ministatusline_disable = true
+          vim.b.minicursorword_disable = true
+        end,
+      })
 
       -- Picker
       local pick = require("mini.pick")
-      pick.setup({
-        mappings = {
-          caret_left = "<Left>",
-          caret_right = "<Right>",
-
-          choose = "<CR>",
-          choose_in_split = "",
-          choose_in_tabpage = "",
-          choose_in_vsplit = "",
-          choose_marked = "",
-
-          delete_char = "<BS>",
-          delete_char_right = "<Del>",
-          delete_left = "",
-          delete_word = "<C-bs>",
-
-          mark = "",
-          mark_all = "",
-
-          move_down = "<down>",
-          move_start = "<pageup>",
-          move_up = "<up>",
-
-          paste = "<c-v>",
-
-          refine = "",
-          refine_marked = "",
-
-          scroll_down = "<PageDown>",
-          scroll_left = "<c-left>",
-          scroll_right = "<c-right>",
-          scroll_up = "<PageUp>",
-
-          stop = "<Esc>",
-
-          toggle_info = "",
-          toggle_preview = "<Tab>",
-        },
-      })
 
       pick.registry.files_rg = function()
         local command = {
@@ -186,73 +145,111 @@ return {
         return pick.builtin.cli({ command = command }, { source = source })
       end
 
-      if not vim.g.normal_kbd then
-        vim.keymap.set("n", "0", "<cmd>Pick files_rg<CR>")
-        -- vim.keymap.set("n", "0", "<cmd>Pick files<CR>")
-        vim.keymap.set("n", "<c-f>", "<cmd>Pick grep<CR>")
-        vim.keymap.set("n", "<s-tab>", "<cmd>Pick grep<CR>")
+      vim.keymap.set("n", "0", "<cmd>Pick files_rg<CR>")
+      -- vim.keymap.set("n", "0", "<cmd>Pick files<CR>")
+      vim.keymap.set("n", "<c-f>", "<cmd>Pick grep<CR>")
+      vim.keymap.set("n", "<s-tab>", "<cmd>Pick grep<CR>")
 
-        pick.builtin.buffers = function(local_opts, opts)
-          local_opts =
-            vim.tbl_deep_extend("force", { include_current = true, include_unlisted = false }, local_opts or {})
+      pick.builtin.buffers = function(local_opts, opts)
+        local_opts =
+          vim.tbl_deep_extend("force", { include_current = true, include_unlisted = false }, local_opts or {})
 
-          local buffers_output =
-            vim.api.nvim_exec2("buffers" .. (local_opts.include_unlisted and "!" or ""), { output = true })
-          local cur_buf_id, include_current = vim.api.nvim_get_current_buf(), local_opts.include_current
-          local items = {}
-          for _, l in ipairs(vim.split(buffers_output.output, "\n")) do
-            local buf_str, name = l:match("^%s*%d+"), l:match('"(.*)"')
-            local buf_id = tonumber(buf_str)
-            local item = { text = name, bufnr = buf_id }
-            if buf_id ~= cur_buf_id or include_current then
-              table.insert(items, item)
-            end
+        local buffers_output =
+          vim.api.nvim_exec2("buffers" .. (local_opts.include_unlisted and "!" or ""), { output = true })
+        local cur_buf_id, include_current = vim.api.nvim_get_current_buf(), local_opts.include_current
+        local items = {}
+        for _, l in ipairs(vim.split(buffers_output.output, "\n")) do
+          local buf_str, name = l:match("^%s*%d+"), l:match('"(.*)"')
+          local buf_id = tonumber(buf_str)
+          local item = { text = name, bufnr = buf_id }
+          if buf_id ~= cur_buf_id or include_current then
+            table.insert(items, item)
           end
-
-          local show = nil
-          local default_opts = { source = { name = "Buffers", show = show } }
-          opts = vim.tbl_deep_extend("force", default_opts, opts or {}, { source = { items = items } })
-          return pick.start(opts)
         end
 
-        local bufremove = require("mini.bufremove")
-        local wipeout_cur = function()
-          local current = pick.get_picker_matches().current
-          if not current or not current.bufnr then
-            return
-          end
-
-          bufremove.delete(current.bufnr, false)
-
-          -- https://github.com/echasnovski/mini.nvim/blob/main/lua/mini/pick.lua#L1497
-          local buffers = vim.api.nvim_exec2("buffers" .. "", { output = true })
-          local cur_buf_id = vim.api.nvim_get_current_buf()
-          local items = {}
-          for _, l in ipairs(vim.split(buffers.output, "\n")) do
-            local buf_str, name = l:match("^%s*%d+"), l:match('"(.*)"')
-            local buf_id = tonumber(buf_str)
-            local item = { text = name, bufnr = buf_id }
-            if buf_id ~= cur_buf_id then
-              table.insert(items, item)
-            end
-          end
-          pick.set_picker_items(items)
-        end
-        local buffer_mappings = { wipeout = { char = "<c-x>", func = wipeout_cur } }
-        vim.keymap.set("n", "<tab>", function()
-          pick.builtin.buffers({ include_current = true }, { mappings = buffer_mappings })
-        end)
-
-        vim.api.nvim_create_autocmd("BufWritePost", {
-          callback = function(args)
-            if vim.bo[args.buf].filetype == "oil" then
-              pcall(function()
-                require("mini.pick").refresh()
-              end)
-            end
-          end,
-        })
+        local show = nil
+        local default_opts = { source = { name = "Buffers", show = show } }
+        opts = vim.tbl_deep_extend("force", default_opts, opts or {}, { source = { items = items } })
+        return pick.start(opts)
       end
+
+      pick.setup({
+        mappings = {
+          caret_left = "<Left>",
+          caret_right = "<Right>",
+
+          choose = "<CR>",
+          choose_in_split = "",
+          choose_in_tabpage = "",
+          choose_in_vsplit = "",
+          choose_marked = "",
+
+          delete_char = "<BS>",
+          delete_char_right = "<Del>",
+          delete_left = "",
+          delete_word = "<C-bs>",
+
+          mark = "",
+          mark_all = "",
+
+          -- move_down = "<down>",
+          move_start = "<c-pageup>",
+          -- move_up = "<up>",
+
+          paste = "<c-v>",
+
+          refine = "",
+          refine_marked = "",
+
+          scroll_down = "<PageDown>",
+          scroll_left = "<c-left>",
+          scroll_right = "<c-right>",
+          scroll_up = "<PageUp>",
+
+          stop = "<Esc>",
+
+          toggle_info = "",
+          toggle_preview = "<Tab>",
+        },
+      })
+
+      local bufremove = require("mini.bufremove")
+      local wipeout_cur = function()
+        local current = pick.get_picker_matches().current
+        if not current or not current.bufnr then
+          return
+        end
+
+        bufremove.delete(current.bufnr, false)
+
+        -- https://github.com/echasnovski/mini.nvim/blob/main/lua/mini/pick.lua#L1497
+        local buffers = vim.api.nvim_exec2("buffers" .. "", { output = true })
+        local cur_buf_id = vim.api.nvim_get_current_buf()
+        local items = {}
+        for _, l in ipairs(vim.split(buffers.output, "\n")) do
+          local buf_str, name = l:match("^%s*%d+"), l:match('"(.*)"')
+          local buf_id = tonumber(buf_str)
+          local item = { text = name, bufnr = buf_id }
+          if buf_id ~= cur_buf_id then
+            table.insert(items, item)
+          end
+        end
+        pick.set_picker_items(items)
+      end
+      local buffer_mappings = { wipeout = { char = "<c-x>", func = wipeout_cur } }
+      vim.keymap.set("n", "<tab>", function()
+        pick.builtin.buffers({ include_current = true }, { mappings = buffer_mappings })
+      end)
+
+      -- vim.api.nvim_create_autocmd("BufWritePost", {
+      --   callback = function(args)
+      --     if vim.bo[args.buf].filetype == "oil" then
+      --       pcall(function()
+      --         pick.refresh()
+      --       end)
+      --     end
+      --   end,
+      -- })
     end,
   },
 }

@@ -491,10 +491,10 @@ vim.api.nvim_create_autocmd("VimLeavePre", {
 })
 -- GODOT END
 
--- vim.api.nvim_set_hl(0, "DiagnosticNumhlError", { fg = "#832936" })
--- vim.api.nvim_set_hl(0, "DiagnosticNumhlWarn", { fg = "#825c3e" })
--- vim.api.nvim_set_hl(0, "DiagnosticNumhlInfo", { fg = "#5d595d" })
--- vim.api.nvim_set_hl(0, "DiagnosticNumhlHint", { fg = "#5d595d" })
+-- vim.api.nvim_set_hl(0, "DiagnosticNumhlError", { fg = "#832936", bg = "#221418" })
+-- vim.api.nvim_set_hl(0, "DiagnosticNumhlWarn", { fg = "#825c3e", bg = "#221c12" })
+-- vim.api.nvim_set_hl(0, "DiagnosticNumhlInfo", { fg = "#5d595d", bg = "#1c1a1c" })
+-- vim.api.nvim_set_hl(0, "DiagnosticNumhlHint", { fg = "#5d595d", bg = "#1a1a1a" })
 
 vim.diagnostic.config({
   virtual_text = {

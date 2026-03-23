@@ -39,6 +39,8 @@ if true then
         vim.keymap.set("n", "<c-s-t>", function()
           api.tree.resize()
         end)
+
+        -- vim.keymap.set("n", "<c-f>", "<cmd>NvimTreeFindFile<cr>", { buffer = true })
       end
 
       require("nvim-tree").setup({
@@ -69,8 +71,6 @@ if true then
 
       vim.keymap.set("n", "<c-t>", "<cmd>NvimTreeFocus<cr>")
       vim.keymap.set("n", "<c-b>", "<cmd>NvimTreeClose<cr>")
-
-      vim.keymap.set("n", "<c-f>", "<cmd>NvimTreeFindFile<cr>")
     end,
   }
 else

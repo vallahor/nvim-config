@@ -121,24 +121,53 @@ return {
         end)
       end)
 
-      vim.api.nvim_set_hl(0, "MultiCursorCursor", { link = "Cursor" })
-      -- vim.api.nvim_set_hl(0, "MultiCursorCursor", { reverse = true })
-      vim.api.nvim_set_hl(0, "MultiCursorVisual", { link = "Visual" })
+      -- vim.api.nvim_set_hl(0, "MultiCursorCursor", { link = "Cursor" })
+      vim.api.nvim_set_hl(0, "MultiCursorVisual", { link = "Visual", conceal = true })
+      vim.api.nvim_set_hl(0, "MultiCursorCursor", { bg = "#222022", fg = "#A98D92", reverse = true })
+      -- vim.api.nvim_set_hl(0, "MultiCursorVisual", { fg = "#2d1524", bg = "#A98D92", reverse = true })
       vim.api.nvim_set_hl(0, "MultiCursorSign", { link = "SignColumn" })
       vim.api.nvim_set_hl(0, "MultiCursorMatchPreview", { link = "Search" })
       vim.api.nvim_set_hl(0, "MultiCursorDisabledCursor", { reverse = true })
       vim.api.nvim_set_hl(0, "MultiCursorDisabledVisual", { link = "Visual" })
       vim.api.nvim_set_hl(0, "MultiCursorDisabledSign", { link = "SignColumn" })
 
-      if not vim.g.cur_word_underline then
-        mc.onSafeState(function()
-          local has_cursors = mc.hasCursors()
-          if vim.b.minicursorword_disable ~= has_cursors then
-            vim.b.minicursorword_disable = has_cursors
-            vim.api.nvim_exec_autocmds("CursorMoved", { buffer = 0 })
+      local mc_ns = nil
+      local mc_match_ids = {}
+
+      mc.onSafeState(function()
+        local ft = vim.bo.filetype
+        if ft == "NvimTree" or ft == "neo-tree" or ft == "SidebarNvim" then
+          return
+        end
+
+        for _, id in ipairs(mc_match_ids) do
+          pcall(vim.fn.matchdelete, id)
+        end
+        mc_match_ids = {}
+
+        if not mc.hasCursors() then
+          return
+        end
+
+        if not mc_ns then
+          mc_ns = vim.api.nvim_get_namespaces()["multicursor-nvim"]
+          if not mc_ns then
+            return
           end
-        end)
-      end
+        end
+
+        local marks = vim.api.nvim_buf_get_extmarks(0, mc_ns, 0, -1, { details = true })
+        for _, m in ipairs(marks) do
+          local hl = m[4].hl_group
+          if hl and hl:match("MultiCursor") then
+            local row = m[2] + 1
+            local col = m[3] + 1
+            local length = m[4].end_col and (m[4].end_col - m[3]) or 1
+            local id = vim.fn.matchaddpos(hl, { { row, col, length } }, 999)
+            mc_match_ids[#mc_match_ids + 1] = id
+          end
+        end
+      end)
     end,
   },
 }
