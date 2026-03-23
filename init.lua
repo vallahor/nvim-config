@@ -24,7 +24,7 @@ require("lazy").setup("plugins", {
 })
 
 -- SETTINGS --
-vim.opt.guifont = { "JetBrainsMonoNL Nerd Font:h11" }
+vim.opt.guifont = { "JetBrains Mono:h12" }
 vim.opt.shiftwidth = 4
 vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
@@ -75,6 +75,8 @@ vim.wo.wrap = false
 vim.bo.autoread = true
 vim.bo.copyindent = true
 vim.bo.grepprg = "rg"
+
+vim.o.linespace = 5
 
 -- work around on python default configs
 vim.g.python_indent = {
@@ -589,9 +591,6 @@ local function increment_selection()
   end
   local vline, vcol = vim.fn.line("v"), vim.fn.col("v")
   local cline, ccol = vim.fn.line("."), vim.fn.col(".")
-  if vline > cline or (vline == cline and vcol > ccol) then
-    vline, vcol, cline, ccol = cline, ccol, vline, vcol
-  end
   stack[#stack + 1] = { vline - 1, vcol - 1, cline - 1, ccol }
   _select.select_parent(vim.v.count1)
 end

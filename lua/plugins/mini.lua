@@ -30,6 +30,13 @@ return {
         end,
       })
 
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = { "NvimTree", "neo-tree", "SidebarNvim" },
+        callback = function()
+          vim.b.ministatusline_disable = true
+        end,
+      })
+
       local MiniStatusline = require("mini.statusline")
       local location = "L%l/%L C%c"
       local get_filename = function()
@@ -58,12 +65,24 @@ return {
             })
           end,
           inactive = function()
+            local mode_info = modes[vim.fn.mode()]
+            local mode, mode_hl = mode_info.short, mode_info.hl
+
             local filename = get_filename()
 
+            -- return MiniStatusline.combine_groups({
+            --   "%<",
+            --   { hl = "MiniStatuslineFilename", strings = { filename } },
+            --   "%=",
+            --   { strings = { location } },
+            -- })
             return MiniStatusline.combine_groups({
+              { hl = mode_hl, strings = { mode } },
               "%<",
               { hl = "MiniStatuslineFilename", strings = { filename } },
               "%=",
+              { strings = { "%S" } },
+              { strings = { vim.bo.filetype } },
               { strings = { location } },
             })
           end,

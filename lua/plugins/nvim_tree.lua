@@ -11,8 +11,9 @@ if true then
 
       local function on_attach(bufnr)
         local api = require("nvim-tree.api")
+        local view = require("nvim-tree.view")
 
-        api.config.mappings.default_on_attach(bufnr)
+        api.map.on_attach.default(bufnr)
 
         vim.keymap.set("n", "<C-t>", function()
           vim.cmd.wincmd("p")
@@ -20,6 +21,24 @@ if true then
         vim.keymap.set("n", "t", function()
           vim.cmd.wincmd("p")
         end, { buffer = bufnr, noremap = true, silent = true, nowait = true })
+
+        local function resize_tree(delta)
+          local winnr = view.get_winnr()
+          if winnr then
+            local current = vim.api.nvim_win_get_width(winnr)
+            api.tree.resize({ width = current + delta })
+          end
+        end
+
+        vim.keymap.set("n", "<c-.>", function()
+          resize_tree(5)
+        end)
+        vim.keymap.set("n", "<c-,>", function()
+          resize_tree(-5)
+        end)
+        vim.keymap.set("n", "<c-s-t>", function()
+          api.tree.resize()
+        end)
       end
 
       require("nvim-tree").setup({

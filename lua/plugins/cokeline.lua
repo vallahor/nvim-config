@@ -3,6 +3,7 @@ return {
     "noib3/nvim-cokeline",
     dependencies = {
       { "nvim-lua/plenary.nvim", lazy = true },
+      { "nvim-tree/nvim-tree.lua" },
     },
     config = function()
       local ok, cokeline = pcall(require, "cokeline")
@@ -12,6 +13,10 @@ return {
         local errors_fg = get_hex("DiagnosticError", "fg")
         local warning_fg = get_hex("DiagnosticWarn", "fg")
 
+        local label = "Explorer" -- or any text you want, e.g. " Explorer"
+        local label_len = vim.fn.strwidth(label)
+        local ok_view, view = pcall(require, "nvim-tree.view")
+
         cokeline.setup({
           buffers = {
             filter_valid = function(buffer)
@@ -19,30 +24,30 @@ return {
             end,
           },
           sidebar = {
-            filetype = "NvimTree",
             components = {
               {
-                text = "",
+                text = function()
+                  if ok_view then
+                    local winnr = view.get_winnr()
+                    if winnr then
+                      local sidebar_width = vim.api.nvim_win_get_width(winnr)
+                      local pad = math.max(0, math.floor((sidebar_width - label_len) / 2))
+                      return string.rep(" ", pad) .. label
+                    end
+                  end
+                end,
                 fg = get_hex("Normal", "fg"),
-                bg = get_hex("StatusLineNC", "bg"),
-                bold = true,
+                -- bg = get_hex("StatusLineNC", "bg"),
+                bg = function(buffer)
+                  if buffer.is_focused then
+                    return "#3f303f"
+                  end
+                  return "#191319"
+                end,
               },
             },
           },
           components = {
-            {
-              -- text = function(buffer)
-              text = function()
-                -- if buffer.is_first then
-                --   return ""
-                -- else
-                --   return ""
-                -- end
-                return ""
-              end,
-              -- bg = get_hex("StatusLineNC", "bg"),
-              bg = get_hex("Normal", "bg"),
-            },
             {
               text = " ",
               bg = function(buffer)
@@ -91,11 +96,11 @@ return {
       end
 
       -- Re-order to previous/next
-      vim.keymap.set("n", "<c-,>", "<Plug>(cokeline-focus-prev)", { silent = true })
-      vim.keymap.set("n", "<c-.>", "<Plug>(cokeline-focus-next)", { silent = true })
+      -- vim.keymap.set("n", "<c-,>", "<Plug>(cokeline-focus-prev)", { silent = true })
+      -- vim.keymap.set("n", "<c-.>", "<Plug>(cokeline-focus-next)", { silent = true })
 
-      vim.keymap.set("n", "<c-<>", "<Plug>(cokeline-switch-prev)", { silent = true })
-      vim.keymap.set("n", "<c->>", "<Plug>(cokeline-switch-next)", { silent = true })
+      -- vim.keymap.set("n", "<c-<>", "<Plug>(cokeline-switch-prev)", { silent = true })
+      -- vim.keymap.set("n", "<c->>", "<Plug>(cokeline-switch-next)", { silent = true })
 
       vim.keymap.set("n", "<home>", "<Plug>(cokeline-focus-prev)", { silent = true })
       vim.keymap.set("n", "<end>", "<Plug>(cokeline-focus-next)", { silent = true })
