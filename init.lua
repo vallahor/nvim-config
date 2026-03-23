@@ -198,11 +198,17 @@ vim.keymap.set("n", "dx", '"_d') -- delete without copying to register @check wo
 vim.keymap.set("n", "*", [[<Cmd>let @/='\<'.expand('<cword>').'\>'<bar>set hlsearch<cr>]]) -- highlight all occurencies of the current word
 vim.keymap.set("v", "*", '"sy/\\V<c-r>s<cr>``') -- highlight all occurencies of the curren selection
 
-vim.keymap.set({ "n", "i" }, "<c-;>", function()
-  local row = vim.api.nvim_win_get_cursor(0)[1] - 1
-  local len = vim.fn.col("$") - 1
-  vim.api.nvim_buf_set_text(0, row, len, row, len, { ";" })
-end)
+-- add ";" to the end of line
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "*",
+  callback = function()
+    vim.keymap.set({ "n", "i" }, "<c-;>", function()
+      local row = vim.api.nvim_win_get_cursor(0)[1] - 1
+      local len = vim.fn.col("$") - 1
+      vim.api.nvim_buf_set_text(0, row, len, row, len, { ";" })
+    end, { buffer = true })
+  end,
+})
 
 -- go to beginning of the line function like DOOM Emacs
 local beginning_of_the_line = function()
