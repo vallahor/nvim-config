@@ -231,8 +231,8 @@ if vim.g.normal_kbd then
     vim.cmd([[norm gcgv"0y"0Pgvgc]])
   end)
 
-  vim.keymap.set("v", "<c-j>", ":m '>+1<CR>gv=gv")
-  vim.keymap.set("v", "<c-k>", ":m '<-2<CR>gv=gv")
+  vim.keymap.set("x", "<c-j>", ":m '>+1<CR>gv=gv")
+  vim.keymap.set("x", "<c-k>", ":m '<-2<CR>gv=gv")
 else
   -- vim.keymap.set("i", "<home>", beginning_of_the_line) -- go to beginning of the line
   -- vim.keymap.set({ "n", "v" }, "<home>", beginning_of_the_line) -- go to beginning of the line
@@ -255,8 +255,8 @@ else
     vim.cmd([[norm gcgv"0y"0Pgvgc]])
   end)
 
-  vim.keymap.set("v", "<Down>", ":m '>+1<CR>gv=gv")
-  vim.keymap.set("v", "<Up>", ":m '<-2<CR>gv=gv")
+  vim.keymap.set("x", "<Down>", ":m '>+1<CR>gv=gv")
+  vim.keymap.set("x", "<Up>", ":m '<-2<CR>gv=gv")
 end
 
 vim.keymap.set("n", "<f4>", "<cmd>:e $MYVIMRC<cr>") -- open config file (vimrc or init.lua)
