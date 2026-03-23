@@ -496,10 +496,10 @@ vim.api.nvim_create_autocmd("VimLeavePre", {
 -- vim.api.nvim_set_hl(0, "DiagnosticNumhlInfo", { fg = "#5d595d", bg = "#1c1a1c" })
 -- vim.api.nvim_set_hl(0, "DiagnosticNumhlHint", { fg = "#5d595d", bg = "#1a1a1a" })
 
-vim.api.nvim_set_hl(0, "DiagnosticNumhlError", { fg = "#5a1f28", bg = "#221418" })
-vim.api.nvim_set_hl(0, "DiagnosticNumhlWarn", { fg = "#5a3d2a", bg = "#221c12" })
-vim.api.nvim_set_hl(0, "DiagnosticNumhlInfo", { fg = "#3d3a3d", bg = "#1c1a1c" })
-vim.api.nvim_set_hl(0, "DiagnosticNumhlHint", { fg = "#3a3a3a", bg = "#1a1a1a" })
+-- vim.api.nvim_set_hl(0, "DiagnosticNumhlError", { fg = "#5a1f28", bg = "#221418" })
+-- vim.api.nvim_set_hl(0, "DiagnosticNumhlWarn", { fg = "#5a3d2a", bg = "#221c12" })
+-- vim.api.nvim_set_hl(0, "DiagnosticNumhlInfo", { fg = "#3d3a3d", bg = "#1c1a1c" })
+-- vim.api.nvim_set_hl(0, "DiagnosticNumhlHint", { fg = "#3a3a3a", bg = "#1a1a1a" })
 
 vim.diagnostic.config({
   virtual_text = {

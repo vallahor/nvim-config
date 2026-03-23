@@ -131,24 +131,12 @@ return {
       vim.api.nvim_set_hl(0, "MultiCursorDisabledVisual", { link = "Visual" })
       vim.api.nvim_set_hl(0, "MultiCursorDisabledSign", { link = "SignColumn" })
 
-      -- mc.onSafeState(function()
-      --   local ft = vim.bo.filetype
-      --   if ft == "NvimTree" or ft == "neo-tree" or ft == "SidebarNvim" then
-      --     return
-      --   end
-      -- end)
-
-      local mc_ns = nil
+      local mc_ns = vim.api.nvim_get_namespaces()["multicursor-nvim"]
       local mc_match_ids = {}
 
       mc.onSafeState(function()
-        local ft = vim.bo.filetype
-        if ft == "NvimTree" or ft == "neo-tree" or ft == "SidebarNvim" then
-          return
-        end
-
         for _, id in ipairs(mc_match_ids) do
-          pcall(vim.fn.matchdelete, id)
+          vim.fn.matchdelete(id)
         end
         mc_match_ids = {}
 
@@ -156,21 +144,14 @@ return {
           return
         end
 
-        if not mc_ns then
-          mc_ns = vim.api.nvim_get_namespaces()["multicursor-nvim"]
-          if not mc_ns then
-            return
-          end
-        end
-
-        local marks = vim.api.nvim_buf_get_extmarks(0, mc_ns, 0, -1, { details = true })
-        for _, m in ipairs(marks) do
+        for _, m in ipairs(vim.api.nvim_buf_get_extmarks(0, mc_ns, 0, -1, { details = true })) do
           local hl = m[4].hl_group
-          if hl and hl:match("MultiCursor") then
-            local row = m[2] + 1
-            local col = m[3] + 1
-            local length = m[4].end_col and (m[4].end_col - m[3]) or 1
-            local id = vim.fn.matchaddpos(hl, { { row, col, length } }, 999)
+          if hl then
+            local id = vim.fn.matchaddpos(
+              hl,
+              { { m[2] + 1, m[3] + 1, m[4].end_col and (m[4].end_col - m[3]) or 1 } },
+              hl == "MultiCursorCursor" and 1000 or 999
+            )
             mc_match_ids[#mc_match_ids + 1] = id
           end
         end
