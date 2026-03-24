@@ -25,8 +25,7 @@ if true then
         local function resize_tree(delta)
           local winnr = view.get_winnr()
           if winnr then
-            local current = vim.api.nvim_win_get_width(winnr)
-            api.tree.resize({ width = current + delta })
+            api.tree.resize({ width = vim.api.nvim_win_get_width(winnr) + delta })
           end
         end
 
@@ -38,6 +37,13 @@ if true then
         end)
         vim.keymap.set("n", "<c-s-t>", function()
           api.tree.resize()
+        end)
+
+        vim.keymap.set("n", "<c-/>", function()
+          require("nvim-tree.api").tree.find_file({ update_root = false })
+        end)
+        vim.keymap.set("n", "<c-?>", function()
+          require("nvim-tree.api").tree.find_file({ update_root = false, open = true, focus = true })
         end)
 
         -- vim.keymap.set("n", "<c-f>", "<cmd>NvimTreeFindFile<cr>", { buffer = true })
