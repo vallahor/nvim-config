@@ -150,7 +150,7 @@ return {
       vim.keymap.set("n", "<c-f>", "<cmd>Pick grep<CR>")
       vim.keymap.set("n", "<s-tab>", "<cmd>Pick grep<CR>")
 
-      pick.builtin.buffers = function(local_opts, opts)
+      rawset(pick.builtin, "buffers", function(local_opts, opts)
         local_opts =
           vim.tbl_deep_extend("force", { include_current = true, include_unlisted = false }, local_opts or {})
 
@@ -171,7 +171,7 @@ return {
         local default_opts = { source = { name = "Buffers", show = show } }
         opts = vim.tbl_deep_extend("force", default_opts, opts or {}, { source = { items = items } })
         return pick.start(opts)
-      end
+      end)
 
       pick.setup({
         mappings = {
@@ -250,6 +250,21 @@ return {
       --     end
       --   end,
       -- })
+
+      local MiniIcons = require("mini.icons")
+      MiniIcons.setup()
+      MiniIcons.mock_nvim_web_devicons()
+
+      vim.api.nvim_set_hl(0, "MiniIconsAzure", { fg = "#51a0cf" })
+      vim.api.nvim_set_hl(0, "MiniIconsBlue", { fg = "#51a0cf" })
+      vim.api.nvim_set_hl(0, "MiniIconsCyan", { fg = "#00bfff" })
+      vim.api.nvim_set_hl(0, "MiniIconsGreen", { fg = "#8fbc8f" })
+      vim.api.nvim_set_hl(0, "MiniIconsGrey", { fg = "#9e9e9e" })
+      vim.api.nvim_set_hl(0, "MiniIconsOrange", { fg = "#d18b5f" })
+      vim.api.nvim_set_hl(0, "MiniIconsPurple", { fg = "#9b59b6" })
+      vim.api.nvim_set_hl(0, "MiniIconsRed", { fg = "#cc6666" })
+      vim.api.nvim_set_hl(0, "MiniIconsWhite", { fg = "#ffffff" })
+      vim.api.nvim_set_hl(0, "MiniIconsYellow", { fg = "#f0c674" })
     end,
   },
 }

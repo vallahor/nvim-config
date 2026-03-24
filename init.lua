@@ -24,7 +24,7 @@ require("lazy").setup("plugins", {
 })
 
 -- SETTINGS --
-vim.opt.guifont = { "JetBrains Mono:h12" }
+vim.opt.guifont = { "JetBrainsMono NF:h12" }
 vim.opt.shiftwidth = 4
 vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
