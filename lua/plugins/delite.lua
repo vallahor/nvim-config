@@ -17,9 +17,17 @@ return {
     delite.edit_default_pairs("'", { not_filetypes = { "ocaml", "rust" } })
     delite.insert_rule({ left = '~%u"""', right = '"""', { filetypes = { "elixir" } } })
     -- delite.remove_pattern_from_default_pairs("<")
-
-    vim.keymap.set("i", "<c-bs>", delite.previous_word)
+    local mc = require("multicursor-nvim")
+    -- vim.keymap.set("i", "<c-bs>", delite.previous_word)
     vim.keymap.set("i", "<c-del>", delite.next_word)
+
+    vim.keymap.set("i", "<c-bs>", function()
+      if mc.hasCursors() then
+        mc.feedkeys(vim.api.nvim_replace_termcodes("<c-w>", true, false, true))
+      else
+        delite.previous_word()
+      end
+    end)
 
     vim.keymap.set("i", "<bs>", delite.previous)
     -- vim.keymap.set("i", "<del>", delite.next)
