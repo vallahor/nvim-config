@@ -29,9 +29,9 @@ if true then
 
       local cursor_hidden = false
       local ignore_file_types = { NvimTree = true }
-      vim.api.nvim_create_autocmd({ "WinEnter", "BufWinEnter" }, {
+      vim.api.nvim_create_autocmd({ "WinEnter", "BufWinEnter", "CmdlineLeave" }, {
         callback = function()
-          if ignore_file_types[vim.bo.filetype] and not cursor_hidden then
+          if ignore_file_types[vim.bo.filetype] then
             cursor_hidden = true
             vim.api.nvim_set_hl(0, "NvimTreeCursor", { blend = 100, fg = cursor_hl.fg, bg = cursor_hl.bg })
             vim.api.nvim_set_hl(0, "NvimTreeCursorLine", { bg = cursor_line_active.bg })
@@ -44,6 +44,15 @@ if true then
             vim.api.nvim_set_hl(0, "NvimTreeCursorLine", { bg = cursor_line_inactive.bg })
             vim.api.nvim_set_hl(0, "CursorLine", { bg = cursor_line_active.bg })
             vim.api.nvim_set_hl(0, "CursorLineNr", { fg = cursor_linenr_active.fg, bg = cursor_linenr_active.bg })
+            vim.opt_local.guicursor:remove("a:NvimTreeCursor/lNvimTreeCursor")
+          end
+        end,
+      })
+
+      vim.api.nvim_create_autocmd({ "CmdlineEnter" }, {
+        callback = function()
+          if cursor_hidden then
+            cursor_hidden = false
             vim.opt_local.guicursor:remove("a:NvimTreeCursor/lNvimTreeCursor")
           end
         end,
