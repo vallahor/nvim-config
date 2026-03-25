@@ -14,8 +14,8 @@ if true then
       vim.api.nvim_set_hl(0, "NvimTreeCursor", { fg = "#222022", bg = "#A98D92" })
 
       local cursor_line_active = vim.api.nvim_get_hl(0, { name = "CursorLine", link = false })
+      local cursor_line_inactive = { fg = "#a1495c", bg = "#20151F" }
       local cursor_linenr_active = vim.api.nvim_get_hl(0, { name = "CursorLineNr", link = false })
-      local cursor_line_inactive = { fg = "#a1495c", bg = "#221721" }
       vim.api.nvim_set_hl(0, "NvimTreeCursorLine", { bg = cursor_line_inactive.bg })
 
       api.events.subscribe(api.events.Event.TreeOpen, function()
