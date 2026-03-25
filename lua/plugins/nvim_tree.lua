@@ -7,11 +7,56 @@ if true then
       vim.g.loaded_netrwPlugin = 1
       vim.g.neo_tree_remove_legacy_commands = 1
 
-      local function on_attach(bufnr)
-        local api = require("nvim-tree.api")
-        local view = require("nvim-tree.view")
+      local api = require("nvim-tree.api")
+      local view = require("nvim-tree.view")
 
+      api.events.subscribe(api.events.Event.TreeOpen, function()
+        local winnr = view.get_winnr()
+        if winnr then
+          vim.wo[winnr].statuscolumn = ""
+        end
+      end)
+
+      local cursor_hl = vim.api.nvim_get_hl(0, { name = "Cursor", link = false })
+
+      vim.api.nvim_create_autocmd("ColorScheme", {
+        callback = function()
+          cursor_hl = vim.api.nvim_get_hl(0, { name = "Cursor", link = false })
+        end,
+      })
+
+      local cursor_hidden = false
+      local ignore_file_types = { NvimTree = true }
+      vim.api.nvim_create_autocmd({ "WinEnter", "BufWinEnter" }, {
+        callback = function()
+          if ignore_file_types[vim.bo.filetype] and not cursor_hidden then
+            cursor_hidden = true
+            vim.api.nvim_set_hl(0, "Cursor", { blend = 100, fg = cursor_hl.fg, bg = cursor_hl.bg })
+            vim.opt_local.guicursor:append("a:Cursor/lCursor")
+          elseif cursor_hidden then
+            cursor_hidden = false
+            vim.api.nvim_set_hl(0, "Cursor", { blend = 0, fg = cursor_hl.fg, bg = cursor_hl.bg })
+            vim.opt_local.guicursor:remove("a:Cursor/lCursor")
+          end
+        end,
+      })
+
+      local function on_attach(bufnr)
         api.map.on_attach.default(bufnr)
+
+        vim.keymap.set("n", "l", function()
+          local node = api.tree.get_node_under_cursor()
+          if node.type == "directory" then
+            api.node.open.edit()
+          end
+        end, { buffer = bufnr, noremap = true, silent = true, nowait = true })
+
+        vim.keymap.set(
+          "n",
+          "h",
+          api.node.navigate.parent_close,
+          { buffer = bufnr, noremap = true, silent = true, nowait = true }
+        )
 
         vim.keymap.set("n", "<C-t>", function()
           vim.cmd.wincmd("p")
