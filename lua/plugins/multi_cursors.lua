@@ -119,9 +119,10 @@ return {
         layerSet("n", "<c-m>", function()
           mc.enableCursors()
         end)
-        layerSet("n", "p", '"*p')
-        layerSet("n", "P", '"*P')
-        layerSet({ "v", "x" }, "p", '"*P')
+        layerSet("i", "<c-v>", "<c-r>+")
+        layerSet("n", "<c-p>", '"*p')
+        layerSet("n", "<c-P>", '"*P')
+        layerSet({ "v", "x" }, "<c-p>", '"*P')
       end)
 
       vim.api.nvim_set_hl(0, "MultiCursorCursor", { link = "Cursor" })
