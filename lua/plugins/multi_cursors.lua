@@ -106,8 +106,8 @@ return {
           layerSet({ "n", "x" }, "<a-n>", mc.nextCursor)
         else
           -- -- Select a different cursor as the main one.
-          layerSet({ "n", "x" }, "<a-left>", mc.prevCursor)
-          layerSet({ "n", "x" }, "<a-right>", mc.nextCursor)
+          layerSet({ "n", "x" }, "<c-,>", mc.prevCursor)
+          layerSet({ "n", "x" }, "<c-.>", mc.nextCursor)
         end
 
         -- -- Delete the main cursor.
@@ -116,9 +116,11 @@ return {
         layerSet("n", "<esc>", function()
           mc.clearCursors()
         end)
+
         layerSet("n", "<c-m>", function()
           mc.enableCursors()
         end)
+
         layerSet("i", "<c-v>", "<c-r>+")
         layerSet("n", "<c-p>", '"*p')
         layerSet("n", "<c-P>", '"*P')
