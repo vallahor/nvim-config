@@ -110,7 +110,7 @@ vim.keymap.set("n", "gc", function()
   require("vim._comment").toggle_lines(row, row)
 end, { noremap = true, silent = true })
 
-vim.keymap.set("s", "<esc>", function()
+vim.keymap.set({ "i", "s" }, "<esc>", function()
   vim.snippet.stop()
   return "<esc>"
 end, { expr = true })
