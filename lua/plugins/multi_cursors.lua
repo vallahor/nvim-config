@@ -1,7 +1,6 @@
 return {
   {
     "jake-stewart/multicursor.nvim",
-    -- branch = "1.0",
     config = function()
       local mc = require("multicursor-nvim")
       mc.setup()
@@ -78,8 +77,8 @@ return {
         vim.keymap.set("n", "<c-s-a>", mc.alignCursors)
       end
 
-      -- Split visual selections by regex.
-      vim.keymap.set("x", "<c-s-s>", mc.splitCursors)
+      -- -- Split visual selections by regex.
+      -- vim.keymap.set("x", "<c-s-s>", mc.splitCursors)
 
       -- match new cursors within visual selections by regex.
       vim.keymap.set("x", "<c-s-m>", mc.matchCursors)
@@ -129,8 +128,6 @@ return {
 
       vim.api.nvim_set_hl(0, "MultiCursorCursor", { link = "Cursor" })
       vim.api.nvim_set_hl(0, "MultiCursorVisual", { link = "Visual" })
-      -- vim.api.nvim_set_hl(0, "MultiCursorVisual", { reverse = true })
-      -- vim.api.nvim_set_hl(0, "MultiCursorVisual", { fg = "#2d1524", bg = "#A98D92", reverse = true })
       vim.api.nvim_set_hl(0, "MultiCursorSign", { link = "SignColumn" })
       vim.api.nvim_set_hl(0, "MultiCursorMatchPreview", { link = "Search" })
       vim.api.nvim_set_hl(0, "MultiCursorDisabledCursor", { reverse = true })
