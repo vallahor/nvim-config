@@ -13,6 +13,7 @@ if true then
       local cursor_hl = vim.api.nvim_get_hl(0, { name = "Cursor", link = false })
       vim.api.nvim_set_hl(0, "NvimTreeCursor", { fg = "#222022", bg = "#A98D92" })
 
+      -- https://coolors.co/gradient-palette/291c28-1e141d?number=7
       local cursor_line_active = vim.api.nvim_get_hl(0, { name = "CursorLine", link = false })
       local cursor_line_inactive = { fg = "#a1495c", bg = "#20151F" }
       local cursor_linenr_active = vim.api.nvim_get_hl(0, { name = "CursorLineNr", link = false })
