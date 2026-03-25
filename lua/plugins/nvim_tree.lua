@@ -10,20 +10,21 @@ if true then
       local api = require("nvim-tree.api")
       local view = require("nvim-tree.view")
 
+      local cursor_hl = vim.api.nvim_get_hl(0, { name = "Cursor", link = false })
+      vim.api.nvim_set_hl(0, "NvimTreeCursor", { fg = "#222022", bg = "#A98D92" })
+
+      local cursor_line_active = vim.api.nvim_get_hl(0, { name = "CursorLine", link = false })
+      local cursor_linenr_active = vim.api.nvim_get_hl(0, { name = "CursorLineNr", link = false })
+      local cursor_line_inactive = { fg = "#a1495c", bg = "#221721" }
+      vim.api.nvim_set_hl(0, "NvimTreeCursorLine", { bg = cursor_line_inactive.bg })
+
       api.events.subscribe(api.events.Event.TreeOpen, function()
         local winnr = view.get_winnr()
         if winnr then
           vim.wo[winnr].statuscolumn = ""
+          vim.wo[winnr].winhighlight = "CursorLine:NvimTreeCursorLine"
         end
       end)
-
-      local cursor_hl = vim.api.nvim_get_hl(0, { name = "Cursor", link = false })
-
-      vim.api.nvim_create_autocmd("ColorScheme", {
-        callback = function()
-          cursor_hl = vim.api.nvim_get_hl(0, { name = "Cursor", link = false })
-        end,
-      })
 
       local cursor_hidden = false
       local ignore_file_types = { NvimTree = true }
@@ -31,12 +32,18 @@ if true then
         callback = function()
           if ignore_file_types[vim.bo.filetype] and not cursor_hidden then
             cursor_hidden = true
-            vim.api.nvim_set_hl(0, "Cursor", { blend = 100, fg = cursor_hl.fg, bg = cursor_hl.bg })
-            vim.opt_local.guicursor:append("a:Cursor/lCursor")
+            vim.api.nvim_set_hl(0, "NvimTreeCursor", { blend = 100, fg = cursor_hl.fg, bg = cursor_hl.bg })
+            vim.api.nvim_set_hl(0, "NvimTreeCursorLine", { bg = cursor_line_active.bg })
+            vim.api.nvim_set_hl(0, "CursorLine", { bg = cursor_line_inactive.bg })
+            vim.api.nvim_set_hl(0, "CursorLineNr", { fg = cursor_linenr_active.fg, bg = cursor_line_inactive.bg })
+            vim.opt_local.guicursor:append("a:NvimTreeCursor/lNvimTreeCursor")
           elseif cursor_hidden then
             cursor_hidden = false
-            vim.api.nvim_set_hl(0, "Cursor", { blend = 0, fg = cursor_hl.fg, bg = cursor_hl.bg })
-            vim.opt_local.guicursor:remove("a:Cursor/lCursor")
+            vim.api.nvim_set_hl(0, "NvimTreeCursor", { blend = 0, fg = cursor_hl.fg, bg = cursor_hl.bg })
+            vim.api.nvim_set_hl(0, "NvimTreeCursorLine", { bg = cursor_line_inactive.bg })
+            vim.api.nvim_set_hl(0, "CursorLine", { bg = cursor_line_active.bg })
+            vim.api.nvim_set_hl(0, "CursorLineNr", { fg = cursor_linenr_active.fg, bg = cursor_linenr_active.bg })
+            vim.opt_local.guicursor:remove("a:NvimTreeCursor/lNvimTreeCursor")
           end
         end,
       })
