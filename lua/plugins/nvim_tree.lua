@@ -29,7 +29,7 @@ if true then
 
       local cursor_hidden = false
       local ignore_file_types = { NvimTree = true }
-      vim.api.nvim_create_autocmd({ "WinEnter", "BufWinEnter", "CmdlineLeave" }, {
+      vim.api.nvim_create_autocmd({ "WinEnter", "BufWinEnter" }, {
         callback = function()
           if ignore_file_types[vim.bo.filetype] then
             cursor_hidden = true
@@ -49,11 +49,14 @@ if true then
         end,
       })
 
-      vim.api.nvim_create_autocmd({ "CmdlineEnter" }, {
+      vim.api.nvim_create_autocmd({ "CmdlineEnter", "CmdlineLeave" }, {
         callback = function()
           if cursor_hidden then
             cursor_hidden = false
             vim.opt_local.guicursor:remove("a:CursorHidden/lCursorHidden")
+          else
+            cursor_hidden = true
+            vim.opt_local.guicursor:append("a:CursorHidden/lCursorHidden")
           end
         end,
       })
