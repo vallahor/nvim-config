@@ -163,10 +163,10 @@ else
   vim.keymap.set("n", "<c-=>", "<cmd>wincmd =<cr>") -- resize all windows
   -- vim.keymap.set("n", "<leader>=", "<cmd>wincmd =<cr>")
 
-  vim.keymap.set("n", "<a-6>", [[<cmd>vertical   resize +2<cr>]]) -- make the window biger   vertically
-  vim.keymap.set("n", "<a-4>", [[<cmd>vertical   resize -2<cr>]]) -- make the window smaller vertically
-  vim.keymap.set("n", "<a-8>", [[<cmd>horizontal resize +2<cr>]]) -- make the window bigger  horizontally
-  vim.keymap.set("n", "<a-5>", [[<cmd>horizontal resize -2<cr>]]) -- make the window smaller horizontally
+  vim.keymap.set("n", "<c-6>", [[<cmd>vertical   resize +2<cr>]]) -- make the window biger   vertically
+  vim.keymap.set("n", "<c-4>", [[<cmd>vertical   resize -2<cr>]]) -- make the window smaller vertically
+  vim.keymap.set("n", "<c-8>", [[<cmd>horizontal resize +2<cr>]]) -- make the window bigger  horizontally
+  vim.keymap.set("n", "<c-5>", [[<cmd>horizontal resize -2<cr>]]) -- make the window smaller horizontally
 
   vim.keymap.set("n", "<left>", "<cmd>wincmd h<cr>") -- move to window left
   vim.keymap.set("n", "<down>", "<cmd>wincmd j<cr>") -- move to window down
