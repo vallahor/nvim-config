@@ -10,56 +10,13 @@ if true then
       local api = require("nvim-tree.api")
       local view = require("nvim-tree.view")
 
-      local cursor_hl = vim.api.nvim_get_hl(0, { name = "Cursor", link = false })
-      vim.api.nvim_set_hl(0, "CursorHidden", { fg = "#222022", bg = "#A98D92" })
-
-      -- https://coolors.co/gradient-palette/291c28-1e141d?number=7
-      local cursor_line_active = vim.api.nvim_get_hl(0, { name = "CursorLine", link = false })
-      local cursor_line_inactive = { fg = "#a1495c", bg = "#20151F" }
-      local cursor_linenr_active = vim.api.nvim_get_hl(0, { name = "CursorLineNr", link = false })
-      vim.api.nvim_set_hl(0, "CursorLineInative", { bg = cursor_line_inactive.bg })
-
       api.events.subscribe(api.events.Event.TreeOpen, function()
         local winnr = view.get_winnr()
         if winnr then
           vim.wo[winnr].statuscolumn = ""
-          vim.wo[winnr].winhighlight = "CursorLine:CursorLineInative"
         end
+        vim.opt.guicursor = "a:CursorHidden/lCursorHidden"
       end)
-
-      local cursor_hidden = false
-      local ignore_file_types = { NvimTree = true }
-      vim.api.nvim_create_autocmd({ "WinEnter", "BufWinEnter" }, {
-        callback = function()
-          if ignore_file_types[vim.bo.filetype] then
-            cursor_hidden = true
-            vim.api.nvim_set_hl(0, "CursorHidden", { blend = 100, fg = cursor_hl.fg, bg = cursor_hl.bg })
-            vim.api.nvim_set_hl(0, "CursorLineInative", { bg = cursor_line_active.bg })
-            vim.api.nvim_set_hl(0, "CursorLine", { bg = cursor_line_inactive.bg })
-            vim.api.nvim_set_hl(0, "CursorLineNr", { fg = cursor_linenr_active.fg, bg = cursor_line_inactive.bg })
-            vim.opt_local.guicursor:append("a:CursorHidden/lCursorHidden")
-          elseif cursor_hidden then
-            cursor_hidden = false
-            vim.api.nvim_set_hl(0, "CursorHidden", { blend = 0, fg = cursor_hl.fg, bg = cursor_hl.bg })
-            vim.api.nvim_set_hl(0, "CursorLineInative", { bg = cursor_line_inactive.bg })
-            vim.api.nvim_set_hl(0, "CursorLine", { bg = cursor_line_active.bg })
-            vim.api.nvim_set_hl(0, "CursorLineNr", { fg = cursor_linenr_active.fg, bg = cursor_linenr_active.bg })
-            vim.opt_local.guicursor:remove("a:CursorHidden/lCursorHidden")
-          end
-        end,
-      })
-
-      vim.api.nvim_create_autocmd({ "CmdlineEnter", "CmdlineLeave" }, {
-        callback = function()
-          if ignore_file_types[vim.bo.filetype] then
-            cursor_hidden = true
-            vim.opt_local.guicursor:append("a:CursorHidden/lCursorHidden")
-          elseif cursor_hidden then
-            cursor_hidden = false
-            vim.opt_local.guicursor:remove("a:CursorHidden/lCursorHidden")
-          end
-        end,
-      })
 
       local function on_attach(bufnr)
         api.map.on_attach.default(bufnr)

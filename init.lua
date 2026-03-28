@@ -60,7 +60,7 @@ vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
 vim.opt.timeoutlen = 300
 vim.opt.ttimeoutlen = 100
 vim.opt.updatetime = 50
-vim.opt.guicursor = "n:block-Cursor,i-ci:block-iCursor,v:block-vCursor"
+vim.opt.guicursor = "n:block-Cursor,i-ci-c:block-iCursor,v:block-vCursor"
 vim.opt.winborder = "single"
 -- vim.opt.winborder = "none"
 vim.opt.isfname:append("(") -- " @windows: nextjs and sveltkit folder name pattern
@@ -628,3 +628,59 @@ vim.keymap.set("x", "<Esc>", function()
   stack = {}
   vim.api.nvim_feedkeys(esc, "nx", true)
 end)
+
+-- Better highlight
+
+-- https://coolors.co/gradient-palette/291c28-1e141d?number=7
+vim.api.nvim_set_hl(0, "CursorHidden", { link = "Cursor", blend = 100 })
+vim.api.nvim_set_hl(0, "CursorLineInative", { bg = "#20151F" })
+vim.api.nvim_set_hl(0, "CursorLineNrInative", { fg = "#a1495c", bg = "#20151F" })
+
+local guicursor_default = "n:block-Cursor,i-ci-c:block-iCursor,v:block-vCursor"
+local guicursor_hidden = "a:CursorHidden/lCursorHidden"
+
+local ignore_file_types = { NvimTree = true }
+vim.api.nvim_create_autocmd({ "WinEnter" }, {
+  callback = function()
+    if ignore_file_types[vim.bo.filetype] then
+      vim.opt.guicursor = guicursor_hidden
+    else
+      vim.opt.guicursor = guicursor_default
+    end
+  end,
+})
+
+local cmdline_active = false
+vim.api.nvim_create_autocmd("CmdlineEnter", {
+  callback = function()
+    if ignore_file_types[vim.bo.filetype] then
+      cmdline_active = true
+      vim.schedule(function()
+        if cmdline_active then
+          vim.opt.guicursor = guicursor_default
+          vim.cmd("redraw")
+        end
+      end)
+    end
+  end,
+})
+
+vim.api.nvim_create_autocmd("CmdlineLeave", {
+  callback = function()
+    cmdline_active = false
+    if ignore_file_types[vim.bo.filetype] then
+      vim.opt.guicursor = guicursor_hidden
+    end
+  end,
+})
+
+vim.api.nvim_create_autocmd({ "WinEnter", "BufWinEnter", "BufEnter" }, {
+  callback = function()
+    vim.opt_local.winhighlight = "CursorLine:CursorLine,CursorLineNr:CursorLineNr"
+  end,
+})
+vim.api.nvim_create_autocmd({ "WinLeave" }, {
+  callback = function()
+    vim.opt_local.winhighlight = "CursorLine:CursorLineInative,CursorLineNr:CursorLineNrInative"
+  end,
+})
