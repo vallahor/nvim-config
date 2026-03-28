@@ -249,15 +249,6 @@ vim.keymap.set("n", "K", "<nop>")
 -- visual mode - paste without copying
 vim.keymap.set({ "v", "x" }, "p", "P")
 
-vim.keymap.set("n", "<c-i>", "<c-i>")
-
--- add mark after insert | <c-o> and <c-i>
-vim.api.nvim_create_autocmd("InsertEnter", {
-  callback = function(_)
-    vim.cmd("normal! m'")
-  end,
-})
-
 -- close quickfix menu after selecting choice
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "qf" },
@@ -388,7 +379,6 @@ end
 --     nvim --server %SERVER% --remote-send "<esc>:e %FILE%<cr>:call cursor(%LINE%,%COL%)<cr>"
 -- )
 -- endlocal
-local started_godot_server = false
 
 -- paths to check for project.godot file
 local paths_to_check = { "/", "/../" }
@@ -403,45 +393,38 @@ for _, value in pairs(paths_to_check) do
   end
 end
 
-local is_server_running = vim.uv.fs_stat(godot_project_path .. "/server.pipe")
+if godot_project_path ~= "" then
+  local is_server_running = vim.uv.fs_stat(godot_project_path .. "/server.pipe")
 
-local addr = godot_project_path .. "/server.pipe"
-if vim.fn.has("win32") == 1 then
-  addr = "127.0.0.1:6004"
-end
+  local addr = godot_project_path .. "/server.pipe"
+  if vim.fn.has("win32") == 1 then
+    addr = "127.0.0.1:6004"
+  end
 
-if vim.fn.filereadable(cwd .. "/project.godot") == 1 and not is_server_running then
-  if vim.v.servername ~= addr then
-    local ok = pcall(function()
-      vim.fn.serverstart(addr)
-    end)
+  local started_godot_server = false
+  if vim.fn.filereadable(cwd .. "/project.godot") == 1 and not is_server_running then
+    if vim.v.servername ~= addr then
+      local ok = pcall(function()
+        vim.fn.serverstart(addr)
+      end)
 
-    if ok then
-      started_godot_server = true
+      if ok then
+        started_godot_server = true
+      end
     end
   end
+
+  vim.api.nvim_create_autocmd("VimLeavePre", {
+    callback = function()
+      if started_godot_server then
+        pcall(function()
+          vim.fn.serverstop(addr)
+        end)
+      end
+    end,
+  })
 end
-
-vim.api.nvim_create_autocmd("VimLeavePre", {
-  callback = function()
-    if started_godot_server then
-      pcall(function()
-        vim.fn.serverstop(addr)
-      end)
-    end
-  end,
-})
 -- GODOT END
-
--- vim.api.nvim_set_hl(0, "DiagnosticNumhlError", { fg = "#832936", bg = "#221418" })
--- vim.api.nvim_set_hl(0, "DiagnosticNumhlWarn", { fg = "#825c3e", bg = "#221c12" })
--- vim.api.nvim_set_hl(0, "DiagnosticNumhlInfo", { fg = "#5d595d", bg = "#1c1a1c" })
--- vim.api.nvim_set_hl(0, "DiagnosticNumhlHint", { fg = "#5d595d", bg = "#1a1a1a" })
-
--- vim.api.nvim_set_hl(0, "DiagnosticNumhlError", { fg = "#5a1f28", bg = "#221418" })
--- vim.api.nvim_set_hl(0, "DiagnosticNumhlWarn", { fg = "#5a3d2a", bg = "#221c12" })
--- vim.api.nvim_set_hl(0, "DiagnosticNumhlInfo", { fg = "#3d3a3d", bg = "#1c1a1c" })
--- vim.api.nvim_set_hl(0, "DiagnosticNumhlHint", { fg = "#3a3a3a", bg = "#1a1a1a" })
 
 vim.diagnostic.config({
   virtual_text = {
