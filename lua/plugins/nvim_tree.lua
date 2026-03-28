@@ -14,7 +14,7 @@ return {
       if winnr then
         vim.wo[winnr].statuscolumn = ""
       end
-      vim.opt.guicursor = "a:CursorHidden/lCursorHidden"
+      vim.opt_local.guicursor = "a:CursorHidden/lCursorHidden"
     end)
 
     local function on_attach(bufnr)

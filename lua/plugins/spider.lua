@@ -1,4 +1,5 @@
 return {
+  {
     "chrisgrieser/nvim-spider",
     config = function()
       local spider = require("spider")

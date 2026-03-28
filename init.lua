@@ -576,9 +576,9 @@ local ignore_file_types = { NvimTree = true }
 vim.api.nvim_create_autocmd("WinEnter", {
   callback = function()
     if ignore_file_types[vim.bo.filetype] then
-      vim.opt.guicursor = guicursor_hidden
+      vim.opt_local.guicursor = guicursor_hidden
     else
-      vim.opt.guicursor = guicursor_default
+      vim.opt_local.guicursor = guicursor_default
     end
   end,
 })
@@ -590,7 +590,7 @@ vim.api.nvim_create_autocmd("CmdlineEnter", {
       cmdline_active = true
       vim.schedule(function()
         if cmdline_active then
-          vim.opt.guicursor = guicursor_default
+          vim.opt_local.guicursor = guicursor_default
           vim.cmd("redraw")
         end
       end)
@@ -602,7 +602,7 @@ vim.api.nvim_create_autocmd("CmdlineLeave", {
   callback = function()
     cmdline_active = false
     if ignore_file_types[vim.bo.filetype] then
-      vim.opt.guicursor = guicursor_hidden
+      vim.opt_local.guicursor = guicursor_hidden
     end
   end,
 })
