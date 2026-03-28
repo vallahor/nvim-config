@@ -632,7 +632,8 @@ end)
 -- Better highlight
 
 -- https://coolors.co/gradient-palette/291c28-1e141d?number=7
-vim.api.nvim_set_hl(0, "CursorHidden", { link = "Cursor", blend = 100 })
+local cursor_hl = vim.api.nvim_get_hl(0, { name = "Cursor", link = false })
+vim.api.nvim_set_hl(0, "CursorHidden", { blend = 100, fg = cursor_hl.fg, bg = cursor_hl.bg })
 vim.api.nvim_set_hl(0, "CursorLineInative", { bg = "#20151F" })
 vim.api.nvim_set_hl(0, "CursorLineNrInative", { fg = "#a1495c", bg = "#20151F" })
 
@@ -640,7 +641,7 @@ local guicursor_default = "n:block-Cursor,i-ci-c:block-iCursor,v:block-vCursor"
 local guicursor_hidden = "a:CursorHidden/lCursorHidden"
 
 local ignore_file_types = { NvimTree = true }
-vim.api.nvim_create_autocmd({ "WinEnter" }, {
+vim.api.nvim_create_autocmd("WinEnter", {
   callback = function()
     if ignore_file_types[vim.bo.filetype] then
       vim.opt.guicursor = guicursor_hidden
