@@ -141,8 +141,9 @@ if vim.g.normal_kbd then
   vim.keymap.set("n", "<c-k>", "<cmd>wincmd k<cr>") -- move to window up
   vim.keymap.set("n", "<c-l>", "<cmd>wincmd l<cr>") -- move to window right
 else
+  local conform = require("conform")
   vim.keymap.set({ "n", "v" }, "<c-s>", function()
-    require("conform").format({
+    conform.format({
       quiet = true,
       async = false,
     })

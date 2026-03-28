@@ -70,14 +70,6 @@ return {
   {
     "RRethy/nvim-treesitter-endwise",
     dependencies = { "nvim-treesitter" },
-    config = function()
-      vim.api.nvim_create_autocmd("FileType", {
-        pattern = { "ruby", "lua", "vim", "bash", "elixir", "fish", "julia" },
-        callback = function()
-          vim.treesitter.start()
-        end,
-      })
-    end,
   },
   {
     "windwp/nvim-ts-autotag",
@@ -86,5 +78,11 @@ return {
     config = function()
       require("nvim-ts-autotag").setup({})
     end,
+  },
+  {
+    "folke/ts-comments.nvim",
+    opts = {},
+    event = "VeryLazy",
+    enabled = vim.fn.has("nvim-0.10.0") == 1,
   },
 }

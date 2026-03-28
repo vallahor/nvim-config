@@ -2,8 +2,7 @@ return {
   { "folke/lazy.nvim", version = "*" },
   { "tpope/vim-repeat", event = "VeryLazy" },
   {
-    -- dir = "../close_other_window.lua",
-    "../close_other_window.lua",
+    dir = "../close_other_window.lua",
     virtual = true,
     config = function()
       local cow = require("close_other_window")
@@ -11,6 +10,17 @@ return {
       vim.keymap.set({ "n", "v" }, "<c-down>", cow.down)
       vim.keymap.set({ "n", "v" }, "<c-up>", cow.up)
       vim.keymap.set({ "n", "v" }, "<c-right>", cow.right)
+    end,
+  },
+  {
+    dir = "../swap_buffer.lua",
+    virtual = true,
+    config = function()
+      local sb = require("swap_buffer")
+      vim.keymap.set({ "n", "v" }, "<s-left>", sb.left)
+      vim.keymap.set({ "n", "v" }, "<s-down>", sb.down)
+      vim.keymap.set({ "n", "v" }, "<s-up>", sb.up)
+      vim.keymap.set({ "n", "v" }, "<s-right>", sb.right)
     end,
   },
   {
@@ -39,11 +49,5 @@ return {
     opts = {
       close_tag_on_complete = true, -- default: true
     },
-  },
-  {
-    "folke/ts-comments.nvim",
-    opts = {},
-    event = "VeryLazy",
-    enabled = vim.fn.has("nvim-0.10.0") == 1,
   },
 }
