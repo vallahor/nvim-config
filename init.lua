@@ -632,8 +632,7 @@ end)
 -- Better highlight
 
 -- https://coolors.co/gradient-palette/291c28-1e141d?number=7
-local cursor_hl = vim.api.nvim_get_hl(0, { name = "Cursor", link = false })
-vim.api.nvim_set_hl(0, "CursorHidden", { blend = 100, fg = cursor_hl.fg, bg = cursor_hl.bg })
+vim.api.nvim_set_hl(0, "CursorHidden", { blend = 100, bg = "#121112" })
 vim.api.nvim_set_hl(0, "CursorLineInative", { bg = "#20151F" })
 vim.api.nvim_set_hl(0, "CursorLineNrInative", { fg = "#a1495c", bg = "#20151F" })
 
