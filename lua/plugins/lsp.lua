@@ -14,16 +14,14 @@ return {
         group = lsp_augroup,
         callback = function(args)
           local bufnr = args.buf
-          if vim.lsp.document_color then
-            vim.lsp.document_color.enable(true, { bufnr = bufnr }, {
-              -- style = "virtual",
-              style = "● ",
-              -- style = "■ ",
-            })
-          end
+          vim.lsp.document_color.enable(true, { bufnr = bufnr }, {
+            -- style = "virtual",
+            style = "● ",
+            -- style = "■ ",
+          })
 
           local client = vim.lsp.get_client_by_id(args.data.client_id)
-          if client then
+          if client and client.server_capabilities then
             client.server_capabilities.semanticTokensProvider = nil
           end
 
@@ -41,15 +39,6 @@ return {
       vim.lsp.enable({ "gdscript", "nushell", "rust_analyzer", "laravel_ls", "intelephense", "svelte" })
 
       vim.lsp.semantic_tokens.enable(false)
-      -- vim.api.nvim_create_autocmd("LspAttach", {
-      --   callback = function(ev)
-      --     local client = vim.lsp.get_client_by_id(ev.data.client_id)
-      --     if client then
-      --       -- local bufnr = ev.buf
-      --       client.server_capabilities.semanticTokensProvider = nil
-      --     end
-      --   end,
-      -- })
 
       local port = os.getenv("GDScript_Port") or "6005"
       vim.lsp.config("gdscript", {
@@ -60,29 +49,16 @@ return {
         capabilities = capabilities,
       })
 
-      vim.lsp.config("lua_ls", {
+      -- vim.lsp.config("lua_ls", {
+      vim.lsp.config("emmylua_ls", {
         capabilities = capabilities,
         settings = {
           Lua = {
             runtime = {
-              -- Tell the language server which version of Lua you're using
-              -- (most likely LuaJIT in the case of Neovim)
               version = "LuaJIT",
             },
-            diagnostics = {
-              -- Get the language server to recognize the `vim` global
-              globals = {
-                "vim",
-                "require",
-              },
-            },
             workspace = {
-              -- Make the server aware of Neovim runtime files
               library = vim.api.nvim_get_runtime_file("", true),
-            },
-            -- Do not send telemetry data containing a randomized but unique identifier
-            telemetry = {
-              enable = false,
             },
           },
         },
@@ -96,7 +72,7 @@ return {
                 {
                   name = "@vue/typescript-plugin",
                   location = vim.fn.stdpath("data")
-                    .. "/mason/packages/vue-language-server/node_modules/@vue/language-server",
+                      .. "/mason/packages/vue-language-server/node_modules/@vue/language-server",
                   languages = { "vue" },
                   configNamespace = "typescript",
                 },
@@ -164,7 +140,8 @@ return {
           "cssls",
           "html",
           "jsonls",
-          "lua_ls",
+          -- "lua_ls",
+          "emmylua_ls",
           "ols",
           "rust_analyzer",
           "intelephense",

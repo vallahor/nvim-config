@@ -109,11 +109,12 @@ return {
         end
 
         for _, m in ipairs(vim.api.nvim_buf_get_extmarks(0, mc_ns, 0, -1, { details = true })) do
-          local hl = m[4].hl_group
+          local details = m[4] --[[@as vim.api.keyset.extmark_details]]
+          local hl = details.hl_group
           if hl then
             mc_match_ids[#mc_match_ids + 1] = vim.fn.matchaddpos(
               hl,
-              { { m[2] + 1, m[3] + 1, m[4].end_col and (m[4].end_col - m[3]) or 1 } },
+              { { m[2] + 1, m[3] + 1, details.end_col and (details.end_col - m[3]) or 1 } },
               hl == "MultiCursorCursor" and 1000 or 999
             )
           end

@@ -1,6 +1,7 @@
 return {
   "stevearc/conform.nvim",
   config = function()
+    ---@diagnostic disable-next-line: param-type-mismatch
     require("conform").setup({
       formatters_by_ft = {
         json = { "prettierd", "prettier", stop_after_first = true },

@@ -1,13 +1,16 @@
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.uv.fs_stat(lazypath) then
-  vim.system({
-    "git",
-    "clone",
-    "--filter=blob:none",
-    "https://github.com/folke/lazy.nvim.git",
-    "--branch=stable",
-    lazypath,
-  })
+  local lazyrepo = "https://github.com/folke/lazy.nvim.git"
+  local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
+  if vim.v.shell_error ~= 0 then
+    vim.api.nvim_echo({
+      { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
+      { out, "WarningMsg" },
+      { "\nPress any key to exit..." },
+    }, true, {})
+    vim.fn.getchar()
+    os.exit(1)
+  end
 end
 vim.opt.rtp:prepend(lazypath)
 
@@ -15,10 +18,13 @@ vim.g.mapleader = " "
 
 vim.env.LANG = "en_US.UTF-8"
 
-require("lazy").setup("plugins", {
-  change_detection = {
-    notify = false,
+require("lazy").setup({
+  spec = {
+    { import = "plugins" },
   },
+  checker = { enabled = true },
+  change_detection = { enabled = false },
+  ---@diagnostic disable-next-line: missing-parameter
 })
 
 -- SETTINGS --
@@ -91,7 +97,7 @@ vim.g.python_indent = {
 local esc_normal_mode = function()
   for _, win in ipairs(vim.api.nvim_list_wins()) do
     local config = vim.api.nvim_win_get_config(win)
-    if config.relative ~= "" then
+    if config.relative == "win" then
       vim.api.nvim_win_close(win, false)
     end
   end
@@ -461,7 +467,8 @@ vim.api.nvim_set_hl(0, "CursorVisualNr", { fg = "#a1495c", bg = "#2d1524" })
 vim.api.nvim_set_hl(0, "VisualNr", { fg = "#493441", bg = "#2d1524" })
 vim.o.statuscolumn = "%!v:lua.StatusColumn()"
 
-local numhl = vim.diagnostic.config().signs.numhl or {}
+local cfg = vim.diagnostic.config()
+local numhl = (cfg and cfg.signs and cfg.signs.numhl) or {}
 local numhl_map = {}
 for severity, hl_name in pairs(numhl) do
   numhl_map[severity] = "%#" .. hl_name .. "#"
@@ -508,6 +515,7 @@ end
 
 -- https://pawelgrzybek.com/nvim-incremental-selection/
 local _select = require("vim.treesitter._select")
+---@type {[1]:integer,[2]:integer,[3]:integer,[4]:integer}[]
 local stack = {}
 local esc = vim.keycode("<Esc>")
 local ctrlv = vim.keycode("<C-\\><C-n>v")
@@ -520,7 +528,7 @@ local function decrement_selection()
   stack[#stack] = nil
   if #stack == 0 then
     vim.api.nvim_feedkeys(esc, "nx", true)
-    if range then
+    if range ~= nil then
       vim.api.nvim_win_set_cursor(0, { range[1] + 1, range[2] })
     end
     return
