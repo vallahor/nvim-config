@@ -144,7 +144,17 @@ return {
         nerd_font_variant = "mono",
       },
 
-      -- signature = { enabled = true, window = { show_documentation = false } },
+      signature = {
+        enabled = true,
+        trigger = {
+          enabled = false,
+          show_on_keyword = true,
+          show_on_insert = true,
+        },
+        window = {
+          show_documentation = false,
+        },
+      },
     },
     opts_extend = { "sources.default" },
   },
