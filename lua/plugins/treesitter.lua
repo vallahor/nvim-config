@@ -34,18 +34,19 @@ return {
         "vim",
         "vimdoc",
         "zig",
+        "query",
       }
 
       local treesitter = require("nvim-treesitter")
       treesitter.install(languages)
 
       local disable_indent = {
-        "cpp",
-        "gdscript",
-        "odin",
-        "python",
-        "rust",
-        "zig",
+        cpp = true,
+        gdscript = true,
+        odin = true,
+        python = true,
+        rust = true,
+        zig = true,
       }
 
       vim.api.nvim_create_autocmd("FileType", {
