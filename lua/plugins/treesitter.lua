@@ -65,10 +65,6 @@ return {
 
       -- require("nvim-treesitter.install").compilers = { "clang" }
       require("nvim-treesitter.install").compilers = { "zig" }
-
-      vim.cmd([[
-          autocmd BufRead *.scm set filetype=query
-      ]])
     end,
   },
   {

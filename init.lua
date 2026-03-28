@@ -404,6 +404,7 @@ vim.filetype.add({
     ["*.vert"] = "glsl",
     ["*.frag"] = "glsl",
     ["*.geom"] = "glsl",
+    ["*.scm"] = "query",
     [".*%.blade%.php"] = "blade",
   },
 })
