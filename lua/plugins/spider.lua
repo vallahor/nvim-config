@@ -15,10 +15,11 @@ return {
         },
       })
 
+      ---@type any
       local custom = {
         subwordMovement = false,
         customPatterns = { "[%w_%-]+", "[!\"#$%%&'()%*+,.%/:;<=>?@%[%]\\%^`{|}~]" },
-      } --[[@as any]]
+      }
 
       vim.keymap.set({ "n", "o", "x", "v" }, "w", function()
         spider.motion("w")
