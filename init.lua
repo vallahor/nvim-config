@@ -18,14 +18,15 @@ vim.g.mapleader = " "
 
 vim.env.LANG = "en_US.UTF-8"
 
-require("lazy").setup({
+---@type any
+local lazy_config = {
   spec = {
     { import = "plugins" },
   },
   checker = { enabled = true },
   change_detection = { enabled = false },
-  ---@diagnostic disable-next-line: missing-parameter
-})
+}
+require("lazy").setup(lazy_config)
 
 -- SETTINGS --
 vim.opt.guifont = { "JetBrainsMono NF:h11" }

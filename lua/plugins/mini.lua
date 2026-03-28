@@ -62,13 +62,6 @@ return {
             local mode, mode_hl = mode_info.short, mode_info.hl
 
             local filename = get_filename()
-
-            -- return MiniStatusline.combine_groups({
-            --   "%<",
-            --   { hl = "MiniStatuslineFilename", strings = { filename } },
-            --   "%=",
-            --   { strings = { location } },
-            -- })
             return MiniStatusline.combine_groups({
               { hl = mode_hl, strings = { mode } },
               "%<",

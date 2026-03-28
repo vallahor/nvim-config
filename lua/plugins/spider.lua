@@ -1,10 +1,10 @@
 return {
-  {
     "chrisgrieser/nvim-spider",
-    event = "VeryLazy",
     config = function()
-      require("spider").setup({
+      local spider = require("spider")
+      spider.setup({
         skipInsignificantPunctuation = false,
+        consistentOperatorPending = false,
         subwordMovement = true,
         customPatterns = {
           patterns = {
@@ -13,37 +13,36 @@ return {
           overrideDefault = false,
         },
       })
-      local pattern = { "[%w_%-]+", "[!\"#$%%&'()%*+,.%/:;<=>?@%[%]\\%^`{|}~]" }
 
       local custom = {
         subwordMovement = false,
-        customPatterns = pattern,
-      }
+        customPatterns = { "[%w_%-]+", "[!\"#$%%&'()%*+,.%/:;<=>?@%[%]\\%^`{|}~]" },
+      } --[[@as any]]
 
       vim.keymap.set({ "n", "o", "x", "v" }, "w", function()
-        require("spider").motion("w")
+        spider.motion("w")
       end)
       vim.keymap.set({ "n", "o", "x", "v" }, "e", function()
-        require("spider").motion("e")
+        spider.motion("e")
       end)
       vim.keymap.set({ "n", "o", "x", "v" }, "b", function()
-        require("spider").motion("b")
+        spider.motion("b")
       end)
       vim.keymap.set({ "n", "o", "x", "v" }, "q", function()
-        require("spider").motion("ge")
+        spider.motion("ge")
       end)
 
       vim.keymap.set({ "n", "o", "x", "v" }, "W", function()
-        require("spider").motion("w", custom)
+        spider.motion("w", custom)
       end)
       vim.keymap.set({ "n", "o", "x", "v" }, "E", function()
-        require("spider").motion("e", custom)
+        spider.motion("e", custom)
       end)
       vim.keymap.set({ "n", "o", "x", "v" }, "B", function()
-        require("spider").motion("b", custom)
+        spider.motion("b", custom)
       end)
       vim.keymap.set({ "n", "o", "x", "v" }, "Q", function()
-        require("spider").motion("ge", custom)
+        spider.motion("ge", custom)
       end)
 
       -- set "Q" to default "q"
