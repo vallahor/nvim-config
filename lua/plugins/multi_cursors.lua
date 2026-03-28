@@ -14,68 +14,35 @@ return {
       vim.keymap.set("n", "Z", mc.restoreCursors)
       vim.keymap.set("n", "<c-z>", mc.restoreCursors)
 
-      if vim.g.normal_kbd then
-        -- Add or skip cursor above/below the main cursor.
-        vim.keymap.set({ "n", "x" }, "<a-k>", function()
-          mc.lineAddCursor(-1)
-        end)
-        vim.keymap.set({ "n", "x" }, "<a-j>", function()
-          mc.lineAddCursor(1)
-        end)
-        vim.keymap.set({ "n", "x" }, "<a-s-k>", function()
-          mc.lineSkipCursor(-1)
-        end)
-        vim.keymap.set({ "n", "x" }, "<a-s-j>", function()
-          mc.lineSkipCursor(1)
-        end)
+      -- Add or skip cursor above/below the main cursor.
+      vim.keymap.set({ "n", "x" }, "<c-k>", function()
+        mc.lineAddCursor(-1)
+      end)
+      vim.keymap.set({ "n", "x" }, "<c-j>", function()
+        mc.lineAddCursor(1)
+      end)
+      vim.keymap.set({ "n", "x" }, "<c-s-k>", function()
+        mc.lineSkipCursor(-1)
+      end)
+      vim.keymap.set({ "n", "x" }, "<c-s-j>", function()
+        mc.lineSkipCursor(1)
+      end)
 
-        -- Add or skip adding a new cursor by matching word/selection
-        vim.keymap.set({ "n", "x" }, "<a-l>", function()
-          mc.matchAddCursor(1)
-        end)
-        vim.keymap.set({ "n", "x" }, "<a-s-l>", function()
-          mc.matchSkipCursor(1)
-        end)
-        vim.keymap.set({ "n", "x" }, "<a-h>", function()
-          mc.matchAddCursor(-1)
-        end)
-        vim.keymap.set({ "n", "x" }, "<a-s-h>", function()
-          mc.matchSkipCursor(-1)
-        end)
-
-        -- Align cursor columns.
-        vim.keymap.set("n", "<a-a>", mc.alignCursors)
-      else
-        -- Add or skip cursor above/below the main cursor.
-        vim.keymap.set({ "n", "x" }, "<c-k>", function()
-          mc.lineAddCursor(-1)
-        end)
-        vim.keymap.set({ "n", "x" }, "<c-j>", function()
-          mc.lineAddCursor(1)
-        end)
-        vim.keymap.set({ "n", "x" }, "<c-s-k>", function()
-          mc.lineSkipCursor(-1)
-        end)
-        vim.keymap.set({ "n", "x" }, "<c-s-j>", function()
-          mc.lineSkipCursor(1)
-        end)
-
-        -- Add or skip adding a new cursor by matching word/selection
-        vim.keymap.set({ "n", "x" }, "<c-l>", function()
-          mc.matchAddCursor(1)
-        end)
-        vim.keymap.set({ "n", "x" }, "<c-s-l>", function()
-          mc.matchSkipCursor(1)
-        end)
-        vim.keymap.set({ "n", "x" }, "<c-h>", function()
-          mc.matchAddCursor(-1)
-        end)
-        vim.keymap.set({ "n", "x" }, "<c-s-h>", function()
-          mc.matchSkipCursor(-1)
-        end)
-        -- Align cursor columns.
-        vim.keymap.set("n", "<c-s-a>", mc.alignCursors)
-      end
+      -- Add or skip adding a new cursor by matching word/selection
+      vim.keymap.set({ "n", "x" }, "<c-l>", function()
+        mc.matchAddCursor(1)
+      end)
+      vim.keymap.set({ "n", "x" }, "<c-s-l>", function()
+        mc.matchSkipCursor(1)
+      end)
+      vim.keymap.set({ "n", "x" }, "<c-h>", function()
+        mc.matchAddCursor(-1)
+      end)
+      vim.keymap.set({ "n", "x" }, "<c-s-h>", function()
+        mc.matchSkipCursor(-1)
+      end)
+      -- Align cursor columns.
+      vim.keymap.set("n", "<c-s-a>", mc.alignCursors)
 
       -- -- Split visual selections by regex.
       -- vim.keymap.set("x", "<c-s-s>", mc.splitCursors)
@@ -99,15 +66,9 @@ return {
       -- Mappings defined in a keymap layer only apply when there are
       -- multiple cursors. This lets you have overlapping mappings.
       mc.addKeymapLayer(function(layerSet)
-        if vim.g.normal_kbd then
-          -- -- Select a different cursor as the main one.
-          layerSet({ "n", "x" }, "<a-p>", mc.prevCursor)
-          layerSet({ "n", "x" }, "<a-n>", mc.nextCursor)
-        else
-          -- -- Select a different cursor as the main one.
-          layerSet({ "n", "x" }, "<c-,>", mc.prevCursor)
-          layerSet({ "n", "x" }, "<c-.>", mc.nextCursor)
-        end
+        -- -- Select a different cursor as the main one.
+        layerSet({ "n", "x" }, "<c-,>", mc.prevCursor)
+        layerSet({ "n", "x" }, "<c-.>", mc.nextCursor)
 
         -- -- Delete the main cursor.
         -- layerSet({ "n", "x" }, "<leader>x", mc.deleteCursor)

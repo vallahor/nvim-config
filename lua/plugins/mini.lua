@@ -86,11 +86,7 @@ return {
       require("mini.bufremove").setup()
 
       vim.keymap.set("n", "<c-w>", "<cmd>lua MiniBufremove.delete(0, false)<CR>")
-      if vim.g.normal_kbd then
-        vim.keymap.set("n", "<a-w>", "<cmd>lua MiniBufremove.delete(0, true)<CR>")
-      else
-        vim.keymap.set("n", "<c-x>", "<cmd>lua MiniBufremove.delete(0, true)<CR>")
-      end
+      vim.keymap.set("n", "<c-x>", "<cmd>lua MiniBufremove.delete(0, true)<CR>")
       -- closes the current window and buffer
       -- to close the current buffer and not the window use <c-w>
       -- vim.keymap.set("n", "<c-s-w>", "<cmd>bd<cr>") -- close current buffer and window -- not work with ghostty (combination in use)
