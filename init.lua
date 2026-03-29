@@ -224,10 +224,7 @@ local function move_lines(direction)
   local first = math.min(cursor, mark)
   local last = math.max(cursor, mark)
 
-  if direction == "down" and last >= vim.fn.line("$") then
-    return
-  end
-  if direction == "up" and first <= 1 then
+  if direction == "down" and last >= vim.fn.line("$") or direction == "up" and first <= 1 then
     return
   end
 
