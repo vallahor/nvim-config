@@ -317,10 +317,10 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
   callback = function()
     vim.keymap.set({ "n", "v", "x" }, "[", function()
       vim.diagnostic.jump({ count = -1, float = false })
-    end, { nowait = true, buffer = true }) -- paragraph up
+    end, { nowait = true, buffer = true }) -- previous diagnostic
     vim.keymap.set({ "n", "v", "x" }, "]", function()
       vim.diagnostic.jump({ count = 1, float = false })
-    end, { nowait = true, buffer = true }) -- paragraph up
+    end, { nowait = true, buffer = true }) -- next diagnostic
 
     -- move indentation
     vim.keymap.set({ "v", "x" }, "<", "<gv", { nowait = true, buffer = true, remap = true }) -- indent left in visual mode
@@ -331,7 +331,25 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
 vim.api.nvim_create_autocmd("TextYankPost", {
   group = vim.api.nvim_create_augroup("highlight-yank", { clear = true }),
   callback = function()
-    vim.hl.on_yank({ higroup = "VisualYank", timeout = 200 })
+    -- vim.hl.on_yank({ higroup = "VisualYank", timeout = 200 })
+    local yank = vim.v.event
+    local pos1 = vim.fn.getpos("'[")
+    local pos2 = vim.fn.getpos("']")
+    local positions = vim.fn.getregionpos(pos1, pos2, { type = yank.regtype, eol = true })
+
+    local match_ids = {}
+    for _, region in ipairs(positions) do
+      local srow, scol = region[1][2], region[1][3]
+      local ecol = region[2][3]
+      local id = vim.fn.matchaddpos("VisualYank", { { srow, scol, ecol - scol + 1 } }, 999)
+      match_ids[#match_ids + 1] = id
+    end
+
+    vim.defer_fn(function()
+      for _, id in ipairs(match_ids) do
+        pcall(vim.fn.matchdelete, id)
+      end
+    end, 200)
   end,
 })
 
@@ -521,7 +539,8 @@ local stack = {}
 local esc = vim.keycode("<Esc>")
 
 local function decrement_selection()
-  if vim.api.nvim_get_mode().mode ~= "v" then
+  local mode = vim.api.nvim_get_mode().mode
+  if mode ~= "v" and mode ~= "V" and mode ~= "\x16" then
     return
   end
   local range = stack[#stack]
@@ -557,6 +576,14 @@ vim.keymap.set("x", "<Esc>", function()
   stack = {}
   vim.api.nvim_feedkeys(esc, "nx", true)
 end)
+
+vim.keymap.set({ "n", "x", "o" }, "<c-h>", function()
+  if vim.treesitter.get_parser(nil, nil, { error = false }) then
+    require("vim.treesitter._select").select_parent(vim.v.count1)
+  else
+    vim.lsp.buf.selection_range(vim.v.count1)
+  end
+end, { desc = "Select parent treesitter node or outer incremental lsp selections" })
 
 -- Better highlight
 
