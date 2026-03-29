@@ -576,14 +576,6 @@ vim.keymap.set("x", "<Esc>", function()
   vim.api.nvim_feedkeys(esc, "nx", true)
 end)
 
-vim.keymap.set({ "n", "x", "o" }, "<c-h>", function()
-  if vim.treesitter.get_parser(nil, nil, { error = false }) then
-    require("vim.treesitter._select").select_parent(vim.v.count1)
-  else
-    vim.lsp.buf.selection_range(vim.v.count1)
-  end
-end, { desc = "Select parent treesitter node or outer incremental lsp selections" })
-
 -- Better highlight
 
 -- https://coolors.co/gradient-palette/291c28-1e141d?number=7

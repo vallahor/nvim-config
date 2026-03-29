@@ -204,7 +204,12 @@ return {
 
       local bufremove = require("mini.bufremove")
       local wipeout_cur = function()
-        local current = pick.get_picker_matches().current
+        local picker_matches = pick.get_picker_matches()
+        if not picker_matches then
+          return
+        end
+
+        local current = picker_matches.current
         if not current or not current.bufnr then
           return
         end
