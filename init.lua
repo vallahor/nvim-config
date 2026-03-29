@@ -166,7 +166,7 @@ vim.keymap.set("i", "<PageDown>", "<nop>", { noremap = true }) -- page down
 
 vim.keymap.set({ "i", "c" }, "<c-v>", [[<c-r>+]]) -- paste to command line mode
 
-vim.keymap.set("v", "v", "V") -- visual line mode
+vim.keymap.set("v", "v", "V", { noremap = true }) -- visual line mode
 
 vim.keymap.set("c", "<c-bs>", "<c-w>") -- delete previous word (cmd)
 
@@ -201,10 +201,6 @@ local beginning_of_the_line = function()
   end
 end
 
--- vim.keymap.set("i", "<home>", beginning_of_the_line) -- go to beginning of the line
--- vim.keymap.set({ "n", "v" }, "<home>", beginning_of_the_line) -- go to beginning of the line
--- vim.keymap.set("n", "<end>", "$") -- go to end of line
--- vim.keymap.set("v", "<end>", "$h") -- go to end of line (for some reason it's goes to wrong place in visual mode)
 vim.keymap.set("i", "<home>", beginning_of_the_line) -- go to beginning of the line
 vim.keymap.set({ "n", "v" }, "(", beginning_of_the_line) -- go to beginning of the line
 vim.keymap.set("n", ")", "$") -- go to end of line
@@ -255,6 +251,9 @@ vim.keymap.set("n", "K", "<nop>")
 
 -- visual mode - paste without copying
 vim.keymap.set({ "v", "x" }, "p", "P")
+
+-- Open mini.pick buffer selection if not do this.
+vim.keymap.set("n", "<c-i>", "<c-i>")
 
 -- close quickfix menu after selecting choice
 vim.api.nvim_create_autocmd("FileType", {
