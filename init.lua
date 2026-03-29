@@ -23,7 +23,7 @@ local lazy_config = {
   spec = {
     { import = "plugins" },
   },
-  checker = { enabled = true },
+  checker = { enabled = false },
   change_detection = { enabled = false },
 }
 require("lazy").setup(lazy_config)
@@ -216,10 +216,10 @@ vim.keymap.set("v", "<c-c>", '"0y"0Pgv') -- like sublime duplicate line
 
 -- duplicate and comment
 vim.keymap.set("n", "<c-s-c>", function()
-  vim.cmd([[norm "0yygc"0p]])
+  vim.cmd.normal('0yygc"0p')
 end)
 vim.keymap.set("v", "<c-s-c>", function()
-  vim.cmd([[norm gcgv"0y"0Pgvgc]])
+  vim.cmd.normal('gcgv"0y"0Pgvgc')
 end)
 
 vim.keymap.set("x", "<Down>", ":m '>+1<CR>gv=gv")
@@ -519,7 +519,6 @@ local _select = require("vim.treesitter._select")
 ---@type {[1]:integer,[2]:integer,[3]:integer,[4]:integer}[]
 local stack = {}
 local esc = vim.keycode("<Esc>")
-local ctrlv = vim.keycode("<C-\\><C-n>v")
 
 local function decrement_selection()
   if vim.api.nvim_get_mode().mode ~= "v" then
@@ -534,12 +533,9 @@ local function decrement_selection()
     end
     return
   end
-  local srow, scol, erow, ecol = range[1], range[2], range[3], range[4]
-  vim.api.nvim_win_set_cursor(0, { srow + 1, scol })
-  vim.api.nvim_feedkeys(ctrlv, "nx", true)
-  if not pcall(vim.api.nvim_win_set_cursor, 0, { erow + 1, ecol - 1 }) then
-    vim.api.nvim_win_set_cursor(0, { erow, #vim.fn.getline(erow) })
-  end
+  vim.fn.setpos("'<", { 0, range[1] + 1, range[2] + 1, 0 })
+  vim.fn.setpos("'>", { 0, range[3] + 1, range[4], 0 })
+  vim.cmd.normal({ "gv", bang = true })
 end
 
 local function increment_selection()
@@ -594,7 +590,9 @@ vim.api.nvim_create_autocmd("CmdlineEnter", {
           vim.cmd("redraw")
         end
       end)
+      return
     end
+    vim.cmd("redraw")
   end,
 })
 
