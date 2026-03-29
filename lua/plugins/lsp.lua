@@ -14,16 +14,7 @@ return {
         group = lsp_augroup,
         callback = function(args)
           local bufnr = args.buf
-          vim.lsp.document_color.enable(true, { bufnr = bufnr }, {
-            -- style = "virtual",
-            style = "● ",
-            -- style = "■ ",
-          })
-
-          local client = vim.lsp.get_client_by_id(args.data.client_id)
-          if client and client.server_capabilities then
-            client.server_capabilities.semanticTokensProvider = nil
-          end
+          vim.lsp.document_color.enable(true, { bufnr = bufnr }, { style = "● " })
 
           local opts = { buffer = bufnr }
           vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
@@ -49,7 +40,6 @@ return {
         capabilities = capabilities,
       })
 
-      -- vim.lsp.config("lua_ls", {
       vim.lsp.config("emmylua_ls", {
         capabilities = capabilities,
         settings = {
@@ -72,7 +62,7 @@ return {
                 {
                   name = "@vue/typescript-plugin",
                   location = vim.fn.stdpath("data")
-                      .. "/mason/packages/vue-language-server/node_modules/@vue/language-server",
+                    .. "/mason/packages/vue-language-server/node_modules/@vue/language-server",
                   languages = { "vue" },
                   configNamespace = "typescript",
                 },
