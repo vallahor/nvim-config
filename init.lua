@@ -28,8 +28,6 @@ local lazy_config = {
 }
 require("lazy").setup(lazy_config)
 
-require("vim._core.ui2").enable({})
-
 -- SETTINGS --
 vim.opt.guifont = { "JetBrainsMono NF:h11" }
 vim.opt.shiftwidth = 4
