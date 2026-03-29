@@ -218,26 +218,28 @@ vim.keymap.set("v", "<c-s-c>", function()
   vim.cmd.normal('gcgv"0y"0Pgvgc')
 end)
 
+local move_direction_up = 2
+local move_direction_down = 1
 local function move_lines(direction)
   local cursor = vim.fn.line(".")
   local mark = vim.fn.line("v")
   local first = math.min(cursor, mark)
   local last = math.max(cursor, mark)
 
-  if direction == "down" and last >= vim.fn.line("$") or direction == "up" and first <= 1 then
+  if direction == move_direction_down and last >= vim.fn.line("$") or direction == move_direction_up and first <= 1 then
     return
   end
 
   vim.cmd.normal({ "\27", bang = true })
-  vim.cmd(first .. "," .. last .. "m " .. (direction == "down" and last + 1 or first - 2))
+  vim.cmd(first .. "," .. last .. "m " .. (direction == move_direction_down and last + 1 or first - 2))
   vim.cmd.normal({ "gv=gv", bang = true })
 end
 
 vim.keymap.set("x", "<Down>", function()
-  move_lines("down")
+  move_lines(move_direction_down)
 end, { silent = true })
 vim.keymap.set("x", "<Up>", function()
-  move_lines("up")
+  move_lines(move_direction_up)
 end, { silent = true })
 
 vim.keymap.set("n", "<f4>", "<cmd>:e $MYVIMRC<cr>") -- open config file (vimrc or init.lua)
