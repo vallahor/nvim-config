@@ -28,6 +28,8 @@ local lazy_config = {
 }
 require("lazy").setup(lazy_config)
 
+require("vim._core.ui2").enable({})
+
 -- SETTINGS --
 vim.opt.guifont = { "JetBrainsMono NF:h11" }
 vim.opt.shiftwidth = 4
@@ -351,7 +353,6 @@ vim.api.nvim_create_autocmd("TextYankPost", {
   callback = function()
     -- vim.hl.on_yank({ higroup = "VisualYank", timeout = 200 })
     local yank = vim.v.event
-    print(vim.inspect(yank))
     if yank.operator ~= "y" then
       return
     end
