@@ -218,8 +218,30 @@ vim.keymap.set("v", "<c-s-c>", function()
   vim.cmd.normal('gcgv"0y"0Pgvgc')
 end)
 
-vim.keymap.set("x", "<Down>", ":m '>+1<CR>gv=gv")
-vim.keymap.set("x", "<Up>", ":m '<-2<CR>gv=gv")
+local function move_lines(direction)
+  local cursor = vim.fn.line(".")
+  local mark = vim.fn.line("v")
+  local first = math.min(cursor, mark)
+  local last = math.max(cursor, mark)
+
+  if direction == "down" and last >= vim.fn.line("$") then
+    return
+  end
+  if direction == "up" and first <= 1 then
+    return
+  end
+
+  vim.cmd("normal! \27")
+  vim.cmd(first .. "," .. last .. "m " .. (direction == "down" and last + 1 or first - 2))
+  vim.cmd("normal! gv=gv")
+end
+
+vim.keymap.set("x", "<Down>", function()
+  move_lines("down")
+end, { silent = true })
+vim.keymap.set("x", "<Up>", function()
+  move_lines("up")
+end, { silent = true })
 
 vim.keymap.set("n", "<f4>", "<cmd>:e $MYVIMRC<cr>") -- open config file (vimrc or init.lua)
 vim.keymap.set("n", "<f5>", "<cmd>so %<cr>") -- execute current file (vim or lua)
@@ -332,6 +354,11 @@ vim.api.nvim_create_autocmd("TextYankPost", {
   callback = function()
     -- vim.hl.on_yank({ higroup = "VisualYank", timeout = 200 })
     local yank = vim.v.event
+    print(vim.inspect(yank))
+    if yank.operator ~= "y" then
+      return
+    end
+
     local pos1 = vim.fn.getpos("'[")
     local pos2 = vim.fn.getpos("']")
     local positions = vim.fn.getregionpos(pos1, pos2, { type = yank.regtype, eol = true })
@@ -577,7 +604,6 @@ vim.keymap.set("x", "<Esc>", function()
 end)
 
 -- Better highlight
-
 -- https://coolors.co/gradient-palette/291c28-1e141d?number=7
 vim.api.nvim_set_hl(0, "CursorHidden", { blend = 100, bg = "#121112" })
 vim.api.nvim_set_hl(0, "CursorLineInative", { bg = "#20151F" })
@@ -585,6 +611,8 @@ vim.api.nvim_set_hl(0, "CursorLineNrInative", { fg = "#a1495c", bg = "#20151F" }
 
 local guicursor_default = "n:block-Cursor,i-ci-c:block-iCursor,v:block-vCursor"
 local guicursor_hidden = "a:CursorHidden/lCursorHidden"
+local cursor_line_active = "CursorLine:CursorLine,CursorLineNr:CursorLineNr"
+local cursor_line_inactive = "CursorLine:CursorLineInative,CursorLineNr:CursorLineNrInative"
 
 local ignore_file_types = { NvimTree = true }
 vim.api.nvim_create_autocmd("WinEnter", {
@@ -625,11 +653,11 @@ vim.api.nvim_create_autocmd("CmdlineLeave", {
 
 vim.api.nvim_create_autocmd({ "WinEnter", "BufWinEnter", "BufEnter" }, {
   callback = function()
-    vim.opt_local.winhighlight = "CursorLine:CursorLine,CursorLineNr:CursorLineNr"
+    vim.opt_local.winhighlight = cursor_line_active
   end,
 })
 vim.api.nvim_create_autocmd({ "WinLeave" }, {
   callback = function()
-    vim.opt_local.winhighlight = "CursorLine:CursorLineInative,CursorLineNr:CursorLineNrInative"
+    vim.opt_local.winhighlight = cursor_line_inactive
   end,
 })
