@@ -228,7 +228,7 @@ local function move_lines(direction)
     return
   end
 
-  vim.cmd("normal! \27")
+  vim.cmd.normal({ "\27", bang = true })
   vim.cmd(first .. "," .. last .. "m " .. (direction == "down" and last + 1 or first - 2))
   vim.cmd.normal({ "gv=gv", bang = true })
 end
