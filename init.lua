@@ -95,7 +95,7 @@ vim.g.python_indent = {
 
 -- MAPPING --
 
-local esc_normal_mode = function()
+local function esc_normal_mode()
   for _, win in ipairs(vim.api.nvim_list_wins()) do
     local config = vim.api.nvim_win_get_config(win)
     if config.relative == "win" then
@@ -193,7 +193,7 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 -- go to beginning of the line function like DOOM Emacs
-local beginning_of_the_line = function()
+local function beginning_of_the_line()
   local old_pos = vim.fn.col(".")
   vim.fn.execute("normal ^")
   if old_pos == vim.fn.col(".") then
@@ -530,7 +530,7 @@ vim.api.nvim_create_autocmd("ModeChanged", {
   end,
 })
 
-local get_linenr_color = function()
+local function get_linenr_color()
   if vim.v.relnum == 0 then
     if in_visual and vim.g.statusline_winid == vim.api.nvim_get_current_win() and not has_cursors then
       return "%#CursorVisualNr#"
