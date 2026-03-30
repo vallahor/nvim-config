@@ -351,23 +351,21 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
 vim.api.nvim_create_autocmd("TextYankPost", {
   group = vim.api.nvim_create_augroup("highlight-yank", { clear = true }),
   callback = function()
-    -- vim.hl.on_yank({ higroup = "VisualYank", timeout = 200 })
     local yank = vim.v.event
     if yank.operator ~= "y" then
       return
     end
 
-    local pos1 = vim.fn.getpos("'[")
-    local pos2 = vim.fn.getpos("']")
-    local positions = vim.fn.getregionpos(pos1, pos2, { type = yank.regtype, eol = true })
+    local pos1, pos2 = vim.fn.getpos("'["), vim.fn.getpos("']")
+    local region_list = vim.fn.getregionpos(pos1, pos2, { type = yank.regtype, eol = true })
 
-    local specs = {}
-    for _, region in ipairs(positions) do
+    local positions = {}
+    for _, region in ipairs(region_list) do
       local srow, scol, ecol = region[1][2], region[1][3], region[2][3]
-      specs[#specs + 1] = { srow, scol, ecol - scol + 1 }
+      positions[#positions + 1] = { srow, scol, ecol - scol + 1 }
     end
 
-    local id = vim.fn.matchaddpos("VisualYank", specs, 999)
+    local id = vim.fn.matchaddpos("VisualYank", positions, 999)
 
     vim.defer_fn(function()
       pcall(vim.fn.matchdelete, id --[[@as integer]])
