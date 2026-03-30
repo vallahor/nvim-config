@@ -109,7 +109,7 @@ end
 
 vim.keymap.set("n", "<esc>", esc_normal_mode)
 
-vim.keymap.del("n", "gcc")
+pcall(vim.keymap.del, "n", "gcc")
 vim.keymap.set("n", "gc", function()
   local row = vim.api.nvim_win_get_cursor(0)[1]
   require("vim._comment").toggle_lines(row, row)
