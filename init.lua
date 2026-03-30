@@ -569,8 +569,10 @@ local function decrement_selection()
   if mode ~= "v" and mode ~= "V" and mode ~= "\x16" then
     return
   end
+
   local range = stack[#stack]
   stack[#stack] = nil
+
   if #stack == 0 then
     vim.api.nvim_feedkeys(esc, "nx", true)
     if range ~= nil then
@@ -578,6 +580,7 @@ local function decrement_selection()
     end
     return
   end
+
   vim.fn.setpos("'<", { 0, range[1] + 1, range[2] + 1, 0 })
   vim.fn.setpos("'>", { 0, range[3] + 1, range[4], 0 })
   vim.cmd.normal({ "gv", bang = true })
@@ -587,11 +590,14 @@ local function increment_selection()
   if not vim.treesitter.get_parser(nil, nil, { error = false }) then
     return
   end
+
   if vim.api.nvim_get_mode().mode ~= "v" then
     stack = {}
   end
+
   local vline, vcol = vim.fn.line("v"), vim.fn.col("v")
   local cline, ccol = vim.fn.line("."), vim.fn.col(".")
+
   stack[#stack + 1] = { vline - 1, vcol - 1, cline - 1, ccol }
   _select.select_parent(vim.v.count1)
 end
