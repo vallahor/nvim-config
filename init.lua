@@ -370,10 +370,11 @@ vim.api.nvim_create_autocmd("TextYankPost", {
       positions[#positions + 1] = { srow, scol, ecol - scol + 1 }
     end
 
-    local id = vim.fn.matchaddpos("VisualYank", positions, 999)
+    local win = vim.api.nvim_get_current_win()
+    local id = vim.fn.matchaddpos("VisualYank", positions, 999) --[[@as integer]]
 
     vim.defer_fn(function()
-      pcall(vim.fn.matchdelete, id --[[@as integer]])
+      pcall(vim.fn.matchdelete, id, win)
     end, 200)
   end,
 })
