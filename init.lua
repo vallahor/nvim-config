@@ -343,8 +343,13 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
     end, { nowait = true, buffer = true }) -- next diagnostic
 
     -- move indentation
-    vim.keymap.set({ "v", "x" }, "<", "<gv", { nowait = true, buffer = true, remap = true }) -- indent left in visual mode
-    vim.keymap.set({ "v", "x" }, ">", ">gv", { nowait = true, buffer = true, remap = true }) -- indent right in visual mode
+    vim.keymap.set({ "v", "x" }, "<", function()
+      vim.cmd("silent keepjumps normal! <gv")
+    end, { silent = true, nowait = true, buffer = true })
+
+    vim.keymap.set({ "v", "x" }, ">", function()
+      vim.cmd("silent keepjumps normal! >gv")
+    end, { silent = true, nowait = true, buffer = true })
   end,
 })
 
