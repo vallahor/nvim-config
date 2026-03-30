@@ -356,14 +356,16 @@ vim.api.nvim_create_autocmd("TextYankPost", {
     if yank.operator ~= "y" then
       return
     end
+
     local pos1 = vim.fn.getpos("'[")
     local pos2 = vim.fn.getpos("']")
-    local region = vim.fn.getregion(pos1, pos2, { type = yank.regtype, eol = true })
+    local positions = vim.fn.getregionpos(pos1, pos2, { type = yank.regtype, eol = true })
 
     local specs = {}
-    for i, line in ipairs(region) do
-      local srow = pos1[2] + i - 1
-      specs[#specs + 1] = { srow, pos1[3], #line }
+    for _, region in ipairs(positions) do
+      local srow, scol = region[1][2], region[1][3]
+      local ecol = region[2][3]
+      specs[#specs + 1] = { srow, scol, ecol - scol + 1 }
     end
 
     local id = vim.fn.matchaddpos("VisualYank", specs, 999)
