@@ -363,8 +363,7 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 
     local specs = {}
     for _, region in ipairs(positions) do
-      local srow, scol = region[1][2], region[1][3]
-      local ecol = region[2][3]
+      local srow, scol, ecol = region[1][2], region[1][3], region[2][3]
       specs[#specs + 1] = { srow, scol, ecol - scol + 1 }
     end
 
