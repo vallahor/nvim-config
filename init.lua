@@ -487,6 +487,7 @@ vim.diagnostic.config({
   jump = {
     on_jump = function() end,
   },
+  update_in_insert = true,
   signs = {
     linehl = {
       [vim.diagnostic.severity.ERROR] = "DiagnosticLinehlError",
@@ -519,6 +520,25 @@ for severity, hl_name in pairs(numhl) do
   numhl_map[severity] = "%#" .. hl_name .. "#"
 end
 
+local diag_cache = {}
+vim.api.nvim_create_autocmd("DiagnosticChanged", {
+  pattern = "*",
+  callback = function(args)
+    local buf = args.buf
+    local cache = {}
+    for _, diag in ipairs(vim.diagnostic.get(buf)) do
+      cache[diag.lnum + 1] = numhl_map[diag.severity]
+    end
+    diag_cache[buf] = cache
+  end,
+})
+
+vim.api.nvim_create_autocmd("BufWipeout", {
+  callback = function(args)
+    diag_cache[args.buf] = nil
+  end,
+})
+
 local in_visual = false
 local has_cursors = false
 local mc = require("multicursor-nvim")
@@ -546,12 +566,10 @@ local function get_linenr_color()
     end
   end
 
-  local diags = vim.diagnostic.get(vim.api.nvim_win_get_buf(vim.g.statusline_winid), { lnum = vim.v.lnum - 1 })
-  if #diags > 0 then
-    return numhl_map[diags[#diags].severity]
-  end
-
-  return "%#LineNr#"
+  local win = vim.g.statusline_winid
+  local buf = vim.api.nvim_win_get_buf(win)
+  local hl = diag_cache[buf] and diag_cache[buf][vim.v.lnum]
+  return hl or "%#LineNr#"
 end
 
 function _G.StatusColumn()
@@ -624,9 +642,9 @@ local ignore_file_types = { NvimTree = true }
 vim.api.nvim_create_autocmd("WinEnter", {
   callback = function()
     if ignore_file_types[vim.bo.filetype] then
-      vim.opt_local.guicursor = guicursor_hidden
+      vim.opt.guicursor = guicursor_hidden
     else
-      vim.opt_local.guicursor = guicursor_default
+      vim.opt.guicursor = guicursor_default
     end
   end,
 })
@@ -638,7 +656,7 @@ vim.api.nvim_create_autocmd("CmdlineEnter", {
       cmdline_active = true
       vim.schedule(function()
         if cmdline_active then
-          vim.opt_local.guicursor = guicursor_default
+          vim.opt.guicursor = guicursor_default
           vim.cmd("redraw")
         end
       end)
@@ -652,7 +670,7 @@ vim.api.nvim_create_autocmd("CmdlineLeave", {
   callback = function()
     cmdline_active = false
     if ignore_file_types[vim.bo.filetype] then
-      vim.opt_local.guicursor = guicursor_hidden
+      vim.opt.guicursor = guicursor_hidden
     end
   end,
 })
