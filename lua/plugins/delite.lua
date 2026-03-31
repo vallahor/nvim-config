@@ -8,6 +8,7 @@ return {
 
     delite.insert_default_pairs_priority({ left = "%{", right = "}" }, { not_filetypes = { "lua" } })
 
+    ---@diagnostic disable-next-line: param-type-mismatch, missing-fields
     delite.edit_default_pairs("'", { not_filetypes = { "ocaml", "rust" } })
     delite.insert_rule({ left = '~%u"""', right = '"""', { filetypes = { "elixir" } } })
     -- delite.remove_pattern_from_default_pairs("<")
