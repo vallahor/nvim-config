@@ -496,12 +496,6 @@ vim.diagnostic.config({
       [vim.diagnostic.severity.INFO] = "DiagnosticLinehlInfo",
       [vim.diagnostic.severity.HINT] = "DiagnosticLinehlHint",
     },
-    numhl = {
-      [vim.diagnostic.severity.ERROR] = "DiagnosticNumhlError",
-      [vim.diagnostic.severity.WARN] = "DiagnosticNumhlWarn",
-      [vim.diagnostic.severity.INFO] = "DiagnosticNumhlInfo",
-      [vim.diagnostic.severity.HINT] = "DiagnosticNumhlHint",
-    },
   },
 })
 
@@ -510,17 +504,30 @@ vim.api.nvim_set_hl(0, "@attribute.gdscript", { fg = "#96674E" })
 -- vim.api.nvim_set_hl(0, "@string.special.url.gdscript", { fg = "#926C83" })
 vim.api.nvim_set_hl(0, "@string.special.url.gdscript", { fg = "#9B668F" })
 
+vim.api.nvim_set_hl(0, "CursorDiagnosticNumhlError", { fg = "#a1495c", bg = "#221418" })
+vim.api.nvim_set_hl(0, "CursorDiagnosticNumhlWarn", { fg = "#a1495c", bg = "#221c12" })
+vim.api.nvim_set_hl(0, "CursorDiagnosticNumhlInfo", { fg = "#a1495c", bg = "#1c1a1c" })
+vim.api.nvim_set_hl(0, "CursorDiagnosticNumhlHint", { fg = "#a1495c", bg = "#1a1a1a" })
+
 vim.api.nvim_set_hl(0, "CursorVisualNr", { fg = "#a1495c", bg = "#2d1524" })
 vim.api.nvim_set_hl(0, "VisualNr", { fg = "#493441", bg = "#2d1524" })
 vim.o.statuscolumn = "%!v:lua.StatusColumn()"
 
-local cfg = vim.diagnostic.config()
-local numhl = (cfg and cfg.signs and cfg.signs.numhl) or {}
-local numhl_map = {}
-for severity, hl_name in pairs(numhl) do
-  numhl_map[severity] = "%#" .. hl_name .. "#"
-end
+local numhl_map = {
+  [vim.diagnostic.severity.ERROR] = "%#DiagnosticNumhlError#",
+  [vim.diagnostic.severity.WARN] = "%#DiagnosticNumhlWarn#",
+  [vim.diagnostic.severity.INFO] = "%#DiagnosticNumhlInfo#",
+  [vim.diagnostic.severity.HINT] = "%#DiagnosticNumhlHint#",
+}
 
+local cursor_numhl_map = {
+  ["%#DiagnosticNumhlError#"] = "%#CursorDiagnosticNumhlError#",
+  ["%#DiagnosticNumhlWarn#"] = "%#CursorDiagnosticNumhlWarn#",
+  ["%#DiagnosticNumhlInfo#"] = "%#CursorDiagnosticNumhlInfo#",
+  ["%#DiagnosticNumhlHint#"] = "%#CursorDiagnosticNumhlHint#",
+}
+
+---@type table<integer, table<integer, string>?>
 local diag_cache = {}
 vim.api.nvim_create_autocmd("DiagnosticChanged", {
   pattern = "*",
@@ -552,9 +559,15 @@ vim.api.nvim_create_autocmd("ModeChanged", {
 })
 
 local function get_linenr_color()
+  local win = vim.g.statusline_winid
+  local buf = vim.api.nvim_win_get_buf(win)
+  local diag_hl = diag_cache[buf] and diag_cache[buf][vim.v.lnum]
+
   if vim.v.relnum == 0 then
     if in_visual and vim.g.statusline_winid == vim.api.nvim_get_current_win() and not has_cursors then
       return "%#CursorVisualNr#"
+    elseif diag_hl then
+      return cursor_numhl_map[diag_hl]
     else
       return "%#CursorLineNr#"
     end
@@ -567,10 +580,7 @@ local function get_linenr_color()
     end
   end
 
-  local win = vim.g.statusline_winid
-  local buf = vim.api.nvim_win_get_buf(win)
-  local hl = diag_cache[buf] and diag_cache[buf][vim.v.lnum]
-  return hl or "%#LineNr#"
+  return diag_hl or "%#LineNr#"
 end
 
 function _G.StatusColumn()
