@@ -4,8 +4,6 @@ return {
   lazy = false,
   opts = {
     picker = {
-      -- layout = "ivy",
-      -- layout = "vscode",
       layout = {
         prompt_pos = "top",
       },
