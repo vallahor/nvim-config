@@ -111,33 +111,33 @@ return {
       -- Picker
       local pick = require("mini.pick")
 
-      -- pick.registry.files_rg = function()
-      --   local command = {
-      --     "rg",
-      --     "--files",
-      --     "--hidden",
-      --     "--ignore",
-      --     "--no-require-git",
-      --     "--glob",
-      --     "!node_modules",
-      --     "--glob",
-      --     "!.git",
-      --     "--glob",
-      --     "!.zig-cache",
-      --     "--sortr=modified",
-      --   }
-      --   -- local show_with_icons = function(buf_id, items, query)
-      --   --   return pick.default_show(buf_id, items, query, { show_icons = true })
-      --   -- end
-      --   -- local source = { name = "Files rg", show = show_with_icons }
-      --   local source = { name = "Files rg" }
-      --   return pick.builtin.cli({ command = command }, { source = source })
-      -- end
+      pick.registry.files_rg = function()
+        local command = {
+          "rg",
+          "--files",
+          "--hidden",
+          "--ignore",
+          "--no-require-git",
+          "--glob",
+          "!node_modules",
+          "--glob",
+          "!.git",
+          "--glob",
+          "!.zig-cache",
+          "--sortr=modified",
+        }
+        -- local show_with_icons = function(buf_id, items, query)
+        --   return pick.default_show(buf_id, items, query, { show_icons = true })
+        -- end
+        -- local source = { name = "Files rg", show = show_with_icons }
+        local source = { name = "Files rg" }
+        return pick.builtin.cli({ command = command }, { source = source })
+      end
 
-      -- vim.keymap.set("n", "0", "<cmd>Pick files_rg<CR>")
+      vim.keymap.set("n", "0", "<cmd>Pick files_rg<CR>")
       -- vim.keymap.set("n", "0", "<cmd>Pick files<CR>")
-      -- vim.keymap.set("n", "<c-f>", "<cmd>Pick grep<CR>")
-      -- vim.keymap.set("n", "<s-tab>", "<cmd>Pick grep<CR>")
+      vim.keymap.set("n", "<c-f>", "<cmd>Pick grep<CR>")
+      vim.keymap.set("n", "<s-tab>", "<cmd>Pick grep<CR>")
 
       rawset(pick.builtin, "buffers", function(local_opts, opts)
         local_opts =
