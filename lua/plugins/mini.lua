@@ -42,7 +42,7 @@ return {
         use_icons = false,
         content = {
           active = function()
-            local mode_info = modes[vim.fn.mode()]
+            local mode_info = modes[vim.api.nvim_get_mode().mode]
             local mode, mode_hl = mode_info.short, mode_info.hl
 
             local filename = get_filename()
@@ -58,12 +58,9 @@ return {
             })
           end,
           inactive = function()
-            local mode_info = modes[vim.fn.mode()]
-            local mode, mode_hl = mode_info.short, mode_info.hl
-
             local filename = get_filename()
             return MiniStatusline.combine_groups({
-              { hl = mode_hl, strings = { mode } },
+              { hl = "MiniStatuslineModeNormal", strings = { "-" } },
               "%<",
               { hl = "MiniStatuslineFilename", strings = { filename } },
               "%=",
