@@ -544,7 +544,7 @@ vim.api.nvim_create_autocmd("DiagnosticChanged", {
   end,
 })
 
-vim.api.nvim_create_autocmd({ "TextChanged", "TextChangedI" }, {
+vim.api.nvim_create_autocmd("TextChanged", {
   callback = function(args)
     update_diag_cache(args.buf, vim.diagnostic.get(args.buf))
   end,
