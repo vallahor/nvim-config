@@ -6,16 +6,23 @@ if false then
     end,
     lazy = false,
     opts = {
+      preview = {
+        enabled = false,
+      },
       debug = {
         enabled = false,
         show_scores = false,
       },
       prompt = "> ",
       layout = {
+        width = 0.5,
         prompt_position = "top",
       },
       grep = {
         modes = { "plain", "fuzzy" },
+      },
+      frequency = {
+        enabled = false,
       },
       history = {
         enabled = false,

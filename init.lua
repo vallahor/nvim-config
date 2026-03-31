@@ -402,6 +402,7 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 })
 
 if vim.g.neovide then
+  vim.g.neovide_input_ime = false
   vim.g.neovide_cursor_animation_length = 0
   vim.g.neovide_scroll_animation_length = 0
   vim.g.neovide_cursor_trail_size = 0.0
