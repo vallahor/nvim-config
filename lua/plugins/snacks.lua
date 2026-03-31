@@ -7,6 +7,9 @@ return {
       layout = {
         prompt_pos = "top",
       },
+      matcher = {
+        frecency = true,
+      },
       formatters = {
         file = {
           filename_first = true,
@@ -75,7 +78,7 @@ return {
       "<C-S-f>",
       function()
         Snacks.picker.grep({ regex = false })
-      end, -- fuzzy/plain
+      end,
     },
     {
       mode = "n",

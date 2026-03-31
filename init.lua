@@ -504,10 +504,10 @@ vim.api.nvim_set_hl(0, "@attribute.gdscript", { fg = "#96674E" })
 -- vim.api.nvim_set_hl(0, "@string.special.url.gdscript", { fg = "#926C83" })
 vim.api.nvim_set_hl(0, "@string.special.url.gdscript", { fg = "#9B668F" })
 
-vim.api.nvim_set_hl(0, "CursorDiagnosticNumhlError", { fg = "#a1495c", bg = "#221418" })
-vim.api.nvim_set_hl(0, "CursorDiagnosticNumhlWarn", { fg = "#a1495c", bg = "#221c12" })
-vim.api.nvim_set_hl(0, "CursorDiagnosticNumhlInfo", { fg = "#a1495c", bg = "#1c1a1c" })
-vim.api.nvim_set_hl(0, "CursorDiagnosticNumhlHint", { fg = "#a1495c", bg = "#1a1a1a" })
+vim.api.nvim_set_hl(0, "DiagnosticLineNumhlError", { fg = "#a1495c", bg = "#221418" })
+vim.api.nvim_set_hl(0, "DiagnosticLineNumhlWarn", { fg = "#a1495c", bg = "#221c12" })
+vim.api.nvim_set_hl(0, "DiagnosticLineNumhlInfo", { fg = "#a1495c", bg = "#1c1a1c" })
+vim.api.nvim_set_hl(0, "DiagnosticLineNumhlHint", { fg = "#a1495c", bg = "#1a1a1a" })
 
 vim.api.nvim_set_hl(0, "CursorVisualNr", { fg = "#a1495c", bg = "#2d1524" })
 vim.api.nvim_set_hl(0, "VisualNr", { fg = "#493441", bg = "#2d1524" })
@@ -521,23 +521,32 @@ local numhl_map = {
 }
 
 local cursor_numhl_map = {
-  ["%#DiagnosticNumhlError#"] = "%#CursorDiagnosticNumhlError#",
-  ["%#DiagnosticNumhlWarn#"] = "%#CursorDiagnosticNumhlWarn#",
-  ["%#DiagnosticNumhlInfo#"] = "%#CursorDiagnosticNumhlInfo#",
-  ["%#DiagnosticNumhlHint#"] = "%#CursorDiagnosticNumhlHint#",
+  ["%#DiagnosticNumhlError#"] = "%#DiagnosticLineNumhlError#",
+  ["%#DiagnosticNumhlWarn#"] = "%#DiagnosticLineNumhlWarn#",
+  ["%#DiagnosticNumhlInfo#"] = "%#DiagnosticLineNumhlInfo#",
+  ["%#DiagnosticNumhlHint#"] = "%#DiagnosticLineNumhlHint#",
 }
 
 ---@type table<integer, table<integer, string>?>
 local diag_cache = {}
+
+local function update_diag_cache(buf, diagnostics)
+  local cache = {}
+  for _, diag in ipairs(diagnostics) do
+    cache[diag.lnum + 1] = numhl_map[diag.severity]
+  end
+  diag_cache[buf] = cache
+end
+
 vim.api.nvim_create_autocmd("DiagnosticChanged", {
-  pattern = "*",
   callback = function(args)
-    local buf = args.buf
-    local cache = {}
-    for _, diag in ipairs(vim.diagnostic.get(buf)) do
-      cache[diag.lnum + 1] = numhl_map[diag.severity]
-    end
-    diag_cache[buf] = cache
+    update_diag_cache(args.buf, args.data.diagnostics)
+  end,
+})
+
+vim.api.nvim_create_autocmd({ "TextChanged", "TextChangedI" }, {
+  callback = function(args)
+    update_diag_cache(args.buf, vim.diagnostic.get(args.buf))
   end,
 })
 
