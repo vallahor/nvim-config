@@ -15,7 +15,8 @@ if false then
       },
       prompt = "> ",
       layout = {
-        width = 0.5,
+        width = 0.4,
+        height = 0.4,
         prompt_position = "top",
       },
       grep = {
@@ -40,12 +41,14 @@ if false then
         cycle_previous_query = "<C-Up>",
       },
       hl = {
+        normal = "FloatNormal",
         matched = "CurSearch",
         grep_match = "CurSearch",
         cursor = "CursorLine",
         scrollbar = "PmenuThumb",
         directory_path = "MiniIndentscopeSymbol",
         title = "TabLineActive",
+        prompt = "TabLineActive",
       },
     },
     keys = {
