@@ -1,0 +1,73 @@
+return {
+  -- "folke/snacks.nvim",
+  -- priority = 1000,
+  -- lazy = false,
+  -- opts = {
+  --   picker = {
+  --     enabled = true,
+  --     layout = {
+  --       width = 0.5,
+  --       preset = "default",
+  --       preview = true,
+  --       prompt_pos = "top",
+  --     },
+  --     win = {
+  --       input = {
+  --         keys = {
+  --           ["<Esc>"] = { "cancel", mode = { "n", "i" } },
+  --           ["<CR>"] = { "confirm", mode = { "n", "i" } },
+  --           ["<Up>"] = { "list_up", mode = { "n", "i" } },
+  --           ["<Down>"] = { "list_down", mode = { "n", "i" } },
+  --           ["<PageUp>"] = { "preview_scroll_up", mode = { "n", "i" } },
+  --           ["<PageDown>"] = { "preview_scroll_down", mode = { "n", "i" } },
+  --           ["<C-Up>"] = { "history_back", mode = { "n", "i" } },
+  --         },
+  --       },
+  --     },
+  --   },
+  -- },
+  -- config = function()
+  --   vim.api.nvim_set_hl(0, "SnacksPickerListCursorLine", { link = "CursorLine" })
+  --   vim.api.nvim_set_hl(0, "SnacksPickerMatch", { link = "CurSearch" })
+  --   vim.api.nvim_set_hl(0, "SnacksPickerPreviewMatch", { link = "CurSearch" })
+  --   vim.api.nvim_set_hl(0, "SnacksPickerScrollbar", { link = "PmenuThumb" })
+  --   vim.api.nvim_set_hl(0, "SnacksPickerDir", { link = "MiniIndentscopeSymbol" })
+  -- end,
+  -- keys = {
+  --   {
+  --     mode = "n",
+  --     "0",
+  --     function()
+  --       Snacks.picker.files()
+  --     end,
+  --   },
+  --   {
+  --     mode = "n",
+  --     "<tab>",
+  --     function()
+  --       Snacks.picker.buffers()
+  --     end,
+  --   },
+  --   {
+  --     mode = "n",
+  --     "<C-f>",
+  --     function()
+  --       Snacks.picker.grep()
+  --     end,
+  --   },
+  --   {
+  --     mode = "n",
+  --     "<C-S-f>",
+  --     function()
+  --       Snacks.picker.grep({ regex = false })
+  --     end, -- fuzzy/plain
+  --   },
+  --   {
+  --     mode = "n",
+  --     "<C-0>",
+  --     function()
+  --       Snacks.picker.grep({ search = vim.fn.expand("<cword>") })
+  --     end,
+  --   },
+  -- },
+}
