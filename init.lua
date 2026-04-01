@@ -621,7 +621,6 @@ end
 local _select = require("vim.treesitter._select")
 ---@type {[1]:integer,[2]:integer,[3]:integer,[4]:integer}[]
 local stack = {}
-local esc = vim.keycode("<Esc>")
 
 local function decrement_selection()
   if not in_visual then
@@ -632,7 +631,7 @@ local function decrement_selection()
   stack[#stack] = nil
 
   if #stack == 0 then
-    vim.api.nvim_feedkeys(esc, "nx", true)
+    vim.api.nvim_feedkeys("\27", "nx", true)
     if range ~= nil then
       vim.api.nvim_win_set_cursor(0, { range[1] + 1, range[2] })
     end
@@ -665,8 +664,8 @@ vim.keymap.set({ "n", "x", "o" }, "m", increment_selection)
 vim.keymap.set({ "n", "v", "o" }, "M", decrement_selection)
 vim.keymap.set("x", "<Esc>", function()
   stack = {}
-  vim.api.nvim_feedkeys(esc, "nx", true)
-end)
+  return "<esc>"
+end, { expr = true })
 
 -- Better highlight
 -- https://coolors.co/gradient-palette/291c28-1e141d?number=7
