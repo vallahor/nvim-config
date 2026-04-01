@@ -527,7 +527,7 @@ local cursor_diag_hl_map = {
   [vim.diagnostic.severity.HINT] = "%#DiagnosticLineNumhlHint#",
 }
 
----@type table<integer, table<integer, string>?>
+---@type table<integer, table<integer, integer>?>
 local diag_cache = {}
 
 local function update_diag_cache(buf, diagnostics)
