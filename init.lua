@@ -671,7 +671,7 @@ vim.api.nvim_set_hl(0, "CursorLineInative", { bg = "#20151F" })
 vim.api.nvim_set_hl(0, "CursorLineNrInative", { fg = "#a1495c", bg = "#20151F" })
 
 local guicursor_default = "n:block-Cursor,i-ci-c:block-iCursor,v:block-vCursor"
-local guicursor_hidden = "a:CursorHidden/lCursorHidden"
+local guicursor_hidden = "n:block-Cursor,i-ci-c:block-iCursor,v:block-vCursor,a:CursorHidden/lCursorHidden"
 local cursor_line_active = "CursorLine:CursorLine,CursorLineNr:CursorLineNr"
 local cursor_line_inactive = "CursorLine:CursorLineInative,CursorLineNr:CursorLineNrInative"
 
