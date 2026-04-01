@@ -51,7 +51,7 @@ vim.opt.magic = true
 vim.opt.smartcase = true
 vim.opt.inccommand = "nosplit"
 vim.opt.backspace = "indent,eol,start"
-vim.opt.shortmess = "aoOtTIcF"
+vim.opt.shortmess:append("aoOtTIcF")
 vim.opt.mouse = "a"
 vim.opt.mousefocus = true
 vim.opt.cursorline = true
@@ -86,7 +86,14 @@ vim.o.linespace = 5
 vim.opt.cmdheight = 0
 vim.opt.showcmdloc = "statusline"
 
-require("vim._core.ui2").enable()
+-- require("vim._core.ui2").enable({
+--   -- msg = {
+--   --   target = "msg",
+--   --   msg = {
+--   --     timeout = 500,
+--   --   },
+--   -- },
+-- })
 
 -- work around on python default configs
 vim.g.python_indent = {
@@ -103,7 +110,7 @@ vim.g.python_indent = {
 local function esc_normal_mode()
   for _, win in ipairs(vim.api.nvim_list_wins()) do
     local config = vim.api.nvim_win_get_config(win)
-    if config.relative == "win" then
+    if config.relative == "win" or config.relative == "laststatus" then
       vim.api.nvim_win_close(win, false)
     end
   end
@@ -134,11 +141,10 @@ vim.keymap.set({ "n", "v" }, "<c-s>", function()
     quiet = true,
     async = false,
   })
-  vim.cmd("w!")
-  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
-end) -- save file
--- vim.keymap.set({ "n", "v" }, "<c-s-s>", "<cmd>w!<cr><esc>") -- save file
-vim.keymap.set({ "n", "v" }, "<s-s>", "<cmd>w!<cr><esc>") -- save file
+  vim.cmd("silent w!")
+  return "<esc>"
+end, { expr = true }) -- save file
+vim.keymap.set({ "n", "v" }, "<s-s>", "<cmd>silent w!<cr><esc>") -- save file
 
 vim.keymap.set("n", "\\", "<cmd>clo<cr>") -- close current window
 vim.keymap.set("n", "|", "<cmd>vs<cr>") -- split vertical window
@@ -170,6 +176,14 @@ vim.keymap.set("i", "<PageUp>", "<nop>", { noremap = true }) -- page up
 vim.keymap.set("i", "<PageDown>", "<nop>", { noremap = true }) -- page down
 
 vim.keymap.set({ "i", "c" }, "<c-v>", [[<c-r>+]]) -- paste to command line mode
+
+vim.keymap.set("n", "u", function()
+  vim.cmd("silent undo | redraw")
+end, { silent = true })
+
+vim.keymap.set("n", "<C-r>", function()
+  vim.cmd("silent redo | redraw")
+end, { silent = true })
 
 vim.keymap.set("v", "v", "V", { noremap = true }) -- visual line mode
 
