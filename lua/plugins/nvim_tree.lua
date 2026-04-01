@@ -10,7 +10,7 @@ return {
     local view = require("nvim-tree.view")
 
     api.events.subscribe(api.events.Event.TreeOpen, function()
-      local winnr = view.get_winnr()
+      local winnr = view.get_winnr() --[[@as integer?]]
       if winnr then
         vim.wo[winnr].statuscolumn = ""
       end
@@ -22,7 +22,7 @@ return {
 
       vim.keymap.set("n", "l", function()
         local node = api.tree.get_node_under_cursor()
-        if node.type == "directory" then
+        if node and node.type == "directory" then
           api.node.open.edit()
         end
       end, { buffer = bufnr, noremap = true, silent = true, nowait = true })
@@ -34,15 +34,15 @@ return {
         { buffer = bufnr, noremap = true, silent = true, nowait = true }
       )
 
-      vim.keymap.set("n", "<C-t>", function()
+      vim.keymap.set("n", "<C-e>", function()
         vim.cmd.wincmd("p")
       end, { buffer = bufnr, noremap = true, silent = true, nowait = true })
-      vim.keymap.set("n", "t", function()
+      vim.keymap.set("n", "e", function()
         vim.cmd.wincmd("p")
       end, { buffer = bufnr, noremap = true, silent = true, nowait = true })
 
       local function resize_tree(delta)
-        local winnr = view.get_winnr()
+        local winnr = view.get_winnr() --[[@as integer?]]
         if winnr then
           api.tree.resize({ width = vim.api.nvim_win_get_width(winnr) + delta })
         end
@@ -54,14 +54,14 @@ return {
       vim.keymap.set("n", "<c-,>", function()
         resize_tree(-5)
       end)
-      vim.keymap.set("n", "<c-s-t>", function()
+      vim.keymap.set("n", "<c-s-e>", function()
         api.tree.resize()
       end)
 
-      vim.keymap.set("n", "<c-/>", function()
+      vim.keymap.set("n", "<c-t>", function()
         require("nvim-tree.api").tree.find_file({ update_root = false })
       end)
-      vim.keymap.set("n", "<c-?>", function()
+      vim.keymap.set("n", "<c-s-t>", function()
         require("nvim-tree.api").tree.find_file({ update_root = false, open = true, focus = true })
       end)
 

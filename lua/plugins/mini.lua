@@ -76,8 +76,13 @@ return {
       local bufremove = require("mini.bufremove")
       bufremove.setup()
 
-      vim.keymap.set("n", "<c-w>", "<cmd>lua MiniBufremove.delete(0, false)<CR>")
-      vim.keymap.set("n", "<c-x>", "<cmd>lua MiniBufremove.delete(0, true)<CR>")
+      vim.keymap.set("n", "<c-w>", function()
+        _G.MiniBufremove.delete(0, false)
+      end)
+      vim.keymap.set("n", "<c-x>", function()
+        _G.MiniBufremove.delete(0, true)
+      end)
+
       -- closes the current window and buffer
       -- to close the current buffer and not the window use <c-w>
       vim.keymap.set("n", "<c-s-x>", "<cmd>bd<cr>") -- close current buffer and window -- not work with ghostty (combination in use)

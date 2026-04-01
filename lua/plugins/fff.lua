@@ -65,7 +65,6 @@ return {
     end)
     vim.keymap.set("v", "<c-/>", function()
       vim.cmd('normal! "sy')
-      -- fff.live_grep({ query = vim.fn.getreg("s"), grep = { modes = { "fuzzy", "plain" } } })
       fff.live_grep({ query = vim.fn.getreg("s") })
     end)
   end,
