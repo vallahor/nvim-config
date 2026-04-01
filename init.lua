@@ -592,7 +592,7 @@ local function get_linenr_color()
   local diag_hl = diag_cache[buf] and diag_cache[buf][vim.v.lnum]
 
   if vim.v.relnum == 0 then
-    if in_visual and vim.g.statusline_winid == vim.api.nvim_get_current_win() and not has_cursors then
+    if in_visual and win == vim.api.nvim_get_current_win() and not has_cursors then
       return "%#CursorVisualNr#"
     elseif diag_hl then
       return cursor_numhl_map[diag_hl]
