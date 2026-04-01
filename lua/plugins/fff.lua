@@ -60,8 +60,14 @@ return {
         },
       })
     end)
-    vim.keymap.set("n", "<c-0>", function()
+    vim.keymap.set("n", "<c-/>", function()
       fff.live_grep({ query = vim.fn.expand("<cword>") })
+    end)
+    vim.keymap.set("v", "<c-/>", function()
+      vim.cmd('normal! "sy')
+      local text = vim.fn.getreg("s"):gsub("%s+", " ")
+
+      fff.live_grep({ query = text })
     end)
   end,
 }
