@@ -620,8 +620,7 @@ local stack = {}
 local esc = vim.keycode("<Esc>")
 
 local function decrement_selection()
-  local mode = vim.api.nvim_get_mode().mode
-  if mode ~= "v" and mode ~= "V" and mode ~= "\x16" then
+  if not in_visual then
     return
   end
 
@@ -636,6 +635,7 @@ local function decrement_selection()
     return
   end
 
+  vim.cmd.normal({ "v\27", bang = true })
   vim.fn.setpos("'<", { 0, range[1] + 1, range[2] + 1, 0 })
   vim.fn.setpos("'>", { 0, range[3] + 1, range[4], 0 })
   vim.cmd.normal({ "gv", bang = true })
@@ -658,7 +658,7 @@ local function increment_selection()
 end
 
 vim.keymap.set({ "n", "x", "o" }, "m", increment_selection)
-vim.keymap.set({ "n", "x", "o" }, "M", decrement_selection)
+vim.keymap.set({ "n", "v", "o" }, "M", decrement_selection)
 vim.keymap.set("x", "<Esc>", function()
   stack = {}
   vim.api.nvim_feedkeys(esc, "nx", true)
