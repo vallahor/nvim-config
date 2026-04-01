@@ -34,34 +34,27 @@ return {
         { buffer = bufnr, noremap = true, silent = true, nowait = true }
       )
 
-      vim.keymap.set("n", "<C-e>", function()
+      vim.keymap.set("n", "<C-t>", function()
         vim.cmd.wincmd("p")
       end, { buffer = bufnr, noremap = true, silent = true, nowait = true })
-      vim.keymap.set("n", "e", function()
+      vim.keymap.set("n", "t", function()
         vim.cmd.wincmd("p")
       end, { buffer = bufnr, noremap = true, silent = true, nowait = true })
-
-      local function resize_tree(delta)
-        local winnr = view.get_winnr() --[[@as integer?]]
-        if winnr then
-          api.tree.resize({ width = vim.api.nvim_win_get_width(winnr) + delta })
-        end
-      end
 
       vim.keymap.set("n", "<c-.>", function()
-        resize_tree(5)
+        view.resize("+5")
       end)
       vim.keymap.set("n", "<c-,>", function()
-        resize_tree(-5)
-      end)
-      vim.keymap.set("n", "<c-s-e>", function()
-        api.tree.resize()
-      end)
-
-      vim.keymap.set("n", "<c-t>", function()
-        require("nvim-tree.api").tree.find_file({ update_root = false })
+        view.resize("-5")
       end)
       vim.keymap.set("n", "<c-s-t>", function()
+        view.resize(30)
+      end)
+
+      vim.keymap.set("n", "<c-e>", function()
+        require("nvim-tree.api").tree.find_file({ update_root = false })
+      end)
+      vim.keymap.set("n", "<c-s-e>", function()
         require("nvim-tree.api").tree.find_file({ update_root = false, open = true, focus = true })
       end)
 
