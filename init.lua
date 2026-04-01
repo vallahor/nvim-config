@@ -567,6 +567,25 @@ vim.api.nvim_create_autocmd("ModeChanged", {
   end,
 })
 
+local function update_visual()
+  if not in_visual then
+    return
+  end
+
+  local cursor_start = vim.fn.line("v")
+  local cursor_end = vim.fn.line(".")
+  if cursor_start > cursor_end then
+    cursor_start, cursor_end = cursor_end, cursor_start
+  end
+
+  vim.b.visual_start = cursor_start
+  vim.b.visual_end = cursor_end
+end
+
+vim.api.nvim_create_autocmd({ "ModeChanged", "CursorMoved" }, {
+  callback = update_visual,
+})
+
 local function get_linenr_color()
   local win = vim.g.statusline_winid
   local buf = vim.api.nvim_win_get_buf(win)
@@ -582,9 +601,7 @@ local function get_linenr_color()
     end
   elseif in_visual and not has_cursors then
     local lnum = vim.v.lnum
-    local v1 = vim.fn.line("v")
-    local v2 = vim.fn.line(".")
-    if (lnum >= v1 and lnum <= v2) or (lnum >= v2 and lnum <= v1) then
+    if lnum >= vim.b.visual_start and lnum <= vim.b.visual_end then
       return "%#VisualNr#"
     end
   end
