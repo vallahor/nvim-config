@@ -26,7 +26,7 @@ return {
       }, {
         -- By default return 'Unknown' but this shouldn't be needed
         __index = function()
-          return { short = "U", hl = "%#MiniStatuslineModeOther#" }
+          return { short = "U", hl = "MiniStatuslineModeOther" }
         end,
       })
 

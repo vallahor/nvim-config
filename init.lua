@@ -72,6 +72,7 @@ vim.opt.isfname:append("(") -- " @windows: nextjs and sveltkit folder name patte
 vim.opt.swapfile = false
 vim.opt.wrap = false
 vim.opt.history = 20
+vim.opt.showcmd = true
 
 vim.wo.signcolumn = "no"
 vim.wo.relativenumber = true
@@ -82,6 +83,10 @@ vim.bo.copyindent = true
 vim.bo.grepprg = "rg"
 
 vim.o.linespace = 5
+vim.opt.cmdheight = 0
+vim.opt.showcmdloc = "statusline"
+
+require("vim._core.ui2").enable()
 
 -- work around on python default configs
 vim.g.python_indent = {
@@ -712,6 +717,18 @@ vim.api.nvim_create_autocmd("CmdlineLeave", {
     if ignore_file_types[vim.bo.filetype] then
       vim.opt.guicursor = guicursor_hidden
     end
+  end,
+})
+
+vim.api.nvim_create_autocmd("CmdlineLeave", {
+  callback = function()
+    vim.opt.cmdheight = 0
+  end,
+})
+
+vim.api.nvim_create_autocmd("CmdlineEnter", {
+  callback = function()
+    vim.opt.cmdheight = 1
   end,
 })
 
