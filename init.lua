@@ -178,11 +178,11 @@ vim.keymap.set("i", "<PageDown>", "<nop>", { noremap = true }) -- page down
 vim.keymap.set({ "i", "c" }, "<c-v>", [[<c-r>+]]) -- paste to command line mode
 
 vim.keymap.set("n", "u", function()
-  vim.cmd("silent undo | redraw")
+  vim.cmd("silent undo | redrawstatus")
 end, { silent = true })
 
 vim.keymap.set("n", "<C-r>", function()
-  vim.cmd("silent redo | redraw")
+  vim.cmd("silent redo | redrawstatus")
 end, { silent = true })
 
 vim.keymap.set("v", "v", "V", { noremap = true }) -- visual line mode
