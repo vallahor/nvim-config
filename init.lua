@@ -513,18 +513,18 @@ vim.api.nvim_set_hl(0, "CursorVisualNr", { fg = "#a1495c", bg = "#2d1524" })
 vim.api.nvim_set_hl(0, "VisualNr", { fg = "#493441", bg = "#2d1524" })
 vim.o.statuscolumn = "%!v:lua.StatusColumn()"
 
-local numhl_map = {
+local diag_hl_map = {
   [vim.diagnostic.severity.ERROR] = "%#DiagnosticNumhlError#",
   [vim.diagnostic.severity.WARN] = "%#DiagnosticNumhlWarn#",
   [vim.diagnostic.severity.INFO] = "%#DiagnosticNumhlInfo#",
   [vim.diagnostic.severity.HINT] = "%#DiagnosticNumhlHint#",
 }
 
-local cursor_numhl_map = {
-  ["%#DiagnosticNumhlError#"] = "%#DiagnosticLineNumhlError#",
-  ["%#DiagnosticNumhlWarn#"] = "%#DiagnosticLineNumhlWarn#",
-  ["%#DiagnosticNumhlInfo#"] = "%#DiagnosticLineNumhlInfo#",
-  ["%#DiagnosticNumhlHint#"] = "%#DiagnosticLineNumhlHint#",
+local cursor_diag_hl_map = {
+  [vim.diagnostic.severity.ERROR] = "%#DiagnosticLineNumhlError#",
+  [vim.diagnostic.severity.WARN] = "%#DiagnosticLineNumhlWarn#",
+  [vim.diagnostic.severity.INFO] = "%#DiagnosticLineNumhlInfo#",
+  [vim.diagnostic.severity.HINT] = "%#DiagnosticLineNumhlHint#",
 }
 
 ---@type table<integer, table<integer, string>?>
@@ -533,7 +533,7 @@ local diag_cache = {}
 local function update_diag_cache(buf, diagnostics)
   local cache = {}
   for _, diag in ipairs(diagnostics) do
-    cache[diag.lnum + 1] = numhl_map[diag.severity]
+    cache[diag.lnum + 1] = diag.severity
   end
   diag_cache[buf] = cache
 end
@@ -589,13 +589,13 @@ vim.api.nvim_create_autocmd({ "ModeChanged", "CursorMoved" }, {
 local function get_linenr_color()
   local win = vim.g.statusline_winid
   local buf = vim.api.nvim_win_get_buf(win)
-  local diag_hl = diag_cache[buf] and diag_cache[buf][vim.v.lnum]
+  local diag_hl_severity = diag_cache[buf] and diag_cache[buf][vim.v.lnum]
 
   if vim.v.relnum == 0 then
     if in_visual and win == vim.api.nvim_get_current_win() and not has_cursors then
       return "%#CursorVisualNr#"
-    elseif diag_hl then
-      return cursor_numhl_map[diag_hl]
+    elseif diag_hl_severity then
+      return cursor_diag_hl_map[diag_hl_severity]
     else
       return "%#CursorLineNr#"
     end
@@ -606,7 +606,11 @@ local function get_linenr_color()
     end
   end
 
-  return diag_hl or "%#LineNr#"
+  if diag_hl_severity then
+    return diag_hl_map[diag_hl_severity]
+  end
+
+  return "%#LineNr#"
 end
 
 function _G.StatusColumn()
