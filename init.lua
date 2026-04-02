@@ -141,10 +141,11 @@ vim.keymap.set({ "n", "v" }, "<c-s>", function()
     quiet = true,
     async = false,
   })
-  vim.cmd("silent w!")
-  vim.api.nvim_feedkeys("\27", "nx", true)
+  vim.cmd.write({ bang = true, mods = { silent = true } })
 end) -- save file
-vim.keymap.set({ "n", "v" }, "<s-s>", "<cmd>silent w!<cr><esc>") -- save file
+vim.keymap.set({ "n", "v" }, "<s-s>", function()
+  vim.cmd.write({ bang = true, mods = { silent = true } })
+end) -- save file
 
 vim.keymap.set("n", "\\", "<cmd>clo<cr>") -- close current window
 vim.keymap.set("n", "|", "<cmd>vs<cr>") -- split vertical window
@@ -154,18 +155,39 @@ vim.keymap.set("n", "<c-9>", "<c-w>o") -- close other windows
 vim.keymap.set("n", "<c-8>", "<c-w>r") -- rotate windows
 
 -- resize windows
-vim.keymap.set("n", "<c-=>", "<cmd>wincmd =<cr>") -- resize all windows
--- vim.keymap.set("n", "<leader>=", "<cmd>wincmd =<cr>")
+vim.keymap.set("n", "<c-=>", function()
+  vim.cmd.wincmd({ "=", mods = { silent = true } })
+end) -- resize all windows
 
-vim.keymap.set("n", "<c-6>", [[<cmd>vertical   resize +2<cr>]]) -- make the window biger   vertically
-vim.keymap.set("n", "<c-4>", [[<cmd>vertical   resize -2<cr>]]) -- make the window smaller vertically
-vim.keymap.set("n", "<c-8>", [[<cmd>horizontal resize +2<cr>]]) -- make the window bigger  horizontally
-vim.keymap.set("n", "<c-5>", [[<cmd>horizontal resize -2<cr>]]) -- make the window smaller horizontally
+vim.keymap.set("n", "<c-6>", function()
+  vim.cmd.resize({ "+2", mods = { vertical = true } })
+end) -- make the window biger   vertically
+vim.keymap.set("n", "<c-4>", function()
+  vim.cmd.resize({ "-2", mods = { vertical = true } })
+end) -- make the window smaller vertically
+vim.keymap.set("n", "<c-8>", function()
+  vim.cmd.resize({ "+2", mods = { horizontal = true } })
+end) -- make the window bigger  horizontally
+vim.keymap.set("n", "<c-5>", function()
+  vim.cmd.resize({ "-2", mods = { horizontal = true } })
+end) -- make the window smaller horizontally
 
-vim.keymap.set("n", "<left>", "<cmd>wincmd h<cr>") -- move to window left
-vim.keymap.set("n", "<down>", "<cmd>wincmd j<cr>") -- move to window down
-vim.keymap.set("n", "<up>", "<cmd>wincmd k<cr>") -- move to window up
-vim.keymap.set("n", "<right>", "<cmd>wincmd l<cr>") -- move to window right
+local function wincmd(dir)
+  vim.cmd.wincmd({ dir, mods = { silent = true } })
+end
+
+vim.keymap.set("n", "<left>", function()
+  wincmd("h")
+end) -- move to window left
+vim.keymap.set("n", "<down>", function()
+  wincmd("j")
+end) -- move to window down
+vim.keymap.set("n", "<up>", function()
+  wincmd("k")
+end) -- move to window up
+vim.keymap.set("n", "<right>", function()
+  wincmd("l")
+end) -- move to window right
 
 vim.keymap.set("n", "Y", "yg$") -- yank to end of line considering line wrap
 
@@ -178,12 +200,14 @@ vim.keymap.set("i", "<PageDown>", "<nop>", { noremap = true }) -- page down
 vim.keymap.set({ "i", "c" }, "<c-v>", [[<c-r>+]]) -- paste to command line mode
 
 vim.keymap.set("n", "u", function()
-  vim.cmd("silent undo | redrawstatus")
-end, { silent = true })
+  vim.cmd.undo({ mods = { silent = true } })
+  vim.cmd.redrawstatus()
+end)
 
 vim.keymap.set("n", "<C-r>", function()
-  vim.cmd("silent redo | redrawstatus")
-end, { silent = true })
+  vim.cmd.redo({ mods = { silent = true } })
+  vim.cmd.redrawstatus()
+end)
 
 vim.keymap.set("v", "v", "V", { noremap = true }) -- visual line mode
 
@@ -214,7 +238,7 @@ vim.api.nvim_create_autocmd("FileType", {
 -- go to beginning of the line function like DOOM Emacs
 local function beginning_of_the_line()
   local old_pos = vim.fn.col(".")
-  vim.fn.execute("normal ^")
+  vim.cmd.normal("^")
   if old_pos == vim.fn.col(".") then
     vim.fn.setpos(".", { 0, vim.fn.line("."), 0, 0 })
   end
@@ -226,8 +250,12 @@ vim.keymap.set("n", ")", "$") -- go to end of line
 vim.keymap.set("v", ")", "$h") -- go to end of line (for some reason it's goes to wrong place in visual mode)
 
 -- duplicate line and lines
-vim.keymap.set("n", "<c-c>", '"0yy"0p') -- duplicate line down
-vim.keymap.set("v", "<c-c>", '"0y"0Pgv') -- like sublime duplicate line
+vim.keymap.set("n", "<c-c>", function()
+  vim.cmd.normal('"0yy"0p')
+end) -- duplicate line down
+vim.keymap.set("v", "<c-c>", function()
+  vim.cmd.normal('"0y"0Pgv')
+end) -- like sublime duplicate line
 
 -- duplicate and comment
 vim.keymap.set("n", "<c-s-c>", function()
@@ -306,13 +334,15 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 vim.api.nvim_create_autocmd("FocusGained", {
-  pattern = "*",
-  command = "silent! checktime",
+  callback = function()
+    vim.cmd.checktime({ mods = { silent = true } })
+  end,
 })
 
 vim.api.nvim_create_autocmd("DiagnosticChanged", {
-  pattern = "*",
-  command = "silent! redrawtabline",
+  callback = function()
+    vim.cmd.redrawtabline({ mods = { silent = true } })
+  end,
 })
 
 vim.api.nvim_create_autocmd("FileType", {
@@ -739,6 +769,7 @@ vim.api.nvim_create_autocmd({ "WinEnter", "BufWinEnter", "BufEnter" }, {
     vim.opt_local.winhighlight = cursor_line_active
   end,
 })
+
 vim.api.nvim_create_autocmd({ "WinLeave" }, {
   callback = function()
     vim.opt_local.winhighlight = cursor_line_inactive
