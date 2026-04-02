@@ -633,7 +633,7 @@ local function get_linenr_color()
 end
 
 function _G.StatusColumn()
-  return get_linenr_color() .. string.format("%3d ", vim.v.relnum)
+  return string.format("%s%3d ", get_linenr_color(), vim.v.relnum)
 end
 
 -- https://pawelgrzybek.com/nvim-incremental-selection/
