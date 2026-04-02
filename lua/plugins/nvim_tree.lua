@@ -17,6 +17,19 @@ return {
       vim.opt_local.guicursor = "a:CursorHidden/lCursorHidden"
     end)
 
+    local default_size = 30
+
+    --- @param size integer?
+    local function resize(size)
+      local winnr = view.get_winnr() --[[@as integer?]]
+      if winnr then
+        size = (size and vim.api.nvim_win_get_width(winnr) + size) or default_size
+
+        vim.api.nvim_win_set_width(winnr, size)
+        vim.cmd.wincmd("=")
+      end
+    end
+
     local function on_attach(bufnr)
       api.map.on_attach.default(bufnr)
 
@@ -42,13 +55,13 @@ return {
       end, { buffer = bufnr, noremap = true, silent = true, nowait = true })
 
       vim.keymap.set("n", "<c-.>", function()
-        view.resize("+5")
+        resize(5)
       end)
       vim.keymap.set("n", "<c-,>", function()
-        view.resize("-5")
+        resize(-5)
       end)
       vim.keymap.set("n", "<c-s-t>", function()
-        view.resize(30)
+        resize()
       end)
 
       vim.keymap.set("n", "<c-e>", function()
