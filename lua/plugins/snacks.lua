@@ -100,9 +100,17 @@ return {
     },
     {
       mode = "n",
-      "<C-0>",
+      "<C-/>",
       function()
         Snacks.picker.grep({ search = vim.fn.expand("<cword>") })
+      end,
+    },
+    {
+      mode = "v",
+      "<C-/>",
+      function()
+        vim.cmd('normal! "sy')
+        Snacks.picker.grep({ search = vim.fn.getreg("s") })
       end,
     },
   },
