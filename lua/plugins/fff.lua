@@ -54,11 +54,7 @@ return {
     vim.keymap.set("n", "0", fff.find_files)
     vim.keymap.set("n", "<c-f>", fff.live_grep)
     vim.keymap.set("n", "<c-s-f>", function()
-      fff.live_grep({
-        grep = {
-          modes = { "fuzzy", "plain" },
-        },
-      })
+      fff.live_grep({ grep = { modes = { "fuzzy", "plain" } } })
     end)
     vim.keymap.set("n", "<c-/>", function()
       fff.live_grep({ query = vim.fn.expand("<cword>") })
