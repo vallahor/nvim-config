@@ -23,8 +23,8 @@ return {
         ["r"] = { short = "P", hl = "MiniStatuslineModeOther" },
         ["!"] = { short = "Sh", hl = "MiniStatuslineModeOther" },
         ["t"] = { short = "T", hl = "MiniStatuslineModeOther" },
+        ["no"] = { short = "O", hl = "MiniStatuslineModeOther" },
       }, {
-        -- By default return 'Unknown' but this shouldn't be needed
         __index = function()
           return { short = "U", hl = "MiniStatuslineModeOther" }
         end,
