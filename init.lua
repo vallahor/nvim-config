@@ -142,8 +142,8 @@ vim.keymap.set({ "n", "v" }, "<c-s>", function()
     async = false,
   })
   vim.cmd("silent w!")
-  return "<esc>"
-end, { expr = true }) -- save file
+  vim.api.nvim_feedkeys("\27", "nx", true)
+end) -- save file
 vim.keymap.set({ "n", "v" }, "<s-s>", "<cmd>silent w!<cr><esc>") -- save file
 
 vim.keymap.set("n", "\\", "<cmd>clo<cr>") -- close current window
@@ -734,6 +734,17 @@ vim.api.nvim_create_autocmd("CmdlineLeave", {
   end,
 })
 
+vim.api.nvim_create_autocmd({ "WinEnter", "BufWinEnter", "BufEnter" }, {
+  callback = function()
+    vim.opt_local.winhighlight = cursor_line_active
+  end,
+})
+vim.api.nvim_create_autocmd({ "WinLeave" }, {
+  callback = function()
+    vim.opt_local.winhighlight = cursor_line_inactive
+  end,
+})
+
 vim.api.nvim_create_autocmd("CmdlineLeave", {
   callback = function()
     vim.opt.cmdheight = 0
@@ -743,16 +754,5 @@ vim.api.nvim_create_autocmd("CmdlineLeave", {
 vim.api.nvim_create_autocmd("CmdlineEnter", {
   callback = function()
     vim.opt.cmdheight = 1
-  end,
-})
-
-vim.api.nvim_create_autocmd({ "WinEnter", "BufWinEnter", "BufEnter" }, {
-  callback = function()
-    vim.opt_local.winhighlight = cursor_line_active
-  end,
-})
-vim.api.nvim_create_autocmd({ "WinLeave" }, {
-  callback = function()
-    vim.opt_local.winhighlight = cursor_line_inactive
   end,
 })
