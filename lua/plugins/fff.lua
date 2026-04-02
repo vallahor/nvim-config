@@ -24,7 +24,9 @@ return {
         enabled = true,
       },
       history = {
-        enabled = false,
+        enabled = true,
+        min_combo_count = 1,
+        combo_boost_score_multiplier = 500,
       },
       logging = {
         enabled = false,
