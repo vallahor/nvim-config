@@ -318,10 +318,7 @@ end)
 local move_direction_up = 2
 local move_direction_down = 1
 local function move_lines(direction)
-  if
-    direction == move_direction_down and vim.b.visual_end >= vim.fn.line("$")
-    or direction == move_direction_up and vim.b.visual_start <= 1
-  then
+  if direction == move_direction_down and vim.b.visual_end >= vim.fn.line("$") then
     return
   end
 
