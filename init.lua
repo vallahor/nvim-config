@@ -304,7 +304,7 @@ vim.keymap.set("n", "<f7>", function()
 end) -- open ghostty config file (vimrc or init.lua)
 vim.keymap.set("n", "<f11>", function()
   vim.notify("Words: " .. vim.fn.wordcount().words)
-end) -- execute current file (vim or lua)
+end) -- Count words of the current buffer
 
 vim.keymap.set("n", "`", "<C-^>") -- back to last buffer
 
@@ -339,12 +339,11 @@ vim.keymap.set("n", "<c-i>", "<c-i>")
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "qf" },
   callback = function()
-    vim.keymap.set("n", "<cr>", function()
-      vim.api.nvim_feedkeys("\r", "n", false)
-      vim.cmd.cclose()
-    end, { buffer = true })
+    vim.keymap.set("n", "<cr>", "<cr><cmd>cclose<cr>", { buffer = true })
+    vim.keymap.set("n", "o", "<cr><cmd>cclose<cr>", { buffer = true })
     vim.keymap.set("n", "q", vim.cmd.cclose, { buffer = true })
     vim.keymap.set("n", "<c-w>", vim.cmd.cclose, { buffer = true })
+    vim.keymap.set("n", "<esc>", vim.cmd.cclose, { buffer = true })
   end,
 })
 
