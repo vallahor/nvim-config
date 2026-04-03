@@ -71,7 +71,7 @@ return {
         require("nvim-tree.api").tree.find_file({ update_root = false, open = true, focus = true })
       end)
 
-      -- vim.keymap.set("n", "<c-f>", "<cmd>NvimTreeFindFile<cr>", { buffer = true })
+      -- vim.keymap.set("n", "<c-f>", vim.cmd.NvimTreeFindFile, { buffer = true })
     end
 
     require("nvim-tree").setup({
@@ -100,7 +100,7 @@ return {
       },
     })
 
-    vim.keymap.set("n", "<c-t>", "<cmd>NvimTreeFocus<cr>")
-    vim.keymap.set("n", "<c-b>", "<cmd>NvimTreeClose<cr>")
+    vim.keymap.set("n", "<c-t>", vim.cmd.NvimTreeFocus)
+    vim.keymap.set("n", "<c-b>", vim.cmd.NvimTreeClose)
   end,
 }

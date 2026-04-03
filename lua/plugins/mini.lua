@@ -86,7 +86,7 @@ return {
 
       -- closes the current window and buffer
       -- to close the current buffer and not the window use <c-w>
-      vim.keymap.set("n", "<c-s-x>", "<cmd>bd<cr>") -- close current buffer and window -- not work with ghostty (combination in use)
+      vim.keymap.set("n", "<c-s-x>", vim.cmd.bdelete()) -- close current buffer and window -- not work with ghostty (combination in use)
 
       -- Cursor Word
       require("mini.cursorword").setup({

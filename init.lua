@@ -18,53 +18,6 @@ vim.g.mapleader = " "
 
 vim.env.LANG = "en_US.UTF-8"
 
-require("vim._core.ui2").enable({
-  enable = true,
-  msg = {
-    targets = {
-      [""] = "msg",
-      empty = "cmd",
-      bufwrite = "msg",
-      confirm = "cmd",
-      emsg = "pager",
-      echo = "msg",
-      echomsg = "msg",
-      echoerr = "pager",
-      completion = "cmd",
-      list_cmd = "pager",
-      lua_error = "pager",
-      lua_print = "msg",
-      progress = "pager",
-      rpc_error = "pager",
-      quickfix = "msg",
-      search_cmd = "cmd",
-      search_count = "cmd",
-      shell_cmd = "pager",
-      shell_err = "pager",
-      shell_out = "pager",
-      shell_ret = "msg",
-      undo = "msg",
-      verbose = "pager",
-      wildlist = "cmd",
-      wmsg = "msg",
-      typed_cmd = "cmd",
-    },
-    cmd = {
-      height = 0.5,
-    },
-    dialog = {
-      height = 0.5,
-    },
-    msg = {
-      height = 0.3,
-      timeout = 800,
-    },
-    pager = {
-      height = 0.5,
-    },
-  },
-})
-
 ---@type any
 local lazy_config = {
   spec = {
@@ -133,15 +86,6 @@ vim.o.linespace = 5
 vim.opt.cmdheight = 0
 vim.opt.showcmdloc = "statusline"
 
--- require("vim._core.ui2").enable({
---   -- msg = {
---   --   target = "msg",
---   --   msg = {
---   --     timeout = 500,
---   --   },
---   -- },
--- })
-
 -- work around on python default configs
 vim.g.python_indent = {
   disable_parentheses_indenting = false,
@@ -194,10 +138,15 @@ vim.keymap.set({ "n", "v" }, "<s-s>", function()
   vim.cmd.write({ bang = true, mods = { silent = true } })
 end) -- save file
 
-vim.keymap.set("n", "\\", "<cmd>clo<cr>") -- close current window
-vim.keymap.set("n", "|", "<cmd>vs<cr>") -- split vertical window
--- vim.keymap.set("n", "-", "<cmd>sp<cr>") -- split horizontal window
-vim.keymap.set("n", "_", "<cmd>sp<cr>") -- split horizontal window
+vim.keymap.set("n", "\\", function()
+  vim.cmd.close()
+end) -- close current window
+vim.keymap.set("n", "|", function()
+  vim.cmd.vsplit()
+end) -- split vertical window
+vim.keymap.set("n", "_", function()
+  vim.cmd.split()
+end) -- split horizontal window
 vim.keymap.set("n", "<c-9>", "<c-w>o") -- close other windows
 vim.keymap.set("n", "<c-8>", "<c-w>r") -- rotate windows
 
@@ -267,7 +216,10 @@ vim.keymap.set({ "n", "v" }, "c", '"_c') -- change verb without copying
 
 vim.keymap.set("n", "dx", '"_d') -- delete without copying to register @check working ok with default timeoutlen
 
-vim.keymap.set("n", "*", [[<Cmd>let @/='\<'.expand('<cword>').'\>'<bar>set hlsearch<cr>]]) -- highlight all occurencies of the current word
+vim.keymap.set("n", "*", function()
+  vim.fn.setreg("/", "\\<" .. vim.fn.expand("<cword>") .. "\\>")
+  vim.opt.hlsearch = true
+end)
 vim.keymap.set("v", "*", '"sy/\\V<c-r>s<cr>``') -- highlight all occurencies of the curren selection
 
 -- add ";" to the end of line
@@ -341,15 +293,23 @@ vim.keymap.set("x", "<Up>", function()
   move_lines(move_direction_up)
 end, { silent = true })
 
-vim.keymap.set("n", "<f4>", "<cmd>:e $MYVIMRC<cr>") -- open config file (vimrc or init.lua)
-vim.keymap.set("n", "<f5>", "<cmd>so %<cr>") -- execute current file (vim or lua)
-vim.keymap.set("n", "<f7>", "<cmd>:e ~/.config/ghostty/config<cr>") -- open ghostty config file (vimrc or init.lua)
-vim.keymap.set("n", "<f11>", "<cmd>echo wordcount().words<cr>") -- execute current file (vim or lua)
+vim.keymap.set("n", "<f4>", function()
+  vim.cmd.edit("$MYVIMRC")
+end) -- open config file (vimrc or init.lua)
+vim.keymap.set("n", "<f5>", function()
+  vim.cmd.source("%")
+end) -- execute current file (vim or lua)
+vim.keymap.set("n", "<f7>", function()
+  vim.cmd.edit("~/.config/ghostty/config")
+end) -- open ghostty config file (vimrc or init.lua)
+vim.keymap.set("n", "<f11>", function()
+  vim.notify("Words: " .. vim.fn.wordcount().words)
+end) -- execute current file (vim or lua)
 
 vim.keymap.set("n", "`", "<C-^>") -- back to last buffer
 
-vim.keymap.set("n", "<f1>", "<cmd>Inspect<cr>") -- inspect current token treesitter
-vim.keymap.set("n", "<f3>", "<cmd>InspectTree<cr>") -- inspect current token treesitter
+vim.keymap.set("n", "<f1>", vim.cmd.Inspect) -- inspect current token treesitter
+vim.keymap.set("n", "<f3>", vim.cmd.InspectTree) -- inspect current token treesitter
 
 -- when it's not in lsp
 vim.keymap.set("n", "K", "<nop>")
@@ -379,9 +339,12 @@ vim.keymap.set("n", "<c-i>", "<c-i>")
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "qf" },
   callback = function()
-    vim.keymap.set("n", "<cr>", "<cr><cmd>cclose<cr>", { buffer = true })
-    vim.keymap.set("n", "q", "<cmd>cclose<cr>", { buffer = true })
-    vim.keymap.set("n", "<c-w>", "<cmd>cclose<cr>", { buffer = true })
+    vim.keymap.set("n", "<cr>", function()
+      vim.api.nvim_feedkeys("\r", "n", false)
+      vim.cmd.cclose()
+    end, { buffer = true })
+    vim.keymap.set("n", "q", vim.cmd.cclose, { buffer = true })
+    vim.keymap.set("n", "<c-w>", vim.cmd.cclose, { buffer = true })
   end,
 })
 

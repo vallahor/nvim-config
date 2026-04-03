@@ -56,7 +56,8 @@ return {
     "chrisgrieser/nvim-various-textobjs",
     event = "UIEnter",
     config = function()
-      require("various-textobjs").setup({
+      local various_textobjs = require("various-textobjs")
+      various_textobjs.setup({
         keymaps = {
           useDefaults = false,
         },
@@ -66,8 +67,13 @@ return {
       })
       vim.keymap.set({ "o", "x" }, "au", "aw")
       vim.keymap.set({ "o", "x" }, "iu", "iw")
-      vim.keymap.set({ "o", "x" }, "aw", '<cmd>lua require("various-textobjs").subword("outer")<CR>', { silent = true })
-      vim.keymap.set({ "o", "x" }, "iw", '<cmd>lua require("various-textobjs").subword("inner")<CR>', { silent = true })
+      vim.keymap.set({ "o", "x" }, "aw", function()
+        various_textobjs.subword("outer")
+      end, { silent = true })
+
+      vim.keymap.set({ "o", "x" }, "iw", function()
+        various_textobjs.subword("inner")
+      end, { silent = true })
     end,
   },
 }
