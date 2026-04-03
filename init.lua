@@ -625,9 +625,8 @@ function _G.StatusColumn()
   return string.format("%s%3d ", hl, relnum)
 end
 
--- https://pawelgrzybek.com/nvim-incremental-selection/
 local _select = require("vim.treesitter._select")
----@type {[1]:integer,[2]:integer,[3]:integer,[4]:integer}[]
+---@type { [1]:integer, [2]:integer, [3]:integer, [4]:integer }[]
 local stack = {}
 
 local function decrement_selection()
