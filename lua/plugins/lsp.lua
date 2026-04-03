@@ -9,18 +9,6 @@ return {
         capabilities = capabilities,
       })
 
-      local notify_original = vim.notify
-      vim.notify = function(msg, level, opts)
-        if level == vim.log.levels.INFO then
-          vim.lsp.util.open_floating_preview({ msg }, "", {
-            border = "rounded",
-            focusable = false,
-          })
-          return
-        end
-        notify_original(msg, level, opts)
-      end
-
       local lsp_augroup = vim.api.nvim_create_augroup("UserLspConfig", { clear = true })
       vim.api.nvim_create_autocmd("LspAttach", {
         group = lsp_augroup,
@@ -116,6 +104,8 @@ return {
                 "**/vendor/**/{Test,test,Tests,tests}/**",
                 "*.twig",
                 "*.js",
+                "**/storage/**",
+                "**/build/**",
               },
             },
           },
@@ -142,9 +132,7 @@ return {
           "cssls",
           "html",
           "jsonls",
-          -- "lua_ls",
           "emmylua_ls",
-          "ols",
           "rust_analyzer",
           "intelephense",
           "laravel_ls",
