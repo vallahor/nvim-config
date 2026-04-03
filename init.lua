@@ -787,3 +787,11 @@ vim.api.nvim_create_autocmd("CmdlineEnter", {
     vim.opt.cmdheight = 1
   end,
 })
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "help", "text", "man" },
+  callback = function()
+    vim.wo.statuscolumn = ""
+    vim.wo.relativenumber = true
+  end,
+})
