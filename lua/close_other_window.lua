@@ -2,7 +2,7 @@ local M = {}
 
 local function close_other_window(direction)
   local old_win = vim.api.nvim_get_current_win()
-  vim.cmd(string.format("wincmd %s", direction))
+  vim.cmd.wincmd(direction)
   local win = vim.api.nvim_get_current_win()
 
   vim.api.nvim_set_current_win(old_win)

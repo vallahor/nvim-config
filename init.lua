@@ -325,7 +325,7 @@ local function move_lines(direction)
   end
 
   vim.cmd.normal({ "\27", bang = true })
-  vim.cmd(first .. "," .. last .. "m " .. (direction == move_direction_down and last + 1 or first - 2))
+  vim.cmd(string.format("%d,%dm %d", first, last, direction == move_direction_down and last + 1 or first - 2))
   vim.cmd.normal({ "gv=gv", bang = true })
 end
 
@@ -751,12 +751,12 @@ vim.api.nvim_create_autocmd("CmdlineEnter", {
       vim.schedule(function()
         if cmdline_active then
           vim.opt.guicursor = guicursor_default
-          vim.cmd("redraw")
+          vim.cmd.redraw()
         end
       end)
       return
     end
-    vim.cmd("redraw")
+    vim.cmd.redraw()
   end,
 })
 

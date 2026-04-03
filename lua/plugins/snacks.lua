@@ -42,7 +42,10 @@ return {
           picker:close()
           for _, item in ipairs(selected) do
             if item.file then
-              vim.cmd("edit " .. vim.fn.fnameescape(item.file))
+              vim.cmd.edit(vim.fn.fnameescape(item.file))
+              if item.pos then
+                vim.api.nvim_win_set_cursor(0, { item.pos[1], item.pos[2] })
+              end
             end
           end
         end,

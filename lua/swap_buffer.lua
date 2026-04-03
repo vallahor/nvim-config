@@ -4,7 +4,7 @@ local function swap_buffer(direction)
   local old_buf = vim.api.nvim_get_current_buf()
   local old_win = vim.api.nvim_get_current_win()
 
-  vim.cmd(string.format("wincmd %s", direction))
+  vim.cmd.wincmd(direction)
   local buf = vim.api.nvim_get_current_buf()
   local win = vim.api.nvim_get_current_win()
 
