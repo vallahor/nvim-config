@@ -545,6 +545,12 @@ vim.diagnostic.config({
       [vim.diagnostic.severity.INFO] = "DiagnosticLinehlInfo",
       [vim.diagnostic.severity.HINT] = "DiagnosticLinehlHint",
     },
+    numhl = {
+      [vim.diagnostic.severity.ERROR] = "DiagnosticNumhlError",
+      [vim.diagnostic.severity.WARN] = "DiagnosticNumhlWarn",
+      [vim.diagnostic.severity.INFO] = "DiagnosticNumhlInfo",
+      [vim.diagnostic.severity.HINT] = "DiagnosticNumhlHint",
+    },
   },
 })
 
@@ -562,48 +568,13 @@ vim.api.nvim_set_hl(0, "CursorVisualNr", { fg = "#a1495c", bg = "#2d1524" })
 vim.api.nvim_set_hl(0, "VisualNr", { fg = "#493441", bg = "#2d1524" })
 vim.o.statuscolumn = "%!v:lua.StatusColumn()"
 
-local diag_hl_map = {
-  [vim.diagnostic.severity.ERROR] = "%#DiagnosticNumhlError#",
-  [vim.diagnostic.severity.WARN] = "%#DiagnosticNumhlWarn#",
-  [vim.diagnostic.severity.INFO] = "%#DiagnosticNumhlInfo#",
-  [vim.diagnostic.severity.HINT] = "%#DiagnosticNumhlHint#",
-}
-
+---@type table<integer, string>
 local cursor_diag_hl_map = {
   [vim.diagnostic.severity.ERROR] = "%#DiagnosticLineNumhlError#",
   [vim.diagnostic.severity.WARN] = "%#DiagnosticLineNumhlWarn#",
   [vim.diagnostic.severity.INFO] = "%#DiagnosticLineNumhlInfo#",
   [vim.diagnostic.severity.HINT] = "%#DiagnosticLineNumhlHint#",
 }
-
----@type table<integer, table<integer, integer>?>
-local diag_cache = {}
-
-local function update_diag_cache(buf, diagnostics)
-  local cache = {}
-  for _, diag in ipairs(diagnostics) do
-    cache[diag.lnum + 1] = diag.severity
-  end
-  diag_cache[buf] = cache
-end
-
-vim.api.nvim_create_autocmd("DiagnosticChanged", {
-  callback = function(args)
-    update_diag_cache(args.buf, args.data.diagnostics)
-  end,
-})
-
-vim.api.nvim_create_autocmd("TextChanged", {
-  callback = function(args)
-    update_diag_cache(args.buf, vim.diagnostic.get(args.buf))
-  end,
-})
-
-vim.api.nvim_create_autocmd("BufWipeout", {
-  callback = function(args)
-    diag_cache[args.buf] = nil
-  end,
-})
 
 local in_visual = false
 local has_cursors = false
@@ -616,54 +587,42 @@ vim.api.nvim_create_autocmd("ModeChanged", {
   end,
 })
 
-local function update_visual()
-  if not in_visual then
-    return
-  end
-
-  local cursor_start = vim.fn.line("v")
-  local cursor_end = vim.fn.line(".")
-  if cursor_start > cursor_end then
-    cursor_start, cursor_end = cursor_end, cursor_start
-  end
-
-  vim.b.visual_start = cursor_start
-  vim.b.visual_end = cursor_end
-end
-
 vim.api.nvim_create_autocmd({ "ModeChanged", "CursorMoved" }, {
-  callback = update_visual,
+  callback = function()
+    if not in_visual then
+      return
+    end
+
+    local cursor_start = vim.fn.line("v")
+    local cursor_end = vim.fn.line(".")
+    if cursor_start > cursor_end then
+      cursor_start, cursor_end = cursor_end, cursor_start
+    end
+
+    vim.b.visual_start = cursor_start
+    vim.b.visual_end = cursor_end
+  end,
 })
 
-local function get_linenr_color()
-  local win = vim.g.statusline_winid
-  local buf = vim.api.nvim_win_get_buf(win)
-  local diag_hl_severity = diag_cache[buf] and diag_cache[buf][vim.v.lnum]
-
-  if vim.v.relnum == 0 then
-    if in_visual and win == vim.api.nvim_get_current_win() and not has_cursors then
-      return "%#CursorVisualNr#"
-    elseif diag_hl_severity then
-      return cursor_diag_hl_map[diag_hl_severity]
+function _G.StatusColumn()
+  local hl = ""
+  local relnum = vim.v.relnum
+  if relnum == 0 then
+    if in_visual and vim.g.statusline_winid == vim.api.nvim_get_current_win() and not has_cursors then
+      hl = "%#CursorVisualNr#"
     else
-      return "%#CursorLineNr#"
+      local diags = vim.diagnostic.get(vim.api.nvim_win_get_buf(vim.g.statusline_winid), { lnum = vim.v.lnum - 1 })
+      if #diags > 0 then
+        hl = cursor_diag_hl_map[diags[#diags].severity]
+      end
     end
   elseif in_visual and not has_cursors then
     local lnum = vim.v.lnum
     if lnum >= vim.b.visual_start and lnum <= vim.b.visual_end then
-      return "%#VisualNr#"
+      hl = "%#VisualNr#"
     end
   end
-
-  if diag_hl_severity then
-    return diag_hl_map[diag_hl_severity]
-  end
-
-  return "%#LineNr#"
-end
-
-function _G.StatusColumn()
-  return string.format("%s%3d ", get_linenr_color(), vim.v.relnum)
+  return string.format("%s%3d ", hl, relnum)
 end
 
 -- https://pawelgrzybek.com/nvim-incremental-selection/
