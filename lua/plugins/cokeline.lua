@@ -26,7 +26,7 @@ return {
         components = {
           {
             text = function()
-              local winnr = nvim_tree_view.get_winnr()
+              local winnr = nvim_tree_view.get_winnr() --[[@as integer?]]
               if winnr then
                 local sidebar_width = vim.api.nvim_win_get_width(winnr)
                 local pad = math.max(0, math.floor((sidebar_width - label_len) / 2))
