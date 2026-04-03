@@ -33,11 +33,32 @@ return {
           filename_first = true,
         },
       },
+      actions = {
+        toggle_select = function(picker)
+          picker.list:select()
+        end,
+        open_all = function(picker)
+          local selected = picker:selected({ fallback = true })
+          picker:close()
+          for _, item in ipairs(selected) do
+            if item.file then
+              vim.cmd("edit " .. vim.fn.fnameescape(item.file))
+            end
+          end
+        end,
+      },
+      icons = {
+        ui = {
+          selected = " ",
+          unselected = " ",
+        },
+      },
       win = {
         input = {
           keys = {
+            ["<tab>"] = { "toggle_select", mode = { "n", "i" } },
             ["<Esc>"] = { "close", mode = { "n", "i" } },
-            ["<CR>"] = { "confirm", mode = { "n", "i" } },
+            ["<CR>"] = { "open_all", mode = { "n", "i" } },
             ["<Up>"] = { "list_up", mode = { "n", "i" } },
             ["<Down>"] = { "list_down", mode = { "n", "i" } },
             ["<PageUp>"] = { "preview_scroll_up", mode = { "n", "i" } },
@@ -95,22 +116,14 @@ return {
       mode = "n",
       "<C-S-f>",
       function()
-        Snacks.picker.grep({ regex = false })
+        Snacks.picker.grep({ search = ".", regex = false, live = false })
       end,
     },
     {
-      mode = "n",
+      mode = { "n", "x" },
       "<C-/>",
       function()
-        Snacks.picker.grep({ search = vim.fn.expand("<cword>") })
-      end,
-    },
-    {
-      mode = "v",
-      "<C-/>",
-      function()
-        vim.cmd('normal! "sy')
-        Snacks.picker.grep({ search = vim.fn.getreg("s") })
+        Snacks.picker.grep_word()
       end,
     },
   },
