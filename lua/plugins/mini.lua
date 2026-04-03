@@ -36,7 +36,8 @@ return {
         if vim.bo.buftype == "terminal" then
           return "%t"
         end
-        return vim.fn.expand("%:.") .. " %m%r"
+        local fname = vim.fn.expand("%:.")
+        return (fname ~= "" and fname .. " " or "") .. "%m%r"
       end
       MiniStatusline.setup({
         use_icons = false,
