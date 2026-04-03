@@ -312,20 +312,28 @@ vim.keymap.set("v", "<c-s-c>", function()
   vim.cmd.normal('gcgv"0y"0Pgvgc')
 end)
 
+-- the vim.b.visual_(start/end) came from `in_visual` autocmd
+-- so there's no need to recalculate it since it's already
+-- calculated there.
 local move_direction_up = 2
 local move_direction_down = 1
 local function move_lines(direction)
-  local cursor = vim.fn.line(".")
-  local mark = vim.fn.line("v")
-  local first = math.min(cursor, mark)
-  local last = math.max(cursor, mark)
-
-  if direction == move_direction_down and last >= vim.fn.line("$") or direction == move_direction_up and first <= 1 then
+  if
+    direction == move_direction_down and vim.b.visual_end >= vim.fn.line("$")
+    or direction == move_direction_up and vim.b.visual_start <= 1
+  then
     return
   end
 
   vim.cmd.normal({ "\27", bang = true })
-  vim.cmd(string.format("%d,%dm %d", first, last, direction == move_direction_down and last + 1 or first - 2))
+  vim.cmd(
+    string.format(
+      "%d,%dm %d",
+      vim.b.visual_start,
+      vim.b.visual_end,
+      direction == move_direction_down and vim.b.visual_end + 1 or vim.b.visual_start - 2
+    )
+  )
   vim.cmd.normal({ "gv=gv", bang = true })
 end
 
