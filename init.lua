@@ -526,7 +526,6 @@ vim.diagnostic.config({
   jump = {
     on_jump = function() end,
   },
-  update_in_insert = true,
   signs = {
     linehl = {
       [vim.diagnostic.severity.ERROR] = "DiagnosticLinehlError",
