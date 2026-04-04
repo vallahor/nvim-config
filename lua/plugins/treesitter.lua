@@ -3,7 +3,7 @@ return {
     "nvim-treesitter/nvim-treesitter",
     lazy = false,
     build = ":TSUpdate",
-    config = function()
+    init = function()
       local languages = {
         "bash",
         "blade",
@@ -36,10 +36,16 @@ return {
         "zig",
         "query",
       }
-
-      local treesitter = require("nvim-treesitter")
-      treesitter.install(languages)
-
+      local alreadyInstalled = require("nvim-treesitter.config").get_installed()
+      local parsersToInstall = vim
+        .iter(languages)
+        :filter(function(parser)
+          return not vim.tbl_contains(alreadyInstalled, parser)
+        end)
+        :totable()
+      require("nvim-treesitter").install(parsersToInstall)
+    end,
+    config = function()
       local disable_indent = {
         cpp = true,
         gdscript = true,
@@ -50,14 +56,11 @@ return {
       }
 
       vim.api.nvim_create_autocmd("FileType", {
-        pattern = "*",
         callback = function(ev)
-          if vim.treesitter.get_parser(ev.buf, nil, { error = false }) then
-            vim.treesitter.start()
-            local lang = vim.bo[ev.buf].filetype
-            if not disable_indent[lang] then
-              vim.bo[ev.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
-            end
+          pcall(vim.treesitter.start)
+          local lang = vim.bo[ev.buf].filetype
+          if not disable_indent[lang] then
+            vim.bo[ev.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
           end
         end,
       })
@@ -74,14 +77,11 @@ return {
     "windwp/nvim-ts-autotag",
     dependencies = { "nvim-treesitter" },
     event = "InsertEnter",
-    config = function()
-      require("nvim-ts-autotag").setup({})
-    end,
+    opts = {},
   },
   {
     "folke/ts-comments.nvim",
     opts = {},
     event = "VeryLazy",
-    enabled = vim.fn.has("nvim-0.10.0") == 1,
   },
 }
