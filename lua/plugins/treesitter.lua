@@ -36,14 +36,15 @@ return {
         "zig",
         "query",
       }
-      local alreadyInstalled = require("nvim-treesitter.config").get_installed()
-      local parsersToInstall = vim
+
+      local already_installed = require("nvim-treesitter.config").get_installed()
+      local parsers_to_install = vim
         .iter(languages)
         :filter(function(parser)
-          return not vim.tbl_contains(alreadyInstalled, parser)
+          return not vim.tbl_contains(already_installed, parser)
         end)
         :totable()
-      require("nvim-treesitter").install(parsersToInstall)
+      require("nvim-treesitter").install(parsers_to_install)
 
       local disable_indent = {
         cpp = true,
