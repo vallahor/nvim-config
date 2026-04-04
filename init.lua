@@ -765,9 +765,8 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
--- the vim.b.visual_(start/end) came from `in_visual` autocmd
--- so there's no need to recalculate it since it's already
--- calculated there.
+-- Uses `visual_state[buf]` to get the visual position
+-- cached, instead of calculating it everytime.
 local move_direction_up = 2
 local move_direction_down = 1
 local function move_lines(direction)
