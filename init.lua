@@ -677,8 +677,11 @@ local function increment_selection()
   _select.select_parent(vim.v.count1)
 end
 
-vim.keymap.set({ "n", "x", "o" }, "m", increment_selection)
-vim.keymap.set({ "n", "v", "o" }, "M", decrement_selection)
+vim.keymap.set({ "n", "x", "o" }, "<c-;>", ",")
+vim.keymap.set({ "n", "x", "o" }, "<c-m>", ".")
+
+vim.keymap.set({ "n", "x", "o" }, ".", increment_selection, { noremap = true })
+vim.keymap.set({ "n", "v", "o" }, ",", decrement_selection, { noremap = true })
 vim.keymap.set("x", "<Esc>", function()
   stack = {}
   return "<esc>"

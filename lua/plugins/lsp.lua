@@ -49,7 +49,11 @@ return {
               version = "LuaJIT",
             },
             workspace = {
-              library = { vim.env.VIMRUNTIME },
+              library = {
+                vim.env.VIMRUNTIME,
+                vim.fn.stdpath("data") .. "/lazy",
+              },
+              checkThirdParty = false,
             },
             diagnostics = {
               globals = { "vim" },
