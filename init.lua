@@ -771,7 +771,7 @@ vim.api.nvim_create_autocmd("FileType", {
 local move_direction_up = 2
 local move_direction_down = 1
 local function move_lines(direction)
-  local buf = vim.api.nvim_win_get_buf(vim.api.nvim_get_current_win())
+  local buf = vim.api.nvim_get_current_buf()
   local state = visual_state[buf]
   if not state then
     return
@@ -779,7 +779,9 @@ local function move_lines(direction)
 
   local vstart = state.visual_start
   local vend = state.visual_end
-  if direction == move_direction_down and vend >= vim.fn.line("$") then
+  if
+    direction == move_direction_down and vend >= vim.fn.line("$") or direction == move_direction_up and vstart <= 1
+  then
     return
   end
 
