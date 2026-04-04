@@ -54,13 +54,13 @@ return {
         vim.cmd.wincmd("p")
       end, { buffer = bufnr, noremap = true, silent = true, nowait = true })
 
-      vim.keymap.set("n", "<c-.>", function()
+      vim.keymap.set("n", "<c-(>", function()
         resize(5)
       end)
-      vim.keymap.set("n", "<c-,>", function()
+      vim.keymap.set("n", "<c-)>", function()
         resize(-5)
       end)
-      vim.keymap.set("n", "<c-s-t>", function()
+      vim.keymap.set("n", "<c-_>", function()
         resize()
       end)
 
