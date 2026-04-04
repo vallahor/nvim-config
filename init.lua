@@ -264,35 +264,6 @@ vim.keymap.set("v", "<c-s-c>", function()
   vim.cmd.normal('gcgv"0y"0Pgvgc')
 end)
 
--- the vim.b.visual_(start/end) came from `in_visual` autocmd
--- so there's no need to recalculate it since it's already
--- calculated there.
-local move_direction_up = 2
-local move_direction_down = 1
-local function move_lines(direction)
-  if direction == move_direction_down and vim.b.visual_end >= vim.fn.line("$") then
-    return
-  end
-
-  vim.cmd.normal({ "\27", bang = true })
-  vim.cmd(
-    string.format(
-      "%d,%dm %d",
-      vim.b.visual_start,
-      vim.b.visual_end,
-      direction == move_direction_down and vim.b.visual_end + 1 or vim.b.visual_start - 2
-    )
-  )
-  vim.cmd.normal({ "gv=gv", bang = true })
-end
-
-vim.keymap.set("x", "<Down>", function()
-  move_lines(move_direction_down)
-end, { silent = true })
-vim.keymap.set("x", "<Up>", function()
-  move_lines(move_direction_up)
-end, { silent = true })
-
 vim.keymap.set("n", "<f4>", function()
   vim.cmd.edit("$MYVIMRC")
 end) -- open config file (vimrc or init.lua)
@@ -623,12 +594,6 @@ vim.api.nvim_create_autocmd("ModeChanged", {
   end,
 })
 
-vim.api.nvim_create_autocmd("BufWipeout", {
-  callback = function(ev)
-    visual_state[ev.buf] = nil
-  end,
-})
-
 vim.api.nvim_create_autocmd("CursorMoved", {
   callback = function(ev)
     local state = visual_state[ev.buf]
@@ -637,6 +602,12 @@ vim.api.nvim_create_autocmd("CursorMoved", {
     end
 
     update_visual_cursor(ev.buf)
+  end,
+})
+
+vim.api.nvim_create_autocmd("BufWipeout", {
+  callback = function(ev)
+    visual_state[ev.buf] = nil
   end,
 })
 
@@ -793,3 +764,33 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.wo.relativenumber = true
   end,
 })
+
+-- the vim.b.visual_(start/end) came from `in_visual` autocmd
+-- so there's no need to recalculate it since it's already
+-- calculated there.
+local move_direction_up = 2
+local move_direction_down = 1
+local function move_lines(direction)
+  local buf = vim.api.nvim_win_get_buf(vim.api.nvim_get_current_win())
+  local state = visual_state[buf]
+  if not state then
+    return
+  end
+
+  local vstart = state.visual_start
+  local vend = state.visual_end
+  if direction == move_direction_down and vend >= vim.fn.line("$") then
+    return
+  end
+
+  vim.cmd.normal({ "\27", bang = true })
+  vim.cmd(string.format("%d,%dm %d", vstart, vend, direction == move_direction_down and vend + 1 or vstart - 2))
+  vim.cmd.normal({ "gv=gv", bang = true })
+end
+
+vim.keymap.set("x", "<Down>", function()
+  move_lines(move_direction_down)
+end, { silent = true })
+vim.keymap.set("x", "<Up>", function()
+  move_lines(move_direction_up)
+end, { silent = true })
