@@ -339,8 +339,12 @@ vim.keymap.set("n", "<c-i>", "<c-i>")
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "qf" },
   callback = function()
-    vim.keymap.set("n", "<cr>", "<cr><cmd>cclose<cr>", { buffer = true })
-    vim.keymap.set("n", "o", "<cr><cmd>cclose<cr>", { buffer = true })
+    local function enter_and_close()
+      vim.cmd.cc(vim.fn.line("."))
+      vim.cmd.cclose()
+    end
+    vim.keymap.set("n", "<cr>", enter_and_close, { buffer = true })
+    vim.keymap.set("n", "o", enter_and_close, { buffer = true })
     vim.keymap.set("n", "q", vim.cmd.cclose, { buffer = true })
     vim.keymap.set("n", "<c-w>", vim.cmd.cclose, { buffer = true })
     vim.keymap.set("n", "<esc>", vim.cmd.cclose, { buffer = true })
