@@ -44,8 +44,7 @@ return {
         end)
         :totable()
       require("nvim-treesitter").install(parsersToInstall)
-    end,
-    config = function()
+
       local disable_indent = {
         cpp = true,
         gdscript = true,
