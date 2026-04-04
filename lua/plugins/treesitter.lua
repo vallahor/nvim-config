@@ -52,7 +52,7 @@ return {
       vim.api.nvim_create_autocmd("FileType", {
         pattern = "*",
         callback = function(ev)
-          if vim.treesitter.get_parser(nil, nil, { error = false }) then
+          if vim.treesitter.get_parser(ev.buf, nil, { error = false }) then
             vim.treesitter.start()
             local lang = vim.bo[ev.buf].filetype
             if not disable_indent[lang] then

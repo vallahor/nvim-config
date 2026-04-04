@@ -594,49 +594,70 @@ local cursor_diag_hl_map = {
   [vim.diagnostic.severity.HINT] = "%#DiagnosticLineNumhlHint#",
 }
 
-local in_visual = false
-local has_cursors = false
+---@type table<integer?, table<string, boolean|integer>>
+local visual_state = {}
+
+local function update_visual_cursor(buf)
+  local cursor_start = vim.fn.line("v")
+  local cursor_end = vim.fn.line(".")
+  if cursor_start > cursor_end then
+    cursor_start, cursor_end = cursor_end, cursor_start
+  end
+
+  visual_state[buf].visual_start = cursor_start
+  visual_state[buf].visual_end = cursor_end
+end
+
 local mc = require("multicursor-nvim")
 vim.api.nvim_create_autocmd("ModeChanged", {
-  callback = function()
+  callback = function(ev)
     local m = vim.api.nvim_get_mode().mode
-    in_visual = m == "v" or m == "V" or m == "\x16"
-    has_cursors = mc.hasCursors() and mc.cursorsEnabled()
+    local in_visual = m == "v" or m == "V" or m == "\x16"
+    visual_state[ev.buf] = {
+      in_visual = in_visual,
+      has_cursors = mc.hasCursors() and mc.cursorsEnabled(),
+    }
+    if in_visual then
+      update_visual_cursor(ev.buf)
+    end
   end,
 })
 
-vim.api.nvim_create_autocmd({ "ModeChanged", "CursorMoved" }, {
-  callback = function()
-    if not in_visual then
+vim.api.nvim_create_autocmd("BufWipeout", {
+  callback = function(ev)
+    visual_state[ev.buf] = nil
+  end,
+})
+
+vim.api.nvim_create_autocmd("CursorMoved", {
+  callback = function(ev)
+    local state = visual_state[ev.buf]
+    if not state or not state.in_visual then
       return
     end
 
-    local cursor_start = vim.fn.line("v")
-    local cursor_end = vim.fn.line(".")
-    if cursor_start > cursor_end then
-      cursor_start, cursor_end = cursor_end, cursor_start
-    end
-
-    vim.b.visual_start = cursor_start
-    vim.b.visual_end = cursor_end
+    update_visual_cursor(ev.buf)
   end,
 })
 
 function _G.StatusColumn()
   local hl = ""
   local relnum = vim.v.relnum
+  local win = vim.g.statusline_winid
+  local buf = vim.api.nvim_win_get_buf(win)
+  local state = visual_state[buf]
   if relnum == 0 then
-    if in_visual and vim.g.statusline_winid == vim.api.nvim_get_current_win() and not has_cursors then
+    if state and state.in_visual and win == vim.api.nvim_get_current_win() and not state.has_cursors then
       hl = "%#CursorVisualNr#"
     else
-      local diags = vim.diagnostic.get(vim.api.nvim_win_get_buf(vim.g.statusline_winid), { lnum = vim.v.lnum - 1 })
+      local diags = vim.diagnostic.get(buf, { lnum = vim.v.lnum - 1 })
       if #diags > 0 then
         hl = cursor_diag_hl_map[diags[#diags].severity]
       end
     end
-  elseif in_visual and not has_cursors then
+  elseif state and state.in_visual and not state.has_cursors then
     local lnum = vim.v.lnum
-    if lnum >= vim.b.visual_start and lnum <= vim.b.visual_end then
+    if lnum >= state.visual_start and lnum <= state.visual_end then
       hl = "%#VisualNr#"
     end
   end
@@ -648,7 +669,8 @@ local _select = require("vim.treesitter._select")
 local stack = {}
 
 local function decrement_selection()
-  if not in_visual then
+  local m = vim.api.nvim_get_mode().mode
+  if not (m == "v" or m == "V" or m == "\x16") then
     return
   end
 
