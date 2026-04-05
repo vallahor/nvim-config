@@ -84,14 +84,18 @@ mc.addKeymapLayer(function(layerSet)
   layerSet({ "v", "x" }, "<c-p>", '"*P')
 end)
 
-local hl = vim.api.nvim_set_hl
-hl(0, "MultiCursorCursor", { link = "Cursor" })
-hl(0, "MultiCursorVisual", { link = "Visual" })
-hl(0, "MultiCursorSign", { link = "SignColumn" })
-hl(0, "MultiCursorMatchPreview", { link = "Search" })
-hl(0, "MultiCursorDisabledCursor", { link = "Cursor" })
-hl(0, "MultiCursorDisabledVisual", { link = "Visual" })
-hl(0, "MultiCursorDisabledSign", { link = "SignColumn" })
+vim.api.nvim_create_autocmd("ColorScheme", {
+  callback = function()
+    local hl = vim.api.nvim_set_hl
+    hl(0, "MultiCursorCursor", { link = "Cursor" })
+    hl(0, "MultiCursorVisual", { link = "Visual" })
+    hl(0, "MultiCursorSign", { link = "SignColumn" })
+    hl(0, "MultiCursorMatchPreview", { link = "Search" })
+    hl(0, "MultiCursorDisabledCursor", { link = "Cursor" })
+    hl(0, "MultiCursorDisabledVisual", { link = "Visual" })
+    hl(0, "MultiCursorDisabledSign", { link = "SignColumn" })
+  end,
+})
 
 local mc_ns = vim.api.nvim_get_namespaces()["multicursor-nvim"]
 local mc_match_ids = {}
