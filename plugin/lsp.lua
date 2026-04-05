@@ -33,12 +33,7 @@ vim.lsp.config("gdscript", {
   cmd = { "ncat", "localhost", port },
 })
 
-vim.lsp.config("rust_analyzer", {
-  capabilities = capabilities,
-})
-
 vim.lsp.config("emmylua_ls", {
-  capabilities = capabilities,
   settings = {
     Lua = {
       runtime = {

@@ -12,7 +12,6 @@ vim.api.nvim_create_autocmd("PackChanged", {
 
 vim.pack.add({
   "https://github.com/nvim-treesitter/nvim-treesitter",
-  "https://github.com/nvim-treesitter/nvim-treesitter",
   "https://github.com/RRethy/nvim-treesitter-endwise",
   "https://github.com/windwp/nvim-ts-autotag",
   "https://github.com/folke/ts-comments.nvim",

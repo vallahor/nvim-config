@@ -2,6 +2,7 @@ vim.pack.add(
   { "https://github.com/chrisgrieser/nvim-spider", "https://github.com/chrisgrieser/nvim-various-textobjs" },
   { load = true }
 )
+
 local spider = require("spider")
 spider.setup({
   skipInsignificantPunctuation = false,
