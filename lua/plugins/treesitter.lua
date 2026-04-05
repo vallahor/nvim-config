@@ -10,10 +10,8 @@ return {
         "c",
         "cpp",
         "css",
-        "gdscript",
-        "gdshader",
-        "godot_resource",
         "html",
+        "hyprlang",
         "javascript",
         "json",
         "lua",
@@ -21,12 +19,9 @@ return {
         "markdown",
         "markdown_inline",
         "nu",
-        "hyprlang",
         "odin",
-        "php",
-        "php_only",
-        "phpdoc",
         "python",
+        "query",
         "rust",
         "svelte",
         "tsx",
@@ -34,7 +29,6 @@ return {
         "vim",
         "vimdoc",
         "zig",
-        "query",
       }
 
       local already_installed = require("nvim-treesitter.config").get_installed()

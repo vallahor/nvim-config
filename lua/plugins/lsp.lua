@@ -28,7 +28,7 @@ return {
         end,
       })
 
-      vim.lsp.enable({ "gdscript", "nushell", "rust_analyzer", "laravel_ls", "intelephense", "svelte" })
+      vim.lsp.enable({ "gdscript", "nushell", "rust_analyzer", "svelte" })
 
       vim.lsp.semantic_tokens.enable(false)
 
@@ -62,59 +62,11 @@ return {
         },
       })
 
-      vim.lsp.config("vtsls", {
-        settings = {
-          vtsls = {
-            tsserver = {
-              globalPlugins = {
-                {
-                  name = "@vue/typescript-plugin",
-                  location = vim.fn.stdpath("data")
-                    .. "/mason/packages/vue-language-server/node_modules/@vue/language-server",
-                  languages = { "vue" },
-                  configNamespace = "typescript",
-                },
-              },
-            },
-          },
-        },
-        filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue" },
-      })
-
       vim.lsp.config("basedpyright", {
         settings = {
           basedpyright = {
             analysis = {
               typeCheckingMode = "standard",
-            },
-          },
-        },
-      })
-
-      vim.lsp.config("html", {
-        filetypes = { "html", "heex", "eex", "elixir", "blade" },
-      })
-
-      vim.lsp.config("laravel_ls", {})
-      vim.lsp.config("intelephense", {
-        settings = {
-          intelephense = {
-            files = {
-              maxSize = 10000000,
-              exclude = {
-                "**/.git/**",
-                "**/.svn/**",
-                "**/.hg/**",
-                "**/CVS/**",
-                "**/.DS_Store/**",
-                "**/node_modules/**",
-                "**/bower_components/**",
-                "**/vendor/**/{Test,test,Tests,tests}/**",
-                "*.twig",
-                "*.js",
-                "**/storage/**",
-                "**/build/**",
-              },
             },
           },
         },
@@ -138,19 +90,16 @@ return {
           "basedpyright",
           "clangd",
           "cssls",
+          "emmylua_ls",
           "html",
           "jsonls",
-          "emmylua_ls",
           "rust_analyzer",
-          "intelephense",
-          "laravel_ls",
+          "svelte",
           "tailwindcss",
           "vtsls",
-          "vue_ls",
-          "svelte",
         },
         automatic_enable = {
-          exclude = { "ruff", "intelephense", "laravel_ls" },
+          exclude = { "ruff" },
         },
       })
     end,
