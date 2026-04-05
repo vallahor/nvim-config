@@ -558,6 +558,12 @@ vim.api.nvim_create_autocmd("ModeChanged", {
     }
     if in_visual then
       update_visual_cursor(ev.buf)
+    else
+      vim.schedule(function()
+        for _, w in ipairs(vim.fn.win_findbuf(ev.buf)) do
+          vim.api.nvim__redraw({ win = w, statuscolumn = true })
+        end
+      end)
     end
   end,
 })

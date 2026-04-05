@@ -50,6 +50,7 @@ vim.keymap.set("n", "R", "q")
 -- vim.keymap.set({ "n", "x", "v" }, "q", "r")
 --
 local various_textobjs = require("various-textobjs")
+---@diagnostic disable-next-line: param-type-mismatch, missing-fields
 various_textobjs.setup({
   keymaps = {
     useDefaults = false,
