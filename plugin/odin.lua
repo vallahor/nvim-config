@@ -1,4 +1,4 @@
-vim.pack.add({ "https://github.com/Tetralux/odin.vim" }, { load = true })
+vim.pack.add({ "https://github.com/Tetralux/odin.vim" })
 vim.cmd([[
   " from https://github.com/Tetralux/odin.vim/pull/11
   setlocal indentexpr=GetOdinIndent(v:lnum)

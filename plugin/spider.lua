@@ -1,7 +1,4 @@
-vim.pack.add(
-  { "https://github.com/chrisgrieser/nvim-spider", "https://github.com/chrisgrieser/nvim-various-textobjs" },
-  { load = true }
-)
+vim.pack.add({ "https://github.com/chrisgrieser/nvim-spider", "https://github.com/chrisgrieser/nvim-various-textobjs" })
 
 local spider = require("spider")
 spider.setup({
@@ -61,6 +58,7 @@ various_textobjs.setup({
     whenObjectNotFound = false,
   },
 })
+
 vim.keymap.set({ "o", "x" }, "au", "aw")
 vim.keymap.set({ "o", "x" }, "iu", "iw")
 vim.keymap.set({ "o", "x" }, "aw", function()

@@ -1,4 +1,4 @@
-vim.pack.add({ "https://github.com/vallahor/delite.nvim" }, { load = true })
+vim.pack.add({ "https://github.com/vallahor/delite.nvim" })
 local delite = require("delite")
 delite.setup({})
 

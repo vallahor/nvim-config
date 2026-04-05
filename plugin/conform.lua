@@ -1,4 +1,4 @@
-vim.pack.add({ "https://github.com/stevearc/conform.nvim" }, { load = true })
+vim.pack.add({ "https://github.com/stevearc/conform.nvim" })
 
 local conform = require("conform")
 ---@diagnostic disable-next-line: param-type-mismatch

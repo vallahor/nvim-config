@@ -1,4 +1,4 @@
-vim.pack.add({ "https://github.com/windwp/nvim-autopairs" }, { load = true })
+vim.pack.add({ "https://github.com/windwp/nvim-autopairs" })
 local autopairs = require("nvim-autopairs")
 autopairs.setup({
   enable_check_bracket_line = true,

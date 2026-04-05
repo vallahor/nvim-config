@@ -15,7 +15,7 @@ vim.pack.add({
   "https://github.com/RRethy/nvim-treesitter-endwise",
   "https://github.com/windwp/nvim-ts-autotag",
   "https://github.com/folke/ts-comments.nvim",
-}, { load = true })
+})
 
 local languages = {
   "bash",

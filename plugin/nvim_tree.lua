@@ -1,4 +1,4 @@
-vim.pack.add({ "https://github.com/nvim-tree/nvim-tree.lua" }, { load = true })
+vim.pack.add({ "https://github.com/nvim-tree/nvim-tree.lua" })
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 vim.g.neo_tree_remove_legacy_commands = 1

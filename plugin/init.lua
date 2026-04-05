@@ -2,7 +2,7 @@ vim.pack.add({
   "https://github.com/tpope/vim-repeat",
   "https://github.com/habamax/vim-godot",
   "https://github.com/ricardoramirezr/blade-nav.nvim",
-}, { load = true })
+})
 
 local cow = require("close_other_window")
 vim.keymap.set({ "n", "v" }, "<c-left>", cow.left)
@@ -20,11 +20,10 @@ vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead", "BufEnter", "BufWinEnter"
   pattern = "*.gd",
   callback = function()
     vim.opt_local.expandtab = false
+    vim.cmd([[
+      setlocal tabstop=4
+      setlocal shiftwidth=4
+      setlocal indentexpr=
+    ]])
   end,
 })
-
-vim.cmd([[
-  setlocal tabstop=4
-  setlocal shiftwidth=4
-  setlocal indentexpr=
-]])

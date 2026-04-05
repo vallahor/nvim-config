@@ -1,4 +1,4 @@
-vim.pack.add({ "https://github.com/kana/vim-arpeggio.git" }, { load = true })
+vim.pack.add({ "https://github.com/kana/vim-arpeggio.git" })
 
 vim.g.arpeggio_timeoutlen = 100
 vim.cmd([[

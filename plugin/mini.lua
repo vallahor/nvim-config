@@ -1,4 +1,4 @@
-vim.pack.add({ "https://github.com/echasnovski/mini.nvim" }, { load = true })
+vim.pack.add({ "https://github.com/echasnovski/mini.nvim" })
 -- Statusline
 
 -- https://github.com/echasnovski/mini.nvim/blob/main/lua/mini/statusline.lua#L557

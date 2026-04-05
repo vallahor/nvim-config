@@ -1,4 +1,4 @@
-vim.pack.add({ "https://github.com/neovim/nvim-lspconfig" }, { load = true })
+vim.pack.add({ "https://github.com/neovim/nvim-lspconfig" })
 local capabilities = require("blink.cmp").get_lsp_capabilities()
 
 vim.lsp.config("*", {
@@ -42,7 +42,7 @@ vim.lsp.config("emmylua_ls", {
       workspace = {
         library = {
           vim.env.VIMRUNTIME,
-          vim.fn.stdpath("data") .. "/lazy",
+          vim.fn.stdpath("data") .. "/site/pack/core/opt",
         },
         checkThirdParty = false,
       },
