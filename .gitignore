@@ -1,5 +1,6 @@
 .luarc.json
 package-lock.json
 lazy-lock.json
+nvim-pack-lock.json
 playground/
 *.dump

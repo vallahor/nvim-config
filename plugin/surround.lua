@@ -1,0 +1,3 @@
+vim.pack.add({ "https://github.com/tpope/vim-surround" }, { load = true })
+
+vim.keymap.set("v", "s", "<Plug>VSurround", { silent = true })

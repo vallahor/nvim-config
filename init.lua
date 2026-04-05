@@ -1,32 +1,9 @@
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.uv.fs_stat(lazypath) then
-  local lazyrepo = "https://github.com/folke/lazy.nvim.git"
-  local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
-  if vim.v.shell_error ~= 0 then
-    vim.api.nvim_echo({
-      { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
-      { out, "WarningMsg" },
-      { "\nPress any key to exit..." },
-    }, true, {})
-    vim.fn.getchar()
-    os.exit(1)
-  end
-end
-vim.opt.rtp:prepend(lazypath)
-
+vim.pack.add({
+  "https://github.com/jake-stewart/multicursor.nvim",
+})
 vim.g.mapleader = " "
 
 vim.env.LANG = "en_US.UTF-8"
-
----@type any
-local lazy_config = {
-  spec = {
-    { import = "plugins" },
-  },
-  checker = { enabled = false },
-  change_detection = { enabled = false },
-}
-require("lazy").setup(lazy_config)
 
 -- SETTINGS --
 vim.opt.guifont = { "JetBrainsMono NF:h11" }
@@ -126,14 +103,6 @@ end, { expr = true })
 -- vim.keymap.set("i", "<s-enter>", "<c-o>O") -- new line up
 -- vim.keymap.set("i", "<c-enter>", "<c-o>o") -- new line down
 
-local conform = require("conform")
-vim.keymap.set({ "n", "v" }, "<c-s>", function()
-  conform.format({
-    quiet = true,
-    async = false,
-  })
-  vim.cmd.write({ bang = true, mods = { silent = true } })
-end) -- save file
 vim.keymap.set({ "n", "v" }, "<s-s>", function()
   vim.cmd.write({ bang = true, mods = { silent = true } })
 end) -- save file

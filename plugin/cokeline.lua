@@ -1,10 +1,8 @@
-return {
-  "noib3/nvim-cokeline",
-  dependencies = {
-    { "nvim-lua/plenary.nvim", lazy = true },
-    { "nvim-tree/nvim-tree.lua" },
-  },
-  config = function()
+vim.pack.add({ "https://github.com/nvim-lua/plenary.nvim", "https://github.com/noib3/nvim-cokeline" })
+
+vim.api.nvim_create_autocmd("VimEnter", {
+  once = true,
+  callback = function()
     local cokeline = require("cokeline")
     local get_hex = require("cokeline.hlgroups").get_hl_attr
 
@@ -117,4 +115,4 @@ return {
     vim.keymap.set("n", "<c-home>", "<Plug>(cokeline-switch-prev)", { silent = true })
     vim.keymap.set("n", "<c-end>", "<Plug>(cokeline-switch-next)", { silent = true })
   end,
-}
+})

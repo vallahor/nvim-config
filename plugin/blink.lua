@@ -1,10 +1,17 @@
-return {
-  {
-    "saghen/blink.cmp",
-    -- dependencies = { "nvim-web-devicons", "onsails/lspkind.nvim" },
-    -- build = "cargo build --release",
-    version = "1.*",
-    opts = {
+vim.api.nvim_create_autocmd("PackChanged", {
+  callback = function(ev)
+    if ev.data.spec.name == "blink.cmp" and (ev.data.kind == "install" or ev.data.kind == "update") then
+      vim.system({ "cargo", "build", "--release" }, { cwd = ev.data.path }):wait()
+    end
+  end,
+})
+
+vim.pack.add({ { src = "https://github.com/Saghen/blink.cmp", version = vim.version.range("*") } })
+
+vim.api.nvim_create_autocmd("InsertEnter", {
+  once = true,
+  callback = function()
+    require("blink.cmp").setup({
       keymap = {
         preset = "none",
         ["<Up>"] = { "select_prev", "fallback" },
@@ -25,12 +32,6 @@ return {
         menu = {
           draw = {
             components = {
-              -- kind_icon = {
-              --   ellipsis = false,
-              --   text = function(_)
-              --     return ""
-              --   end,
-              -- },
               label = {
                 width = { fill = true, max = 40 },
               },
@@ -155,7 +156,6 @@ return {
           show_documentation = false,
         },
       },
-    },
-    opts_extend = { "sources.default" },
-  },
-}
+    })
+  end,
+})
