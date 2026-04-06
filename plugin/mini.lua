@@ -185,18 +185,12 @@ vim.api.nvim_create_autocmd("VimEnter", {
     local buf_order = {}
     local buf_lookup = {}
 
-    local function rebuild_buf_order()
-      buf_order = {}
-      buf_lookup = {}
-      for _, b in ipairs(api.nvim_list_bufs()) do
-        if bo[b].buflisted then
-          buf_order[#buf_order + 1] = b
-          buf_lookup[b] = true
-        end
+    for _, b in ipairs(api.nvim_list_bufs()) do
+      if bo[b].buflisted then
+        buf_order[#buf_order + 1] = b
+        buf_lookup[b] = true
       end
     end
-
-    rebuild_buf_order()
 
     local last_focus_buf = buf_order[1] or api.nvim_get_current_buf()
 
@@ -221,17 +215,11 @@ vim.api.nvim_create_autocmd("VimEnter", {
           return
         end
         buf_lookup[deleted] = nil
-        local idx
         for i, b in ipairs(buf_order) do
           if b == deleted then
-            idx = i
             table.remove(buf_order, i)
             break
           end
-        end
-        if last_focus_buf == deleted then
-          local next_idx = math.min(idx or 1, #buf_order)
-          last_focus_buf = buf_order[next_idx] or api.nvim_get_current_buf()
         end
         vim.cmd.redrawtabline()
       end,
@@ -254,6 +242,19 @@ vim.api.nvim_create_autocmd("VimEnter", {
     local nvim_tree_view = require("nvim-tree.view")
     local explorer_label = "Explorer"
     local explorer_label_len = strwidth(explorer_label)
+
+    -- [severity][modified+1][focused+1]
+    ---@type table<integer, table<integer, table<integer, string>>>
+    local diag_hl_map = {
+      [1] = {
+        { "%#MiniTablineDiagErrorHid#", "%#MiniTablineDiagError#" },
+        { "%#MiniTablineDiagModifiedErrorHid#", "%#MiniTablineDiagModifiedError#" },
+      },
+      [2] = {
+        { "%#MiniTablineDiagWarnHid#", "%#MiniTablineDiagWarn#" },
+        { "%#MiniTablineDiagModifiedWarnHid#", "%#MiniTablineDiagModifiedWarn#" },
+      },
+    }
 
     -- tabline
     local function make_tabline()
@@ -298,29 +299,34 @@ vim.api.nvim_create_autocmd("VimEnter", {
         local visible = visible_bufs[b] and not focused
         local modified = api.nvim_get_option_value("modified", { buf = b })
 
+        ---@type string?
+        local hl
         local diags = vim.diagnostic.get(b)
-        local errors, warnings = 0, 0
-        for _, d in ipairs(diags) do
-          if d.severity == 1 then
-            errors = errors + 1
-          elseif d.severity == 2 then
-            warnings = warnings + 1
+        if #diags > 0 then
+          ---@type vim.Diagnostic
+          local top
+          for _, d in ipairs(diags) do
+            if not top or d.severity < top.severity then
+              top = d
+              if top.severity == 1 then
+                break
+              end
+            end
+          end
+          local diag_entry = diag_hl_map[top.severity] ---@type table?
+          if diag_entry then
+            hl = diag_entry[modified and 2 or 1][focused and 2 or 1]
           end
         end
 
-        local hl
-        if errors > 0 then
-          hl = modified and (focused and "%#MiniTablineDiagModifiedError#" or "%#MiniTablineDiagModifiedErrorHid#")
-            or (focused and "%#MiniTablineDiagError#" or "%#MiniTablineDiagErrorHid#")
-        elseif warnings > 0 then
-          hl = modified and (focused and "%#MiniTablineDiagModifiedWarn#" or "%#MiniTablineDiagModifiedWarnHid#")
-            or (focused and "%#MiniTablineDiagWarn#" or "%#MiniTablineDiagWarnHid#")
-        elseif modified then
-          hl = focused and "%#MiniTablineModifiedCurrent#"
-            or visible and "%#MiniTablineModifiedVisible#"
-            or "%#MiniTablineModifiedHidden#"
-        else
-          hl = focused and "%#MiniTablineCurrent#" or visible and "%#MiniTablineVisible#" or "%#MiniTablineHidden#"
+        if not hl then
+          if modified then
+            hl = focused and "%#MiniTablineModifiedCurrent#"
+              or visible and "%#MiniTablineModifiedVisible#"
+              or "%#MiniTablineModifiedHidden#"
+          else
+            hl = focused and "%#MiniTablineCurrent#" or visible and "%#MiniTablineVisible#" or "%#MiniTablineHidden#"
+          end
         end
 
         tabs[#tabs + 1] = { str = hl .. label, w = w, focused = focused }
