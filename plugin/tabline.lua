@@ -70,9 +70,9 @@ api.nvim_create_autocmd("BufEnter", {
       if buf_lookup[b] then
         return
       end
-
       buf_order[#buf_order + 1] = b
       buf_lookup[b] = true
+      vim.cmd.redrawtabline()
     end)
   end,
 })
@@ -207,6 +207,10 @@ function _G.make_tabline()
     total_w = total_w + w
   end
 
+  focus_idx = math.max(1, math.min(focus_idx, #tabs))
+  if #tabs == 0 then
+    return sidebar .. "%#MiniTablineFill#"
+  end
   local result_tabs = tabs
   if total_w > avail then
     local kept = { tabs[focus_idx] }
@@ -342,6 +346,37 @@ local function move_tab_end()
   end
 end
 
+local function buf_delete(bufnr, force)
+  bufnr = bufnr == 0 and api.nvim_get_current_buf() or bufnr
+
+  local switch_target
+  for _, b in ipairs(buf_order) do
+    if b ~= bufnr and api.nvim_buf_is_valid(b) then
+      if b < bufnr then
+        switch_target = b
+      end
+      if b > bufnr and switch_target == nil then
+        switch_target = b
+        break
+      end
+    end
+  end
+  if not switch_target then
+    switch_target = api.nvim_create_buf(true, false)
+  end
+
+  -- switch all windows showing this buffer
+  for _, win in ipairs(api.nvim_list_wins()) do
+    if api.nvim_win_get_buf(win) == bufnr then
+      api.nvim_win_set_buf(win, switch_target)
+    end
+  end
+
+  if api.nvim_buf_is_valid(bufnr) then
+    api.nvim_buf_delete(bufnr, { force = force })
+  end
+end
+
 vim.keymap.set("n", "<home>", prev_tab, { silent = true })
 vim.keymap.set("n", "<end>", next_tab, { silent = true })
 vim.keymap.set("n", "<s-home>", move_to_begin, { silent = true })
@@ -350,32 +385,6 @@ vim.keymap.set("n", "<c-home>", move_tab_left, { silent = true })
 vim.keymap.set("n", "<c-end>", move_tab_right, { silent = true })
 vim.keymap.set("n", "<c-s-home>", move_tab_begin, { silent = true })
 vim.keymap.set("n", "<c-s-end>", move_tab_end, { silent = true })
-
-local function buf_delete(bufnr, force)
-  bufnr = bufnr or api.nvim_get_current_buf()
-  local win = fn.bufwinid(bufnr)
-  if win ~= -1 then
-    local switch_target
-    for _, b in ipairs(buf_order) do
-      if b ~= bufnr and api.nvim_buf_is_valid(b) then
-        if b < bufnr then
-          switch_target = b
-        end
-        if b > bufnr and switch_target == nil then
-          switch_target = b
-          break
-        end
-      end
-    end
-    if not switch_target then
-      switch_target = api.nvim_create_buf(false, true)
-    end
-    api.nvim_win_set_buf(win, switch_target)
-  end
-  if api.nvim_buf_is_valid(bufnr) then
-    api.nvim_buf_delete(bufnr, { force = force })
-  end
-end
 
 vim.keymap.set("n", "<c-w>", function()
   buf_delete(0, false)
