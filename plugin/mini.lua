@@ -251,7 +251,6 @@ vim.api.nvim_create_autocmd("VimEnter", {
       end,
     })
 
-    -- ======== TABLINE ========
     local nvim_tree_view = require("nvim-tree.view")
     local explorer_label = "Explorer"
     local explorer_label_len = strwidth(explorer_label)
@@ -259,40 +258,28 @@ vim.api.nvim_create_autocmd("VimEnter", {
     local function make_tabline()
       local cur_win = api.nvim_get_current_win()
       local cur_buf = api.nvim_get_current_buf()
-      -- if not bo[cur_buf].buflisted then
-      --   cur_buf = last_focus_buf
-      -- else
-      --   last_focus_buf = cur_buf
-      -- end
-
-      -- Sidebar
-      local sidebar, sidebar_width = "", 0
-      local tree_winnr = nvim_tree_view.get_winnr()
-      if tree_winnr then
-        sidebar_width = api.nvim_win_get_width(tree_winnr)
-        local pad = floor((sidebar_width - explorer_label_len) / 2)
-        pad = math.max(0, pad)
-        local right_pad = math.max(0, sidebar_width - explorer_label_len - 2 * pad - 1)
-        local spaces = string.rep(" ", pad)
-        local sidebar_hl = (cur_win == tree_winnr) and "MiniTablineSidebarLabelFocused"
-          or "MiniTablineSidebarLabelHidden"
-        sidebar = "%#"
-          .. sidebar_hl
-          .. "#"
-          .. spaces
-          .. explorer_label
-          .. spaces
-          .. string.rep(" ", right_pad)
-          .. "%#MiniTablineSidebarSep#│"
+      if not bo[cur_buf].buflisted then
+        cur_buf = last_focus_buf
+      else
+        last_focus_buf = cur_buf
       end
 
-      -- Tabs
+      local sidebar, sidebar_width = "", 0
+      local tree_winnr = nvim_tree_view.get_winnr() --[[@as integer?]]
+      if tree_winnr then
+        sidebar_width = api.nvim_win_get_width(tree_winnr)
+        local pad = math.max(0, floor((sidebar_width - explorer_label_len) / 2))
+        local spaces = string.rep(" ", pad)
+        local sidebar_hl = (cur_win == tree_winnr) and "%#MiniTablineSidebarLabelFocused#"
+          or "%#MiniTablineSidebarLabelHidden#"
+        sidebar = sidebar_hl .. spaces .. explorer_label .. spaces .. "%#MiniTablineSidebarSep#│"
+      end
+
       local tabs, total_w, visible_bufs = {}, 0, {}
       for _, w in ipairs(api.nvim_list_wins()) do
         visible_bufs[api.nvim_win_get_buf(w)] = true
       end
 
-      -- Make names unique (unique prefix per mini's approach)
       local names = {}
       for _, b in ipairs(buf_order) do
         local name = api.nvim_buf_get_name(b)
@@ -395,7 +382,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
       end
       local i = get_current_index()
       if i < #buf_order then
-        api.nvim_set_current_buf(buf_order[i + 1])
+        api.nvim_set_current_buf(buf_order[i + 1] --[[@as integer]])
       end
     end
 
@@ -405,7 +392,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
       end
       local i = get_current_index()
       if i > 1 then
-        api.nvim_set_current_buf(buf_order[i - 1])
+        api.nvim_set_current_buf(buf_order[i - 1] --[[@as integer]])
       end
     end
 
@@ -413,14 +400,14 @@ vim.api.nvim_create_autocmd("VimEnter", {
       if is_nvim_tree() then
         return
       end
-      api.nvim_set_current_buf(buf_order[1])
+      api.nvim_set_current_buf(buf_order[1] --[[@as integer]])
     end
 
     local function move_to_end()
       if is_nvim_tree() then
         return
       end
-      api.nvim_set_current_buf(buf_order[#buf_order])
+      api.nvim_set_current_buf(buf_order[#buf_order] --[[@as integer]])
     end
 
     local function swap(i, j)
