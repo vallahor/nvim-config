@@ -192,13 +192,10 @@ vim.api.nvim_create_autocmd("VimEnter", {
       end
     end
 
-    local last_focus_buf = buf_order[1] or api.nvim_get_current_buf()
-
     api.nvim_create_autocmd("BufEnter", {
       callback = function()
         local b = api.nvim_get_current_buf()
         if bo[b].buflisted then
-          last_focus_buf = b
           if not buf_lookup[b] then
             buf_order[#buf_order + 1] = b
             buf_lookup[b] = true
@@ -238,6 +235,16 @@ vim.api.nvim_create_autocmd("VimEnter", {
       end
     end
 
+    local cached_pad = -1
+    local cached_spaces = ""
+    local function spaces(n)
+      if cached_pad ~= n then
+        cached_pad = n
+        cached_spaces = string.rep(" ", n)
+      end
+      return cached_spaces
+    end
+
     -- nvim_tree
     local nvim_tree_view = require("nvim-tree.view")
     local explorer_label = "Explorer"
@@ -256,6 +263,9 @@ vim.api.nvim_create_autocmd("VimEnter", {
       },
     }
 
+    local focus_idx = 1
+    local diag_filter = { severity = { min = vim.diagnostic.severity.WARN, max = vim.diagnostic.severity.ERROR } }
+
     -- tabline
     local function make_tabline()
       local cur_win = api.nvim_get_current_win()
@@ -270,8 +280,8 @@ vim.api.nvim_create_autocmd("VimEnter", {
         sidebar_width = api.nvim_win_get_width(tree_winnr)
         local pad = math.max(0, floor((sidebar_width - explorer_label_len) / 2))
         local sidebar_hl = in_tree and "%#MiniTablineSidebarLabelFocused#" or "%#MiniTablineSidebarLabelHidden#"
-        local spaces = string.rep(" ", pad)
-        sidebar = sidebar_hl .. spaces .. explorer_label .. spaces .. "%#MiniTablineSidebarSep#│"
+        local pad_spaces = spaces(pad)
+        sidebar = sidebar_hl .. pad_spaces .. explorer_label .. pad_spaces .. "%#MiniTablineSidebarSep#│"
       end
 
       -- Names
@@ -292,19 +302,16 @@ vim.api.nvim_create_autocmd("VimEnter", {
       local tabs = {}
       local total_w = 0
 
-      for _, b in ipairs(buf_order) do
+      for i, b in ipairs(buf_order) do
         local label = " " .. names[b] .. " "
         local w = strwidth(label)
         local focused = b == cur_buf
         local visible = visible_bufs[b] and not focused
-        local modified = api.nvim_get_option_value("modified", { buf = b })
+        local modified = bo[b].modified
 
         ---@type string?
         local hl
-        local counts = vim.diagnostic.count(
-          b,
-          { severity = { min = vim.diagnostic.severity.WARN, max = vim.diagnostic.severity.ERROR } }
-        )
+        local counts = vim.diagnostic.count(b, diag_filter)
         local sev = (counts[1] and counts[1] > 0) and 1 or (counts[2] and counts[2] > 0) and 2
         if sev then
           hl = diag_hl_map[sev][modified and 2 or 1][focused and 2 or 1]
@@ -318,17 +325,11 @@ vim.api.nvim_create_autocmd("VimEnter", {
           end
         end
 
-        tabs[#tabs + 1] = { str = hl .. label, w = w, focused = focused }
-        total_w = total_w + w
-      end
-
-      -- Centered truncation
-      local focus_idx = 1
-      for i, t in ipairs(tabs) do
-        if t.focused then
+        if focused then
           focus_idx = i
-          break
         end
+        tabs[#tabs + 1] = { str = hl .. label, w = w }
+        total_w = total_w + w
       end
 
       local result_tabs = tabs
