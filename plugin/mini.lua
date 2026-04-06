@@ -292,12 +292,31 @@ vim.api.nvim_create_autocmd("VimEnter", {
         visible_bufs[api.nvim_win_get_buf(w)] = true
       end
 
+      -- Make names unique (unique prefix per mini's approach)
+      local names = {}
       for _, b in ipairs(buf_order) do
         local name = api.nvim_buf_get_name(b)
-        if name == "" then
-          name = "[No Name]"
+        names[b] = name ~= "" and fnamemodify(name, ":t") or "[No Name]"
+      end
+
+      local function make_unique(buflist, namemap)
+        local counts = {}
+        for _, b in ipairs(buflist) do
+          local n = namemap[b]
+          counts[n] = (counts[n] or 0) + 1
         end
-        local label = " " .. fnamemodify(name, ":t") .. " "
+        for _, b in ipairs(buflist) do
+          local n = namemap[b]
+          if counts[n] > 1 then
+            local full = api.nvim_buf_get_name(b)
+            namemap[b] = fnamemodify(full, ":~:."):gsub("^%./", "")
+          end
+        end
+      end
+      make_unique(buf_order, names)
+
+      for _, b in ipairs(buf_order) do
+        local label = " " .. names[b] .. " "
         local focused = b == cur_buf
         local visible = visible_bufs[b] and not focused
         local modified = api.nvim_get_option_value("modified", { buf = b })
