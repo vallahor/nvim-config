@@ -56,6 +56,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
             return "#191319"
           end,
         },
+
         {
           text = " ",
           bg = function(buffer)

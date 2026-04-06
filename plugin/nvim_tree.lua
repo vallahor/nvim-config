@@ -89,6 +89,19 @@ require("nvim-tree").setup({
       enable = true,
     },
     icons = {
+      web_devicons = {
+        folder = { enable = true, color = true },
+      },
+      glyphs = {
+        folder = {
+          default = "",
+          open = "",
+          empty = "",
+          empty_open = "",
+          symlink = "",
+          symlink_open = "",
+        },
+      },
       show = {
         git = false,
         folder_arrow = false,
