@@ -301,25 +301,14 @@ vim.api.nvim_create_autocmd("VimEnter", {
 
         ---@type string?
         local hl
-        local diags = vim.diagnostic.get(b)
-        if #diags > 0 then
-          ---@type vim.Diagnostic
-          local top
-          for _, d in ipairs(diags) do
-            if not top or d.severity < top.severity then
-              top = d
-              if top.severity == 1 then
-                break
-              end
-            end
-          end
-          local diag_entry = diag_hl_map[top.severity] ---@type table?
-          if diag_entry then
-            hl = diag_entry[modified and 2 or 1][focused and 2 or 1]
-          end
-        end
-
-        if not hl then
+        local counts = vim.diagnostic.count(
+          b,
+          { severity = { min = vim.diagnostic.severity.WARN, max = vim.diagnostic.severity.ERROR } }
+        )
+        local sev = (counts[1] and counts[1] > 0) and 1 or (counts[2] and counts[2] > 0) and 2
+        if sev then
+          hl = diag_hl_map[sev][modified and 2 or 1][focused and 2 or 1]
+        else
           if modified then
             hl = focused and "%#MiniTablineModifiedCurrent#"
               or visible and "%#MiniTablineModifiedVisible#"
