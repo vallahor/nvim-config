@@ -149,45 +149,36 @@ vim.api.nvim_create_autocmd("VimEnter", {
       return n and string.format("#%06x", n)
     end
 
-    local hl_colors = {
-      Normal = get_hex("Normal", "fg"),
-      WinSeparator = get_hex("WinSeparator", "fg"),
-      DiagnosticError = get_hex("DiagnosticError", "fg"),
-      DiagnosticWarn = get_hex("DiagnosticWarn", "fg"),
-      dim_fg = "#7e706c",
-      focused_bg = "#3f303f",
-      hidden_bg = "#191319",
-    }
-
-    local hl_defs = {
-      { "MiniTablineCurrent", { fg = hl_colors.Normal, bg = hl_colors.focused_bg } },
-      { "MiniTablineVisible", { fg = hl_colors.dim_fg, bg = hl_colors.hidden_bg } },
-      { "MiniTablineHidden", { fg = hl_colors.dim_fg, bg = hl_colors.hidden_bg } },
-      { "MiniTablineModifiedCurrent", { fg = hl_colors.Normal, bg = hl_colors.focused_bg, italic = true } },
-      { "MiniTablineModifiedVisible", { fg = hl_colors.dim_fg, bg = hl_colors.hidden_bg, italic = true } },
-      { "MiniTablineModifiedHidden", { fg = hl_colors.dim_fg, bg = hl_colors.hidden_bg, italic = true } },
-      { "MiniTablineFill", { bg = hl_colors.hidden_bg } },
-      { "MiniTablineSidebarLabelFocused", { fg = hl_colors.Normal, bg = hl_colors.focused_bg } },
-      { "MiniTablineSidebarLabelHidden", { fg = hl_colors.Normal, bg = hl_colors.hidden_bg } },
-      { "MiniTablineSidebarSep", { fg = hl_colors.WinSeparator, bg = hl_colors.hidden_bg } },
-      { "MiniTablineDiagError", { fg = hl_colors.DiagnosticError, bg = hl_colors.focused_bg } },
-      { "MiniTablineDiagErrorHid", { fg = hl_colors.DiagnosticError, bg = hl_colors.hidden_bg } },
-      { "MiniTablineDiagWarn", { fg = hl_colors.DiagnosticWarn, bg = hl_colors.focused_bg } },
-      { "MiniTablineDiagWarnHid", { fg = hl_colors.DiagnosticWarn, bg = hl_colors.hidden_bg } },
-      { "MiniTablineDiagModifiedError", { fg = hl_colors.DiagnosticError, bg = hl_colors.focused_bg, italic = true } },
-      {
-        "MiniTablineDiagModifiedErrorHid",
-        { fg = hl_colors.DiagnosticError, bg = hl_colors.hidden_bg, italic = true },
-      },
-      { "MiniTablineDiagModifiedWarn", { fg = hl_colors.DiagnosticWarn, bg = hl_colors.focused_bg, italic = true } },
-      { "MiniTablineDiagModifiedWarnHid", { fg = hl_colors.DiagnosticWarn, bg = hl_colors.hidden_bg, italic = true } },
-    }
+    local dim_fg = "#7e706c"
+    local focused_bg = "#3f303f"
+    local hidden_bg = "#191319"
 
     local function set_hls()
-      for _, v in ipairs(hl_defs) do
-        api.nvim_set_hl(0, v[1], v[2])
-      end
+      local normal_fg = get_hex("Normal", "fg")
+      local win_sep_fg = get_hex("WinSeparator", "fg")
+      local errors_fg = get_hex("DiagnosticError", "fg")
+      local warning_fg = get_hex("DiagnosticWarn", "fg")
+      local hl = api.nvim_set_hl
+      hl(0, "MiniTablineCurrent", { fg = normal_fg, bg = focused_bg })
+      hl(0, "MiniTablineVisible", { fg = dim_fg, bg = hidden_bg })
+      hl(0, "MiniTablineHidden", { fg = dim_fg, bg = hidden_bg })
+      hl(0, "MiniTablineModifiedCurrent", { fg = normal_fg, bg = focused_bg, italic = true })
+      hl(0, "MiniTablineModifiedVisible", { fg = dim_fg, bg = hidden_bg, italic = true })
+      hl(0, "MiniTablineModifiedHidden", { fg = dim_fg, bg = hidden_bg, italic = true })
+      hl(0, "MiniTablineFill", { bg = hidden_bg })
+      hl(0, "MiniTablineSidebarLabelFocused", { fg = normal_fg, bg = focused_bg })
+      hl(0, "MiniTablineSidebarLabelHidden", { fg = normal_fg, bg = hidden_bg })
+      hl(0, "MiniTablineSidebarSep", { fg = win_sep_fg, bg = hidden_bg })
+      hl(0, "MiniTablineDiagError", { fg = errors_fg, bg = focused_bg })
+      hl(0, "MiniTablineDiagErrorHid", { fg = errors_fg, bg = hidden_bg })
+      hl(0, "MiniTablineDiagWarn", { fg = warning_fg, bg = focused_bg })
+      hl(0, "MiniTablineDiagWarnHid", { fg = warning_fg, bg = hidden_bg })
+      hl(0, "MiniTablineDiagModifiedError", { fg = errors_fg, bg = focused_bg, italic = true })
+      hl(0, "MiniTablineDiagModifiedErrorHid", { fg = errors_fg, bg = hidden_bg, italic = true })
+      hl(0, "MiniTablineDiagModifiedWarn", { fg = warning_fg, bg = focused_bg, italic = true })
+      hl(0, "MiniTablineDiagModifiedWarnHid", { fg = warning_fg, bg = hidden_bg, italic = true })
     end
+
     set_hls()
     api.nvim_create_autocmd("ColorScheme", { callback = set_hls })
 
@@ -198,123 +189,145 @@ vim.api.nvim_create_autocmd("VimEnter", {
       buf_order = {}
       buf_lookup = {}
       for _, b in ipairs(api.nvim_list_bufs()) do
-        if bo[b].buflisted and api.nvim_buf_get_name(b) ~= "[No Name]" then
+        if bo[b].buflisted then
           buf_order[#buf_order + 1] = b
           buf_lookup[b] = true
         end
       end
-      if #buf_order == 0 then
-        local b = api.nvim_create_buf(true, false)
-        api.nvim_buf_set_name(b, "[No Name]")
-        buf_order[1] = b
-        buf_lookup[b] = true
-        api.nvim_set_current_buf(b)
-      end
     end
 
     rebuild_buf_order()
-    local last_focus_buf = buf_order[1]
 
-    api.nvim_create_autocmd({ "BufDelete" }, {
-      callback = function(args)
-        local deleted = tonumber(args.buf)
-        if buf_lookup[deleted] then
-          buf_lookup[deleted] = nil
-          for i, b in ipairs(buf_order) do
-            if b == deleted then
-              table.remove(buf_order, i)
-              break
-            end
+    local last_focus_buf = buf_order[1] or api.nvim_get_current_buf()
+
+    api.nvim_create_autocmd("BufEnter", {
+      callback = function()
+        local b = api.nvim_get_current_buf()
+        if bo[b].buflisted then
+          last_focus_buf = b
+          if not buf_lookup[b] then
+            buf_order[#buf_order + 1] = b
+            buf_lookup[b] = true
+            vim.cmd.redrawtabline()
           end
         end
-        if last_focus_buf == deleted and #buf_order > 0 then
-          last_focus_buf = buf_order[1]
-          api.nvim_set_current_buf(last_focus_buf)
-        end
-        vim.cmd("redrawtabline")
       end,
     })
 
-    api.nvim_create_autocmd({ "BufAdd" }, {
+    api.nvim_create_autocmd("BufDelete", {
       callback = function(args)
-        local added = tonumber(args.buf)
-        if not bo[added].buflisted then
+        local deleted = tonumber(args.buf) --[[@as integer]]
+        if not buf_lookup[deleted] then
           return
         end
-        if buf_lookup[added] then
-          return
+        buf_lookup[deleted] = nil
+        for i, b in ipairs(buf_order) do
+          if b == deleted then
+            table.remove(buf_order, i)
+            break
+          end
         end
-
-        buf_order[#buf_order + 1] = added
-        buf_lookup[added] = true
-        vim.cmd("redrawtabline")
+        if last_focus_buf == deleted then
+          last_focus_buf = buf_order[1] or api.nvim_get_current_buf()
+          if api.nvim_buf_is_valid(last_focus_buf) then
+            api.nvim_set_current_buf(last_focus_buf)
+          end
+        end
+        vim.cmd.redrawtabline()
       end,
     })
 
+    -- make unique names (add parent dir to differ equal filenames)
+    local function make_unique(namemap)
+      local counts = {}
+      for _, n in pairs(namemap) do
+        counts[n] = (counts[n] or 0) + 1
+      end
+      for b, n in pairs(namemap) do
+        if counts[n] > 1 then
+          namemap[b] = fnamemodify(api.nvim_buf_get_name(b), ":~:."):gsub("^%./", "")
+        end
+      end
+    end
+
+    -- nvim_tree
     local nvim_tree_view = require("nvim-tree.view")
     local explorer_label = "Explorer"
     local explorer_label_len = strwidth(explorer_label)
 
+    -- tabline
     local function make_tabline()
       local cur_win = api.nvim_get_current_win()
-      local cur_buf = api.nvim_get_current_buf()
-      if not bo[cur_buf].buflisted then
-        cur_buf = last_focus_buf
-      else
-        last_focus_buf = cur_buf
-      end
-
-      local sidebar, sidebar_width = "", 0
       local tree_winnr = nvim_tree_view.get_winnr() --[[@as integer?]]
+      local in_tree = tree_winnr ~= nil and cur_win == tree_winnr
+      local cur_buf = in_tree and -1 or api.nvim_get_current_buf()
+
+      -- Sidebar
+      local sidebar = ""
+      local sidebar_width = 0
       if tree_winnr then
         sidebar_width = api.nvim_win_get_width(tree_winnr)
         local pad = math.max(0, floor((sidebar_width - explorer_label_len) / 2))
+        local sidebar_hl = in_tree and "%#MiniTablineSidebarLabelFocused#" or "%#MiniTablineSidebarLabelHidden#"
         local spaces = string.rep(" ", pad)
-        local sidebar_hl = (cur_win == tree_winnr) and "%#MiniTablineSidebarLabelFocused#"
-          or "%#MiniTablineSidebarLabelHidden#"
         sidebar = sidebar_hl .. spaces .. explorer_label .. spaces .. "%#MiniTablineSidebarSep#│"
       end
 
-      local tabs, total_w, visible_bufs = {}, 0, {}
-      for _, w in ipairs(api.nvim_list_wins()) do
-        visible_bufs[api.nvim_win_get_buf(w)] = true
-      end
-
+      -- Names
       local names = {}
       for _, b in ipairs(buf_order) do
         local name = api.nvim_buf_get_name(b)
         names[b] = name ~= "" and fnamemodify(name, ":t") or "[No Name]"
       end
+      make_unique(names)
 
-      local function make_unique(buflist, namemap)
-        local counts = {}
-        for _, b in ipairs(buflist) do
-          local n = namemap[b]
-          counts[n] = (counts[n] or 0) + 1
-        end
-        for _, b in ipairs(buflist) do
-          local n = namemap[b]
-          if counts[n] > 1 then
-            local full = api.nvim_buf_get_name(b)
-            namemap[b] = fnamemodify(full, ":~:."):gsub("^%./", "")
-          end
-        end
+      -- Visible windows
+      local visible_bufs = {}
+      for _, w in ipairs(api.nvim_list_wins()) do
+        visible_bufs[api.nvim_win_get_buf(w)] = true
       end
-      make_unique(buf_order, names)
+
+      local avail = vim.o.columns - sidebar_width - (tree_winnr and 1 or 0)
+      local tabs = {}
+      local total_w = 0
 
       for _, b in ipairs(buf_order) do
         local label = " " .. names[b] .. " "
+        local w = strwidth(label)
         local focused = b == cur_buf
         local visible = visible_bufs[b] and not focused
         local modified = api.nvim_get_option_value("modified", { buf = b })
-        local hl = modified
-            and (focused and "%#MiniTablineModifiedCurrent#" or visible and "%#MiniTablineModifiedVisible#" or "%#MiniTablineModifiedHidden#")
-          or (focused and "%#MiniTablineCurrent#" or visible and "%#MiniTablineVisible#" or "%#MiniTablineHidden#")
-        tabs[#tabs + 1] = { str = hl .. label, w = strwidth(label), focused = focused }
-        total_w = total_w + strwidth(label)
+
+        local diags = vim.diagnostic.get(b)
+        local errors, warnings = 0, 0
+        for _, d in ipairs(diags) do
+          if d.severity == 1 then
+            errors = errors + 1
+          elseif d.severity == 2 then
+            warnings = warnings + 1
+          end
+        end
+
+        local hl
+        if errors > 0 then
+          hl = modified and (focused and "%#MiniTablineDiagModifiedError#" or "%#MiniTablineDiagModifiedErrorHid#")
+            or (focused and "%#MiniTablineDiagError#" or "%#MiniTablineDiagErrorHid#")
+        elseif warnings > 0 then
+          hl = modified and (focused and "%#MiniTablineDiagModifiedWarn#" or "%#MiniTablineDiagModifiedWarnHid#")
+            or (focused and "%#MiniTablineDiagWarn#" or "%#MiniTablineDiagWarnHid#")
+        elseif modified then
+          hl = focused and "%#MiniTablineModifiedCurrent#"
+            or visible and "%#MiniTablineModifiedVisible#"
+            or "%#MiniTablineModifiedHidden#"
+        else
+          hl = focused and "%#MiniTablineCurrent#" or visible and "%#MiniTablineVisible#" or "%#MiniTablineHidden#"
+        end
+
+        tabs[#tabs + 1] = { str = hl .. label, w = w, focused = focused }
+        total_w = total_w + w
       end
 
-      local avail = vim.o.columns - sidebar_width
+      -- Centered truncation
       local focus_idx = 1
       for i, t in ipairs(tabs) do
         if t.focused then
@@ -325,17 +338,18 @@ vim.api.nvim_create_autocmd("VimEnter", {
 
       local result_tabs = tabs
       if total_w > avail then
-        local kept, w = { tabs[focus_idx] }, tabs[focus_idx].w
+        local kept = { tabs[focus_idx] }
+        local w = tabs[focus_idx].w
         local lo, hi = focus_idx - 1, focus_idx + 1
         while true do
           local added = false
-          if hi <= #tabs and w + tabs[hi].w <= avail - 1 then
+          if hi <= #tabs and w + tabs[hi].w <= avail then
             w = w + tabs[hi].w
             kept[#kept + 1] = tabs[hi]
             hi = hi + 1
             added = true
           end
-          if lo >= 1 and w + tabs[lo].w <= avail - 1 then
+          if lo >= 1 and w + tabs[lo].w <= avail then
             w = w + tabs[lo].w
             table.insert(kept, 1, tabs[lo])
             lo = lo - 1
@@ -348,11 +362,12 @@ vim.api.nvim_create_autocmd("VimEnter", {
         result_tabs = kept
       end
 
-      return sidebar
-        .. table.concat(vim.tbl_map(function(t)
-          return t.str
-        end, result_tabs))
-        .. "%#MiniTablineFill#"
+      local parts = { sidebar }
+      for _, t in ipairs(result_tabs) do
+        parts[#parts + 1] = t.str
+      end
+      parts[#parts + 1] = "%#MiniTablineFill#"
+      return table.concat(parts)
     end
 
     require("mini.tabline").setup({ show_icons = false })
@@ -360,10 +375,9 @@ vim.api.nvim_create_autocmd("VimEnter", {
     vim.opt.tabline = "%!v:lua.MiniTabline.make_tabline_string()"
     vim.opt.showtabline = 2
 
+    -- navigation
     local function is_nvim_tree()
-      local w = api.nvim_get_current_win()
-      local tree_winnr = nvim_tree_view.get_winnr()
-      return w == tree_winnr
+      return api.nvim_get_current_win() == nvim_tree_view.get_winnr()
     end
 
     local function get_current_index()
@@ -376,16 +390,6 @@ vim.api.nvim_create_autocmd("VimEnter", {
       return 1
     end
 
-    local function next_tab()
-      if is_nvim_tree() then
-        return
-      end
-      local i = get_current_index()
-      if i < #buf_order then
-        api.nvim_set_current_buf(buf_order[i + 1] --[[@as integer]])
-      end
-    end
-
     local function prev_tab()
       if is_nvim_tree() then
         return
@@ -393,6 +397,16 @@ vim.api.nvim_create_autocmd("VimEnter", {
       local i = get_current_index()
       if i > 1 then
         api.nvim_set_current_buf(buf_order[i - 1] --[[@as integer]])
+      end
+    end
+
+    local function next_tab()
+      if is_nvim_tree() then
+        return
+      end
+      local i = get_current_index()
+      if i < #buf_order then
+        api.nvim_set_current_buf(buf_order[i + 1] --[[@as integer]])
       end
     end
 
@@ -412,7 +426,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
 
     local function swap(i, j)
       buf_order[i], buf_order[j] = buf_order[j], buf_order[i]
-      vim.cmd("redrawtabline")
+      vim.cmd.redrawtabline()
     end
 
     local function move_tab_left()
@@ -441,10 +455,9 @@ vim.api.nvim_create_autocmd("VimEnter", {
       end
       local i = get_current_index()
       if i > 1 then
-        local b = buf_order[i]
-        table.remove(buf_order, i)
+        local b = table.remove(buf_order, i)
         table.insert(buf_order, 1, b)
-        vim.cmd("redrawtabline")
+        vim.cmd.redrawtabline()
       end
     end
 
@@ -454,14 +467,12 @@ vim.api.nvim_create_autocmd("VimEnter", {
       end
       local i = get_current_index()
       if i < #buf_order then
-        local b = buf_order[i]
-        table.remove(buf_order, i)
-        table.insert(buf_order, b)
-        vim.cmd("redrawtabline")
+        local b = table.remove(buf_order, i)
+        buf_order[#buf_order + 1] = b
+        vim.cmd.redrawtabline()
       end
     end
 
-    -- Keymaps
     vim.keymap.set("n", "<home>", prev_tab, { silent = true })
     vim.keymap.set("n", "<end>", next_tab, { silent = true })
     vim.keymap.set("n", "<s-home>", move_to_begin, { silent = true })
