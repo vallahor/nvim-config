@@ -16,8 +16,8 @@ vim.keymap.set({ "n", "v" }, "<s-down>", sb.down)
 vim.keymap.set({ "n", "v" }, "<s-up>", sb.up)
 vim.keymap.set({ "n", "v" }, "<s-right>", sb.right)
 
-vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead", "BufEnter", "BufWinEnter" }, {
-  pattern = "*.gd",
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "godot", "gdresource", "gdshader" },
   callback = function()
     vim.opt_local.expandtab = false
     vim.cmd([[
