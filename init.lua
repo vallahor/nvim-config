@@ -595,9 +595,12 @@ function _G.StatusColumn()
     if state and state.in_visual and win == vim.api.nvim_get_current_win() and not state.has_cursors then
       hl = "%#CursorVisualNr#"
     else
-      local diags = vim.diagnostic.get(buf, { lnum = vim.v.lnum - 1 })
-      if #diags > 0 then
-        hl = cursor_diag_hl_map[diags[#diags].severity]
+      local mode = vim.api.nvim_get_mode().mode
+      if mode ~= "i" and mode ~= "ic" and mode ~= "ix" and mode ~= "R" and mode ~= "Rc" then
+        local diags = vim.diagnostic.get(buf, { lnum = vim.v.lnum - 1 })
+        if #diags > 0 then
+          hl = cursor_diag_hl_map[diags[#diags].severity]
+        end
       end
     end
   elseif state and state.in_visual and not state.has_cursors then
