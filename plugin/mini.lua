@@ -221,17 +221,17 @@ vim.api.nvim_create_autocmd("VimEnter", {
           return
         end
         buf_lookup[deleted] = nil
+        local idx
         for i, b in ipairs(buf_order) do
           if b == deleted then
+            idx = i
             table.remove(buf_order, i)
             break
           end
         end
         if last_focus_buf == deleted then
-          last_focus_buf = buf_order[1] or api.nvim_get_current_buf()
-          if api.nvim_buf_is_valid(last_focus_buf) then
-            api.nvim_set_current_buf(last_focus_buf)
-          end
+          local next_idx = math.min(idx or 1, #buf_order)
+          last_focus_buf = buf_order[next_idx] or api.nvim_get_current_buf()
         end
         vim.cmd.redrawtabline()
       end,
