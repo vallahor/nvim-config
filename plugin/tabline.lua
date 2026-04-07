@@ -1,47 +1,6 @@
 local api, fn, bo = vim.api, vim.fn, vim.bo
 local floor, strwidth, fnamemodify = math.floor, fn.strwidth, fn.fnamemodify
 
-local function get_hex(group, attr)
-  local ok, val = pcall(api.nvim_get_hl, 0, { name = group, link = false })
-  if not ok or not val then
-    return
-  end
-  local n = (attr == "fg") and val.fg or val.bg
-  return n and string.format("#%06x", n)
-end
-
-local dim_fg = "#7e706c"
-local focused_bg = "#3f303f"
-local hidden_bg = "#191319"
-
-api.nvim_create_autocmd("ColorScheme", {
-  callback = function()
-    local normal_fg = get_hex("Normal", "fg")
-    local win_sep_fg = get_hex("WinSeparator", "fg")
-    local errors_fg = get_hex("DiagnosticError", "fg")
-    local warning_fg = get_hex("DiagnosticWarn", "fg")
-    local hl = api.nvim_set_hl
-    hl(0, "TablineCurrent", { fg = normal_fg, bg = focused_bg })
-    hl(0, "TablineVisible", { fg = dim_fg, bg = hidden_bg })
-    hl(0, "TablineHidden", { fg = dim_fg, bg = hidden_bg })
-    hl(0, "TablineModifiedCurrent", { fg = normal_fg, bg = focused_bg, italic = true })
-    hl(0, "TablineModifiedVisible", { fg = dim_fg, bg = hidden_bg, italic = true })
-    hl(0, "TablineModifiedHidden", { fg = dim_fg, bg = hidden_bg, italic = true })
-    hl(0, "TablineFill", { bg = hidden_bg })
-    hl(0, "TablineSidebarLabelFocused", { fg = normal_fg, bg = focused_bg })
-    hl(0, "TablineSidebarLabelHidden", { fg = normal_fg, bg = hidden_bg })
-    hl(0, "TablineSidebarSep", { fg = win_sep_fg, bg = hidden_bg })
-    hl(0, "TablineDiagError", { fg = errors_fg, bg = focused_bg })
-    hl(0, "TablineDiagErrorHid", { fg = errors_fg, bg = hidden_bg })
-    hl(0, "TablineDiagWarn", { fg = warning_fg, bg = focused_bg })
-    hl(0, "TablineDiagWarnHid", { fg = warning_fg, bg = hidden_bg })
-    hl(0, "TablineDiagModifiedError", { fg = errors_fg, bg = focused_bg, italic = true })
-    hl(0, "TablineDiagModifiedErrorHid", { fg = errors_fg, bg = hidden_bg, italic = true })
-    hl(0, "TablineDiagModifiedWarn", { fg = warning_fg, bg = focused_bg, italic = true })
-    hl(0, "TablineDiagModifiedWarnHid", { fg = warning_fg, bg = hidden_bg, italic = true })
-  end,
-})
-
 local buf_order = {}
 local buf_lookup = {}
 
@@ -139,46 +98,6 @@ function _G.make_tabline()
     local pad_spaces = spaces(pad)
     sidebar = sidebar_hl .. pad_spaces .. explorer_label .. pad_spaces .. "%#TablineSidebarSep#│"
   end
-
-  -- local names = {}
-  -- local seen = {}
-  --
-  -- for _, b in ipairs(buf_order) do
-  --   local bufname = api.nvim_buf_get_name(b)
-  --   local tail = bufname ~= "" and fnamemodify(bufname, ":t") or "[No Name]"
-  --   local display = " " .. tail .. " "
-  --
-  --   if seen[display] then
-  --     local full_display = " " .. fnamemodify(bufname, ":~:."):gsub("^%./", "") .. " "
-  --     names[b] = { name = full_display, w = strwidth(full_display) }
-  --   else
-  --     names[b] = { name = display, w = strwidth(display) }
-  --     seen[display] = true
-  --   end
-  -- end
-
-  -- local names = {}
-  -- local counts = {}
-  --
-  -- for _, b in ipairs(buf_order) do
-  --   local bufname = api.nvim_buf_get_name(b)
-  --   local tail = bufname ~= "" and fnamemodify(bufname, ":t") or "[No Name]"
-  --   counts[tail] = (counts[tail] or 0) + 1
-  -- end
-  --
-  -- for _, b in ipairs(buf_order) do
-  --   local bufname = api.nvim_buf_get_name(b)
-  --   local tail = bufname ~= "" and fnamemodify(bufname, ":t") or "[No Name]"
-  --
-  --   local display
-  --   if counts[tail] > 1 then
-  --     display = " " .. fnamemodify(bufname, ":~:."):gsub("^%./", "") .. " "
-  --   else
-  --     display = " " .. tail .. " "
-  --   end
-  --
-  --   names[b] = { name = display, w = strwidth(display) }
-  -- end
 
   local names = {}
   local counts = {}
@@ -397,6 +316,7 @@ local function buf_delete(bufnr, force)
   end
 
   buf_lookup[bufnr] = nil
+  buf_index[bufnr] = nil
   table.remove(buf_order, idx)
   update_buf_index()
 
@@ -434,3 +354,44 @@ end, { silent = true })
 vim.keymap.set("n", "<c-x>", function()
   buf_delete(0, true)
 end, { silent = true })
+
+api.nvim_create_autocmd("ColorScheme", {
+  callback = function()
+    local function get_hex(group, attr)
+      local ok, val = pcall(api.nvim_get_hl, 0, { name = group, link = false })
+      if not ok or not val then
+        return
+      end
+      local n = (attr == "fg") and val.fg or val.bg
+      return n and string.format("#%06x", n)
+    end
+
+    local dim_fg = "#7e706c"
+    local focused_bg = "#3f303f"
+    local hidden_bg = "#191319"
+    local normal_fg = get_hex("Normal", "fg")
+    local win_sep_fg = get_hex("WinSeparator", "fg")
+    local errors_fg = get_hex("DiagnosticError", "fg")
+    local warning_fg = get_hex("DiagnosticWarn", "fg")
+
+    local hl = api.nvim_set_hl
+    hl(0, "TablineCurrent", { fg = normal_fg, bg = focused_bg })
+    hl(0, "TablineVisible", { fg = dim_fg, bg = hidden_bg })
+    hl(0, "TablineHidden", { fg = dim_fg, bg = hidden_bg })
+    hl(0, "TablineModifiedCurrent", { fg = normal_fg, bg = focused_bg, italic = true })
+    hl(0, "TablineModifiedVisible", { fg = dim_fg, bg = hidden_bg, italic = true })
+    hl(0, "TablineModifiedHidden", { fg = dim_fg, bg = hidden_bg, italic = true })
+    hl(0, "TablineFill", { bg = hidden_bg })
+    hl(0, "TablineSidebarLabelFocused", { fg = normal_fg, bg = focused_bg })
+    hl(0, "TablineSidebarLabelHidden", { fg = normal_fg, bg = hidden_bg })
+    hl(0, "TablineSidebarSep", { fg = win_sep_fg, bg = hidden_bg })
+    hl(0, "TablineDiagError", { fg = errors_fg, bg = focused_bg })
+    hl(0, "TablineDiagErrorHid", { fg = errors_fg, bg = hidden_bg })
+    hl(0, "TablineDiagWarn", { fg = warning_fg, bg = focused_bg })
+    hl(0, "TablineDiagWarnHid", { fg = warning_fg, bg = hidden_bg })
+    hl(0, "TablineDiagModifiedError", { fg = errors_fg, bg = focused_bg, italic = true })
+    hl(0, "TablineDiagModifiedErrorHid", { fg = errors_fg, bg = hidden_bg, italic = true })
+    hl(0, "TablineDiagModifiedWarn", { fg = warning_fg, bg = focused_bg, italic = true })
+    hl(0, "TablineDiagModifiedWarnHid", { fg = warning_fg, bg = hidden_bg, italic = true })
+  end,
+})
