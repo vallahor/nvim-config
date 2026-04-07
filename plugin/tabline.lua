@@ -174,6 +174,28 @@ function _G.make_tabline()
   --   end
   -- end
 
+  -- local names = {}
+  -- local counts = {}
+  --
+  -- for _, b in ipairs(buf_order) do
+  --   local bufname = api.nvim_buf_get_name(b)
+  --   local tail = bufname ~= "" and fnamemodify(bufname, ":t") or "[No Name]"
+  --   counts[tail] = (counts[tail] or 0) + 1
+  -- end
+  --
+  -- for _, b in ipairs(buf_order) do
+  --   local bufname = api.nvim_buf_get_name(b)
+  --   local tail = bufname ~= "" and fnamemodify(bufname, ":t") or "[No Name]"
+  --
+  --   local display
+  --   if counts[tail] > 1 then
+  --     display = " " .. fnamemodify(bufname, ":~:."):gsub("^%./", "") .. " "
+  --   else
+  --     display = " " .. tail .. " "
+  --   end
+  --
+  --   names[b] = { name = display, w = strwidth(display) }
+  -- end
   local names = {}
   local counts = {}
 
@@ -181,20 +203,18 @@ function _G.make_tabline()
     local bufname = api.nvim_buf_get_name(b)
     local tail = bufname ~= "" and fnamemodify(bufname, ":t") or "[No Name]"
     counts[tail] = (counts[tail] or 0) + 1
+    names[b] = { bufname = bufname, tail = tail }
   end
 
-  for _, b in ipairs(buf_order) do
-    local bufname = api.nvim_buf_get_name(b)
-    local tail = bufname ~= "" and fnamemodify(bufname, ":t") or "[No Name]"
-
+  for _, info in pairs(names) do
     local display
-    if counts[tail] > 1 then
-      display = " " .. fnamemodify(bufname, ":~:."):gsub("^%./", "") .. " "
+    if counts[info.tail] > 1 and info.bufname ~= "" then
+      display = " " .. fnamemodify(info.bufname, ":~:."):gsub("^%./", "") .. " "
     else
-      display = " " .. tail .. " "
+      display = " " .. info.tail .. " "
     end
-
-    names[b] = { name = display, w = strwidth(display) }
+    info.name = display
+    info.w = strwidth(display)
   end
 
   -- Visible windows
@@ -274,7 +294,7 @@ function _G.make_tabline()
     parts[i + 1] = result_tabs[i].str
   end
   parts[n + 2] = "%#MiniTablineFill#"
-  return table.concat(parts)
+  return table.concat(parts, "")
 end
 
 vim.opt.tabline = "%!v:lua.make_tabline()"
@@ -384,13 +404,7 @@ end
 local function buf_delete(bufnr, force)
   bufnr = bufnr == 0 and api.nvim_get_current_buf() or bufnr
 
-  local idx
-  for i, b in ipairs(buf_order) do
-    if b == bufnr then
-      idx = i
-      break
-    end
-  end
+  local idx = buf_index[bufnr]
   if not idx then
     return
   end
@@ -404,17 +418,12 @@ local function buf_delete(bufnr, force)
     fallback = api.nvim_create_buf(true, false)
     buf_order[#buf_order + 1] = fallback
     buf_lookup[fallback] = true
+    update_buf_index()
   end
 
-  local wins = vim.tbl_filter(function(win)
-    return api.nvim_win_get_buf(win) == bufnr
-  end, api.nvim_list_wins())
-
-  if #wins > 0 then
-    for _, win in ipairs(wins) do
-      if api.nvim_win_is_valid(win) and api.nvim_buf_is_valid(fallback) then
-        api.nvim_win_set_buf(win, fallback)
-      end
+  for _, win in ipairs(api.nvim_list_wins()) do
+    if api.nvim_win_get_buf(win) == bufnr and api.nvim_win_is_valid(win) and api.nvim_buf_is_valid(fallback) then
+      api.nvim_win_set_buf(win, fallback)
     end
   end
 
