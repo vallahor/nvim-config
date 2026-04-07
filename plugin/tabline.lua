@@ -338,15 +338,14 @@ function M.buf_delete(bufnr, force)
     ---@type integer?
     local replacement = buf_order[idx] or buf_order[idx - 1]
 
-    if replacement then
-      api.nvim_win_set_buf(win, replacement)
-    else
-      local new = api.nvim_create_buf(true, false)
-      buf_order[#buf_order + 1] = new
-      buf_lookup[new] = true
+    if not replacement then
+      replacement = api.nvim_create_buf(true, false)
+      buf_order[#buf_order + 1] = replacement
+      buf_lookup[replacement] = true
       update_buf_index()
-      api.nvim_win_set_buf(win, new)
     end
+
+    api.nvim_win_set_buf(win, replacement)
   end
 
   if api.nvim_buf_is_valid(bufnr) then
