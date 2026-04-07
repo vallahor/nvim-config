@@ -292,6 +292,24 @@ function M.buf_delete(bufnr, force)
     return
   end
 
+  if not force and bo[bufnr].modified then
+    -- @check if worth it (delete scratch buffer without asking)
+    -- if bo[bufnr].buftype == "" then
+    --   M.buf_delete(bufnr, true)
+    --   return
+    -- end
+    local choice = fn.confirm("Unsaved changes:", "&Save\n&Discard\n&Cancel", 1)
+    if choice == 1 then
+      pcall(api.nvim_buf_call, bufnr, function()
+        vim.cmd.write()
+      end)
+      M.buf_delete(bufnr, true)
+    elseif choice == 2 then
+      M.buf_delete(bufnr, true)
+    end
+    return
+  end
+
   buf_lookup[bufnr] = nil
   buf_index[bufnr] = nil
   diag_cache[bufnr] = nil
@@ -313,7 +331,7 @@ function M.buf_delete(bufnr, force)
   end
 
   if api.nvim_buf_is_valid(bufnr) then
-    api.nvim_buf_delete(bufnr, { force = force })
+    api.nvim_buf_delete(bufnr, { force = true })
   end
 end
 
