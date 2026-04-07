@@ -92,15 +92,9 @@ vim.keymap.set({ "n", "v" }, "<s-s>", function()
   vim.cmd.write({ bang = true, mods = { silent = true } })
 end) -- save file
 
-vim.keymap.set("n", "\\", function()
-  vim.cmd.close()
-end) -- close current window
-vim.keymap.set("n", "|", function()
-  vim.cmd.vsplit()
-end) -- split vertical window
-vim.keymap.set("n", "_", function()
-  vim.cmd.split()
-end) -- split horizontal window
+vim.keymap.set("n", "\\", vim.cmd.close) -- close current window
+vim.keymap.set("n", "|", vim.cmd.vsplit) -- split vertical window
+vim.keymap.set("n", "_", vim.cmd.split) -- split horizontal window
 vim.keymap.set("n", "<c-9>", "<c-w>o") -- close other windows
 vim.keymap.set("n", "<c-8>", "<c-w>r") -- rotate windows
 
