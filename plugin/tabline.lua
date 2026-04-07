@@ -3,10 +3,12 @@ local floor, strwidth, fnamemodify = math.floor, fn.strwidth, fn.fnamemodify
 
 local M = {}
 
+local focus_idx = 1
+local ghost_space = 4
 local buf_order = {}
 local buf_lookup = {}
 local buf_index = {}
-local focus_idx = 1
+local diag_cache = {}
 
 local function update_buf_index()
   for i, b in ipairs(buf_order) do
@@ -79,7 +81,7 @@ local function render_sidebar(tree_winnr, in_tree)
   return hl .. p .. explorer_label .. p .. "%#TablineSidebarSep#│", sidebar_width
 end
 
--- [severity][modified+1][focused+1]
+---@type table<integer, table<integer, table<integer, string>>>
 local diag_hl_map = {
   [1] = {
     { "%#TablineDiagErrorHid#", "%#TablineDiagError#" },
@@ -93,9 +95,14 @@ local diag_hl_map = {
 
 local diag_filter = { severity = { min = vim.diagnostic.severity.WARN, max = vim.diagnostic.severity.ERROR } }
 
+---@return string
 local function resolve_hl(b, focused, visible, modified)
-  local dc = vim.diagnostic.count(b, diag_filter)
-  local sev = (dc[1] and dc[1] > 0) and 1 or (dc[2] and dc[2] > 0) and 2 or nil
+  local cached = diag_cache[b]
+  if not cached then
+    cached = vim.diagnostic.count(b, diag_filter)
+    diag_cache[b] = cached
+  end
+  local sev = (cached[1] and cached[1] > 0) and 1 or (cached[2] and cached[2] > 0) and 2 or nil
   if sev then
     return diag_hl_map[sev][modified and 2 or 1][focused and 2 or 1]
   end
@@ -106,8 +113,6 @@ local function resolve_hl(b, focused, visible, modified)
   end
   return focused and "%#TablineCurrent#" or visible and "%#TablineVisible#" or "%#TablineHidden#"
 end
-
-local ghost_space = 4
 
 local function truncate_tabs(tabs, avail)
   local kept = { tabs[focus_idx] }
@@ -150,7 +155,6 @@ function M.make_tabline()
   local cur_buf = in_tree and -1 or api.nvim_get_current_buf()
 
   local sidebar, sidebar_width = render_sidebar(tree_winnr, in_tree)
-
   local names = resolve_names()
 
   local visible_bufs = {}
@@ -290,6 +294,7 @@ function M.buf_delete(bufnr, force)
 
   buf_lookup[bufnr] = nil
   buf_index[bufnr] = nil
+  diag_cache[bufnr] = nil
   table.remove(buf_order, idx)
   update_buf_index()
 
@@ -328,6 +333,12 @@ local function setup_autocmds()
         update_buf_index()
         vim.cmd.redrawtabline()
       end)
+    end,
+  })
+
+  api.nvim_create_autocmd("DiagnosticChanged", {
+    callback = function(ev)
+      diag_cache[ev.buf] = nil
     end,
   })
 
