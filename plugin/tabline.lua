@@ -101,7 +101,8 @@ local function make_unique(namemap)
     if counts[n] > 1 then
       local fullname = api.nvim_buf_get_name(b)
       if fullname ~= "" then
-        namemap[b] = fnamemodify(fullname, ":~:."):gsub("^%./", "")
+        namemap[b].name = " " .. fnamemodify(fullname, ":~:."):gsub("^%./", "") .. " "
+        namemap[b].w = strwidth(namemap[b].name)
       end
     end
   end
@@ -156,14 +157,45 @@ function _G.make_tabline()
     sidebar = sidebar_hl .. pad_spaces .. explorer_label .. pad_spaces .. "%#MiniTablineSidebarSep#│"
   end
 
-  -- Names
+  -- local names = {}
+  -- local seen = {}
+  --
+  -- for _, b in ipairs(buf_order) do
+  --   local bufname = api.nvim_buf_get_name(b)
+  --   local tail = bufname ~= "" and fnamemodify(bufname, ":t") or "[No Name]"
+  --   local display = " " .. tail .. " "
+  --
+  --   if seen[display] then
+  --     local full_display = " " .. fnamemodify(bufname, ":~:."):gsub("^%./", "") .. " "
+  --     names[b] = { name = full_display, w = strwidth(full_display) }
+  --   else
+  --     names[b] = { name = display, w = strwidth(display) }
+  --     seen[display] = true
+  --   end
+  -- end
+
   local names = {}
+  local counts = {}
+
   for _, b in ipairs(buf_order) do
-    local name = api.nvim_buf_get_name(b)
-    local tail = name ~= "" and fnamemodify(name, ":t") or ""
-    names[b] = tail ~= "" and tail or "[No Name]"
+    local bufname = api.nvim_buf_get_name(b)
+    local tail = bufname ~= "" and fnamemodify(bufname, ":t") or "[No Name]"
+    counts[tail] = (counts[tail] or 0) + 1
   end
-  make_unique(names)
+
+  for _, b in ipairs(buf_order) do
+    local bufname = api.nvim_buf_get_name(b)
+    local tail = bufname ~= "" and fnamemodify(bufname, ":t") or "[No Name]"
+
+    local display
+    if counts[tail] > 1 then
+      display = " " .. fnamemodify(bufname, ":~:."):gsub("^%./", "") .. " "
+    else
+      display = " " .. tail .. " "
+    end
+
+    names[b] = { name = display, w = strwidth(display) }
+  end
 
   -- Visible windows
   local visible_bufs = {}
@@ -176,8 +208,8 @@ function _G.make_tabline()
   local total_w = 0
 
   for i, b in ipairs(buf_order) do
-    local label = " " .. names[b] .. " "
-    local w = strwidth(label)
+    local label = names[b].name
+    local w = names[b].w
     local focused = b == cur_buf
     local visible = visible_bufs[b] and not focused
     local modified = bo[b].modified
