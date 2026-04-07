@@ -53,6 +53,20 @@ for _, b in ipairs(api.nvim_list_bufs()) do
   end
 end
 
+local buf_index = {}
+
+-- Rebuild this whenever buf_order changes
+local function update_buf_index()
+  for i, b in ipairs(buf_order) do
+    buf_index[b] = i
+  end
+end
+
+-- Optimized current buffer lookup
+local function get_current_index()
+  return buf_index[api.nvim_get_current_buf()] or 1
+end
+
 api.nvim_create_autocmd("BufEnter", {
   callback = function()
     local b = api.nvim_get_current_buf()
@@ -72,6 +86,7 @@ api.nvim_create_autocmd("BufEnter", {
       end
       buf_order[#buf_order + 1] = b
       buf_lookup[b] = true
+      update_buf_index()
       vim.cmd.redrawtabline()
     end)
   end,
@@ -220,11 +235,13 @@ function _G.make_tabline()
     result_tabs = kept
   end
 
-  local parts = { sidebar }
-  for _, t in ipairs(result_tabs) do
-    parts[#parts + 1] = t.str
+  local n = #result_tabs
+  local parts = {}
+  parts[1] = sidebar
+  for i = 1, n do
+    parts[i + 1] = result_tabs[i].str
   end
-  parts[#parts + 1] = "%#MiniTablineFill#"
+  parts[n + 2] = "%#MiniTablineFill#"
   return table.concat(parts)
 end
 
@@ -236,15 +253,15 @@ local function is_nvim_tree()
   return api.nvim_get_current_win() == nvim_tree_view.get_winnr()
 end
 
-local function get_current_index()
-  local cur = api.nvim_get_current_buf()
-  for i, b in ipairs(buf_order) do
-    if b == cur then
-      return i
-    end
-  end
-  return 1
-end
+-- local function get_current_index()
+--   local cur = api.nvim_get_current_buf()
+--   for i, b in ipairs(buf_order) do
+--     if b == cur then
+--       return i
+--     end
+--   end
+--   return 1
+-- end
 
 local function prev_tab()
   if is_nvim_tree() then
@@ -282,6 +299,7 @@ end
 
 local function swap(i, j)
   buf_order[i], buf_order[j] = buf_order[j], buf_order[i]
+  update_buf_index()
   vim.cmd.redrawtabline()
 end
 
@@ -313,6 +331,7 @@ local function move_tab_begin()
   if i > 1 then
     local b = table.remove(buf_order, i)
     table.insert(buf_order, 1, b)
+    update_buf_index()
     vim.cmd.redrawtabline()
   end
 end
@@ -325,6 +344,7 @@ local function move_tab_end()
   if i < #buf_order then
     local b = table.remove(buf_order, i)
     buf_order[#buf_order + 1] = b
+    update_buf_index()
     vim.cmd.redrawtabline()
   end
 end
@@ -345,6 +365,7 @@ local function buf_delete(bufnr, force)
 
   buf_lookup[bufnr] = nil
   table.remove(buf_order, idx)
+  update_buf_index()
 
   local fallback = buf_order[idx] or buf_order[idx - 1]
   if not fallback then
