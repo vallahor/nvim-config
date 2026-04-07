@@ -327,17 +327,23 @@ function M.buf_delete(bufnr, force)
     return
   end
 
+  buf_lookup[bufnr] = nil
+  buf_index[bufnr] = nil
+  diag_cache[bufnr] = nil
+  table.remove(buf_order, idx)
+  update_buf_index()
+  invalidate_name_cache()
+
   for _, win in ipairs(fn.win_findbuf(bufnr)) do
     api.nvim_win_call(win, function()
-      local alt = fn.bufnr("#")
-      if alt ~= bufnr and fn.buflisted(alt) == 1 then
-        api.nvim_win_set_buf(win, alt)
+      ---@type integer?
+      local replacement = buf_order[idx] or buf_order[idx - 1]
+
+      if replacement then
+        api.nvim_win_set_buf(win, replacement)
         return
       end
-      local ok = pcall(vim.cmd.bnext)
-      if ok and api.nvim_win_get_buf(win) ~= bufnr then
-        return
-      end
+
       local new = api.nvim_create_buf(true, false)
       buf_order[#buf_order + 1] = new
       buf_lookup[new] = true
@@ -347,7 +353,7 @@ function M.buf_delete(bufnr, force)
   end
 
   if api.nvim_buf_is_valid(bufnr) then
-    api.nvim_buf_delete(bufnr, { force = true })
+    api.nvim_buf_delete(bufnr, { force = force })
   end
 end
 
@@ -385,7 +391,6 @@ local function setup_autocmds()
       table.remove(buf_order, idx)
       update_buf_index()
       invalidate_name_cache()
-      vim.cmd.redrawtabline()
     end,
   })
 
