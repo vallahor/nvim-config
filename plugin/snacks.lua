@@ -37,15 +37,9 @@ require("snacks").setup({
       toggle_select = function(picker)
         picker.list:select()
       end,
-      open_all = function(picker, item, action)
-        local selected = picker:selected({ fallback = false })
-
-        if not selected or #selected == 0 then
-          return Snacks.picker.actions.jump(picker, item, action)
-        end
-
+      open_all = function(picker)
+        local selected = picker:selected({ fallback = true })
         picker:close()
-
         for _, sel in ipairs(selected) do
           if sel.file then
             vim.cmd.edit({ vim.fn.fnameescape(sel.file), bang = true })

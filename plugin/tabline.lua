@@ -77,23 +77,6 @@ api.nvim_create_autocmd("BufEnter", {
   end,
 })
 
-api.nvim_create_autocmd("BufDelete", {
-  callback = function(args)
-    local deleted = tonumber(args.buf) --[[@as integer]]
-    if not buf_lookup[deleted] then
-      return
-    end
-    buf_lookup[deleted] = nil
-    for i, b in ipairs(buf_order) do
-      if b == deleted then
-        table.remove(buf_order, i)
-        break
-      end
-    end
-    vim.cmd.redrawtabline()
-  end,
-})
-
 local function make_unique(namemap)
   local counts = {}
   for _, n in pairs(namemap) do
@@ -349,26 +332,36 @@ end
 local function buf_delete(bufnr, force)
   bufnr = bufnr == 0 and api.nvim_get_current_buf() or bufnr
 
-  local switch_target
-  for _, b in ipairs(buf_order) do
-    if b ~= bufnr and api.nvim_buf_is_valid(b) then
-      if b < bufnr then
-        switch_target = b
-      end
-      if b > bufnr and switch_target == nil then
-        switch_target = b
-        break
-      end
+  local idx
+  for i, b in ipairs(buf_order) do
+    if b == bufnr then
+      idx = i
+      break
     end
   end
-  if not switch_target then
-    switch_target = api.nvim_create_buf(true, false)
+  if not idx then
+    return
   end
 
-  -- switch all windows showing this buffer
-  for _, win in ipairs(api.nvim_list_wins()) do
-    if api.nvim_win_get_buf(win) == bufnr then
-      api.nvim_win_set_buf(win, switch_target)
+  buf_lookup[bufnr] = nil
+  table.remove(buf_order, idx)
+
+  local fallback = buf_order[idx] or buf_order[idx - 1]
+  if not fallback then
+    fallback = api.nvim_create_buf(true, false)
+    buf_order[#buf_order + 1] = fallback
+    buf_lookup[fallback] = true
+  end
+
+  local wins = vim.tbl_filter(function(win)
+    return api.nvim_win_get_buf(win) == bufnr
+  end, api.nvim_list_wins())
+
+  if #wins > 0 then
+    for _, win in ipairs(wins) do
+      if api.nvim_win_is_valid(win) and api.nvim_buf_is_valid(fallback) then
+        api.nvim_win_set_buf(win, fallback)
+      end
     end
   end
 
