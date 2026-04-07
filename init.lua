@@ -23,8 +23,6 @@ vim.opt.clipboard = "unnamedplus"
 vim.opt.encoding = "utf8"
 vim.opt.pumheight = 10
 -- vim.opt.switchbuf = "useopen,split"
--- vim.opt.switchbuf = "uselast,useopen"
--- vim.opt.switchbuf = "useopen"
 vim.opt.switchbuf = ""
 vim.opt.magic = true
 vim.opt.smartcase = true
@@ -659,8 +657,6 @@ end
 
 vim.keymap.set({ "n", "v", "o" }, "M", decrement_selection, { noremap = true })
 vim.keymap.set({ "n", "x", "o" }, "m", increment_selection, { noremap = true })
-vim.keymap.set({ "n", "v", "o" }, "-", decrement_selection, { noremap = true })
-vim.keymap.set({ "n", "x", "o" }, "+", increment_selection, { noremap = true })
 vim.keymap.set("x", "<Esc>", function()
   stack = {}
   return "<esc>"
