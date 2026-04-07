@@ -14,34 +14,33 @@ local dim_fg = "#7e706c"
 local focused_bg = "#3f303f"
 local hidden_bg = "#191319"
 
-local function set_hls()
-  local normal_fg = get_hex("Normal", "fg")
-  local win_sep_fg = get_hex("WinSeparator", "fg")
-  local errors_fg = get_hex("DiagnosticError", "fg")
-  local warning_fg = get_hex("DiagnosticWarn", "fg")
-  local hl = api.nvim_set_hl
-  hl(0, "MiniTablineCurrent", { fg = normal_fg, bg = focused_bg })
-  hl(0, "MiniTablineVisible", { fg = dim_fg, bg = hidden_bg })
-  hl(0, "MiniTablineHidden", { fg = dim_fg, bg = hidden_bg })
-  hl(0, "MiniTablineModifiedCurrent", { fg = normal_fg, bg = focused_bg, italic = true })
-  hl(0, "MiniTablineModifiedVisible", { fg = dim_fg, bg = hidden_bg, italic = true })
-  hl(0, "MiniTablineModifiedHidden", { fg = dim_fg, bg = hidden_bg, italic = true })
-  hl(0, "MiniTablineFill", { bg = hidden_bg })
-  hl(0, "MiniTablineSidebarLabelFocused", { fg = normal_fg, bg = focused_bg })
-  hl(0, "MiniTablineSidebarLabelHidden", { fg = normal_fg, bg = hidden_bg })
-  hl(0, "MiniTablineSidebarSep", { fg = win_sep_fg, bg = hidden_bg })
-  hl(0, "MiniTablineDiagError", { fg = errors_fg, bg = focused_bg })
-  hl(0, "MiniTablineDiagErrorHid", { fg = errors_fg, bg = hidden_bg })
-  hl(0, "MiniTablineDiagWarn", { fg = warning_fg, bg = focused_bg })
-  hl(0, "MiniTablineDiagWarnHid", { fg = warning_fg, bg = hidden_bg })
-  hl(0, "MiniTablineDiagModifiedError", { fg = errors_fg, bg = focused_bg, italic = true })
-  hl(0, "MiniTablineDiagModifiedErrorHid", { fg = errors_fg, bg = hidden_bg, italic = true })
-  hl(0, "MiniTablineDiagModifiedWarn", { fg = warning_fg, bg = focused_bg, italic = true })
-  hl(0, "MiniTablineDiagModifiedWarnHid", { fg = warning_fg, bg = hidden_bg, italic = true })
-end
-
-set_hls()
-api.nvim_create_autocmd("ColorScheme", { callback = set_hls })
+api.nvim_create_autocmd("ColorScheme", {
+  callback = function()
+    local normal_fg = get_hex("Normal", "fg")
+    local win_sep_fg = get_hex("WinSeparator", "fg")
+    local errors_fg = get_hex("DiagnosticError", "fg")
+    local warning_fg = get_hex("DiagnosticWarn", "fg")
+    local hl = api.nvim_set_hl
+    hl(0, "MiniTablineCurrent", { fg = normal_fg, bg = focused_bg })
+    hl(0, "MiniTablineVisible", { fg = dim_fg, bg = hidden_bg })
+    hl(0, "MiniTablineHidden", { fg = dim_fg, bg = hidden_bg })
+    hl(0, "MiniTablineModifiedCurrent", { fg = normal_fg, bg = focused_bg, italic = true })
+    hl(0, "MiniTablineModifiedVisible", { fg = dim_fg, bg = hidden_bg, italic = true })
+    hl(0, "MiniTablineModifiedHidden", { fg = dim_fg, bg = hidden_bg, italic = true })
+    hl(0, "MiniTablineFill", { bg = hidden_bg })
+    hl(0, "MiniTablineSidebarLabelFocused", { fg = normal_fg, bg = focused_bg })
+    hl(0, "MiniTablineSidebarLabelHidden", { fg = normal_fg, bg = hidden_bg })
+    hl(0, "MiniTablineSidebarSep", { fg = win_sep_fg, bg = hidden_bg })
+    hl(0, "MiniTablineDiagError", { fg = errors_fg, bg = focused_bg })
+    hl(0, "MiniTablineDiagErrorHid", { fg = errors_fg, bg = hidden_bg })
+    hl(0, "MiniTablineDiagWarn", { fg = warning_fg, bg = focused_bg })
+    hl(0, "MiniTablineDiagWarnHid", { fg = warning_fg, bg = hidden_bg })
+    hl(0, "MiniTablineDiagModifiedError", { fg = errors_fg, bg = focused_bg, italic = true })
+    hl(0, "MiniTablineDiagModifiedErrorHid", { fg = errors_fg, bg = hidden_bg, italic = true })
+    hl(0, "MiniTablineDiagModifiedWarn", { fg = warning_fg, bg = focused_bg, italic = true })
+    hl(0, "MiniTablineDiagModifiedWarnHid", { fg = warning_fg, bg = hidden_bg, italic = true })
+  end,
+})
 
 local buf_order = {}
 local buf_lookup = {}
