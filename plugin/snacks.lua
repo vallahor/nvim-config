@@ -37,14 +37,20 @@ require("snacks").setup({
       toggle_select = function(picker)
         picker.list:select()
       end,
-      open_all = function(picker)
-        local selected = picker:selected({ fallback = true })
+      open_all = function(picker, item, action)
+        local selected = picker:selected({ fallback = false })
+
+        if not selected or #selected == 0 then
+          return Snacks.picker.actions.jump(picker, item, action)
+        end
+
         picker:close()
-        for _, item in ipairs(selected) do
-          if item.file then
-            vim.cmd.edit({ vim.fn.fnameescape(item.file), bang = true })
-            if item.pos then
-              vim.api.nvim_win_set_cursor(0, { item.pos[1], item.pos[2] })
+
+        for _, sel in ipairs(selected) do
+          if sel.file then
+            vim.cmd.edit({ vim.fn.fnameescape(sel.file), bang = true })
+            if sel.pos then
+              vim.api.nvim_win_set_cursor(0, { sel.pos[1], sel.pos[2] })
             end
           end
         end
@@ -68,6 +74,11 @@ require("snacks").setup({
           ["<PageDown>"] = { "preview_scroll_down", mode = { "n", "i" } },
           ["<C-Up>"] = { "history_back", mode = { "n", "i" } },
         },
+      },
+    },
+    list = {
+      keys = {
+        ["<CR>"] = "open_all",
       },
     },
   },

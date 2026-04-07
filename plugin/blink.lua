@@ -11,6 +11,7 @@ vim.pack.add({ { src = "https://github.com/Saghen/blink.cmp", version = vim.vers
 vim.api.nvim_create_autocmd("InsertEnter", {
   once = true,
   callback = function()
+    ---@diagnostic disable: param-type-mismatch, missing-fields
     require("blink.cmp").setup({
       keymap = {
         preset = "none",
