@@ -19,29 +19,29 @@ local custom = {
   customPatterns = { "[%w_%-]+", "[!\"#$%%&'()%*+,.%/:;<=>?@%[%]\\%^`{|}~]" },
 }
 
-vim.keymap.set({ "n", "o", "x", "v" }, "w", function()
+vim.keymap.set({ "n", "o", "x" }, "w", function()
   spider.motion("w")
 end)
-vim.keymap.set({ "n", "o", "x", "v" }, "e", function()
+vim.keymap.set({ "n", "o", "x" }, "e", function()
   spider.motion("e")
 end)
-vim.keymap.set({ "n", "o", "x", "v" }, "b", function()
+vim.keymap.set({ "n", "o", "x" }, "b", function()
   spider.motion("b")
 end)
-vim.keymap.set({ "n", "o", "x", "v" }, "q", function()
+vim.keymap.set({ "n", "o", "x" }, "q", function()
   spider.motion("ge")
 end)
 
-vim.keymap.set({ "n", "o", "x", "v" }, "W", function()
+vim.keymap.set({ "n", "o", "x" }, "W", function()
   spider.motion("w", custom)
 end)
-vim.keymap.set({ "n", "o", "x", "v" }, "E", function()
+vim.keymap.set({ "n", "o", "x" }, "E", function()
   spider.motion("e", custom)
 end)
-vim.keymap.set({ "n", "o", "x", "v" }, "B", function()
+vim.keymap.set({ "n", "o", "x" }, "B", function()
   spider.motion("b", custom)
 end)
-vim.keymap.set({ "n", "o", "x", "v" }, "Q", function()
+vim.keymap.set({ "n", "o", "x" }, "Q", function()
   spider.motion("ge", custom)
 end)
 
@@ -60,8 +60,6 @@ various_textobjs.setup({
   },
 })
 
-vim.keymap.set({ "o", "x" }, "au", "aw")
-vim.keymap.set({ "o", "x" }, "iu", "iw")
 vim.keymap.set({ "o", "x" }, "aw", function()
   various_textobjs.subword("outer")
 end, { silent = true })
