@@ -22,23 +22,11 @@ vim.api.nvim_create_autocmd("LspAttach", {
     vim.keymap.set("n", "&", vim.diagnostic.open_float, opts)
     vim.keymap.set("n", "<f2>", vim.lsp.buf.rename, opts)
 
-    local client_id = args.data.client_id
-    if not client_id then
-      return
-    end
-
     local client = vim.lsp.get_client_by_id(args.data.client_id)
-    if client then
-      if client:supports_method("textDocument/diagnostic") then
-        client:request("textDocument/diagnostic", {
-          textDocument = { uri = vim.uri_from_bufnr(bufnr) },
-        }, nil, bufnr)
-      end
-      if client:supports_method("textDocument/completion") then
-        vim.lsp.completion.enable(true, client_id, bufnr, {
-          autotrigger = true,
-        })
-      end
+    if client and client:supports_method("textDocument/diagnostic") then
+      client:request("textDocument/diagnostic", {
+        textDocument = { uri = vim.uri_from_bufnr(bufnr) },
+      }, nil, bufnr)
     end
   end,
 })
