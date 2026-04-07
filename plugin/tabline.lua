@@ -247,20 +247,23 @@ function _G.make_tabline()
   if #tabs == 0 then
     return sidebar .. "%#TablineFill#"
   end
+
+  local ghost_space = 4
   local result_tabs = tabs
   if total_w > avail then
     local kept = { tabs[focus_idx] }
     local w = tabs[focus_idx].w
     local lo, hi = focus_idx - 1, focus_idx + 1
+
     while true do
       local added = false
-      if hi <= #tabs and w + tabs[hi].w <= avail then
+      if hi <= #tabs and w + tabs[hi].w <= avail - ghost_space then
         w = w + tabs[hi].w
         kept[#kept + 1] = tabs[hi]
         hi = hi + 1
         added = true
       end
-      if lo >= 1 and w + tabs[lo].w <= avail then
+      if lo >= 1 and w + tabs[lo].w <= avail - ghost_space then
         w = w + tabs[lo].w
         table.insert(kept, 1, tabs[lo])
         lo = lo - 1
@@ -270,6 +273,14 @@ function _G.make_tabline()
         break
       end
     end
+
+    if lo >= 1 then
+      table.insert(kept, 1, { str = " %#TablineHidden#…", w = 1 })
+    end
+    if hi <= #tabs then
+      table.insert(kept, { str = "%#TablineHidden#… ", w = 1 })
+    end
+
     result_tabs = kept
   end
 
