@@ -310,12 +310,6 @@ function M.buf_delete(bufnr, force)
     return
   end
 
-  buf_lookup[bufnr] = nil
-  buf_index[bufnr] = nil
-  diag_cache[bufnr] = nil
-  table.remove(buf_order, idx)
-  update_buf_index()
-
   local fallback = buf_order[idx] or buf_order[idx - 1]
   if not fallback then
     fallback = api.nvim_create_buf(true, false)
@@ -351,6 +345,23 @@ local function setup_autocmds()
         update_buf_index()
         vim.cmd.redrawtabline()
       end)
+    end,
+  })
+
+  api.nvim_create_autocmd("BufDelete", {
+    callback = function(ev)
+      local b = ev.buf
+      local idx = buf_index[b]
+      if not idx then
+        return
+      end
+
+      buf_lookup[b] = nil
+      buf_index[b] = nil
+      diag_cache[b] = nil
+      table.remove(buf_order, idx)
+      update_buf_index()
+      vim.cmd.redrawtabline()
     end,
   })
 
