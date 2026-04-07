@@ -21,24 +21,24 @@ api.nvim_create_autocmd("ColorScheme", {
     local errors_fg = get_hex("DiagnosticError", "fg")
     local warning_fg = get_hex("DiagnosticWarn", "fg")
     local hl = api.nvim_set_hl
-    hl(0, "MiniTablineCurrent", { fg = normal_fg, bg = focused_bg })
-    hl(0, "MiniTablineVisible", { fg = dim_fg, bg = hidden_bg })
-    hl(0, "MiniTablineHidden", { fg = dim_fg, bg = hidden_bg })
-    hl(0, "MiniTablineModifiedCurrent", { fg = normal_fg, bg = focused_bg, italic = true })
-    hl(0, "MiniTablineModifiedVisible", { fg = dim_fg, bg = hidden_bg, italic = true })
-    hl(0, "MiniTablineModifiedHidden", { fg = dim_fg, bg = hidden_bg, italic = true })
-    hl(0, "MiniTablineFill", { bg = hidden_bg })
-    hl(0, "MiniTablineSidebarLabelFocused", { fg = normal_fg, bg = focused_bg })
-    hl(0, "MiniTablineSidebarLabelHidden", { fg = normal_fg, bg = hidden_bg })
-    hl(0, "MiniTablineSidebarSep", { fg = win_sep_fg, bg = hidden_bg })
-    hl(0, "MiniTablineDiagError", { fg = errors_fg, bg = focused_bg })
-    hl(0, "MiniTablineDiagErrorHid", { fg = errors_fg, bg = hidden_bg })
-    hl(0, "MiniTablineDiagWarn", { fg = warning_fg, bg = focused_bg })
-    hl(0, "MiniTablineDiagWarnHid", { fg = warning_fg, bg = hidden_bg })
-    hl(0, "MiniTablineDiagModifiedError", { fg = errors_fg, bg = focused_bg, italic = true })
-    hl(0, "MiniTablineDiagModifiedErrorHid", { fg = errors_fg, bg = hidden_bg, italic = true })
-    hl(0, "MiniTablineDiagModifiedWarn", { fg = warning_fg, bg = focused_bg, italic = true })
-    hl(0, "MiniTablineDiagModifiedWarnHid", { fg = warning_fg, bg = hidden_bg, italic = true })
+    hl(0, "TablineCurrent", { fg = normal_fg, bg = focused_bg })
+    hl(0, "TablineVisible", { fg = dim_fg, bg = hidden_bg })
+    hl(0, "TablineHidden", { fg = dim_fg, bg = hidden_bg })
+    hl(0, "TablineModifiedCurrent", { fg = normal_fg, bg = focused_bg, italic = true })
+    hl(0, "TablineModifiedVisible", { fg = dim_fg, bg = hidden_bg, italic = true })
+    hl(0, "TablineModifiedHidden", { fg = dim_fg, bg = hidden_bg, italic = true })
+    hl(0, "TablineFill", { bg = hidden_bg })
+    hl(0, "TablineSidebarLabelFocused", { fg = normal_fg, bg = focused_bg })
+    hl(0, "TablineSidebarLabelHidden", { fg = normal_fg, bg = hidden_bg })
+    hl(0, "TablineSidebarSep", { fg = win_sep_fg, bg = hidden_bg })
+    hl(0, "TablineDiagError", { fg = errors_fg, bg = focused_bg })
+    hl(0, "TablineDiagErrorHid", { fg = errors_fg, bg = hidden_bg })
+    hl(0, "TablineDiagWarn", { fg = warning_fg, bg = focused_bg })
+    hl(0, "TablineDiagWarnHid", { fg = warning_fg, bg = hidden_bg })
+    hl(0, "TablineDiagModifiedError", { fg = errors_fg, bg = focused_bg, italic = true })
+    hl(0, "TablineDiagModifiedErrorHid", { fg = errors_fg, bg = hidden_bg, italic = true })
+    hl(0, "TablineDiagModifiedWarn", { fg = warning_fg, bg = focused_bg, italic = true })
+    hl(0, "TablineDiagModifiedWarnHid", { fg = warning_fg, bg = hidden_bg, italic = true })
   end,
 })
 
@@ -91,22 +91,6 @@ api.nvim_create_autocmd("BufEnter", {
   end,
 })
 
-local function make_unique(namemap)
-  local counts = {}
-  for _, n in pairs(namemap) do
-    counts[n] = (counts[n] or 0) + 1
-  end
-  for b, n in pairs(namemap) do
-    if counts[n] > 1 then
-      local fullname = api.nvim_buf_get_name(b)
-      if fullname ~= "" then
-        namemap[b].name = " " .. fnamemodify(fullname, ":~:."):gsub("^%./", "") .. " "
-        namemap[b].w = strwidth(namemap[b].name)
-      end
-    end
-  end
-end
-
 local cached_pad = -1
 local cached_spaces = ""
 local function spaces(n)
@@ -126,12 +110,12 @@ local explorer_label_len = strwidth(explorer_label)
 ---@type table<integer, table<integer, table<integer, string>>>
 local diag_hl_map = {
   [1] = {
-    { "%#MiniTablineDiagErrorHid#", "%#MiniTablineDiagError#" },
-    { "%#MiniTablineDiagModifiedErrorHid#", "%#MiniTablineDiagModifiedError#" },
+    { "%#TablineDiagErrorHid#", "%#TablineDiagError#" },
+    { "%#TablineDiagModifiedErrorHid#", "%#TablineDiagModifiedError#" },
   },
   [2] = {
-    { "%#MiniTablineDiagWarnHid#", "%#MiniTablineDiagWarn#" },
-    { "%#MiniTablineDiagModifiedWarnHid#", "%#MiniTablineDiagModifiedWarn#" },
+    { "%#TablineDiagWarnHid#", "%#TablineDiagWarn#" },
+    { "%#TablineDiagModifiedWarnHid#", "%#TablineDiagModifiedWarn#" },
   },
 }
 
@@ -151,9 +135,9 @@ function _G.make_tabline()
   if tree_winnr then
     sidebar_width = api.nvim_win_get_width(tree_winnr)
     local pad = math.max(0, floor((sidebar_width - explorer_label_len) / 2))
-    local sidebar_hl = in_tree and "%#MiniTablineSidebarLabelFocused#" or "%#MiniTablineSidebarLabelHidden#"
+    local sidebar_hl = in_tree and "%#TablineSidebarLabelFocused#" or "%#TablineSidebarLabelHidden#"
     local pad_spaces = spaces(pad)
-    sidebar = sidebar_hl .. pad_spaces .. explorer_label .. pad_spaces .. "%#MiniTablineSidebarSep#│"
+    sidebar = sidebar_hl .. pad_spaces .. explorer_label .. pad_spaces .. "%#TablineSidebarSep#│"
   end
 
   -- local names = {}
@@ -195,6 +179,7 @@ function _G.make_tabline()
   --
   --   names[b] = { name = display, w = strwidth(display) }
   -- end
+
   local names = {}
   local counts = {}
 
@@ -235,17 +220,19 @@ function _G.make_tabline()
 
     ---@type string?
     local hl
-    local counts = vim.diagnostic.count(b, diag_filter)
-    local sev = (counts[1] and counts[1] > 0) and 1 or (counts[2] and counts[2] > 0) and 2 or nil
+    local diagnostic_count = vim.diagnostic.count(b, diag_filter)
+    local sev = (diagnostic_count[1] and diagnostic_count[1] > 0) and 1
+      or (diagnostic_count[2] and diagnostic_count[2] > 0) and 2
+      or nil
     if sev then
       hl = diag_hl_map[sev][modified and 2 or 1][focused and 2 or 1]
     else
       if modified then
-        hl = focused and "%#MiniTablineModifiedCurrent#"
-          or visible and "%#MiniTablineModifiedVisible#"
-          or "%#MiniTablineModifiedHidden#"
+        hl = focused and "%#TablineModifiedCurrent#"
+          or visible and "%#TablineModifiedVisible#"
+          or "%#TablineModifiedHidden#"
       else
-        hl = focused and "%#MiniTablineCurrent#" or visible and "%#MiniTablineVisible#" or "%#MiniTablineHidden#"
+        hl = focused and "%#TablineCurrent#" or visible and "%#TablineVisible#" or "%#TablineHidden#"
       end
     end
 
@@ -258,7 +245,7 @@ function _G.make_tabline()
 
   focus_idx = math.max(1, math.min(focus_idx, #tabs))
   if #tabs == 0 then
-    return sidebar .. "%#MiniTablineFill#"
+    return sidebar .. "%#TablineFill#"
   end
   local result_tabs = tabs
   if total_w > avail then
@@ -292,7 +279,7 @@ function _G.make_tabline()
   for i = 1, n do
     parts[i + 1] = result_tabs[i].str
   end
-  parts[n + 2] = "%#MiniTablineFill#"
+  parts[n + 2] = "%#TablineFill#"
   return table.concat(parts, "")
 end
 
@@ -303,16 +290,6 @@ vim.opt.showtabline = 2
 local function is_nvim_tree()
   return api.nvim_get_current_win() == nvim_tree_view.get_winnr()
 end
-
--- local function get_current_index()
---   local cur = api.nvim_get_current_buf()
---   for i, b in ipairs(buf_order) do
---     if b == cur then
---       return i
---     end
---   end
---   return 1
--- end
 
 local function prev_tab()
   if is_nvim_tree() then
