@@ -659,6 +659,8 @@ end
 
 vim.keymap.set({ "n", "v", "o" }, "M", decrement_selection, { noremap = true })
 vim.keymap.set({ "n", "x", "o" }, "m", increment_selection, { noremap = true })
+vim.keymap.set({ "n", "v", "o" }, "-", decrement_selection, { noremap = true })
+vim.keymap.set({ "n", "x", "o" }, "+", increment_selection, { noremap = true })
 vim.keymap.set("x", "<Esc>", function()
   stack = {}
   return "<esc>"

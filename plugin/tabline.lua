@@ -334,20 +334,16 @@ function M.buf_delete(bufnr, force)
   update_buf_index()
   invalidate_name_cache()
 
-  for _, win in ipairs(api.nvim_list_wins()) do
-    if api.nvim_win_get_buf(win) == bufnr then
-      ---@type integer?
-      local replacement = buf_order[idx] or buf_order[idx - 1]
-
-      if replacement then
-        api.nvim_win_set_buf(win, replacement)
-      else
-        local new = api.nvim_create_buf(true, false)
-        buf_order[#buf_order + 1] = new
-        buf_lookup[new] = true
-        update_buf_index()
-        api.nvim_win_set_buf(win, new)
-      end
+  ---@type integer?
+  local replacement = buf_order[idx] or buf_order[idx - 1]
+  if not replacement then
+    local new = api.nvim_create_buf(true, false)
+    buf_order[#buf_order + 1] = new
+    buf_lookup[new] = true
+    update_buf_index()
+  else
+    for _, win in ipairs(fn.win_findbuf(bufnr)) do
+      api.nvim_win_set_buf(win, replacement)
     end
   end
 
