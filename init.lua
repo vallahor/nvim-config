@@ -12,20 +12,17 @@ vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
 vim.opt.expandtab = true
 vim.opt.smartindent = true
+vim.opt.smarttab = true
+vim.opt.smartcase = true
 vim.opt.autoindent = true
 vim.opt.hidden = true
 vim.opt.ignorecase = true
 vim.opt.shiftround = true
 vim.opt.splitright = true
 vim.opt.splitbelow = true
-vim.opt.wildmode = "longest,list:longest,full"
 vim.opt.clipboard = "unnamedplus"
-vim.opt.encoding = "utf8"
 vim.opt.pumheight = 10
--- vim.opt.switchbuf = "useopen,split"
-vim.opt.switchbuf = ""
-vim.opt.magic = true
-vim.opt.smartcase = true
+vim.opt.switchbuf = "useopen,split"
 vim.opt.inccommand = "nosplit"
 vim.opt.backspace = "indent,eol,start"
 vim.opt.shortmess:append("aoOtTIcF")
@@ -35,31 +32,19 @@ vim.opt.cursorline = true
 vim.opt.scrolloff = 3
 vim.opt.backup = false
 vim.opt.writebackup = false
-vim.opt.gdefault = true
 vim.opt.cindent = false -- check
 vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
--- vim.opt.cino:append("L0,g0,l1,t0,w1,w4,m1")
-vim.opt.timeoutlen = 300
-vim.opt.ttimeoutlen = 100
-vim.opt.updatetime = 50
-vim.opt.guicursor = "n:block-Cursor,i-ci-c:block-iCursor,v:block-vCursor"
 vim.opt.winborder = "rounded"
--- vim.opt.winborder = "none"
-vim.opt.isfname:append("(") -- " @windows: nextjs and sveltkit folder name pattern
+vim.opt.isfname:append("(") -- " @windows: nextjs and sveltekit folder name pattern
 vim.opt.swapfile = false
 vim.opt.wrap = false
 vim.opt.history = 20
-vim.opt.showcmd = true
 
 vim.wo.signcolumn = "no"
 vim.wo.relativenumber = true
 vim.wo.wrap = false
 
-vim.bo.autoread = true
-vim.bo.copyindent = true
-vim.bo.grepprg = "rg"
-
-vim.o.linespace = 5
+vim.opt.linespace = 5
 vim.opt.cmdheight = 0
 vim.opt.showcmdloc = "statusline"
 
@@ -673,6 +658,8 @@ local guicursor_hidden = "n:block-Cursor,i-ci-c:block-iCursor,v:block-vCursor,a:
 local cursor_line_active = "CursorLine:CursorLine,CursorLineNr:CursorLineNr"
 local cursor_line_inactive = "CursorLine:CursorLineInative,CursorLineNr:CursorLineNrInative"
 
+vim.opt.guicursor = guicursor_default
+
 local ignore_file_types = { NvimTree = true }
 vim.api.nvim_create_autocmd("WinEnter", {
   callback = function()
@@ -738,7 +725,7 @@ vim.api.nvim_create_autocmd("FileType", {
   pattern = { "help", "text", "man" },
   callback = function()
     vim.wo.statuscolumn = ""
-    vim.wo.relativenumber = true
+    vim.wo.number = true
   end,
 })
 
