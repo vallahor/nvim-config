@@ -9,6 +9,7 @@ local buf_order = {}
 local buf_lookup = {}
 local buf_index = {}
 local diag_cache = {}
+local name_cache = nil ---@type table<integer, { bufname: string, name: string, w: integer }>?
 
 local function update_buf_index()
   for i, b in ipairs(buf_order) do
@@ -30,8 +31,16 @@ local function init_bufs()
   update_buf_index()
 end
 
----@return table<integer, { bufname: string, tail: string, name: string, w: integer }>
+local function invalidate_name_cache()
+  name_cache = nil
+end
+
+---@return table<integer, { bufname: string, name: string, w: integer }>
 local function resolve_names()
+  if name_cache then
+    return name_cache
+  end
+
   local names = {}
   local counts = {}
 
@@ -51,9 +60,12 @@ local function resolve_names()
     end
     info.name = display
     info.w = strwidth(display)
+    info.tail = nil
+    info.bufname = nil
   end
 
-  return names
+  name_cache = names
+  return name_cache
 end
 
 local nvim_tree_view = require("nvim-tree.view")
@@ -95,6 +107,10 @@ local diag_hl_map = {
 
 local diag_filter = { severity = { min = vim.diagnostic.severity.WARN, max = vim.diagnostic.severity.ERROR } }
 
+---@param b integer
+---@param focused boolean
+---@param visible boolean|nil
+---@param modified boolean
 ---@return string
 local function resolve_hl(b, focused, visible, modified)
   local cached = diag_cache[b]
@@ -235,7 +251,8 @@ end
 
 local function swap(i, j)
   buf_order[i], buf_order[j] = buf_order[j], buf_order[i]
-  update_buf_index()
+  buf_index[buf_order[i]] = i
+  buf_index[buf_order[j]] = j
   vim.cmd.redrawtabline()
 end
 
@@ -343,6 +360,7 @@ local function setup_autocmds()
         buf_order[#buf_order + 1] = b
         buf_lookup[b] = true
         update_buf_index()
+        invalidate_name_cache()
         vim.cmd.redrawtabline()
       end)
     end,
@@ -361,6 +379,7 @@ local function setup_autocmds()
       diag_cache[b] = nil
       table.remove(buf_order, idx)
       update_buf_index()
+      invalidate_name_cache()
       vim.cmd.redrawtabline()
     end,
   })
@@ -369,6 +388,10 @@ local function setup_autocmds()
     callback = function(ev)
       diag_cache[ev.buf] = nil
     end,
+  })
+
+  api.nvim_create_autocmd({ "BufFilePost", "BufAdd" }, {
+    callback = invalidate_name_cache,
   })
 
   api.nvim_create_autocmd("ColorScheme", {
