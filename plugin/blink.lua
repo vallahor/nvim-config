@@ -6,9 +6,12 @@ vim.api.nvim_create_autocmd("PackChanged", {
   end,
 })
 
-vim.pack.add({ { src = "https://github.com/Saghen/blink.cmp", version = vim.version.range("*") } })
+vim.pack.add({
+  "https://github.com/Saghen/blink.lib",
+  { src = "https://github.com/Saghen/blink.cmp", version = vim.version.range("*") },
+})
 
-vim.api.nvim_create_autocmd("InsertEnter", {
+vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter" }, {
   once = true,
   callback = function()
     ---@diagnostic disable: param-type-mismatch, missing-fields
