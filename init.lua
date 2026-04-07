@@ -1,7 +1,6 @@
 vim.pack.add({
   "https://github.com/jake-stewart/multicursor.nvim",
 })
-vim.g.mapleader = " "
 
 vim.env.LANG = "en_US.UTF-8"
 
@@ -39,6 +38,7 @@ vim.opt.isfname:append("(") -- " @windows: nextjs and sveltekit folder name patt
 vim.opt.swapfile = false
 vim.opt.wrap = false
 vim.opt.history = 20
+vim.opt.timeout = false
 
 vim.wo.signcolumn = "no"
 vim.wo.relativenumber = true

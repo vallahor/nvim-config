@@ -331,7 +331,6 @@ function M.buf_delete(bufnr, force)
   buf_index[bufnr] = nil
   diag_cache[bufnr] = nil
   table.remove(buf_order, idx)
-  update_buf_index()
   invalidate_name_cache()
 
   for _, win in ipairs(fn.win_findbuf(bufnr)) do
@@ -342,11 +341,12 @@ function M.buf_delete(bufnr, force)
       replacement = api.nvim_create_buf(true, false)
       buf_order[#buf_order + 1] = replacement
       buf_lookup[replacement] = true
-      update_buf_index()
     end
 
     api.nvim_win_set_buf(win, replacement)
   end
+
+  update_buf_index()
 
   if api.nvim_buf_is_valid(bufnr) then
     api.nvim_buf_delete(bufnr, { force = true })
