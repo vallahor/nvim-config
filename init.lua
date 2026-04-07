@@ -691,15 +691,15 @@ vim.api.nvim_create_autocmd("CmdlineLeave", {
   end,
 })
 
-vim.api.nvim_create_autocmd({ "WinEnter", "BufWinEnter", "BufEnter" }, {
+vim.api.nvim_create_autocmd("WinEnter", {
   callback = function()
-    vim.opt_local.winhighlight = cursor_line_active
+    vim.api.nvim_set_option_value("winhighlight", cursor_line_active, { win = vim.api.nvim_get_current_win() })
   end,
 })
 
-vim.api.nvim_create_autocmd({ "WinLeave" }, {
+vim.api.nvim_create_autocmd("WinLeave", {
   callback = function()
-    vim.opt_local.winhighlight = cursor_line_inactive
+    vim.api.nvim_set_option_value("winhighlight", cursor_line_inactive, { win = vim.api.nvim_get_current_win() })
   end,
 })
 

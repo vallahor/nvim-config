@@ -454,10 +454,10 @@ local function setup_keymaps()
   map("n", "<c-s-end>", M.move_tab_end, { silent = true })
   map("n", "<c-w>", function()
     M.buf_delete(0, false)
-  end, { silent = true })
+  end, { silent = true, nowait = true })
   map("n", "<c-x>", function()
     M.buf_delete(0, true)
-  end, { silent = true })
+  end, { silent = true, nowait = true })
 end
 
 _G.make_tabline = M.make_tabline
