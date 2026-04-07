@@ -327,18 +327,23 @@ function M.buf_delete(bufnr, force)
     return
   end
 
-  local fallback = buf_order[idx] or buf_order[idx - 1]
-  if not fallback then
-    fallback = api.nvim_create_buf(true, false)
-    buf_order[#buf_order + 1] = fallback
-    buf_lookup[fallback] = true
-    update_buf_index()
-  end
-
-  for _, win in ipairs(api.nvim_list_wins()) do
-    if api.nvim_win_get_buf(win) == bufnr and api.nvim_win_is_valid(win) and api.nvim_buf_is_valid(fallback) then
-      api.nvim_win_set_buf(win, fallback)
-    end
+  for _, win in ipairs(fn.win_findbuf(bufnr)) do
+    api.nvim_win_call(win, function()
+      local alt = fn.bufnr("#")
+      if alt ~= bufnr and fn.buflisted(alt) == 1 then
+        api.nvim_win_set_buf(win, alt)
+        return
+      end
+      local ok = pcall(vim.cmd.bnext)
+      if ok and api.nvim_win_get_buf(win) ~= bufnr then
+        return
+      end
+      local new = api.nvim_create_buf(true, false)
+      buf_order[#buf_order + 1] = new
+      buf_lookup[new] = true
+      update_buf_index()
+      api.nvim_win_set_buf(win, new)
+    end)
   end
 
   if api.nvim_buf_is_valid(bufnr) then
