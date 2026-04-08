@@ -701,6 +701,7 @@ vim.api.nvim_create_autocmd("WinLeave", {
 })
 
 vim.api.nvim_create_autocmd("VimEnter", {
+  once = true,
   callback = function()
     local tabline = require("plugin/tabline")
     tabline.setup({
