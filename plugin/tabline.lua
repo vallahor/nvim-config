@@ -3,6 +3,14 @@ local floor, strwidth, fnamemodify = math.floor, fn.strwidth, fn.fnamemodify
 
 local M = {}
 
+M.update_cursor_line_hl = function(_, _) end
+
+function M.setup(opts)
+  if opts and type(opts.update_cursor_line_hl) == "function" then
+    M.update_cursor_line_hl = opts.update_cursor_line_hl
+  end
+end
+
 local focus_idx = 1
 local ghost_space = 4
 local buf_order = {}
@@ -316,7 +324,7 @@ function M.buf_delete(bufnr, force)
     local choice = fn.confirm("Unsaved changes:", "&Save\n&Discard\n&Cancel", 1)
     if choice == 1 then
       pcall(api.nvim_buf_call, bufnr, function()
-        vim.cmd.write({ mods = { silent = true } })
+        vim.cmd.write()
       end)
       M.buf_delete(bufnr, true)
     elseif choice == 2 then
@@ -334,8 +342,10 @@ function M.buf_delete(bufnr, force)
     buf_order[idx] = replacement
   end
 
+  local cur_win = api.nvim_get_current_win()
   for _, win in ipairs(fn.win_findbuf(bufnr)) do
     api.nvim_win_set_buf(win, replacement)
+    M.update_cursor_line_hl(cur_win, win)
   end
 
   buf_index[bufnr] = nil
@@ -457,12 +467,8 @@ _G.make_tabline = M.make_tabline
 vim.opt.tabline = "%!v:lua.make_tabline()"
 vim.opt.showtabline = 2
 
-function M.setup()
-  init_bufs()
-  setup_autocmds()
-  setup_keymaps()
-end
-
-M.setup()
+init_bufs()
+setup_autocmds()
+setup_keymaps()
 
 return M

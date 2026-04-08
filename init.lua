@@ -1,7 +1,3 @@
-vim.pack.add({
-  "https://github.com/jake-stewart/multicursor.nvim",
-})
-
 vim.env.LANG = "en_US.UTF-8"
 
 -- SETTINGS --
@@ -526,6 +522,7 @@ local function update_visual_cursor(buf)
   visual_state[buf].visual_end = cursor_end
 end
 
+vim.pack.add({ "https://github.com/jake-stewart/multicursor.nvim" })
 local mc = require("multicursor-nvim")
 vim.api.nvim_create_autocmd("ModeChanged", {
   callback = function(ev)
@@ -700,6 +697,19 @@ vim.api.nvim_create_autocmd("WinEnter", {
 vim.api.nvim_create_autocmd("WinLeave", {
   callback = function()
     vim.api.nvim_set_option_value("winhighlight", cursor_line_inactive, { win = vim.api.nvim_get_current_win() })
+  end,
+})
+
+vim.api.nvim_create_autocmd("VimEnter", {
+  callback = function()
+    local tabline = require("plugin/tabline")
+    tabline.setup({
+      update_cursor_line_hl = function(cur_win, win)
+        print(cur_win, win)
+        local hl = cur_win == win and cursor_line_active or cursor_line_inactive
+        vim.api.nvim_set_option_value("winhighlight", hl, { win = win })
+      end,
+    })
   end,
 })
 
