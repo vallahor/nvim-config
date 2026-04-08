@@ -418,11 +418,12 @@ local function setup_autocmds()
         return
       end
 
+      table.remove(buf_order, idx)
+
       buf_index[b] = nil
       diag_cache[b] = nil
-      table.remove(buf_order, idx)
-      update_buf_index()
       invalidate_name_cache()
+      update_buf_index()
     end,
   })
 

@@ -18,6 +18,27 @@ api.events.subscribe(api.events.Event.TreeOpen, function()
   end
 end)
 
+api.events.subscribe(api.events.Event.FileRemoved, function(data)
+  if not data then
+    return
+  end
+
+  local removed_buf = vim.fn.bufnr(data.fname)
+  if removed_buf == -1 then
+    return
+  end
+
+  local wins = vim.fn.win_findbuf(removed_buf)
+  if #wins == 0 then
+    return
+  end
+
+  local scratch = vim.api.nvim_create_buf(true, false)
+  for _, win in ipairs(wins) do
+    vim.api.nvim_win_set_buf(win, scratch)
+  end
+end)
+
 local default_size = 30
 
 --- @param size integer?
@@ -77,6 +98,11 @@ end
 
 require("nvim-tree").setup({
   on_attach = on_attach,
+  actions = {
+    remove_file = {
+      close_window = false,
+    },
+  },
   update_focused_file = {
     enable = false,
   },
