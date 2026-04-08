@@ -266,7 +266,6 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.keymap.set("n", "<cr>", enter_and_close, { buffer = true })
     vim.keymap.set("n", "o", enter_and_close, { buffer = true })
     vim.keymap.set("n", "q", vim.cmd.cclose, { buffer = true })
-    vim.keymap.set("n", "<c-w>", vim.cmd.cclose, { buffer = true })
     vim.keymap.set("n", "<esc>", vim.cmd.cclose, { buffer = true })
   end,
 })
