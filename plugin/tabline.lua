@@ -316,7 +316,7 @@ function M.buf_delete(bufnr, force)
     local choice = fn.confirm("Unsaved changes:", "&Save\n&Discard\n&Cancel", 1)
     if choice == 1 then
       pcall(api.nvim_buf_call, bufnr, function()
-        vim.cmd.write()
+        vim.cmd.write({ mods = { silent = true } })
       end)
       M.buf_delete(bufnr, true)
     elseif choice == 2 then
