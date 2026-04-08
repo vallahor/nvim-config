@@ -6,7 +6,6 @@ local M = {}
 local focus_idx = 1
 local ghost_space = 4
 local buf_order = {}
-local buf_lookup = {}
 local buf_index = {}
 local diag_cache = {}
 local name_cache = nil ---@type table<integer, { bufname: string, name: string, w: integer }>?
@@ -25,7 +24,6 @@ local function init_bufs()
   for _, b in ipairs(api.nvim_list_bufs()) do
     if bo[b].buflisted then
       buf_order[#buf_order + 1] = b
-      buf_lookup[b] = true
     end
   end
   update_buf_index()
@@ -327,7 +325,6 @@ function M.buf_delete(bufnr, force)
     return
   end
 
-  buf_lookup[bufnr] = nil
   buf_index[bufnr] = nil
   diag_cache[bufnr] = nil
   table.remove(buf_order, idx)
@@ -340,7 +337,6 @@ function M.buf_delete(bufnr, force)
     if not replacement then
       replacement = api.nvim_create_buf(true, false)
       buf_order[#buf_order + 1] = replacement
-      buf_lookup[replacement] = true
     end
 
     api.nvim_win_set_buf(win, replacement)
@@ -357,15 +353,14 @@ local function setup_autocmds()
   api.nvim_create_autocmd("BufEnter", {
     callback = function()
       local b = api.nvim_get_current_buf()
-      if not bo[b].buflisted or buf_lookup[b] then
+      if not bo[b].buflisted or buf_index[b] then
         return
       end
       vim.schedule(function()
-        if not api.nvim_buf_is_valid(b) or buf_lookup[b] then
+        if not api.nvim_buf_is_valid(b) or buf_index[b] then
           return
         end
         buf_order[#buf_order + 1] = b
-        buf_lookup[b] = true
         update_buf_index()
         invalidate_name_cache()
         vim.cmd.redrawtabline()
@@ -381,7 +376,6 @@ local function setup_autocmds()
         return
       end
 
-      buf_lookup[b] = nil
       buf_index[b] = nil
       diag_cache[b] = nil
       table.remove(buf_order, idx)
