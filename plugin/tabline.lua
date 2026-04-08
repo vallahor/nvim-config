@@ -330,15 +330,14 @@ function M.buf_delete(bufnr, force)
   table.remove(buf_order, idx)
   invalidate_name_cache()
 
+  ---@type integer?
+  local replacement = buf_order[idx] or buf_order[idx - 1]
+  if not replacement then
+    replacement = api.nvim_create_buf(true, false)
+    buf_order[#buf_order + 1] = replacement
+  end
+
   for _, win in ipairs(fn.win_findbuf(bufnr)) do
-    ---@type integer?
-    local replacement = buf_order[idx] or buf_order[idx - 1]
-
-    if not replacement then
-      replacement = api.nvim_create_buf(true, false)
-      buf_order[#buf_order + 1] = replacement
-    end
-
     api.nvim_win_set_buf(win, replacement)
   end
 

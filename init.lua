@@ -290,10 +290,10 @@ vim.api.nvim_create_autocmd("FileType", {
     "typescript",
     "typescriptreact",
   },
-  callback = function()
+  callback = function(args)
     if not vim.g.editorconfig then
-      vim.opt.shiftwidth = 2
-      vim.opt.tabstop = 2
+      vim.api.nvim_set_option_value("shiftwidth", 2, { buf = args.buf })
+      vim.api.nvim_set_option_value("tabstop", 2, { buf = args.buf })
     end
   end,
 })
@@ -308,9 +308,9 @@ vim.api.nvim_create_autocmd("FileType", {
     "vue",
     "svelte",
   },
-  callback = function()
-    vim.opt.shiftwidth = 2
-    vim.opt.tabstop = 2
+  callback = function(args)
+    vim.api.nvim_set_option_value("shiftwidth", 2, { buf = args.buf })
+    vim.api.nvim_set_option_value("tabstop", 2, { buf = args.buf })
   end,
 })
 
@@ -652,15 +652,15 @@ local guicursor_hidden = "n:block-Cursor,i-ci-c:block-iCursor,v:block-vCursor,a:
 local cursor_line_active = "CursorLine:CursorLine,CursorLineNr:CursorLineNr"
 local cursor_line_inactive = "CursorLine:CursorLineInative,CursorLineNr:CursorLineNrInative"
 
-vim.opt.guicursor = guicursor_default
+vim.api.nvim_set_option_value("guicursor", guicursor_default, {})
 
 local ignore_file_types = { NvimTree = true }
 vim.api.nvim_create_autocmd("WinEnter", {
   callback = function()
     if ignore_file_types[vim.bo.filetype] then
-      vim.opt.guicursor = guicursor_hidden
+      vim.api.nvim_set_option_value("guicursor", guicursor_hidden, {})
     else
-      vim.opt.guicursor = guicursor_default
+      vim.api.nvim_set_option_value("guicursor", guicursor_default, {})
     end
   end,
 })
@@ -672,7 +672,7 @@ vim.api.nvim_create_autocmd("CmdlineEnter", {
       cmdline_active = true
       vim.schedule(function()
         if cmdline_active then
-          vim.opt.guicursor = guicursor_default
+          vim.api.nvim_set_option_value("guicursor", guicursor_default, {})
           vim.cmd.redraw()
         end
       end)
@@ -686,7 +686,7 @@ vim.api.nvim_create_autocmd("CmdlineLeave", {
   callback = function()
     cmdline_active = false
     if ignore_file_types[vim.bo.filetype] then
-      vim.opt.guicursor = guicursor_hidden
+      vim.api.nvim_set_option_value("guicursor", guicursor_hidden, {})
     end
   end,
 })
@@ -705,21 +705,21 @@ vim.api.nvim_create_autocmd("WinLeave", {
 
 vim.api.nvim_create_autocmd("CmdlineLeave", {
   callback = function()
-    vim.opt.cmdheight = 0
+    vim.api.nvim_set_option_value("cmdheight", 0, {})
   end,
 })
 
 vim.api.nvim_create_autocmd("CmdlineEnter", {
   callback = function()
-    vim.opt.cmdheight = 1
+    vim.api.nvim_set_option_value("cmdheight", 1, {})
   end,
 })
 
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "help", "text", "man" },
   callback = function()
-    vim.wo.statuscolumn = ""
-    vim.wo.number = true
+    vim.api.nvim_set_option_value("statuscolumn", "", { win = 0 })
+    vim.api.nvim_set_option_value("number", true, { win = 0 })
   end,
 })
 

@@ -10,8 +10,12 @@ api.events.subscribe(api.events.Event.TreeOpen, function()
   local winnr = view.get_winnr() --[[@as integer?]]
   if winnr then
     vim.wo[winnr].statuscolumn = ""
+    vim.api.nvim_set_option_value(
+      "guicursor",
+      "n:block-Cursor,i-ci-c:block-iCursor,v:block-vCursor,a:CursorHidden/lCursorHidden",
+      {}
+    )
   end
-  vim.opt_local.guicursor = "a:CursorHidden/lCursorHidden"
 end)
 
 local default_size = 30
