@@ -649,6 +649,19 @@ local guicursor_hidden = "n:block-Cursor,i-ci-c:block-iCursor,v:block-vCursor,a:
 local cursor_line_active = "CursorLine:CursorLine,CursorLineNr:CursorLineNr"
 local cursor_line_inactive = "CursorLine:CursorLineInative,CursorLineNr:CursorLineNrInative"
 
+vim.api.nvim_create_autocmd("VimEnter", {
+  once = true,
+  callback = function()
+    local tabline = require("plugin/tabline")
+    tabline.setup({
+      update_cursor_line_hl = function(cur_win, win)
+        local hl = cur_win == win and cursor_line_active or cursor_line_inactive
+        vim.api.nvim_set_option_value("winhighlight", hl, { win = win })
+      end,
+    })
+  end,
+})
+
 vim.api.nvim_set_option_value("guicursor", guicursor_default, {})
 
 local ignore_file_types = { NvimTree = true }
@@ -697,19 +710,6 @@ vim.api.nvim_create_autocmd("WinEnter", {
 vim.api.nvim_create_autocmd("WinLeave", {
   callback = function()
     vim.api.nvim_set_option_value("winhighlight", cursor_line_inactive, { win = vim.api.nvim_get_current_win() })
-  end,
-})
-
-vim.api.nvim_create_autocmd("VimEnter", {
-  once = true,
-  callback = function()
-    local tabline = require("plugin/tabline")
-    tabline.setup({
-      update_cursor_line_hl = function(cur_win, win)
-        local hl = cur_win == win and cursor_line_active or cursor_line_inactive
-        vim.api.nvim_set_option_value("winhighlight", hl, { win = win })
-      end,
-    })
   end,
 })
 
