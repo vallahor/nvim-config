@@ -47,6 +47,10 @@ local function resize(size)
   if winnr then
     size = (size and vim.api.nvim_win_get_width(winnr) + size) or default_size
 
+    if size < default_size then
+      size = default_size
+    end
+
     vim.api.nvim_win_set_width(winnr, size)
     vim.cmd.wincmd("=")
   end
