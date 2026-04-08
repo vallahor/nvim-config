@@ -21,7 +21,7 @@ vim.opt.splitright = true
 vim.opt.splitbelow = true
 vim.opt.clipboard = "unnamedplus"
 vim.opt.pumheight = 10
-vim.opt.switchbuf = "useopen,split"
+vim.opt.switchbuf = "useopen,uselast"
 vim.opt.inccommand = "nosplit"
 vim.opt.backspace = "indent,eol,start"
 vim.opt.shortmess:append("aoOtTIcF")
