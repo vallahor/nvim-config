@@ -705,7 +705,6 @@ vim.api.nvim_create_autocmd("VimEnter", {
     local tabline = require("plugin/tabline")
     tabline.setup({
       update_cursor_line_hl = function(cur_win, win)
-        print(cur_win, win)
         local hl = cur_win == win and cursor_line_active or cursor_line_inactive
         vim.api.nvim_set_option_value("winhighlight", hl, { win = win })
       end,
