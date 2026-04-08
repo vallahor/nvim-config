@@ -331,7 +331,7 @@ function M.buf_delete(bufnr, force)
   local replacement = buf_order[idx] or buf_order[idx - 1]
   if not replacement then
     replacement = api.nvim_create_buf(true, false)
-    buf_order[#buf_order + 1] = replacement
+    buf_order[idx] = replacement
   end
 
   for _, win in ipairs(fn.win_findbuf(bufnr)) do
