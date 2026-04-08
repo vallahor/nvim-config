@@ -5,12 +5,6 @@ local M = {}
 
 M.update_cursor_line_hl = function(_, _) end
 
-function M.setup(opts)
-  if opts and type(opts.update_cursor_line_hl) == "function" then
-    M.update_cursor_line_hl = opts.update_cursor_line_hl
-  end
-end
-
 local focus_idx = 1
 local ghost_space = 4
 local buf_order = {}
@@ -358,6 +352,45 @@ function M.buf_delete(bufnr, force)
   end
 end
 
+local function setup_tabline_hl()
+  local function get_hex(group, attr)
+    local ok, val = pcall(api.nvim_get_hl, 0, { name = group, link = false })
+    if not ok or not val then
+      return
+    end
+    local n = attr == "fg" and val.fg or val.bg
+    return n and string.format("#%06x", n)
+  end
+
+  local dim_fg = "#7e706c"
+  local focused_bg = "#3f303f"
+  local hidden_bg = "#191319"
+  local normal_fg = get_hex("Normal", "fg")
+  local win_sep_fg = get_hex("WinSeparator", "fg")
+  local errors_fg = get_hex("DiagnosticError", "fg")
+  local warning_fg = get_hex("DiagnosticWarn", "fg")
+
+  local hl = api.nvim_set_hl
+  hl(0, "TablineCurrent", { fg = normal_fg, bg = focused_bg })
+  hl(0, "TablineVisible", { fg = dim_fg, bg = hidden_bg })
+  hl(0, "TablineHidden", { fg = dim_fg, bg = hidden_bg })
+  hl(0, "TablineModifiedCurrent", { fg = normal_fg, bg = focused_bg, italic = true })
+  hl(0, "TablineModifiedVisible", { fg = dim_fg, bg = hidden_bg, italic = true })
+  hl(0, "TablineModifiedHidden", { fg = dim_fg, bg = hidden_bg, italic = true })
+  hl(0, "TablineFill", { bg = hidden_bg })
+  hl(0, "TablineSidebarLabelFocused", { fg = normal_fg, bg = focused_bg })
+  hl(0, "TablineSidebarLabelHidden", { fg = normal_fg, bg = hidden_bg })
+  hl(0, "TablineSidebarSep", { fg = win_sep_fg, bg = hidden_bg })
+  hl(0, "TablineDiagError", { fg = errors_fg, bg = focused_bg })
+  hl(0, "TablineDiagErrorHid", { fg = errors_fg, bg = hidden_bg })
+  hl(0, "TablineDiagWarn", { fg = warning_fg, bg = focused_bg })
+  hl(0, "TablineDiagWarnHid", { fg = warning_fg, bg = hidden_bg })
+  hl(0, "TablineDiagModifiedError", { fg = errors_fg, bg = focused_bg, italic = true })
+  hl(0, "TablineDiagModifiedErrorHid", { fg = errors_fg, bg = hidden_bg, italic = true })
+  hl(0, "TablineDiagModifiedWarn", { fg = warning_fg, bg = focused_bg, italic = true })
+  hl(0, "TablineDiagModifiedWarnHid", { fg = warning_fg, bg = hidden_bg, italic = true })
+end
+
 local function setup_autocmds()
   api.nvim_create_autocmd("BufEnter", {
     callback = function()
@@ -404,44 +437,8 @@ local function setup_autocmds()
   })
 
   api.nvim_create_autocmd("ColorScheme", {
-    callback = function()
-      local function get_hex(group, attr)
-        local ok, val = pcall(api.nvim_get_hl, 0, { name = group, link = false })
-        if not ok or not val then
-          return
-        end
-        local n = attr == "fg" and val.fg or val.bg
-        return n and string.format("#%06x", n)
-      end
-
-      local dim_fg = "#7e706c"
-      local focused_bg = "#3f303f"
-      local hidden_bg = "#191319"
-      local normal_fg = get_hex("Normal", "fg")
-      local win_sep_fg = get_hex("WinSeparator", "fg")
-      local errors_fg = get_hex("DiagnosticError", "fg")
-      local warning_fg = get_hex("DiagnosticWarn", "fg")
-
-      local hl = api.nvim_set_hl
-      hl(0, "TablineCurrent", { fg = normal_fg, bg = focused_bg })
-      hl(0, "TablineVisible", { fg = dim_fg, bg = hidden_bg })
-      hl(0, "TablineHidden", { fg = dim_fg, bg = hidden_bg })
-      hl(0, "TablineModifiedCurrent", { fg = normal_fg, bg = focused_bg, italic = true })
-      hl(0, "TablineModifiedVisible", { fg = dim_fg, bg = hidden_bg, italic = true })
-      hl(0, "TablineModifiedHidden", { fg = dim_fg, bg = hidden_bg, italic = true })
-      hl(0, "TablineFill", { bg = hidden_bg })
-      hl(0, "TablineSidebarLabelFocused", { fg = normal_fg, bg = focused_bg })
-      hl(0, "TablineSidebarLabelHidden", { fg = normal_fg, bg = hidden_bg })
-      hl(0, "TablineSidebarSep", { fg = win_sep_fg, bg = hidden_bg })
-      hl(0, "TablineDiagError", { fg = errors_fg, bg = focused_bg })
-      hl(0, "TablineDiagErrorHid", { fg = errors_fg, bg = hidden_bg })
-      hl(0, "TablineDiagWarn", { fg = warning_fg, bg = focused_bg })
-      hl(0, "TablineDiagWarnHid", { fg = warning_fg, bg = hidden_bg })
-      hl(0, "TablineDiagModifiedError", { fg = errors_fg, bg = focused_bg, italic = true })
-      hl(0, "TablineDiagModifiedErrorHid", { fg = errors_fg, bg = hidden_bg, italic = true })
-      hl(0, "TablineDiagModifiedWarn", { fg = warning_fg, bg = focused_bg, italic = true })
-      hl(0, "TablineDiagModifiedWarnHid", { fg = warning_fg, bg = hidden_bg, italic = true })
-    end,
+    once = true,
+    callback = setup_tabline_hl,
   })
 end
 
@@ -467,8 +464,15 @@ _G.make_tabline = M.make_tabline
 vim.opt.tabline = "%!v:lua.make_tabline()"
 vim.opt.showtabline = 2
 
-init_bufs()
-setup_autocmds()
-setup_keymaps()
+function M.setup(opts)
+  init_bufs()
+  setup_autocmds()
+  setup_keymaps()
+  setup_tabline_hl()
+
+  if opts and type(opts.update_cursor_line_hl) == "function" then
+    M.update_cursor_line_hl = opts.update_cursor_line_hl
+  end
+end
 
 return M

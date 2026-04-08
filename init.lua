@@ -652,7 +652,7 @@ local cursor_line_inactive = "CursorLine:CursorLineInative,CursorLineNr:CursorLi
 vim.api.nvim_create_autocmd("VimEnter", {
   once = true,
   callback = function()
-    local tabline = require("plugin/tabline")
+    local tabline = require("tabline")
     tabline.setup({
       update_cursor_line_hl = function(cur_win, win)
         local hl = cur_win == win and cursor_line_active or cursor_line_inactive
