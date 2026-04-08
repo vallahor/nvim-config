@@ -272,12 +272,6 @@ vim.api.nvim_create_autocmd("FocusGained", {
   end,
 })
 
-vim.api.nvim_create_autocmd("DiagnosticChanged", {
-  callback = function()
-    vim.cmd.redrawtabline({ mods = { silent = true } })
-  end,
-})
-
 vim.api.nvim_create_autocmd("FileType", {
   pattern = {
     "css",
