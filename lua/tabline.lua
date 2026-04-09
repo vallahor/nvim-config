@@ -7,8 +7,14 @@ M.update_cursor_line_hl = function(_, _) end
 
 local focus_idx = 1
 local ghost_space = 4
----@type {slide_window: {b: integer, str: string, w: integer }[]|{b: nil, str: string, w: integer }[], w_avail: integer, lo: integer, hi: integer, w_hi: integer, w_lo: integer}
-local ruler = { slide_window = {}, w_avail = 0, lo = 1, hi = 1, w_hi = 0, w_lo = 0 }
+---@type {slide_window: {b: integer, str: string, w: integer }[]|{b: nil, str: string, w: integer }[], w_avail: integer, w_changed: boolean, lo: integer, hi: integer}
+local ruler = {
+  slide_window = {},
+  w_avail = 0,
+  w_changed = true,
+  lo = 1,
+  hi = 1,
+}
 local buf_order = {}
 local buf_index = {}
 local diag_cache = {}
@@ -20,6 +26,7 @@ local function update_buf_index()
     buf_index[b] = i
   end
   ruler.w_avail = 0
+  ruler.w_changed = true
 end
 
 local function get_current_index()
@@ -129,23 +136,27 @@ end
 
 local function get_ruler_hi(idx, avail)
   local w = tabs_cache[idx].w
-  local hi = idx + 1
-  while hi <= #tabs_cache and w + tabs_cache[hi].w <= avail - ghost_space do
-    w = w + tabs_cache[hi].w
-    hi = hi + 1
+  local hi = idx
+  for pos = hi + 1, #tabs_cache do
+    if w + tabs_cache[pos].w > avail - ghost_space then
+      break
+    end
+    w = w + tabs_cache[pos].w
+    hi = pos
   end
-  hi = hi - 1
   return hi, w
 end
 
 local function get_ruler_lo(idx, avail)
   local w = tabs_cache[idx].w
-  local lo = idx - 1
-  while lo >= 1 and w + tabs_cache[lo].w <= avail - ghost_space do
-    w = w + tabs_cache[lo].w
-    lo = lo - 1
+  local lo = idx
+  for pos = lo - 1, 1, -1 do
+    if w + tabs_cache[pos].w > avail - ghost_space then
+      break
+    end
+    w = w + tabs_cache[pos].w
+    lo = pos
   end
-  lo = lo + 1
   return lo, w
 end
 
@@ -158,10 +169,15 @@ local function truncate_tabs(avail)
   elseif focus_idx < ruler.lo then
     ruler.hi, w = get_ruler_hi(focus_idx, avail)
     ruler.lo = focus_idx
-  elseif ruler.w_avail ~= avail then
-    ruler.lo, w = get_ruler_lo(focus_idx, avail)
-    ruler.hi, w = get_ruler_hi(focus_idx, w)
+  elseif ruler.w_avail ~= avail or ruler.w_changed then
     ruler.w_avail = avail
+    for idx = ruler.lo, #tabs_cache do
+      w = w + tabs_cache[idx].w
+      if w > avail - ghost_space then
+        break
+      end
+      ruler.hi = idx
+    end
   end
 
   if w ~= 0 then
@@ -175,12 +191,6 @@ local function truncate_tabs(avail)
     if ruler.hi < #tabs_cache then
       ruler.slide_window[#ruler.slide_window + 1] = { b = nil, str = "%#TablineHidden#… ", w = 1 }
     end
-  else
-    for i = ruler.lo + 1, focus_idx do
-      w = w + tabs_cache[i].w
-    end
-    ruler.w_lo = w
-    ruler.w_hi = avail - w
   end
 
   return ruler.slide_window
@@ -261,6 +271,7 @@ local function swap(i, j)
   tabs_cache[i], tabs_cache[j] = tabs_cache[j], tabs_cache[i]
   buf_index[buf_order[i]] = i
   buf_index[buf_order[j]] = j
+  ruler.w_changed = true
   vim.cmd.redrawtabline()
 end
 
@@ -416,6 +427,7 @@ local function setup_autocmds()
         end
         buf_order[#buf_order + 1] = b
         update_buf_index()
+        ruler.w_changed = true
         resolve_tabs()
         vim.cmd.redrawtabline()
       end)
@@ -434,6 +446,7 @@ local function setup_autocmds()
 
       buf_index[b] = nil
       diag_cache[b] = nil
+      ruler.w_changed = true
       update_buf_index()
       resolve_tabs()
     end,
