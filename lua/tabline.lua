@@ -68,8 +68,7 @@ local function resolve_tabs()
 
   for _, b in ipairs(buf_order) do
     local info = names[b]
-    local modified = bo[b].modified
-    tabs[#tabs + 1] = { b = b, str = info.name, w = info.w, modified = modified }
+    tabs[#tabs + 1] = { b = b, str = info.name, w = info.w }
     total_w = total_w + info.w
   end
 
@@ -118,12 +117,12 @@ local diag_filter = { severity = { min = vim.diagnostic.severity.WARN, max = vim
 
 ---@param b integer
 ---@param focused boolean
----@param modified boolean
 ---@return string
-local function resolve_hl(b, focused, modified)
+local function resolve_hl(b, focused)
   if not b then
     return ""
   end
+  local modified = bo[b].modified
   local cached = diag_cache[b]
   if not cached then
     cached = vim.diagnostic.count(b, diag_filter)
@@ -188,12 +187,12 @@ function M.make_tabline()
   end
   focus_idx = math.max(1, math.min(focus_idx, #tabs_cache))
 
-  ---@type {b: integer, str: string, modified: boolean }[]
+  ---@type {b: integer, str: string }[]
   local result_tabs = (tabs_width_cache > avail and truncate_tabs(tabs_cache, avail) or tabs_cache)
 
   local parts = { sidebar }
   for _, part in ipairs(result_tabs) do
-    local hl = resolve_hl(part.b, part.b == cur_buf, part.modified)
+    local hl = resolve_hl(part.b, part.b == cur_buf)
     parts[#parts + 1] = hl .. part.str
   end
   parts[#parts + 1] = "%#TablineFill#"
