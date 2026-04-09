@@ -171,12 +171,9 @@ local function truncate_tabs(avail)
     ruler.lo = focus_idx
   elseif ruler.w_avail ~= avail or ruler.w_changed then
     ruler.w_avail = avail
-    for idx = ruler.lo, #tabs_cache do
-      w = w + tabs_cache[idx].w
-      if w > avail - ghost_space then
-        break
-      end
-      ruler.hi = idx
+    ruler.hi, w = get_ruler_hi(ruler.lo, avail)
+    if ruler.hi == #tabs_cache then
+      ruler.lo, w = get_ruler_lo(ruler.hi, avail)
     end
   end
 
