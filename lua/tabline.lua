@@ -7,8 +7,8 @@ M.update_cursor_line_hl = function(_, _) end
 
 local focus_idx = 1
 local ghost_space = 4
----@type {slide_window: {b: integer, str: string, w: integer }[]|{b: nil, str: string, w: integer }[], w_avail: integer, lo: integer, hi: integer}
-local ruler = { slide_window = {}, w_avail = 0, lo = 1, hi = 1 }
+---@type {slide_window: {b: integer, str: string, w: integer }[]|{b: nil, str: string, w: integer }[], w_avail: integer, lo: integer, hi: integer, w_hi: integer, w_lo: integer}
+local ruler = { slide_window = {}, w_avail = 0, lo = 1, hi = 1, w_hi = 0, w_lo = 0 }
 local buf_order = {}
 local buf_index = {}
 local diag_cache = {}
@@ -19,6 +19,7 @@ local function update_buf_index()
   for i, b in ipairs(buf_order) do
     buf_index[b] = i
   end
+  ruler.w_avail = 0
 end
 
 local function get_current_index()
@@ -127,48 +128,43 @@ local function resolve_hl(b, focused)
 end
 
 local function get_ruler_hi(idx, avail)
-  local hi = idx
   local w = tabs_cache[idx].w
-  while hi < #tabs_cache and w + tabs_cache[hi].w <= avail - ghost_space do
+  local hi = idx + 1
+  while hi <= #tabs_cache and w + tabs_cache[hi].w <= avail - ghost_space do
     w = w + tabs_cache[hi].w
     hi = hi + 1
   end
+  hi = hi - 1
   return hi, w
 end
 
 local function get_ruler_lo(idx, avail)
-  local lo = idx
   local w = tabs_cache[idx].w
-  while lo > 1 and w + tabs_cache[lo].w <= avail - ghost_space do
+  local lo = idx - 1
+  while lo >= 1 and w + tabs_cache[lo].w <= avail - ghost_space do
     w = w + tabs_cache[lo].w
     lo = lo - 1
   end
+  lo = lo + 1
   return lo, w
 end
 
 local function truncate_tabs(avail)
-  local should_update = true
-
-  if ruler.w_avail ~= avail then
-    ruler.w_avail = avail
-    should_update = true
-  end
+  local w = 0
 
   if focus_idx > ruler.hi then
     ruler.hi = focus_idx
-    ruler.lo, _ = get_ruler_lo(focus_idx - 1, ruler.w_avail)
-    should_update = true
+    ruler.lo, w = get_ruler_lo(focus_idx, avail)
   elseif focus_idx < ruler.lo then
-    ruler.hi, _ = get_ruler_hi(focus_idx + 1, ruler.w_avail)
+    ruler.hi, w = get_ruler_hi(focus_idx, avail)
     ruler.lo = focus_idx
-    should_update = true
-  elseif should_update then
-    local hi, w = get_ruler_hi(math.min(focus_idx + 1, #tabs_cache), ruler.w_avail)
-    ruler.hi = hi
-    ruler.lo = get_ruler_lo(focus_idx, ruler.w_avail - w)
+  elseif ruler.w_avail ~= avail then
+    ruler.lo, w = get_ruler_lo(focus_idx, avail)
+    ruler.hi, w = get_ruler_hi(focus_idx, w)
+    ruler.w_avail = avail
   end
 
-  if should_update then
+  if w ~= 0 then
     ruler.slide_window = {}
     if ruler.lo > 1 then
       ruler.slide_window[#ruler.slide_window + 1] = { b = nil, str = " %#TablineHidden#…", w = 1 }
@@ -179,6 +175,12 @@ local function truncate_tabs(avail)
     if ruler.hi < #tabs_cache then
       ruler.slide_window[#ruler.slide_window + 1] = { b = nil, str = "%#TablineHidden#… ", w = 1 }
     end
+  else
+    for i = ruler.lo + 1, focus_idx do
+      w = w + tabs_cache[i].w
+    end
+    ruler.w_lo = w
+    ruler.w_hi = avail - w
   end
 
   return ruler.slide_window
@@ -192,20 +194,25 @@ function M.make_tabline()
   local cur_buf = in_tree and -1 or api.nvim_get_current_buf()
 
   local sidebar, sidebar_width = render_sidebar(tree_winnr, in_tree)
-  local avail = vim.o.columns - sidebar_width - (tree_winnr and 1 or 0)
 
   if not in_tree and buf_index[cur_buf] then
     focus_idx = buf_index[cur_buf]
   end
   focus_idx = math.max(1, math.min(focus_idx, #tabs_cache))
 
+  local avail = vim.o.columns - sidebar_width - (tree_winnr and 1 or 0)
+
   ---@type {b: integer, str: string, w: integer }[]|{b: nil, str: string, w: integer }[]
   local result_tabs = (tabs_width_cache > avail and truncate_tabs(avail) or tabs_cache)
 
   local parts = { sidebar }
   for _, part in ipairs(result_tabs) do
-    local hl = resolve_hl(part.b, part.b == cur_buf)
-    parts[#parts + 1] = hl .. part.str
+    if part.b then
+      local hl = resolve_hl(part.b, part.b == cur_buf)
+      parts[#parts + 1] = hl .. part.str
+    else
+      parts[#parts + 1] = part.str
+    end
   end
   parts[#parts + 1] = "%#TablineFill#"
   return table.concat(parts)
