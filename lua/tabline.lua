@@ -7,7 +7,7 @@ M.update_cursor_line_hl = function(_, _) end
 
 local focus_idx = 1
 local ghost_space = 4
----@type {slide_window: {b: integer, str: string, w: integer }[]|{b: nil, str: string, w: integer }[], w_avail: integer, w_changed: boolean, lo: integer, hi: integer}
+---@type {slide_window: {b: integer, str: string }[]|{b: nil, str: string }[], w_avail: integer, w_changed: boolean, lo: integer, hi: integer}
 local ruler = {
   slide_window = {},
   w_avail = 0,
@@ -119,12 +119,12 @@ local function resolve_hl(b, focused)
     return ""
   end
   local modified = bo[b].modified
-  local cached = diag_cache[b]
-  if not cached then
-    cached = vim.diagnostic.count(b, diag_filter)
-    diag_cache[b] = cached
+  if not diag_cache[b] then
+    diag_cache[b] = vim.diagnostic.count(b, diag_filter)
   end
-  local sev = (cached[1] and cached[1] > 0) and 1 or (cached[2] and cached[2] > 0) and 2 or nil
+  local sev = (diag_cache[b][vim.diagnostic.severity.ERROR] or 0) > 0 and 1
+    or (diag_cache[b][vim.diagnostic.severity.WARN] or 0) > 0 and 2
+    or nil
   if sev then
     return diag_hl_map[sev][modified and 2 or 1][focused and 2 or 1]
   end
@@ -180,13 +180,13 @@ local function truncate_tabs(avail)
   if w ~= 0 then
     ruler.slide_window = {}
     if ruler.lo > 1 then
-      ruler.slide_window[#ruler.slide_window + 1] = { b = nil, str = " %#TablineHidden#…", w = 1 }
+      ruler.slide_window[#ruler.slide_window + 1] = { b = nil, str = " %#TablineHidden#…" }
     end
     for i = ruler.lo, ruler.hi do
       ruler.slide_window[#ruler.slide_window + 1] = tabs_cache[i]
     end
     if ruler.hi < #tabs_cache then
-      ruler.slide_window[#ruler.slide_window + 1] = { b = nil, str = "%#TablineHidden#… ", w = 1 }
+      ruler.slide_window[#ruler.slide_window + 1] = { b = nil, str = "%#TablineHidden#… " }
     end
   end
 
@@ -209,17 +209,13 @@ function M.make_tabline()
 
   local avail = vim.o.columns - sidebar_width - (tree_winnr and 1 or 0)
 
-  ---@type {b: integer, str: string, w: integer }[]|{b: nil, str: string, w: integer }[]
+  ---@type {b: integer?, str: string }[]|{b: nil, str: string }[]
   local result_tabs = (tabs_width_cache > avail and truncate_tabs(avail) or tabs_cache)
 
   local parts = { sidebar }
   for _, part in ipairs(result_tabs) do
-    if part.b then
-      local hl = resolve_hl(part.b, part.b == cur_buf)
-      parts[#parts + 1] = hl .. part.str
-    else
-      parts[#parts + 1] = part.str
-    end
+    local hl = resolve_hl(part.b, part.b == cur_buf)
+    parts[#parts + 1] = hl .. part.str
   end
   parts[#parts + 1] = "%#TablineFill#"
   return table.concat(parts)
@@ -452,6 +448,7 @@ local function setup_autocmds()
   api.nvim_create_autocmd("DiagnosticChanged", {
     callback = function(ev)
       diag_cache[ev.buf] = nil
+      vim.cmd.redrawtabline()
     end,
   })
 
