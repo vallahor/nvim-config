@@ -197,9 +197,6 @@ function M.make_tabline()
   end
 
   focus_idx = math.max(1, math.min(focus_idx, #tabs))
-  if #tabs == 0 then
-    return sidebar .. "%#TablineFill#"
-  end
 
   local result_tabs = (total_w > avail and truncate_tabs(tabs, avail) or tabs) --[[@as {str:string, w:integer}[] ]]
 
