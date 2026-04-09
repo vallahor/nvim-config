@@ -86,6 +86,7 @@ local function spaces(n)
   return cached_spaces
 end
 
+---@return string, integer
 local function render_sidebar(tree_winnr, in_tree)
   if not tree_winnr then
     return "", 0
@@ -160,6 +161,7 @@ local function get_ruler_lo(idx, avail)
   return lo, w
 end
 
+---@param avail integer
 local function truncate_tabs(avail)
   local w = 0
 
@@ -178,15 +180,18 @@ local function truncate_tabs(avail)
   end
 
   if w ~= 0 then
+    local space = 2
     ruler.slide_window = {}
     if ruler.lo > 1 then
+      space = space + 2
       ruler.slide_window[#ruler.slide_window + 1] = { b = nil, str = " %#TablineHidden#…" }
     end
     for i = ruler.lo, ruler.hi do
       ruler.slide_window[#ruler.slide_window + 1] = tabs_cache[i]
     end
     if ruler.hi < #tabs_cache then
-      ruler.slide_window[#ruler.slide_window + 1] = { b = nil, str = "%#TablineHidden#… " }
+      local pad = string.rep(" ", avail - w - space)
+      ruler.slide_window[#ruler.slide_window + 1] = { b = nil, str = "%#TablineFill#" .. pad .. "%#TablineHidden#… " }
     end
   end
 
@@ -207,6 +212,7 @@ function M.make_tabline()
   end
   focus_idx = math.max(1, math.min(focus_idx, #tabs_cache))
 
+  ---@type integer
   local avail = vim.o.columns - sidebar_width - (tree_winnr and 1 or 0)
 
   ---@type {b: integer?, str: string }[]|{b: nil, str: string }[]
