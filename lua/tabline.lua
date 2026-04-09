@@ -32,44 +32,30 @@ local function init_bufs()
   update_buf_index()
 end
 
----@return table<integer, { bufname: string, name: string, w: integer }>
-local function resolve_names()
-  local names = {}
+local function resolve_tabs()
+  local buf_names = {}
   local counts = {}
 
   for _, b in ipairs(buf_order) do
     local bufname = api.nvim_buf_get_name(b)
     local tail = bufname ~= "" and fnamemodify(bufname, ":t") or "[No Name]"
     counts[tail] = (counts[tail] or 0) + 1
-    names[b] = { bufname = bufname, tail = tail }
+    buf_names[#buf_names + 1] = { b = b, bufname = bufname, tail = tail }
   end
 
-  for _, info in pairs(names) do
+  local tabs = {}
+  local total_w = 0
+
+  for _, info in ipairs(buf_names) do
     local display
     if counts[info.tail] > 1 and info.bufname ~= "" then
       display = " " .. fnamemodify(info.bufname, ":~:."):gsub("^%./", "") .. " "
     else
       display = " " .. info.tail .. " "
     end
-    info.name = display
-    info.w = strwidth(display)
-    info.tail = nil
-    info.bufname = nil
-  end
-
-  return names
-end
-
-local function resolve_tabs()
-  local names = resolve_names()
-
-  local tabs = {}
-  local total_w = 0
-
-  for _, b in ipairs(buf_order) do
-    local info = names[b]
-    tabs[#tabs + 1] = { b = b, str = info.name, w = info.w }
-    total_w = total_w + info.w
+    local width = strwidth(display)
+    tabs[#tabs + 1] = { b = info.b, str = display, w = width }
+    total_w = total_w + width
   end
 
   tabs_cache = tabs
@@ -138,22 +124,22 @@ local function resolve_hl(b, focused)
   return focused and "%#TablineCurrent#" or "%#TablineVisible#"
 end
 
-local function truncate_tabs(tabs, avail)
-  local kept = { tabs[focus_idx] }
-  local w = tabs[focus_idx].w
+local function truncate_tabs(avail)
+  local kept = { tabs_cache[focus_idx] }
+  local w = tabs_cache[focus_idx].w
   local lo, hi = focus_idx - 1, focus_idx + 1
 
   while true do
     local added = false
-    if hi <= #tabs and w + tabs[hi].w <= avail - ghost_space then
-      w = w + tabs[hi].w
-      kept[#kept + 1] = tabs[hi]
+    if hi <= #tabs_cache and w + tabs_cache[hi].w <= avail - ghost_space then
+      w = w + tabs_cache[hi].w
+      kept[#kept + 1] = tabs_cache[hi]
       hi = hi + 1
       added = true
     end
-    if lo >= 1 and w + tabs[lo].w <= avail - ghost_space then
-      w = w + tabs[lo].w
-      table.insert(kept, 1, tabs[lo])
+    if lo >= 1 and w + tabs_cache[lo].w <= avail - ghost_space then
+      w = w + tabs_cache[lo].w
+      table.insert(kept, 1, tabs_cache[lo])
       lo = lo - 1
       added = true
     end
@@ -165,7 +151,7 @@ local function truncate_tabs(tabs, avail)
   if lo >= 1 then
     table.insert(kept, 1, { str = " %#TablineHidden#…", w = 1 })
   end
-  if hi <= #tabs then
+  if hi <= #tabs_cache then
     kept[#kept + 1] = { str = "%#TablineHidden#… ", w = 1 }
   end
 
@@ -188,7 +174,7 @@ function M.make_tabline()
   focus_idx = math.max(1, math.min(focus_idx, #tabs_cache))
 
   ---@type {b: integer, str: string }[]
-  local result_tabs = (tabs_width_cache > avail and truncate_tabs(tabs_cache, avail) or tabs_cache)
+  local result_tabs = (tabs_width_cache > avail and truncate_tabs(avail) or tabs_cache)
 
   local parts = { sidebar }
   for _, part in ipairs(result_tabs) do
