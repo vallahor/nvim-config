@@ -10,7 +10,8 @@ local ghost_space = 4
 local buf_order = {}
 local buf_index = {}
 local diag_cache = {}
-local name_cache = nil ---@type table<integer, { bufname: string, name: string, w: integer }>?
+local tabs_cache = {} ---@type table
+local tabs_width_cache = 0
 
 local function update_buf_index()
   for i, b in ipairs(buf_order) do
@@ -31,16 +32,8 @@ local function init_bufs()
   update_buf_index()
 end
 
-local function invalidate_name_cache()
-  name_cache = nil
-end
-
 ---@return table<integer, { bufname: string, name: string, w: integer }>
 local function resolve_names()
-  if name_cache then
-    return name_cache
-  end
-
   local names = {}
   local counts = {}
 
@@ -64,8 +57,24 @@ local function resolve_names()
     info.bufname = nil
   end
 
-  name_cache = names
-  return name_cache
+  return names
+end
+
+local function resolve_tabs()
+  local names = resolve_names()
+
+  local tabs = {}
+  local total_w = 0
+
+  for _, b in ipairs(buf_order) do
+    local info = names[b]
+    local modified = bo[b].modified
+    tabs[#tabs + 1] = { b = b, str = info.name, w = info.w, modified = modified }
+    total_w = total_w + info.w
+  end
+
+  tabs_cache = tabs
+  tabs_width_cache = total_w
 end
 
 local nvim_tree_view = require("nvim-tree.view")
@@ -109,10 +118,12 @@ local diag_filter = { severity = { min = vim.diagnostic.severity.WARN, max = vim
 
 ---@param b integer
 ---@param focused boolean
----@param visible boolean|nil
 ---@param modified boolean
 ---@return string
-local function resolve_hl(b, focused, visible, modified)
+local function resolve_hl(b, focused, modified)
+  if not b then
+    return ""
+  end
   local cached = diag_cache[b]
   if not cached then
     cached = vim.diagnostic.count(b, diag_filter)
@@ -123,11 +134,9 @@ local function resolve_hl(b, focused, visible, modified)
     return diag_hl_map[sev][modified and 2 or 1][focused and 2 or 1]
   end
   if modified then
-    return focused and "%#TablineModifiedCurrent#"
-      or visible and "%#TablineModifiedVisible#"
-      or "%#TablineModifiedHidden#"
+    return focused and "%#TablineModifiedCurrent#" or "%#TablineModifiedVisible#"
   end
-  return focused and "%#TablineCurrent#" or visible and "%#TablineVisible#" or "%#TablineHidden#"
+  return focused and "%#TablineCurrent#" or "%#TablineVisible#"
 end
 
 local function truncate_tabs(tabs, avail)
@@ -168,41 +177,24 @@ function M.make_tabline()
   local cur_win = api.nvim_get_current_win()
   local tree_winnr = nvim_tree_view.get_winnr()
   local in_tree = tree_winnr ~= nil and cur_win == tree_winnr
+
   local cur_buf = in_tree and -1 or api.nvim_get_current_buf()
 
   local sidebar, sidebar_width = render_sidebar(tree_winnr, in_tree)
-  local names = resolve_names()
-
-  local visible_bufs = {}
-  for _, w in ipairs(api.nvim_list_wins()) do
-    visible_bufs[api.nvim_win_get_buf(w)] = true
-  end
-
   local avail = vim.o.columns - sidebar_width - (tree_winnr and 1 or 0)
-  local tabs = {}
-  local total_w = 0
 
-  for i, b in ipairs(buf_order) do
-    local info = names[b]
-    local focused = b == cur_buf
-    local visible = visible_bufs[b] and not focused
-    local modified = bo[b].modified
-    local hl = resolve_hl(b, focused, visible, modified)
-
-    if focused then
-      focus_idx = i
-    end
-    tabs[#tabs + 1] = { str = hl .. info.name, w = info.w }
-    total_w = total_w + info.w
+  if not in_tree and buf_index[cur_buf] then
+    focus_idx = buf_index[cur_buf]
   end
+  focus_idx = math.max(1, math.min(focus_idx, #tabs_cache))
 
-  focus_idx = math.max(1, math.min(focus_idx, #tabs))
-
-  local result_tabs = (total_w > avail and truncate_tabs(tabs, avail) or tabs) --[[@as {str:string, w:integer}[] ]]
+  ---@type {b: integer, str: string, modified: boolean }[]
+  local result_tabs = (tabs_width_cache > avail and truncate_tabs(tabs_cache, avail) or tabs_cache)
 
   local parts = { sidebar }
-  for i = 1, #result_tabs do
-    parts[#parts + 1] = result_tabs[i].str
+  for _, part in ipairs(result_tabs) do
+    local hl = resolve_hl(part.b, part.b == cur_buf, part.modified)
+    parts[#parts + 1] = hl .. part.str
   end
   parts[#parts + 1] = "%#TablineFill#"
   return table.concat(parts)
@@ -248,6 +240,7 @@ end
 
 local function swap(i, j)
   buf_order[i], buf_order[j] = buf_order[j], buf_order[i]
+  tabs_cache[i], tabs_cache[j] = tabs_cache[j], tabs_cache[i]
   buf_index[buf_order[i]] = i
   buf_index[buf_order[j]] = j
   vim.cmd.redrawtabline()
@@ -281,6 +274,8 @@ function M.move_tab_begin()
   if i > 1 then
     local b = table.remove(buf_order, i)
     table.insert(buf_order, 1, b)
+    local t = table.remove(tabs_cache, i)
+    table.insert(tabs_cache, 1, t)
     update_buf_index()
     vim.cmd.redrawtabline()
   end
@@ -294,6 +289,8 @@ function M.move_tab_end()
   if i < #buf_order then
     local b = table.remove(buf_order, i)
     buf_order[#buf_order + 1] = b
+    local t = table.remove(tabs_cache, i)
+    tabs_cache[#tabs_cache + 1] = t
     update_buf_index()
     vim.cmd.redrawtabline()
   end
@@ -341,8 +338,8 @@ function M.buf_delete(bufnr, force)
 
   buf_index[bufnr] = nil
   diag_cache[bufnr] = nil
-  invalidate_name_cache()
   update_buf_index()
+  resolve_tabs()
 
   if api.nvim_buf_is_valid(bufnr) then
     api.nvim_buf_delete(bufnr, { force = true })
@@ -401,7 +398,7 @@ local function setup_autocmds()
         end
         buf_order[#buf_order + 1] = b
         update_buf_index()
-        invalidate_name_cache()
+        resolve_tabs()
         vim.cmd.redrawtabline()
       end)
     end,
@@ -419,8 +416,8 @@ local function setup_autocmds()
 
       buf_index[b] = nil
       diag_cache[b] = nil
-      invalidate_name_cache()
       update_buf_index()
+      resolve_tabs()
     end,
   })
 
@@ -431,7 +428,7 @@ local function setup_autocmds()
   })
 
   api.nvim_create_autocmd({ "BufFilePost", "BufAdd" }, {
-    callback = invalidate_name_cache,
+    callback = resolve_tabs,
   })
 
   api.nvim_create_autocmd("ColorScheme", {
@@ -467,6 +464,7 @@ function M.setup(opts)
   setup_autocmds()
   setup_keymaps()
   setup_tabline_hl()
+  resolve_tabs()
 
   if opts and type(opts.update_cursor_line_hl) == "function" then
     M.update_cursor_line_hl = opts.update_cursor_line_hl
