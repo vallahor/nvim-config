@@ -7,6 +7,8 @@ M.update_cursor_line_hl = function(_, _) end
 
 local focus_idx = 1
 local ghost_space = 4
+---@type {slide_window: {b: integer, str: string, w: integer }[]|{b: nil, str: string, w: integer }[], w_avail: integer, lo: integer, hi: integer}
+local ruler = { slide_window = {}, w_avail = 0, lo = 1, hi = 1 }
 local buf_order = {}
 local buf_index = {}
 local diag_cache = {}
@@ -124,39 +126,62 @@ local function resolve_hl(b, focused)
   return focused and "%#TablineCurrent#" or "%#TablineVisible#"
 end
 
+local function get_ruler_hi(idx, avail)
+  local hi = idx
+  local w = tabs_cache[idx].w
+  while hi < #tabs_cache and w + tabs_cache[hi].w <= avail - ghost_space do
+    w = w + tabs_cache[hi].w
+    hi = hi + 1
+  end
+  return hi, w
+end
+
+local function get_ruler_lo(idx, avail)
+  local lo = idx
+  local w = tabs_cache[idx].w
+  while lo > 1 and w + tabs_cache[lo].w <= avail - ghost_space do
+    w = w + tabs_cache[lo].w
+    lo = lo - 1
+  end
+  return lo, w
+end
+
 local function truncate_tabs(avail)
-  local kept = {}
-  local w = tabs_cache[focus_idx].w
-  local lo, hi = focus_idx - 1, focus_idx + 1
+  local should_update = true
 
-  while true do
-    local added = false
-    if hi <= #tabs_cache and w + tabs_cache[hi].w <= avail - ghost_space then
-      w = w + tabs_cache[hi].w
-      hi = hi + 1
-      added = true
-    end
-    if lo >= 1 and w + tabs_cache[lo].w <= avail - ghost_space then
-      w = w + tabs_cache[lo].w
-      lo = lo - 1
-      added = true
-    end
-    if not added then
-      break
-    end
+  if ruler.w_avail ~= avail then
+    ruler.w_avail = avail
+    should_update = true
   end
 
-  if lo >= 1 then
-    kept[#kept + 1] = { b = nil, str = " %#TablineHidden#…", w = 1 }
-  end
-  for i = lo + 1, hi - 1 do
-    kept[#kept + 1] = tabs_cache[i]
-  end
-  if hi <= #tabs_cache then
-    kept[#kept + 1] = { b = nil, str = "%#TablineHidden#… ", w = 1 }
+  if focus_idx > ruler.hi then
+    ruler.hi = focus_idx
+    ruler.lo, _ = get_ruler_lo(focus_idx - 1, ruler.w_avail)
+    should_update = true
+  elseif focus_idx < ruler.lo then
+    ruler.hi, _ = get_ruler_hi(focus_idx + 1, ruler.w_avail)
+    ruler.lo = focus_idx
+    should_update = true
+  elseif should_update then
+    local hi, w = get_ruler_hi(math.min(focus_idx + 1, #tabs_cache), ruler.w_avail)
+    ruler.hi = hi
+    ruler.lo = get_ruler_lo(focus_idx, ruler.w_avail - w)
   end
 
-  return kept
+  if should_update then
+    ruler.slide_window = {}
+    if ruler.lo > 1 then
+      ruler.slide_window[#ruler.slide_window + 1] = { b = nil, str = " %#TablineHidden#…", w = 1 }
+    end
+    for i = ruler.lo, ruler.hi do
+      ruler.slide_window[#ruler.slide_window + 1] = tabs_cache[i]
+    end
+    if ruler.hi < #tabs_cache then
+      ruler.slide_window[#ruler.slide_window + 1] = { b = nil, str = "%#TablineHidden#… ", w = 1 }
+    end
+  end
+
+  return ruler.slide_window
 end
 
 function M.make_tabline()
