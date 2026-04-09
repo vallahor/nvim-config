@@ -28,14 +28,38 @@ api.events.subscribe(api.events.Event.FileRemoved, function(data)
     return
   end
 
+  local real_bufs = {}
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    if
+      vim.api.nvim_buf_is_valid(buf)
+      and vim.bo[buf].buflisted
+      and buf ~= removed_buf
+      and vim.bo[buf].filetype ~= "NvimTree"
+    then
+      real_bufs[1] = buf
+    end
+  end
+
   local wins = vim.fn.win_findbuf(removed_buf)
   if #wins == 0 then
     return
   end
 
-  local scratch = vim.api.nvim_create_buf(true, false)
-  for _, win in ipairs(wins) do
-    vim.api.nvim_win_set_buf(win, scratch)
+  if #real_bufs > 0 then
+    local target = real_bufs[1]
+
+    for _, win in ipairs(wins) do
+      vim.api.nvim_win_set_buf(win, target)
+    end
+  else
+    local scratch = vim.api.nvim_create_buf(true, false)
+    for _, win in ipairs(wins) do
+      vim.api.nvim_win_set_buf(win, scratch)
+    end
+
+    vim.schedule(function()
+      api.tree.focus()
+    end)
   end
 end)
 
