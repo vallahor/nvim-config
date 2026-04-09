@@ -147,13 +147,13 @@ local function truncate_tabs(avail)
   end
 
   if lo >= 1 then
-    kept[#kept + 1] = { str = " %#TablineHidden#…", w = 1 }
+    kept[#kept + 1] = { b = nil, str = " %#TablineHidden#…", w = 1 }
   end
   for i = lo + 1, hi - 1 do
     kept[#kept + 1] = tabs_cache[i]
   end
   if hi <= #tabs_cache then
-    kept[#kept + 1] = { str = "%#TablineHidden#… ", w = 1 }
+    kept[#kept + 1] = { b = nil, str = "%#TablineHidden#… ", w = 1 }
   end
 
   return kept
@@ -174,7 +174,7 @@ function M.make_tabline()
   end
   focus_idx = math.max(1, math.min(focus_idx, #tabs_cache))
 
-  ---@type {b: integer, str: string, w: integer }[]|{str: string, w: integer }[]
+  ---@type {b: integer, str: string, w: integer }[]|{b: nil, str: string, w: integer }[]
   local result_tabs = (tabs_width_cache > avail and truncate_tabs(avail) or tabs_cache)
 
   local parts = { sidebar }
