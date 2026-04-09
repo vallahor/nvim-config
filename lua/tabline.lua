@@ -125,7 +125,7 @@ local function resolve_hl(b, focused)
 end
 
 local function truncate_tabs(avail)
-  local kept = { tabs_cache[focus_idx] }
+  local kept = {}
   local w = tabs_cache[focus_idx].w
   local lo, hi = focus_idx - 1, focus_idx + 1
 
@@ -133,13 +133,11 @@ local function truncate_tabs(avail)
     local added = false
     if hi <= #tabs_cache and w + tabs_cache[hi].w <= avail - ghost_space then
       w = w + tabs_cache[hi].w
-      kept[#kept + 1] = tabs_cache[hi]
       hi = hi + 1
       added = true
     end
     if lo >= 1 and w + tabs_cache[lo].w <= avail - ghost_space then
       w = w + tabs_cache[lo].w
-      table.insert(kept, 1, tabs_cache[lo])
       lo = lo - 1
       added = true
     end
@@ -149,7 +147,10 @@ local function truncate_tabs(avail)
   end
 
   if lo >= 1 then
-    table.insert(kept, 1, { str = " %#TablineHidden#…", w = 1 })
+    kept[#kept + 1] = { str = " %#TablineHidden#…", w = 1 }
+  end
+  for i = lo + 1, hi - 1 do
+    kept[#kept + 1] = tabs_cache[i]
   end
   if hi <= #tabs_cache then
     kept[#kept + 1] = { str = "%#TablineHidden#… ", w = 1 }
@@ -173,7 +174,7 @@ function M.make_tabline()
   end
   focus_idx = math.max(1, math.min(focus_idx, #tabs_cache))
 
-  ---@type {b: integer, str: string }[]
+  ---@type {b: integer, str: string, w: integer }[]|{str: string, w: integer }[]
   local result_tabs = (tabs_width_cache > avail and truncate_tabs(avail) or tabs_cache)
 
   local parts = { sidebar }
