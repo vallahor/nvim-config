@@ -238,7 +238,10 @@ local function calc_truncated_tabs(width)
     if viewport.hi < #tabs_cache then
       postfix = "%#TablineHidden#… "
       if w > 0 then
-        postfix = resolve_post_str(width - w - space) .. postfix
+        local size = width - w - space
+        if size > 0 then
+          postfix = resolve_post_str(width - w - space) .. postfix
+        end
       end
     end
   end
