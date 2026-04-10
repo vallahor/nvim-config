@@ -208,9 +208,8 @@ local function calc_truncated_tabs(width)
 end
 
 function M.make_tabline()
-  local cur_win = api.nvim_get_current_win()
   local tree_winnr = nvim_tree_view.get_winnr()
-  local in_tree = tree_winnr ~= nil and cur_win == tree_winnr
+  local in_tree = api.nvim_get_current_win() == tree_winnr
   local cur_buf = in_tree and -1 or api.nvim_get_current_buf()
 
   if not in_tree and buf_index[cur_buf] then
