@@ -146,7 +146,7 @@ local function resolve_hl(b, focused)
   if not diag_cache[b] then
     diag_cache[b] = vim.diagnostic.count(b, diag_filter)
   end
-  local sev = (diag_cache[b][vim.diagnostic.severity.ERROR] or 0) > 0 and 1
+  local sev = diag_cache[b] and (diag_cache[b][vim.diagnostic.severity.ERROR] or 0) > 0 and 1
     or (diag_cache[b][vim.diagnostic.severity.WARN] or 0) > 0 and 2
     or nil
   if sev then
@@ -181,20 +181,32 @@ local function get_ruler_lo(idx, width)
     w = w + tabs_cache[pos].w
     lo = pos
   end
-  return lo, w
+  return lo, -w
+end
+
+local function resolve_prefix_str(size)
+  local tab = tabs_cache[viewport.lo - 1] --[[@as table]]
+  local buf = buf_cache[viewport.lo - 1] --[[@as integer]]
+  return resolve_hl(buf, false) .. string.sub(tab.str, -size)
+end
+
+local function resolve_post_str(size)
+  local tab = tabs_cache[viewport.hi + 1] --[[@as table]]
+  local buf = buf_cache[viewport.hi + 1] --[[@as integer]]
+  return resolve_hl(buf, false) .. string.sub(tab.str, 1, size)
 end
 
 ---@param width integer
 local function calc_truncated_tabs(width)
   local w = 0
 
-  if viewport.index > viewport.hi then
+  if viewport.index >= viewport.hi + 1 then
     viewport.hi = viewport.index
     viewport.lo, w = get_ruler_lo(viewport.index, width)
-  elseif viewport.index < viewport.lo then
+  elseif viewport.index <= viewport.lo - 1 then
     viewport.hi, w = get_ruler_hi(viewport.index, width)
     viewport.lo = viewport.index
-  elseif viewport.width ~= width or viewport.changed then
+  elseif viewport.width ~= width then
     viewport.width = width
     viewport.hi, w = get_ruler_hi(viewport.lo, width)
     if viewport.hi == #tabs_cache then
@@ -202,19 +214,21 @@ local function calc_truncated_tabs(width)
     end
   end
 
-  if w ~= 0 or viewport.changed then
+  if w ~= 0 then
     prefix = ""
     postfix = ""
-    local space = 2
+    local space = (viewport.lo > 1 and 2 or 0) + (viewport.hi < #tabs_cache and 2 or 0)
     if viewport.lo > 1 then
-      space = space + 2
       prefix = " %#TablineHidden#…"
+      if w < 0 then
+        prefix = prefix .. resolve_prefix_str(width - math.abs(w) - space)
+      end
     end
     if viewport.hi < #tabs_cache then
-      local size = width - w - space
-      local tab = tabs_cache[viewport.hi + 1] --[[@as table]]
-      local buf = buf_cache[viewport.hi + 1] --[[@as integer]]
-      postfix = resolve_hl(buf, false) .. string.sub(tab.str, 1, size) .. "%#TablineHidden#… "
+      postfix = "%#TablineHidden#… "
+      if w > 0 then
+        postfix = resolve_post_str(width - w - space) .. postfix
+      end
     end
   end
 end
