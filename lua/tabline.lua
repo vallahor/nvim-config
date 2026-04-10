@@ -13,7 +13,7 @@ local viewport = {
   hi = 1,
 }
 
-local buf_order = {}
+local buf_cache = {}
 local buf_index = {}
 local diag_cache = {}
 local tabs_cache = {} ---@type table
@@ -33,7 +33,7 @@ local postfix = ""
 local endfix = "%#TablineFill#"
 
 local function update_buf_index()
-  for i, b in ipairs(buf_order) do
+  for i, b in ipairs(buf_cache) do
     buf_index[b] = i
   end
   if not sidebar_open and buf_index[cur_buf] then
@@ -43,30 +43,17 @@ local function update_buf_index()
   viewport.changed = true
 end
 
-local function get_current_index()
-  return buf_index[cur_buf] or 1
-end
-
-local function init_bufs()
-  for _, b in ipairs(api.nvim_list_bufs()) do
-    if bo[b].buflisted then
-      buf_order[#buf_order + 1] = b
-    end
-  end
-  update_buf_index()
-end
-
 local function resolve_tabs()
   update_buf_index()
 
   local buf_names = {}
   local counts = {}
 
-  for _, b in ipairs(buf_order) do
+  for _, b in ipairs(buf_cache) do
     local bufname = api.nvim_buf_get_name(b)
     local tail = bufname ~= "" and fnamemodify(bufname, ":t") or "[No Name]"
     counts[tail] = (counts[tail] or 0) + 1
-    buf_names[#buf_names + 1] = { b = b, bufname = bufname, tail = tail }
+    buf_names[#buf_names + 1] = { bufname = bufname, tail = tail }
   end
 
   local tabs = {}
@@ -80,7 +67,7 @@ local function resolve_tabs()
       display = " " .. info.tail .. " "
     end
     local width = strwidth(display)
-    tabs[#tabs + 1] = { b = info.b, str = display, w = width }
+    tabs[#tabs + 1] = { str = display, w = width }
     total_w = total_w + width
   end
 
@@ -88,6 +75,19 @@ local function resolve_tabs()
   tabs_width_cache = total_w
 
   viewport.changed = true
+end
+
+local function init_bufs()
+  for _, b in ipairs(api.nvim_list_bufs()) do
+    if bo[b].buflisted then
+      buf_cache[#buf_cache + 1] = b
+    end
+  end
+  resolve_tabs()
+end
+
+local function get_current_index()
+  return buf_index[cur_buf] or 1
 end
 
 local nvim_tree_view = require("nvim-tree.view")
@@ -241,7 +241,8 @@ function M.make_tabline()
   for i = viewport.lo, viewport.hi do
     ---@type table
     local tab = tabs_cache[i]
-    tabs[#tabs + 1] = resolve_hl(tab.b, tab.b == cur_buf) .. tab.str
+    local buf = buf_cache[i] --[[@as integer]]
+    tabs[#tabs + 1] = resolve_hl(buf, buf == cur_buf) .. tab.str
   end
   tabs[#tabs + 1] = postfix
   tabs[#tabs + 1] = endfix
@@ -259,7 +260,7 @@ function M.prev_tab()
   end
   local i = get_current_index()
   if i > 1 then
-    api.nvim_set_current_buf(buf_order[i - 1])
+    api.nvim_set_current_buf(buf_cache[i - 1])
   end
 end
 
@@ -268,8 +269,8 @@ function M.next_tab()
     return
   end
   local i = get_current_index()
-  if i < #buf_order then
-    api.nvim_set_current_buf(buf_order[i + 1])
+  if i < #buf_cache then
+    api.nvim_set_current_buf(buf_cache[i + 1])
   end
 end
 
@@ -277,21 +278,21 @@ function M.move_to_begin()
   if is_nvim_tree() then
     return
   end
-  api.nvim_set_current_buf(buf_order[1])
+  api.nvim_set_current_buf(buf_cache[1])
 end
 
 function M.move_to_end()
   if is_nvim_tree() then
     return
   end
-  api.nvim_set_current_buf(buf_order[#buf_order])
+  api.nvim_set_current_buf(buf_cache[#buf_cache])
 end
 
 local function swap(i, j)
-  buf_order[i], buf_order[j] = buf_order[j], buf_order[i]
+  buf_cache[i], buf_cache[j] = buf_cache[j], buf_cache[i]
   tabs_cache[i], tabs_cache[j] = tabs_cache[j], tabs_cache[i]
-  buf_index[buf_order[i]] = i
-  buf_index[buf_order[j]] = j
+  buf_index[buf_cache[i]] = i
+  buf_index[buf_cache[j]] = j
   focus_idx = buf_index[cur_buf]
   viewport.changed = true
   vim.cmd.redrawtabline()
@@ -312,7 +313,7 @@ function M.move_tab_right()
     return
   end
   local i = get_current_index()
-  if i < #buf_order then
+  if i < #buf_cache then
     swap(i, i + 1)
   end
 end
@@ -323,8 +324,8 @@ function M.move_tab_begin()
   end
   local i = get_current_index()
   if i > 1 then
-    local b = table.remove(buf_order, i)
-    table.insert(buf_order, 1, b)
+    local b = table.remove(buf_cache, i)
+    table.insert(buf_cache, 1, b)
     local t = table.remove(tabs_cache, i)
     table.insert(tabs_cache, 1, t)
     update_buf_index()
@@ -337,9 +338,9 @@ function M.move_tab_end()
     return
   end
   local i = get_current_index()
-  if i < #buf_order then
-    local b = table.remove(buf_order, i)
-    buf_order[#buf_order + 1] = b
+  if i < #buf_cache then
+    local b = table.remove(buf_cache, i)
+    buf_cache[#buf_cache + 1] = b
     local t = table.remove(tabs_cache, i)
     tabs_cache[#tabs_cache + 1] = t
     update_buf_index()
@@ -372,13 +373,13 @@ function M.buf_delete(bufnr, force)
     return
   end
 
-  table.remove(buf_order, idx)
+  table.remove(buf_cache, idx)
 
   ---@type integer?
-  local replacement = buf_order[idx] or buf_order[idx - 1]
+  local replacement = buf_cache[idx] or buf_cache[idx - 1]
   if not replacement then
     replacement = api.nvim_create_buf(true, false)
-    buf_order[idx] = replacement
+    buf_cache[idx] = replacement
   end
 
   local cur_win = api.nvim_get_current_win()
@@ -446,7 +447,7 @@ local function setup_autocmds()
         if not api.nvim_buf_is_valid(b) or buf_index[b] then
           return
         end
-        buf_order[#buf_order + 1] = b
+        buf_cache[#buf_cache + 1] = b
         resolve_tabs()
         vim.cmd.redrawtabline()
       end)
@@ -461,7 +462,7 @@ local function setup_autocmds()
         return
       end
 
-      table.remove(buf_order, idx)
+      table.remove(buf_cache, idx)
 
       buf_index[b] = nil
       diag_cache[b] = nil
@@ -533,7 +534,6 @@ function M.setup(opts)
   setup_autocmds()
   setup_keymaps()
   setup_tabline_hl()
-  resolve_tabs()
 
   if opts and type(opts.update_cursor_line_hl) == "function" then
     M.update_cursor_line_hl = opts.update_cursor_line_hl
