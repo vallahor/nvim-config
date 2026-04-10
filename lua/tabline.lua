@@ -221,7 +221,7 @@ function M.make_tabline()
 
   if tabs_width_cache > width then
     calc_truncated_tabs(width)
-  else
+  elseif viewport.changed then
     viewport.lo = 1
     viewport.hi = #tabs_cache
     prefix = ""
