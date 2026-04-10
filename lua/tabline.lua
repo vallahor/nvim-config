@@ -18,6 +18,8 @@ local buf_index = {}
 local diag_cache = {}
 local tabs_cache = {} ---@type table
 
+local tab_str = ""
+
 local focus_idx = 1
 local ghost_space = 4
 local tabs_width_cache = 0
@@ -218,36 +220,40 @@ local function calc_truncated_tabs(width)
 end
 
 function M.make_tabline()
-  local sidebar_width = render_sidebar()
-  local width = vim.o.columns - sidebar_width
+  if viewport.changed then
+    local sidebar_width = render_sidebar()
+    local width = vim.o.columns - sidebar_width
 
-  if tabs_width_cache > width then
-    calc_truncated_tabs(width)
-  elseif viewport.changed then
-    viewport.lo = 1
-    viewport.hi = #tabs_cache
-    prefix = ""
-    postfix = ""
+    if tabs_width_cache > width then
+      calc_truncated_tabs(width)
+    else
+      viewport.lo = 1
+      viewport.hi = #tabs_cache
+      prefix = ""
+      postfix = ""
+    end
+
+    local sidebar_str = ""
+    local hl = ""
+    if sidebar_width > 0 then
+      hl = sidebar_open and "%#TablineSidebarLabelFocused#" or "%#TablineSidebarLabelHidden#"
+      sidebar_str = sidebar
+    end
+
+    local tabs = { hl, sidebar_str, prefix }
+    for i = viewport.lo, viewport.hi do
+      ---@type table
+      local tab = tabs_cache[i]
+      local buf = buf_cache[i] --[[@as integer]]
+      tabs[#tabs + 1] = resolve_hl(buf, buf == cur_buf) .. tab.str
+    end
+    tabs[#tabs + 1] = postfix
+    tabs[#tabs + 1] = endfix
+
+    viewport.changed = false
+    tab_str = table.concat(tabs)
   end
-
-  local sidebar_str = ""
-  local hl = ""
-  if sidebar_width > 0 then
-    hl = sidebar_open and "%#TablineSidebarLabelFocused#" or "%#TablineSidebarLabelHidden#"
-    sidebar_str = sidebar
-  end
-
-  local tabs = { hl, sidebar_str, prefix }
-  for i = viewport.lo, viewport.hi do
-    ---@type table
-    local tab = tabs_cache[i]
-    local buf = buf_cache[i] --[[@as integer]]
-    tabs[#tabs + 1] = resolve_hl(buf, buf == cur_buf) .. tab.str
-  end
-  tabs[#tabs + 1] = postfix
-  tabs[#tabs + 1] = endfix
-
-  return table.concat(tabs)
+  return tab_str
 end
 
 local function is_nvim_tree()
@@ -474,14 +480,14 @@ local function setup_autocmds()
   api.nvim_create_autocmd("DiagnosticChanged", {
     callback = function(ev)
       diag_cache[ev.buf] = nil
+      viewport.changed = true
       vim.cmd.redrawtabline()
     end,
   })
 
-  api.nvim_create_autocmd("BufWritePost", {
+  api.nvim_create_autocmd({ "TextChanged", "TextChangedI", "TextChangedP", "BufWritePost" }, {
     callback = function()
       viewport.changed = true
-      vim.cmd.redrawtabline()
     end,
   })
 
@@ -503,6 +509,8 @@ local function setup_autocmds()
       if not sidebar_open and buf_index[cur_buf] then
         focus_idx = buf_index[cur_buf]
       end
+
+      viewport.changed = true
     end,
   })
 end
