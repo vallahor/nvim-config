@@ -5,24 +5,25 @@ local M = {}
 
 M.update_cursor_line_hl = function(_, _) end
 
-local focus_idx = 1
-local ghost_space = 4
--- ---@type {slide_window: string[], tab_strings: string[], w_avail: integer, w_changed: boolean, w_diagnostic_changed: boolean, lo: integer, hi: integer}
----@type {slide_window: table, w_avail: integer, w_changed: boolean, w_diagnostic_changed: boolean, lo: integer, hi: integer}
-local ruler = {
-  slide_window = {},
-  -- tab_strings = {},
-  w_avail = 0,
-  w_changed = true,
-  w_diagnostic_changed = false,
+---@type {width: integer, changed: boolean, lo: integer, hi: integer}
+local viewport = {
+  width = 0,
+  changed = true,
   lo = 1,
   hi = 1,
 }
+
 local buf_order = {}
 local buf_index = {}
 local diag_cache = {}
 local tabs_cache = {} ---@type table
+
+local focus_idx = 1
+local ghost_space = 4
 local tabs_width_cache = 0
+
+local sidebar_width_cache = 0
+local sidebar = ""
 
 local prefix = ""
 local postfix = ""
@@ -32,8 +33,8 @@ local function update_buf_index()
   for i, b in ipairs(buf_order) do
     buf_index[b] = i
   end
-  ruler.w_avail = 0
-  ruler.w_changed = true
+  viewport.width = 0
+  viewport.changed = true
 end
 
 local function get_current_index()
@@ -85,7 +86,7 @@ local explorer_label_len = strwidth(explorer_label)
 
 local cached_pad = -1
 local cached_spaces = ""
-local function spaces(n)
+local function make_spaces(n)
   if cached_pad ~= n then
     cached_pad = n
     cached_spaces = string.rep(" ", n)
@@ -93,16 +94,20 @@ local function spaces(n)
   return cached_spaces
 end
 
----@return string, integer
-local function render_sidebar(tree_winnr, in_tree)
+---@return integer
+local function render_sidebar(tree_winnr)
   if not tree_winnr then
-    return "", 0
+    return 0
   end
-  local sidebar_width = api.nvim_win_get_width(tree_winnr)
-  local pad = math.max(0, floor((sidebar_width - explorer_label_len) / 2))
-  local hl = in_tree and "%#TablineSidebarLabelFocused#" or "%#TablineSidebarLabelHidden#"
-  local p = spaces(pad)
-  return hl .. p .. explorer_label .. p .. "%#TablineSidebarSep#│", sidebar_width
+  -- add the `separator` width to sidebar_width
+  local sidebar_width = api.nvim_win_get_width(tree_winnr) + 1
+  if sidebar_width ~= sidebar_width_cache then
+    sidebar_width_cache = sidebar_width
+    local pad = math.max(0, floor((sidebar_width - explorer_label_len) / 2))
+    local p = make_spaces(pad)
+    sidebar = p .. explorer_label .. p .. "%#TablineSidebarSep#│"
+  end
+  return sidebar_width
 end
 
 ---@type table<integer, table<integer, table<integer, string>>>
@@ -142,11 +147,11 @@ local function resolve_hl(b, focused)
   return focused and "%#TablineCurrent#" or "%#TablineVisible#"
 end
 
-local function get_ruler_hi(idx, avail)
+local function get_ruler_hi(idx, width)
   local w = tabs_cache[idx].w
   local hi = idx
   for pos = hi + 1, #tabs_cache do
-    if w + tabs_cache[pos].w > avail - ghost_space then
+    if w + tabs_cache[pos].w > width - ghost_space then
       break
     end
     w = w + tabs_cache[pos].w
@@ -155,11 +160,11 @@ local function get_ruler_hi(idx, avail)
   return hi, w
 end
 
-local function get_ruler_lo(idx, avail)
+local function get_ruler_lo(idx, width)
   local w = tabs_cache[idx].w
   local lo = idx
   for pos = lo - 1, 1, -1 do
-    if w + tabs_cache[pos].w > avail - ghost_space then
+    if w + tabs_cache[pos].w > width - ghost_space then
       break
     end
     w = w + tabs_cache[pos].w
@@ -168,35 +173,35 @@ local function get_ruler_lo(idx, avail)
   return lo, w
 end
 
----@param avail integer
-local function calc_truncated_tabs(avail)
+---@param width integer
+local function calc_truncated_tabs(width)
   local w = 0
 
-  if focus_idx > ruler.hi then
-    ruler.hi = focus_idx
-    ruler.lo, w = get_ruler_lo(focus_idx, avail)
-  elseif focus_idx < ruler.lo then
-    ruler.hi, w = get_ruler_hi(focus_idx, avail)
-    ruler.lo = focus_idx
-  elseif ruler.w_avail ~= avail or ruler.w_changed then
-    ruler.w_avail = avail
-    ruler.hi, w = get_ruler_hi(ruler.lo, avail)
-    if ruler.hi == #tabs_cache then
-      ruler.lo, w = get_ruler_lo(ruler.hi, avail)
+  if focus_idx > viewport.hi then
+    viewport.hi = focus_idx
+    viewport.lo, w = get_ruler_lo(focus_idx, width)
+  elseif focus_idx < viewport.lo then
+    viewport.hi, w = get_ruler_hi(focus_idx, width)
+    viewport.lo = focus_idx
+  elseif viewport.width ~= width or viewport.changed then
+    viewport.width = width
+    viewport.hi, w = get_ruler_hi(viewport.lo, width)
+    if viewport.hi == #tabs_cache then
+      viewport.lo, w = get_ruler_lo(viewport.hi, width)
     end
   end
 
-  if w ~= 0 or ruler.w_changed then
-    ruler.w_changed = false
+  if w ~= 0 or viewport.changed then
+    viewport.changed = false
     prefix = ""
     postfix = ""
     local space = 2
-    if ruler.lo > 1 then
+    if viewport.lo > 1 then
       space = space + 2
       prefix = " %#TablineHidden#…"
     end
-    if ruler.hi < #tabs_cache then
-      local pad = string.rep(" ", avail - w - space)
+    if viewport.hi < #tabs_cache then
+      local pad = string.rep(" ", width - w - space)
       postfix = "%#TablineFill#" .. pad .. "%#TablineHidden#… "
     end
   end
@@ -206,30 +211,34 @@ function M.make_tabline()
   local cur_win = api.nvim_get_current_win()
   local tree_winnr = nvim_tree_view.get_winnr()
   local in_tree = tree_winnr ~= nil and cur_win == tree_winnr
-
   local cur_buf = in_tree and -1 or api.nvim_get_current_buf()
-
-  local sidebar, sidebar_width = render_sidebar(tree_winnr, in_tree)
 
   if not in_tree and buf_index[cur_buf] then
     focus_idx = buf_index[cur_buf]
   end
   focus_idx = math.max(1, math.min(focus_idx, #tabs_cache))
 
-  ---@type integer
-  local avail = vim.o.columns - sidebar_width - (tree_winnr and 1 or 0)
+  local sidebar_width = render_sidebar(tree_winnr)
+  local width = vim.o.columns - sidebar_width
 
-  if tabs_width_cache > avail then
-    calc_truncated_tabs(avail)
+  if tabs_width_cache > width then
+    calc_truncated_tabs(width)
   else
-    ruler.lo = 1
-    ruler.hi = #tabs_cache
+    viewport.lo = 1
+    viewport.hi = #tabs_cache
     prefix = ""
     postfix = ""
   end
 
-  local tabs = { sidebar, prefix }
-  for i = ruler.lo, ruler.hi do
+  local sidebar_str = ""
+  local hl = ""
+  if sidebar_width > 0 then
+    hl = in_tree and "%#TablineSidebarLabelFocused#" or "%#TablineSidebarLabelHidden#"
+    sidebar_str = sidebar
+  end
+
+  local tabs = { hl, sidebar_str, prefix }
+  for i = viewport.lo, viewport.hi do
     ---@type table
     local tab = tabs_cache[i]
     tabs[#tabs + 1] = resolve_hl(tab.b, tab.b == cur_buf) .. tab.str
@@ -283,7 +292,7 @@ local function swap(i, j)
   tabs_cache[i], tabs_cache[j] = tabs_cache[j], tabs_cache[i]
   buf_index[buf_order[i]] = i
   buf_index[buf_order[j]] = j
-  ruler.w_changed = true
+  viewport.changed = true
   vim.cmd.redrawtabline()
 end
 
@@ -471,7 +480,7 @@ local function setup_autocmds()
 
   api.nvim_create_autocmd("BufWritePost", {
     callback = function()
-      ruler.w_changed = true
+      viewport.changed = true
       vim.cmd.redrawtabline()
     end,
   })
