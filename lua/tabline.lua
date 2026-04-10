@@ -200,10 +200,10 @@ end
 local function calc_truncated_tabs(width)
   local w = 0
 
-  if viewport.index >= viewport.hi + 1 then
+  if viewport.index > viewport.hi then
     viewport.hi = viewport.index
     viewport.lo, w = get_ruler_lo(viewport.index, width)
-  elseif viewport.index <= viewport.lo - 1 then
+  elseif viewport.index < viewport.lo then
     viewport.hi, w = get_ruler_hi(viewport.index, width)
     viewport.lo = viewport.index
   elseif viewport.width ~= width then
@@ -229,7 +229,10 @@ local function calc_truncated_tabs(width)
     if viewport.lo > 1 then
       prefix = " %#TablineHidden#…"
       if w < 0 then
-        prefix = prefix .. resolve_prefix_str(width - math.abs(w) - space)
+        local size = width - math.abs(w) - space
+        if size > 0 then
+          prefix = prefix .. resolve_prefix_str(width - math.abs(w) - space)
+        end
       end
     end
     if viewport.hi < #tabs_cache then
