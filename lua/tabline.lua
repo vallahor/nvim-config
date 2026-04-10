@@ -7,11 +7,14 @@ M.update_cursor_line_hl = function(_, _) end
 
 local focus_idx = 1
 local ghost_space = 4
----@type {slide_window: {b: integer, str: string }[]|{b: nil, str: string }[], w_avail: integer, w_changed: boolean, lo: integer, hi: integer}
+-- ---@type {slide_window: string[], tab_strings: string[], w_avail: integer, w_changed: boolean, w_diagnostic_changed: boolean, lo: integer, hi: integer}
+---@type {slide_window: table, w_avail: integer, w_changed: boolean, w_diagnostic_changed: boolean, lo: integer, hi: integer}
 local ruler = {
   slide_window = {},
+  -- tab_strings = {},
   w_avail = 0,
   w_changed = true,
+  w_diagnostic_changed = false,
   lo = 1,
   hi = 1,
 }
@@ -20,6 +23,10 @@ local buf_index = {}
 local diag_cache = {}
 local tabs_cache = {} ---@type table
 local tabs_width_cache = 0
+
+local prefix = ""
+local postfix = ""
+local endfix = "%#TablineFill#"
 
 local function update_buf_index()
   for i, b in ipairs(buf_order) do
@@ -162,7 +169,7 @@ local function get_ruler_lo(idx, avail)
 end
 
 ---@param avail integer
-local function truncate_tabs(avail)
+local function calc_truncated_tabs(avail)
   local w = 0
 
   if focus_idx > ruler.hi then
@@ -179,23 +186,20 @@ local function truncate_tabs(avail)
     end
   end
 
-  if w ~= 0 then
+  if w ~= 0 or ruler.w_changed then
+    ruler.w_changed = false
+    prefix = ""
+    postfix = ""
     local space = 2
-    ruler.slide_window = {}
     if ruler.lo > 1 then
       space = space + 2
-      ruler.slide_window[#ruler.slide_window + 1] = { b = nil, str = " %#TablineHidden#…" }
-    end
-    for i = ruler.lo, ruler.hi do
-      ruler.slide_window[#ruler.slide_window + 1] = tabs_cache[i]
+      prefix = " %#TablineHidden#…"
     end
     if ruler.hi < #tabs_cache then
       local pad = string.rep(" ", avail - w - space)
-      ruler.slide_window[#ruler.slide_window + 1] = { b = nil, str = "%#TablineFill#" .. pad .. "%#TablineHidden#… " }
+      postfix = "%#TablineFill#" .. pad .. "%#TablineHidden#… "
     end
   end
-
-  return ruler.slide_window
 end
 
 function M.make_tabline()
@@ -215,16 +219,25 @@ function M.make_tabline()
   ---@type integer
   local avail = vim.o.columns - sidebar_width - (tree_winnr and 1 or 0)
 
-  ---@type {b: integer?, str: string }[]|{b: nil, str: string }[]
-  local result_tabs = (tabs_width_cache > avail and truncate_tabs(avail) or tabs_cache)
-
-  local parts = { sidebar }
-  for _, part in ipairs(result_tabs) do
-    local hl = resolve_hl(part.b, part.b == cur_buf)
-    parts[#parts + 1] = hl .. part.str
+  if tabs_width_cache > avail then
+    calc_truncated_tabs(avail)
+  else
+    ruler.lo = 1
+    ruler.hi = #tabs_cache
+    prefix = ""
+    postfix = ""
   end
-  parts[#parts + 1] = "%#TablineFill#"
-  return table.concat(parts)
+
+  local tabs = { sidebar, prefix }
+  for i = ruler.lo, ruler.hi do
+    ---@type table
+    local tab = tabs_cache[i]
+    tabs[#tabs + 1] = resolve_hl(tab.b, tab.b == cur_buf) .. tab.str
+  end
+  tabs[#tabs + 1] = postfix
+  tabs[#tabs + 1] = endfix
+
+  return table.concat(tabs)
 end
 
 local function is_nvim_tree()
@@ -426,7 +439,6 @@ local function setup_autocmds()
         end
         buf_order[#buf_order + 1] = b
         update_buf_index()
-        ruler.w_changed = true
         resolve_tabs()
         vim.cmd.redrawtabline()
       end)
@@ -445,7 +457,6 @@ local function setup_autocmds()
 
       buf_index[b] = nil
       diag_cache[b] = nil
-      ruler.w_changed = true
       update_buf_index()
       resolve_tabs()
     end,
@@ -454,6 +465,13 @@ local function setup_autocmds()
   api.nvim_create_autocmd("DiagnosticChanged", {
     callback = function(ev)
       diag_cache[ev.buf] = nil
+      vim.cmd.redrawtabline()
+    end,
+  })
+
+  api.nvim_create_autocmd("BufWritePost", {
+    callback = function()
+      ruler.w_changed = true
       vim.cmd.redrawtabline()
     end,
   })
