@@ -5,7 +5,7 @@ local M = {}
 
 M.update_cursor_line_hl = function(_, _) end
 
----@type {str: string, width: integer, changed: boolean, lo: integer, hi: integer, buf: integer}
+---@type {str: string, width: integer, changed: boolean, lo: integer, hi: integer, buf: integer, index: integer}
 local viewport = {
   str = "",
   width = 0,
@@ -13,6 +13,7 @@ local viewport = {
   lo = 1,
   hi = 1,
   buf = 1,
+  index = 1,
 }
 
 local buf_cache = {}
@@ -20,7 +21,6 @@ local buf_index = {}
 local diag_cache = {}
 local tabs_cache = {} ---@type table
 
-local focus_idx = 1
 local ghost_space = 4
 local tabs_width_cache = 0
 
@@ -38,7 +38,7 @@ local function update_buf_index()
     buf_index[b] = i
   end
   if not sidebar_open and buf_index[viewport.buf] then
-    focus_idx = buf_index[viewport.buf]
+    viewport.index = buf_index[viewport.buf]
   end
   viewport.width = 0
   viewport.changed = true
@@ -188,12 +188,12 @@ end
 local function calc_truncated_tabs(width)
   local w = 0
 
-  if focus_idx > viewport.hi then
-    viewport.hi = focus_idx
-    viewport.lo, w = get_ruler_lo(focus_idx, width)
-  elseif focus_idx < viewport.lo then
-    viewport.hi, w = get_ruler_hi(focus_idx, width)
-    viewport.lo = focus_idx
+  if viewport.index > viewport.hi then
+    viewport.hi = viewport.index
+    viewport.lo, w = get_ruler_lo(viewport.index, width)
+  elseif viewport.index < viewport.lo then
+    viewport.hi, w = get_ruler_hi(viewport.index, width)
+    viewport.lo = viewport.index
   elseif viewport.width ~= width or viewport.changed then
     viewport.width = width
     viewport.hi, w = get_ruler_hi(viewport.lo, width)
@@ -296,7 +296,7 @@ local function swap(i, j)
   tabs_cache[i], tabs_cache[j] = tabs_cache[j], tabs_cache[i]
   buf_index[buf_cache[i]] = i
   buf_index[buf_cache[j]] = j
-  focus_idx = buf_index[viewport.buf]
+  viewport.index = buf_index[viewport.buf]
   viewport.changed = true
   vim.cmd.redrawtabline()
 end
@@ -504,7 +504,7 @@ local function setup_autocmds()
       viewport.buf = sidebar_open and -1 or api.nvim_get_current_buf()
 
       if not sidebar_open and buf_index[viewport.buf] then
-        focus_idx = buf_index[viewport.buf]
+        viewport.index = buf_index[viewport.buf]
       end
 
       viewport.changed = true
