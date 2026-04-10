@@ -25,6 +25,8 @@ local tabs_width_cache = 0
 local sidebar = ""
 local sidebar_width_cache = 0
 local sidebar_open = false
+local sidebar_winnr = nil
+local cur_buf = 1
 
 local prefix = ""
 local postfix = ""
@@ -34,12 +36,15 @@ local function update_buf_index()
   for i, b in ipairs(buf_order) do
     buf_index[b] = i
   end
+  if not sidebar_open and buf_index[cur_buf] then
+    focus_idx = buf_index[cur_buf]
+  end
   viewport.width = 0
   viewport.changed = true
 end
 
 local function get_current_index()
-  return buf_index[api.nvim_get_current_buf()] or 1
+  return buf_index[cur_buf] or 1
 end
 
 local function init_bufs()
@@ -98,12 +103,12 @@ local function make_spaces(n)
 end
 
 ---@return integer
-local function render_sidebar(tree_winnr)
-  if not tree_winnr then
+local function render_sidebar()
+  if not sidebar_winnr or not api.nvim_win_is_valid(sidebar_winnr) then
     return 0
   end
   -- add the `separator` width to sidebar_width
-  local sidebar_width = api.nvim_win_get_width(tree_winnr) + 1
+  local sidebar_width = api.nvim_win_get_width(sidebar_winnr) + 1
   if sidebar_width ~= sidebar_width_cache then
     sidebar_width_cache = sidebar_width
     local pad = math.max(0, floor((sidebar_width - explorer_label_len) / 2))
@@ -211,15 +216,7 @@ local function calc_truncated_tabs(width)
 end
 
 function M.make_tabline()
-  local tree_winnr = nvim_tree_view.get_winnr()
-  sidebar_open = api.nvim_get_current_win() == tree_winnr
-  local cur_buf = sidebar_open and -1 or api.nvim_get_current_buf()
-
-  if not sidebar_open and buf_index[cur_buf] then
-    focus_idx = buf_index[cur_buf]
-  end
-
-  local sidebar_width = render_sidebar(tree_winnr)
+  local sidebar_width = render_sidebar()
   local width = vim.o.columns - sidebar_width
 
   if tabs_width_cache > width then
@@ -293,6 +290,7 @@ local function swap(i, j)
   tabs_cache[i], tabs_cache[j] = tabs_cache[j], tabs_cache[i]
   buf_index[buf_order[i]] = i
   buf_index[buf_order[j]] = j
+  focus_idx = buf_index[cur_buf]
   viewport.changed = true
   vim.cmd.redrawtabline()
 end
@@ -494,6 +492,18 @@ local function setup_autocmds()
   api.nvim_create_autocmd("ColorScheme", {
     once = true,
     callback = setup_tabline_hl,
+  })
+
+  api.nvim_create_autocmd({ "WinEnter", "BufEnter" }, {
+    callback = function()
+      sidebar_winnr = nvim_tree_view.get_winnr()
+      sidebar_open = api.nvim_get_current_win() == sidebar_winnr
+      cur_buf = sidebar_open and -1 or api.nvim_get_current_buf()
+
+      if not sidebar_open and buf_index[cur_buf] then
+        focus_idx = buf_index[cur_buf]
+      end
+    end,
   })
 end
 
