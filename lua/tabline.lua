@@ -204,7 +204,6 @@ local function calc_truncated_tabs(width)
   end
 
   if w ~= 0 or viewport.changed then
-    viewport.changed = false
     prefix = ""
     postfix = ""
     local space = 2
@@ -220,10 +219,9 @@ local function calc_truncated_tabs(width)
 end
 
 function M.make_tabline()
-  if viewport.changed then
-    local sidebar_width = render_sidebar()
-    local width = vim.o.columns - sidebar_width
-
+  local sidebar_width = render_sidebar()
+  local width = vim.o.columns - sidebar_width
+  if viewport.width ~= width or viewport.changed then
     if tabs_width_cache > width then
       calc_truncated_tabs(width)
     else
