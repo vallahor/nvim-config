@@ -485,7 +485,7 @@ local function setup_autocmds()
     end,
   })
 
-  api.nvim_create_autocmd({ "BufFilePost", "BufAdd" }, {
+  api.nvim_create_autocmd("BufFilePost", {
     callback = resolve_tabs,
   })
 
