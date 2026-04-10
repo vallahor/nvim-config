@@ -57,6 +57,8 @@ local function init_bufs()
 end
 
 local function resolve_tabs()
+  update_buf_index()
+
   local buf_names = {}
   local counts = {}
 
@@ -387,7 +389,6 @@ function M.buf_delete(bufnr, force)
 
   buf_index[bufnr] = nil
   diag_cache[bufnr] = nil
-  update_buf_index()
   resolve_tabs()
 
   if api.nvim_buf_is_valid(bufnr) then
@@ -446,7 +447,6 @@ local function setup_autocmds()
           return
         end
         buf_order[#buf_order + 1] = b
-        update_buf_index()
         resolve_tabs()
         vim.cmd.redrawtabline()
       end)
@@ -466,7 +466,6 @@ local function setup_autocmds()
       buf_index[b] = nil
       diag_cache[b] = nil
 
-      update_buf_index()
       resolve_tabs()
     end,
   })
