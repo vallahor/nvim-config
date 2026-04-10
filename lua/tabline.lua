@@ -202,27 +202,29 @@ local function calc_truncated_tabs(width)
     end
   end
 
+  local space = 0
   if w ~= 0 or viewport.changed then
     prefix = ""
     postfix = ""
-    local space = 2
     if viewport.lo > 1 then
       space = space + 2
       prefix = " %#TablineHidden#…"
     end
     if viewport.hi < #tabs_cache then
-      local pad = string.rep(" ", width - w - space)
-      postfix = "%#TablineFill#" .. pad .. "%#TablineHidden#… "
+      space = space + 2
+      postfix = "%#TablineHidden#… "
     end
   end
+  return width - w - space
 end
 
 function M.make_tabline()
   local sidebar_width = render_sidebar()
   local width = vim.o.columns - sidebar_width
   if viewport.width ~= width or viewport.changed then
+    local size = 0
     if tabs_width_cache > width then
-      calc_truncated_tabs(width)
+      size = calc_truncated_tabs(width)
     else
       viewport.lo = 1
       viewport.hi = #tabs_cache
@@ -243,6 +245,11 @@ function M.make_tabline()
       local tab = tabs_cache[i]
       local buf = buf_cache[i] --[[@as integer]]
       tabs[#tabs + 1] = resolve_hl(buf, buf == viewport.buf) .. tab.str
+    end
+    if size > 0 and viewport.hi < #tabs_cache then
+      local tab = tabs_cache[viewport.hi] --[[@as table]]
+      local buf = buf_cache[viewport.hi] --[[@as integer]]
+      tabs[#tabs + 1] = resolve_hl(buf, false) .. string.sub(tab.str, 1, size - 1)
     end
     tabs[#tabs + 1] = postfix
     tabs[#tabs + 1] = endfix
