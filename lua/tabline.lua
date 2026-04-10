@@ -229,7 +229,7 @@ local function calc_truncated_tabs(width)
     if viewport.lo > 1 then
       prefix = " %#TablineHidden#…"
       if w < 0 then
-        local size = width - math.abs(w) - space
+        local size = width + w - space
         if size > 0 then
           prefix = prefix .. resolve_prefix_str(width - math.abs(w) - space)
         end
