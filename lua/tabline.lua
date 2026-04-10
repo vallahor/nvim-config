@@ -216,7 +216,6 @@ function M.make_tabline()
   if not in_tree and buf_index[cur_buf] then
     focus_idx = buf_index[cur_buf]
   end
-  focus_idx = math.max(1, math.min(focus_idx, #tabs_cache))
 
   local sidebar_width = render_sidebar(tree_winnr)
   local width = vim.o.columns - sidebar_width
