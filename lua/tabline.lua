@@ -5,20 +5,20 @@ local M = {}
 
 M.update_cursor_line_hl = function(_, _) end
 
----@type {width: integer, changed: boolean, lo: integer, hi: integer}
+---@type {str: string, width: integer, changed: boolean, lo: integer, hi: integer, buf: integer}
 local viewport = {
+  str = "",
   width = 0,
   changed = true,
   lo = 1,
   hi = 1,
+  buf = 1,
 }
 
 local buf_cache = {}
 local buf_index = {}
 local diag_cache = {}
 local tabs_cache = {} ---@type table
-
-local tab_str = ""
 
 local focus_idx = 1
 local ghost_space = 4
@@ -28,7 +28,6 @@ local sidebar = ""
 local sidebar_width_cache = 0
 local sidebar_open = false
 local sidebar_winnr = nil
-local cur_buf = 1
 
 local prefix = ""
 local postfix = ""
@@ -38,8 +37,8 @@ local function update_buf_index()
   for i, b in ipairs(buf_cache) do
     buf_index[b] = i
   end
-  if not sidebar_open and buf_index[cur_buf] then
-    focus_idx = buf_index[cur_buf]
+  if not sidebar_open and buf_index[viewport.buf] then
+    focus_idx = buf_index[viewport.buf]
   end
   viewport.width = 0
   viewport.changed = true
@@ -89,7 +88,7 @@ local function init_bufs()
 end
 
 local function get_current_index()
-  return buf_index[cur_buf] or 1
+  return buf_index[viewport.buf] or 1
 end
 
 local nvim_tree_view = require("nvim-tree.view")
@@ -243,15 +242,15 @@ function M.make_tabline()
       ---@type table
       local tab = tabs_cache[i]
       local buf = buf_cache[i] --[[@as integer]]
-      tabs[#tabs + 1] = resolve_hl(buf, buf == cur_buf) .. tab.str
+      tabs[#tabs + 1] = resolve_hl(buf, buf == viewport.buf) .. tab.str
     end
     tabs[#tabs + 1] = postfix
     tabs[#tabs + 1] = endfix
 
     viewport.changed = false
-    tab_str = table.concat(tabs)
+    viewport.str = table.concat(tabs)
   end
-  return tab_str
+  return viewport.str
 end
 
 local function is_nvim_tree()
@@ -297,7 +296,7 @@ local function swap(i, j)
   tabs_cache[i], tabs_cache[j] = tabs_cache[j], tabs_cache[i]
   buf_index[buf_cache[i]] = i
   buf_index[buf_cache[j]] = j
-  focus_idx = buf_index[cur_buf]
+  focus_idx = buf_index[viewport.buf]
   viewport.changed = true
   vim.cmd.redrawtabline()
 end
@@ -502,10 +501,10 @@ local function setup_autocmds()
     callback = function()
       sidebar_winnr = nvim_tree_view.get_winnr()
       sidebar_open = api.nvim_get_current_win() == sidebar_winnr
-      cur_buf = sidebar_open and -1 or api.nvim_get_current_buf()
+      viewport.buf = sidebar_open and -1 or api.nvim_get_current_buf()
 
-      if not sidebar_open and buf_index[cur_buf] then
-        focus_idx = buf_index[cur_buf]
+      if not sidebar_open and buf_index[viewport.buf] then
+        focus_idx = buf_index[viewport.buf]
       end
 
       viewport.changed = true
