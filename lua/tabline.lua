@@ -5,11 +5,12 @@ local M = {}
 
 M.update_cursor_line_hl = function(_, _) end
 
----@type {str: string, width: integer, changed: boolean, lo: integer, hi: integer, buf: integer, index: integer}
+---@type {str: string, width: integer, changed: boolean, diag_or_input_changed: boolean, lo: integer, hi: integer, buf: integer, index: integer}
 local viewport = {
   str = "",
   width = 0,
   changed = true,
+  diag_or_input_changed = true,
   lo = 1,
   hi = 1,
   buf = 1,
@@ -250,7 +251,12 @@ end
 function M.make_tabline()
   local sidebar_width = render_sidebar()
   local width = vim.o.columns - sidebar_width
-  if viewport.width ~= width or viewport.changed then
+  if viewport.width ~= width or viewport.changed or viewport.diag_or_input_changed then
+    if viewport.diag_or_input_changed and not viewport.changed then
+      viewport.diag_or_input_changed = false
+      goto build_viewport_str
+    end
+
     if tabs_width_cache > width then
       calc_truncated_tabs(width)
     else
@@ -259,6 +265,8 @@ function M.make_tabline()
       prefix = ""
       postfix = ""
     end
+
+    ::build_viewport_str::
 
     local sidebar_str = ""
     local hl = ""
@@ -507,14 +515,14 @@ local function setup_autocmds()
   api.nvim_create_autocmd("DiagnosticChanged", {
     callback = function(ev)
       diag_cache[ev.buf] = nil
-      viewport.changed = true
+      viewport.diag_or_input_changed = true
       vim.cmd.redrawtabline()
     end,
   })
 
-  api.nvim_create_autocmd({ "TextChanged", "TextChangedI", "TextChangedP", "BufWritePost" }, {
+  api.nvim_create_autocmd({ "TextChanged", "TextChangedI", "TextChangedP", "BufWritePost", "BufModifiedSet" }, {
     callback = function()
-      viewport.changed = true
+      viewport.diag_or_input_changed = true
     end,
   })
 
