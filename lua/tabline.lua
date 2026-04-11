@@ -217,8 +217,7 @@ local function calc_truncated_tabs(width)
     if viewport.index < viewport.lo then
       viewport.lo = viewport.index
       viewport.hi, w = get_ruler_hi(viewport.lo, width)
-    end
-    if viewport.index > viewport.hi then
+    elseif viewport.index > viewport.hi then
       viewport.hi = viewport.index
       viewport.lo, w = get_ruler_lo(viewport.hi, width)
     end
