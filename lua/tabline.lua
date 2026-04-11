@@ -53,10 +53,21 @@ local sidebar = {
   winnr = nil,
 }
 
+---@type {[integer]: integer}
 local buf_cache = {}
+
+---@type {[integer]: integer?}
 local buf_index = {}
+
+---@type {[integer]: table<integer, integer>?}
 local diag_cache = {}
-local tabs_cache = {} ---@type table
+
+---@class Tab
+---@field str string
+---@field width integer
+
+---@type {[integer]: Tab}
+local tabs_cache = {}
 
 local function update_buf_index()
   for i, b in ipairs(buf_cache) do
@@ -93,7 +104,7 @@ local function resolve_tabs()
       display = " " .. info.tail .. " "
     end
     local width = strwidth(display)
-    tabs[#tabs + 1] = { str = display, w = width }
+    tabs[#tabs + 1] = { str = display, width = width }
     total_w = total_w + width
   end
 
@@ -181,34 +192,34 @@ local function resolve_hl(b, focused)
 end
 
 local function get_ruler_hi(idx, width)
-  local w = tabs_cache[idx].w
+  local w = tabs_cache[idx].width
   local hi = idx
   for pos = hi + 1, #tabs_cache do
-    if w + tabs_cache[pos].w > width - viewport.ghost_space then
+    if w + tabs_cache[pos].width > width - viewport.ghost_space then
       break
     end
-    w = w + tabs_cache[pos].w
+    w = w + tabs_cache[pos].width
     hi = pos
   end
   return hi, w
 end
 
 local function get_ruler_lo(idx, width)
-  local w = tabs_cache[idx].w
+  local w = tabs_cache[idx].width
   local lo = idx
   for pos = lo - 1, 1, -1 do
-    if w + tabs_cache[pos].w > width - viewport.ghost_space then
+    if w + tabs_cache[pos].width > width - viewport.ghost_space then
       break
     end
-    w = w + tabs_cache[pos].w
+    w = w + tabs_cache[pos].width
     lo = pos
   end
   return lo, -w
 end
 
 local function resolve_prefix_str(size)
-  local tab = tabs_cache[viewport.lo - 1] --[[@as table]]
-  local buf = buf_cache[viewport.lo - 1] --[[@as integer]]
+  local tab = tabs_cache[viewport.lo - 1]
+  local buf = buf_cache[viewport.lo - 1]
   local pad = string.rep(" ", math.max(0, size - #tab.str))
   return pad .. resolve_hl(buf, false) .. string.sub(tab.str, -size)
 end
