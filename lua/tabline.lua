@@ -214,7 +214,6 @@ local function calc_truncated_tabs(width)
     viewport.hi, w = get_ruler_hi(viewport.lo, width)
     if viewport.hi == #tabs_cache then
       viewport.lo, w = get_ruler_lo(viewport.hi, width)
-      print(width, w)
     end
     if viewport.index < viewport.lo then
       viewport.lo = viewport.index
@@ -236,7 +235,6 @@ local function calc_truncated_tabs(width)
         if size > 0 then
           prefix = prefix .. resolve_prefix_str(size)
         end
-        print(size, resolve_prefix_str(size), prefix)
       end
     end
     if viewport.hi < #tabs_cache then
@@ -248,8 +246,6 @@ local function calc_truncated_tabs(width)
         end
       end
     end
-    -- print("," .. prefix .. ",")
-    -- print("." .. postfix .. ".")
   end
 end
 
