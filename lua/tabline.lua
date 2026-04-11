@@ -27,7 +27,7 @@ local tabs_width_cache = 0
 
 local sidebar = ""
 local sidebar_width_cache = 0
-local sidebar_open = false
+local sidebar_focus = false
 local sidebar_winnr = nil
 
 local prefix = ""
@@ -38,7 +38,7 @@ local function update_buf_index()
   for i, b in ipairs(buf_cache) do
     buf_index[b] = i
   end
-  if not sidebar_open and buf_index[viewport.buf] then
+  if not sidebar_focus and buf_index[viewport.buf] then
     viewport.index = buf_index[viewport.buf]
   end
   viewport.width = 0
@@ -272,7 +272,7 @@ function M.make_tabline()
     local sidebar_str = ""
     local hl = ""
     if sidebar_width > 0 then
-      hl = sidebar_open and "%#TablineSidebarLabelFocused#" or "%#TablineSidebarLabelHidden#"
+      hl = sidebar_focus and "%#TablineSidebarLabelFocused#" or "%#TablineSidebarLabelHidden#"
       sidebar_str = sidebar
     end
 
@@ -293,7 +293,7 @@ function M.make_tabline()
 end
 
 local function is_nvim_tree()
-  return sidebar_open
+  return sidebar_focus
 end
 
 function M.prev_tab()
@@ -540,8 +540,8 @@ local function setup_autocmds()
   api.nvim_create_autocmd({ "WinEnter", "BufEnter" }, {
     callback = function()
       sidebar_winnr = nvim_tree_view.get_winnr()
-      sidebar_open = api.nvim_get_current_win() == sidebar_winnr
-      viewport.buf = sidebar_open and -1 or api.nvim_get_current_buf()
+      sidebar_focus = api.nvim_get_current_win() == sidebar_winnr
+      viewport.buf = sidebar_focus and -1 or api.nvim_get_current_buf()
 
       viewport.changed = true
     end,
