@@ -189,7 +189,7 @@ end
 local function resolve_prefix_str(size)
   local tab = tabs_cache[viewport.lo - 1] --[[@as table]]
   local buf = buf_cache[viewport.lo - 1] --[[@as integer]]
-  return resolve_hl(buf, false) .. string.sub(tab.str, -size)
+  return string.rep(" ", math.max(0, size - #tab.str)) .. resolve_hl(buf, false) .. string.sub(tab.str, -size)
 end
 
 local function resolve_post_str(size)
@@ -213,6 +213,7 @@ local function calc_truncated_tabs(width)
     viewport.hi, w = get_ruler_hi(viewport.lo, width)
     if viewport.hi == #tabs_cache then
       viewport.lo, w = get_ruler_lo(viewport.hi, width)
+      print(width, w)
     end
     if viewport.index < viewport.lo then
       viewport.lo = viewport.index
@@ -232,8 +233,9 @@ local function calc_truncated_tabs(width)
       if w < 0 then
         local size = width + w - space
         if size > 0 then
-          prefix = prefix .. resolve_prefix_str(width - math.abs(w) - space)
+          prefix = prefix .. resolve_prefix_str(size)
         end
+        print(size, resolve_prefix_str(size), prefix)
       end
     end
     if viewport.hi < #tabs_cache then
@@ -241,10 +243,12 @@ local function calc_truncated_tabs(width)
       if w > 0 then
         local size = width - w - space
         if size > 0 then
-          postfix = resolve_post_str(width - w - space) .. postfix
+          postfix = resolve_post_str(size) .. postfix
         end
       end
     end
+    -- print("," .. prefix .. ",")
+    -- print("." .. postfix .. ".")
   end
 end
 
