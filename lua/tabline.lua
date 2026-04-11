@@ -5,8 +5,10 @@ local floor, strwidth, fnamemodify = math.floor, fn.strwidth, fn.fnamemodify
 
 local M = {
   focus_on_click = true,
-  close_on_click = true,
   close_icon = "",
+  icons = {
+    enabled = false,
+  },
 }
 
 M.update_cursor_line_hl = function(_, _) end
@@ -77,6 +79,9 @@ local config = {
   sidebar = {
     label = "Explorer",
   },
+  icons = {
+    enabled = true,
+  },
 }
 
 local function focus_on_click(bufnr)
@@ -113,8 +118,9 @@ local function resolve_tabs()
   for _, b in ipairs(buf_cache) do
     local bufname = api.nvim_buf_get_name(b)
     local tail = bufname ~= "" and fnamemodify(bufname, ":t") or "[No Name]"
+    local ext = bufname ~= "" and fnamemodify(bufname, ":e") or ""
     counts[tail] = (counts[tail] or 0) + 1
-    buf_names[#buf_names + 1] = { bufnr = b, bufname = bufname, tail = tail }
+    buf_names[#buf_names + 1] = { buf = b, ext = ext, bufname = bufname, tail = tail }
   end
 
   local tabs = {}
@@ -128,7 +134,24 @@ local function resolve_tabs()
       display = " " .. info.tail .. " "
     end
     local width = strwidth(display)
-    tabs[#tabs + 1] = { str = display, width = width }
+    local icon
+    if M.icons.enabled then
+      local str, color = M.get_icon(info.ext)
+      if str ~= "" then
+        width = width + 2
+      end
+      icon = {
+        str = str,
+        icon_hl = function(focused)
+          return M.get_icon_hl(info.ext, color, focused)
+        end,
+      }
+    end
+    tabs[#tabs + 1] = {
+      str = display,
+      width = width,
+      icon = icon,
+    }
     total_w = total_w + width
   end
 
@@ -137,6 +160,8 @@ local function resolve_tabs()
 
   viewport.changed = true
 end
+
+local icon_hl_cache = {}
 
 local function init_bufs()
   for _, b in ipairs(api.nvim_list_bufs()) do
@@ -336,7 +361,18 @@ function M.make_tabline()
       ---@type table
       local tab = tabs_cache[i]
       local buf = buf_cache[i] --[[@as integer]]
-      tabs[#tabs + 1] = focus_on_click(buf) .. resolve_hl(buf, buf == viewport.buf) .. tab.str .. close_on_click()
+      local focused = buf == viewport.buf
+      local tab_hl = resolve_hl(buf, focused)
+      tabs[#tabs + 1] = focus_on_click(buf)
+      tabs[#tabs + 1] = tab_hl
+      if tab.icon then
+        tabs[#tabs + 1] = " "
+        tabs[#tabs + 1] = tab.icon.icon_hl(focused)
+        tabs[#tabs + 1] = tab.icon.str
+        tabs[#tabs + 1] = tab_hl
+      end
+      tabs[#tabs + 1] = tab.str
+      tabs[#tabs + 1] = close_on_click()
     end
     tabs[#tabs + 1] = viewport.postfix
     tabs[#tabs + 1] = viewport.endfix
@@ -496,17 +532,17 @@ function M.close_tab(force)
   end
 end
 
-local function setup_tabline_hl()
-  ---@return string?
-  local function get_hex(group, attr)
-    local ok, val = pcall(api.nvim_get_hl, 0, { name = group, link = false })
-    if not ok or not val then
-      return nil
-    end
-    local n = attr == "fg" and val.fg or val.bg
-    return n and string.format("#%06x", n)
+---@return string?
+local function get_hex(group, attr)
+  local ok, val = pcall(api.nvim_get_hl, 0, { name = group, link = false })
+  if not ok or not val then
+    return nil
   end
+  local n = attr == "fg" and val.fg or val.bg
+  return n and string.format("#%06x", n)
+end
 
+local function setup_tabline_hl()
   local focused_fg = get_hex("TablineFocused", "fg") or get_hex("Normal", "fg")
   local focused_bg = get_hex("TablineFocused", "bg") or get_hex("CursorLine", "bg") or get_hex("Visual", "bg")
   local visible_fg = get_hex("TablineVisible", "fg") or get_hex("Comment", "fg")
@@ -532,6 +568,41 @@ local function setup_tabline_hl()
   hl(0, "TablineFocusedDiagModifiedWarn", { fg = warning_fg, bg = focused_bg, italic = true })
   hl(0, "TablineVisibleDiagModifiedWarn", { fg = warning_fg, bg = visible_bg, italic = true })
 end
+
+local get_icon_fn = {
+  ["mini.icons"] = function(ext)
+    return M.icons.provider.get("extension", ext)
+  end,
+  ["nvim-web-devicons"] = function(ext)
+    return M.icons.provider.get_icon_color(nil, ext, { default = true })
+  end,
+}
+
+local get_icon_hl_fn = {
+  ["mini.icons"] = function(ext, color, focused)
+    local key = focused and "f_" .. ext or "v_" .. ext
+    if not icon_hl_cache[key] then
+      local fg = color:sub(1, 1) == "#" and color or get_hex(color, "fg")
+      local bg = focused and (get_hex("TablineFocused", "bg") or get_hex("Normal", "bg"))
+        or (get_hex("TablineVisible", "bg") or get_hex("Normal", "bg"))
+      local name = (focused and "TablineFocusedIcon_" or "TablineVisibleIcon_") .. ext
+      api.nvim_set_hl(0, name, { fg = fg, bg = bg })
+      icon_hl_cache[key] = "%#" .. name .. "#"
+    end
+    return icon_hl_cache[key]
+  end,
+  ["nvim-web-devicons"] = function(ext, color, focused)
+    local key = focused and "f_" .. ext or "v_" .. ext
+    if not icon_hl_cache[key] then
+      local bg = focused and (get_hex("TablineFocused", "bg") or get_hex("Normal", "bg"))
+        or (get_hex("TablineVisible", "bg") or get_hex("Normal", "bg"))
+      local name = (focused and "TablineFocusedIcon_" or "TablineVisibleIcon_") .. ext
+      api.nvim_set_hl(0, name, { fg = color, bg = bg })
+      icon_hl_cache[key] = "%#" .. name .. "#"
+    end
+    return icon_hl_cache[key]
+  end,
+}
 
 local function setup_autocmds()
   api.nvim_create_autocmd("BufEnter", {
@@ -627,7 +698,7 @@ _G.CloseTab = function()
   M.close_tab(false)
 end
 
-_G.FocusTab = function(bufnr, clicks, button)
+_G.FocusTab = function(bufnr, _clicks, button)
   if button == "l" then
     api.nvim_set_current_buf(bufnr)
     viewport.index = buf_index[bufnr]
@@ -636,6 +707,18 @@ end
 
 function M.setup(opts)
   config = vim.tbl_deep_extend("force", vim.deepcopy(config), opts or {})
+  if config.icons.enabled then
+    M.icons.enabled = config.icons.enabled
+
+    -- "mini.icons"|"nvim-web-devicons" default: "mini.icons"
+    local provider = "mini.icons"
+    if config.icons.provider and config.icons.provider ~= "" then
+      provider = config.icons.provider
+    end
+    M.icons.provider = require(provider)
+    M.get_icon = get_icon_fn[provider]
+    M.get_icon_hl = get_icon_hl_fn[provider]
+  end
 
   init_bufs()
   setup_autocmds()
