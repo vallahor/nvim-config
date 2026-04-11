@@ -88,6 +88,7 @@ local function init_bufs()
   resolve_tabs()
 end
 
+--- @return integer
 local function get_current_index()
   return buf_index[viewport.buf] or 1
 end
@@ -302,6 +303,7 @@ function M.prev_tab()
   local i = get_current_index()
   if i > 1 then
     api.nvim_set_current_buf(buf_cache[i - 1])
+    viewport.index = i - 1
   end
 end
 
@@ -312,6 +314,7 @@ function M.next_tab()
   local i = get_current_index()
   if i < #buf_cache then
     api.nvim_set_current_buf(buf_cache[i + 1])
+    viewport.index = i + 1
   end
 end
 
@@ -539,10 +542,6 @@ local function setup_autocmds()
       sidebar_winnr = nvim_tree_view.get_winnr()
       sidebar_open = api.nvim_get_current_win() == sidebar_winnr
       viewport.buf = sidebar_open and -1 or api.nvim_get_current_buf()
-
-      if not sidebar_open and buf_index[viewport.buf] then
-        viewport.index = buf_index[viewport.buf]
-      end
 
       viewport.changed = true
     end,
