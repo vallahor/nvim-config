@@ -392,8 +392,8 @@ function M.move_tab_end()
   end
 end
 
-function M.buf_delete(bufnr, force)
-  bufnr = bufnr == 0 and api.nvim_get_current_buf() or bufnr
+function M.buf_delete(force)
+  local bufnr = api.nvim_get_current_buf()
   local idx = buf_index[bufnr]
   if not idx then
     return
@@ -410,9 +410,9 @@ function M.buf_delete(bufnr, force)
       pcall(api.nvim_buf_call, bufnr, function()
         vim.cmd.write()
       end)
-      M.buf_delete(bufnr, true)
+      M.buf_delete(true)
     elseif choice == 2 then
-      M.buf_delete(bufnr, true)
+      M.buf_delete(true)
     end
     return
   end
@@ -559,10 +559,10 @@ local function setup_keymaps()
   map("n", "<c-s-home>", M.move_tab_begin, { silent = true })
   map("n", "<c-s-end>", M.move_tab_end, { silent = true })
   map("n", "<c-w>", function()
-    M.buf_delete(0, false)
+    M.buf_delete(false)
   end, { silent = true, nowait = true })
   map("n", "<c-x>", function()
-    M.buf_delete(0, true)
+    M.buf_delete(true)
   end, { silent = true, nowait = true })
 end
 
