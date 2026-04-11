@@ -3,11 +3,17 @@ local nvim_tree_view = require("nvim-tree.view")
 local api, fn, bo = vim.api, vim.fn, vim.bo
 local floor, strwidth, fnamemodify = math.floor, fn.strwidth, fn.fnamemodify
 
+---@class Module
+---@field focus_on_click boolean
+---@field close_icon string
+---@field icons {enabled: boolean, provider: string, no_hl: boolean}
 local M = {
   focus_on_click = true,
   close_icon = "",
   icons = {
-    enabled = false,
+    enabled = true,
+    no_hl = true,
+    provider = "mini.icons",
   },
 }
 
@@ -68,9 +74,14 @@ local buf_index = {}
 ---@type {[integer]: table<integer, integer>?}
 local diag_cache = {}
 
+---@class Icon
+---@field str string
+---@field icon_hl function
+
 ---@class Tab
 ---@field str string
 ---@field width integer
+---@field icon Icon?
 
 ---@type {[integer]: Tab}
 local tabs_cache = {}
@@ -81,6 +92,8 @@ local config = {
   },
   icons = {
     enabled = true,
+    no_hl = false,
+    provider = "nvim-web-devicons",
   },
 }
 
@@ -571,38 +584,28 @@ end
 
 local get_icon_fn = {
   ["mini.icons"] = function(ext)
-    return M.icons.provider.get("extension", ext)
+    local icon, hl = M.icons.provider.get("extension", ext)
+    return icon, get_hex(hl, "fg")
   end,
   ["nvim-web-devicons"] = function(ext)
     return M.icons.provider.get_icon_color(nil, ext, { default = true })
   end,
 }
 
-local get_icon_hl_fn = {
-  ["mini.icons"] = function(ext, color, focused)
-    local key = focused and "f_" .. ext or "v_" .. ext
-    if not icon_hl_cache[key] then
-      local fg = color:sub(1, 1) == "#" and color or get_hex(color, "fg")
-      local bg = focused and (get_hex("TablineFocused", "bg") or get_hex("Normal", "bg"))
-        or (get_hex("TablineVisible", "bg") or get_hex("Normal", "bg"))
-      local name = (focused and "TablineFocusedIcon_" or "TablineVisibleIcon_") .. ext
-      api.nvim_set_hl(0, name, { fg = fg, bg = bg })
-      icon_hl_cache[key] = "%#" .. name .. "#"
-    end
-    return icon_hl_cache[key]
-  end,
-  ["nvim-web-devicons"] = function(ext, color, focused)
-    local key = focused and "f_" .. ext or "v_" .. ext
-    if not icon_hl_cache[key] then
-      local bg = focused and (get_hex("TablineFocused", "bg") or get_hex("Normal", "bg"))
-        or (get_hex("TablineVisible", "bg") or get_hex("Normal", "bg"))
-      local name = (focused and "TablineFocusedIcon_" or "TablineVisibleIcon_") .. ext
-      api.nvim_set_hl(0, name, { fg = color, bg = bg })
-      icon_hl_cache[key] = "%#" .. name .. "#"
-    end
-    return icon_hl_cache[key]
-  end,
-}
+M.get_icon_hl = function(ext, color, focused)
+  if M.icons.no_hl then
+    return ""
+  end
+  local key = focused and "f_" .. ext or "v_" .. ext
+  if not icon_hl_cache[key] then
+    local bg = focused and (get_hex("TablineFocused", "bg") or get_hex("Normal", "bg"))
+      or (get_hex("TablineVisible", "bg") or get_hex("Normal", "bg"))
+    local name = (focused and "TablineFocusedIcon_" or "TablineVisibleIcon_") .. ext
+    api.nvim_set_hl(0, name, { fg = color, bg = bg })
+    icon_hl_cache[key] = "%#" .. name .. "#"
+  end
+  return icon_hl_cache[key]
+end
 
 local function setup_autocmds()
   api.nvim_create_autocmd("BufEnter", {
@@ -709,6 +712,7 @@ function M.setup(opts)
   config = vim.tbl_deep_extend("force", vim.deepcopy(config), opts or {})
   if config.icons.enabled then
     M.icons.enabled = config.icons.enabled
+    M.icons.no_hl = config.icons.no_hl or false
 
     -- "mini.icons"|"nvim-web-devicons" default: "mini.icons"
     local provider = "mini.icons"
@@ -717,7 +721,6 @@ function M.setup(opts)
     end
     M.icons.provider = require(provider)
     M.get_icon = get_icon_fn[provider]
-    M.get_icon_hl = get_icon_hl_fn[provider]
   end
 
   init_bufs()
