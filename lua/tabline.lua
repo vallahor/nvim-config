@@ -518,12 +518,6 @@ local function setup_autocmds()
     end,
   })
 
-  api.nvim_create_autocmd({ "TextChanged", "TextChangedI", "TextChangedP", "BufWritePost" }, {
-    callback = function()
-      viewport.diag_or_input_changed = true
-    end,
-  })
-
   api.nvim_create_autocmd({ "BufModifiedSet", "DiagnosticChanged" }, {
     callback = function()
       viewport.diag_or_input_changed = true
