@@ -1,15 +1,18 @@
 local nvim_tree_view = require("nvim-tree.view")
 
 local api, fn, bo = vim.api, vim.fn, vim.bo
-local floor, strwidth, fnamemodify = math.floor, fn.strwidth, fn.fnamemodify
+local strwidth, fnamemodify = fn.strwidth, fn.fnamemodify
 
 ---@class Module
 ---@field focus_on_click boolean
+---@field unique_names boolean
 ---@field close_icon string
 ---@field icons {enabled: boolean, provider: string, no_hl: boolean}
 local M = {
   focus_on_click = true,
+  unique_names = true,
   close_icon = "",
+
   icons = {
     enabled = true,
     no_hl = true,
@@ -33,6 +36,7 @@ M.update_cursor_line_hl = function(_, _) end
 ---@field endfix string
 ---@field ghost_space integer
 ---@field total_tabs_width integer
+---@field close_icon_width integer
 local viewport = {
   str = "",
   width = 0,
@@ -47,12 +51,15 @@ local viewport = {
   endfix = "%#TablineFill#",
   ghost_space = 4,
   total_tabs_width = 0,
+  close_icon_width = 0,
 }
 
 ---@class Sidebar
 ---@field str string
 ---@field label string
 ---@field label_width integer
+---@field separator_wdith integer
+---@field separator string
 ---@field width integer
 ---@field focus boolean
 ---@field winnr integer?
@@ -60,6 +67,8 @@ local sidebar = {
   str = "",
   label = "",
   label_width = 0,
+  separator = "",
+  separator_width = 0,
   width = 0,
   focus = false,
   winnr = nil,
@@ -86,17 +95,6 @@ local diag_cache = {}
 ---@type {[integer]: Tab}
 local tabs_cache = {}
 
-local config = {
-  sidebar = {
-    label = "Explorer",
-  },
-  icons = {
-    enabled = true,
-    no_hl = false,
-    provider = "nvim-web-devicons",
-  },
-}
-
 local function focus_on_click(bufnr)
   if M.focus_on_click then
     return "%" .. bufnr .. "@v:lua.FocusTab@"
@@ -104,9 +102,9 @@ local function focus_on_click(bufnr)
   return ""
 end
 
-local function close_on_click()
+local function close_on_click(bufnr)
   if M.close_icon ~= "" then
-    return "%@v:lua.CloseTab@" .. M.close_icon .. "%X"
+    return "%" .. bufnr .. "@v:lua.CloseTab@" .. M.close_icon .. "%X"
   end
   return ""
 end
@@ -141,12 +139,12 @@ local function resolve_tabs()
 
   for _, info in ipairs(buf_names) do
     local display
-    if counts[info.tail] > 1 and info.bufname ~= "" then
+    if counts[info.tail] > 1 and info.bufname ~= "" and M.unique_names then
       display = " " .. fnamemodify(info.bufname, ":~:."):gsub("^%./", "") .. " "
     else
       display = " " .. info.tail .. " "
     end
-    local width = strwidth(display)
+    local width = strwidth(display) + viewport.close_icon_width
     local icon
     if M.icons.enabled then
       local str, color = M.get_icon(info.ext)
@@ -190,14 +188,16 @@ local function get_current_index()
   return buf_index[viewport.buf] or 1
 end
 
-local cached_pad = -1
-local cached_spaces = ""
-local function make_spaces(n)
+local cached_pad_left = -1
+local cached_pad_right = -1
+local sidebar_spaces_left = ""
+local sidebar_spaces_right = ""
+local function make_spaces(cached_pad, str, n)
   if cached_pad ~= n then
     cached_pad = n
-    cached_spaces = string.rep(" ", n)
+    str = string.rep(" ", n)
   end
-  return cached_spaces
+  return str
 end
 
 ---@return integer
@@ -206,12 +206,15 @@ local function render_sidebar()
     return 0
   end
   -- add the `separator` width to sidebar_width
-  local sidebar_width = api.nvim_win_get_width(sidebar.winnr) + 1
+  local sidebar_width = api.nvim_win_get_width(sidebar.winnr) + sidebar.separator_width
   if sidebar_width ~= sidebar.width then
     sidebar.width = sidebar_width
-    local pad = math.max(0, floor((sidebar_width - sidebar.label_width) / 2))
-    local p = make_spaces(pad)
-    sidebar.str = p .. sidebar.label .. p .. "%#TablineSidebarSep#│"
+    local total_pad = math.max(0, sidebar_width - sidebar.label_width - sidebar.separator_width)
+    local pad_left = math.ceil(total_pad / 2)
+    local pad_right = math.floor(total_pad / 2)
+    local spaces_left = make_spaces(cached_pad_left, sidebar_spaces_left, pad_left)
+    local spaces_right = make_spaces(cached_pad_right, sidebar_spaces_right, pad_right)
+    sidebar.str = spaces_left .. sidebar.label .. spaces_right .. "%#TablineSidebarSep#" .. sidebar.separator
   end
   return sidebar_width
 end
@@ -385,7 +388,7 @@ function M.make_tabline()
         tabs[#tabs + 1] = tab_hl
       end
       tabs[#tabs + 1] = tab.str
-      tabs[#tabs + 1] = close_on_click()
+      tabs[#tabs + 1] = close_on_click(buf)
     end
     tabs[#tabs + 1] = viewport.postfix
     tabs[#tabs + 1] = viewport.endfix
@@ -496,8 +499,8 @@ function M.move_tab_end()
   end
 end
 
-function M.close_tab(force)
-  local bufnr = api.nvim_get_current_buf()
+function M.close_tab(bufnr, force)
+  bufnr = bufnr == 0 and api.nvim_get_current_buf() or bufnr
   local idx = buf_index[bufnr]
   if not idx then
     return
@@ -686,10 +689,10 @@ local function setup_keymaps()
   map("n", "<c-s-home>", M.move_tab_begin, { silent = true })
   map("n", "<c-s-end>", M.move_tab_end, { silent = true })
   map("n", "<c-w>", function()
-    M.close_tab(false)
+    M.close_tab(0, false)
   end, { silent = true, nowait = true })
   map("n", "<c-x>", function()
-    M.close_tab(true)
+    M.close_tab(0, true)
   end, { silent = true, nowait = true })
 end
 
@@ -697,8 +700,9 @@ _G.make_tabline = M.make_tabline
 vim.opt.tabline = "%!v:lua.make_tabline()"
 vim.opt.showtabline = 2
 
-_G.CloseTab = function()
-  M.close_tab(false)
+_G.CloseTab = function(bufnr)
+  print(bufnr)
+  M.close_tab(bufnr, false)
 end
 
 _G.FocusTab = function(bufnr, _clicks, button)
@@ -707,6 +711,21 @@ _G.FocusTab = function(bufnr, _clicks, button)
     viewport.index = buf_index[bufnr]
   end
 end
+
+local config = {
+  close_icon = "X ",
+  sidebar = {
+    -- label = "Explorer",
+    -- label = "Files",
+    -- separator = "│",
+    separator = " ",
+  },
+  icons = {
+    enabled = true,
+    no_hl = false,
+    provider = "nvim-web-devicons",
+  },
+}
 
 function M.setup(opts)
   config = vim.tbl_deep_extend("force", vim.deepcopy(config), opts or {})
@@ -723,6 +742,21 @@ function M.setup(opts)
     M.get_icon = get_icon_fn[provider]
   end
 
+  if config.close_icon then
+    M.close_icon = config.close_icon
+    viewport.close_icon_width = strwidth(config.close_icon)
+  end
+
+  if config.sidebar.separator then
+    sidebar.separator = config.sidebar.separator
+    sidebar.separator_width = strwidth(config.sidebar.separator)
+  end
+
+  if config.sidebar.label then
+    sidebar.label = config.sidebar.label
+    sidebar.label_width = strwidth(sidebar.label)
+  end
+
   init_bufs()
   setup_autocmds()
   setup_keymaps()
@@ -731,9 +765,6 @@ function M.setup(opts)
   if opts and type(opts.update_cursor_line_hl) == "function" then
     M.update_cursor_line_hl = opts.update_cursor_line_hl
   end
-
-  sidebar.label = config.sidebar.label
-  sidebar.label_width = strwidth(sidebar.label)
 end
 
 return M
