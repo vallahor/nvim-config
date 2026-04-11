@@ -5,7 +5,20 @@ local M = {}
 
 M.update_cursor_line_hl = function(_, _) end
 
----@type {str: string, width: integer, changed: boolean, diag_or_input_changed: boolean, lo: integer, hi: integer, buf: integer, index: integer}
+---@class Viewport
+---@field str string
+---@field width integer
+---@field changed boolean
+---@field diag_or_input_changed boolean
+---@field lo integer
+---@field hi integer
+---@field buf integer
+---@field index integer
+---@field prefix string
+---@field postfix string
+---@field endfix string
+---@field ghost_space integer
+---@field total_tabs_width integer
 local viewport = {
   str = "",
   width = 0,
@@ -15,6 +28,23 @@ local viewport = {
   hi = 1,
   buf = 1,
   index = 1,
+  prefix = "",
+  postfix = "",
+  endfix = "%#TablineFill#",
+  ghost_space = 4,
+  total_tabs_width = 0,
+}
+
+---@class Sidebar
+---@field str string
+---@field width integer
+---@field focus boolean
+---@field winnr integer?
+local sidebar = {
+  str = "",
+  width = 0,
+  focus = false,
+  winnr = nil,
 }
 
 local buf_cache = {}
@@ -22,23 +52,11 @@ local buf_index = {}
 local diag_cache = {}
 local tabs_cache = {} ---@type table
 
-local ghost_space = 4
-local tabs_width_cache = 0
-
-local sidebar = ""
-local sidebar_width_cache = 0
-local sidebar_focus = false
-local sidebar_winnr = nil
-
-local prefix = ""
-local postfix = ""
-local endfix = "%#TablineFill#"
-
 local function update_buf_index()
   for i, b in ipairs(buf_cache) do
     buf_index[b] = i
   end
-  if not sidebar_focus and buf_index[viewport.buf] then
+  if not sidebar.focus and buf_index[viewport.buf] then
     viewport.index = buf_index[viewport.buf]
   end
   viewport.width = 0
@@ -74,7 +92,7 @@ local function resolve_tabs()
   end
 
   tabs_cache = tabs
-  tabs_width_cache = total_w
+  viewport.total_tabs_width = total_w
 
   viewport.changed = true
 end
@@ -109,16 +127,16 @@ end
 
 ---@return integer
 local function render_sidebar()
-  if not sidebar_winnr or not api.nvim_win_is_valid(sidebar_winnr) then
+  if not sidebar.winnr or not api.nvim_win_is_valid(sidebar.winnr) then
     return 0
   end
   -- add the `separator` width to sidebar_width
-  local sidebar_width = api.nvim_win_get_width(sidebar_winnr) + 1
-  if sidebar_width ~= sidebar_width_cache then
-    sidebar_width_cache = sidebar_width
+  local sidebar_width = api.nvim_win_get_width(sidebar.winnr) + 1
+  if sidebar_width ~= sidebar.width then
+    sidebar.width = sidebar_width
     local pad = math.max(0, floor((sidebar_width - explorer_label_len) / 2))
     local p = make_spaces(pad)
-    sidebar = p .. explorer_label .. p .. "%#TablineSidebarSep#│"
+    sidebar.str = p .. explorer_label .. p .. "%#TablineSidebarSep#│"
   end
   return sidebar_width
 end
@@ -164,7 +182,7 @@ local function get_ruler_hi(idx, width)
   local w = tabs_cache[idx].w
   local hi = idx
   for pos = hi + 1, #tabs_cache do
-    if w + tabs_cache[pos].w > width - ghost_space then
+    if w + tabs_cache[pos].w > width - viewport.ghost_space then
       break
     end
     w = w + tabs_cache[pos].w
@@ -177,7 +195,7 @@ local function get_ruler_lo(idx, width)
   local w = tabs_cache[idx].w
   local lo = idx
   for pos = lo - 1, 1, -1 do
-    if w + tabs_cache[pos].w > width - ghost_space then
+    if w + tabs_cache[pos].w > width - viewport.ghost_space then
       break
     end
     w = w + tabs_cache[pos].w
@@ -225,24 +243,24 @@ local function calc_truncated_tabs(width)
   end
 
   if w ~= 0 then
-    prefix = ""
-    postfix = ""
+    viewport.prefix = ""
+    viewport.postfix = ""
     local space = (viewport.lo > 1 and 2 or 0) + (viewport.hi < #tabs_cache and 2 or 0)
     if viewport.lo > 1 then
-      prefix = " %#TablineHidden#…"
+      viewport.prefix = " %#TablineHidden#…"
       if w < 0 then
         local size = width + w - space
         if size > 0 then
-          prefix = prefix .. resolve_prefix_str(size)
+          viewport.prefix = viewport.prefix .. resolve_prefix_str(size)
         end
       end
     end
     if viewport.hi < #tabs_cache then
-      postfix = "%#TablineHidden#… "
+      viewport.postfix = "%#TablineHidden#… "
       if w > 0 then
         local size = width - w - space
         if size > 0 then
-          postfix = resolve_post_str(size) .. postfix
+          viewport.postfix = resolve_post_str(size) .. viewport.postfix
         end
       end
     end
@@ -258,13 +276,13 @@ function M.make_tabline()
       goto build_viewport_str
     end
 
-    if tabs_width_cache > width then
+    if viewport.total_tabs_width > width then
       calc_truncated_tabs(width)
     else
       viewport.lo = 1
       viewport.hi = #tabs_cache
-      prefix = ""
-      postfix = ""
+      viewport.prefix = ""
+      viewport.postfix = ""
     end
 
     ::build_viewport_str::
@@ -272,19 +290,19 @@ function M.make_tabline()
     local sidebar_str = ""
     local hl = ""
     if sidebar_width > 0 then
-      hl = sidebar_focus and "%#TablineSidebarLabelFocused#" or "%#TablineSidebarLabelHidden#"
-      sidebar_str = sidebar
+      hl = sidebar.focus and "%#TablineSidebarLabelFocused#" or "%#TablineSidebarLabelHidden#"
+      sidebar_str = sidebar.str
     end
 
-    local tabs = { hl, sidebar_str, prefix }
+    local tabs = { hl, sidebar_str, viewport.prefix }
     for i = viewport.lo, viewport.hi do
       ---@type table
       local tab = tabs_cache[i]
       local buf = buf_cache[i] --[[@as integer]]
       tabs[#tabs + 1] = resolve_hl(buf, buf == viewport.buf) .. tab.str
     end
-    tabs[#tabs + 1] = postfix
-    tabs[#tabs + 1] = endfix
+    tabs[#tabs + 1] = viewport.postfix
+    tabs[#tabs + 1] = viewport.endfix
 
     viewport.changed = false
     viewport.str = table.concat(tabs)
@@ -292,12 +310,8 @@ function M.make_tabline()
   return viewport.str
 end
 
-local function is_nvim_tree()
-  return sidebar_focus
-end
-
 function M.prev_tab()
-  if is_nvim_tree() then
+  if sidebar.focus then
     return
   end
   local i = get_current_index()
@@ -308,7 +322,7 @@ function M.prev_tab()
 end
 
 function M.next_tab()
-  if is_nvim_tree() then
+  if sidebar.focus then
     return
   end
   local i = get_current_index()
@@ -319,14 +333,14 @@ function M.next_tab()
 end
 
 function M.move_to_begin()
-  if is_nvim_tree() then
+  if sidebar.focus then
     return
   end
   api.nvim_set_current_buf(buf_cache[1])
 end
 
 function M.move_to_end()
-  if is_nvim_tree() then
+  if sidebar.focus then
     return
   end
   api.nvim_set_current_buf(buf_cache[#buf_cache])
@@ -343,7 +357,7 @@ local function swap(i, j)
 end
 
 function M.move_tab_left()
-  if is_nvim_tree() then
+  if sidebar.focus then
     return
   end
   local i = get_current_index()
@@ -353,7 +367,7 @@ function M.move_tab_left()
 end
 
 function M.move_tab_right()
-  if is_nvim_tree() then
+  if sidebar.focus then
     return
   end
   local i = get_current_index()
@@ -363,7 +377,7 @@ function M.move_tab_right()
 end
 
 function M.move_tab_begin()
-  if is_nvim_tree() then
+  if sidebar.focus then
     return
   end
   local i = get_current_index()
@@ -378,7 +392,7 @@ function M.move_tab_begin()
 end
 
 function M.move_tab_end()
-  if is_nvim_tree() then
+  if sidebar.focus then
     return
   end
   local i = get_current_index()
@@ -539,9 +553,9 @@ local function setup_autocmds()
 
   api.nvim_create_autocmd({ "WinEnter", "BufEnter" }, {
     callback = function()
-      sidebar_winnr = nvim_tree_view.get_winnr()
-      sidebar_focus = api.nvim_get_current_win() == sidebar_winnr
-      viewport.buf = sidebar_focus and -1 or api.nvim_get_current_buf()
+      sidebar.winnr = nvim_tree_view.get_winnr()
+      sidebar.focus = api.nvim_get_current_win() == sidebar.winnr
+      viewport.buf = sidebar.focus and -1 or api.nvim_get_current_buf()
 
       viewport.changed = true
     end,
