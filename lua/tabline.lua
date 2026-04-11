@@ -3,7 +3,11 @@ local nvim_tree_view = require("nvim-tree.view")
 local api, fn, bo = vim.api, vim.fn, vim.bo
 local floor, strwidth, fnamemodify = math.floor, fn.strwidth, fn.fnamemodify
 
-local M = {}
+local M = {
+  focus_on_click = true,
+  close_on_click = true,
+  close_icon = "",
+}
 
 M.update_cursor_line_hl = function(_, _) end
 
@@ -75,6 +79,20 @@ local config = {
   },
 }
 
+local function focus_on_click(bufnr)
+  if M.focus_on_click then
+    return "%" .. bufnr .. "@v:lua.FocusTab@"
+  end
+  return ""
+end
+
+local function close_on_click()
+  if M.close_icon ~= "" then
+    return "%@v:lua.CloseTab@" .. M.close_icon .. "%X"
+  end
+  return ""
+end
+
 local function update_buf_index()
   for i, b in ipairs(buf_cache) do
     buf_index[b] = i
@@ -96,7 +114,7 @@ local function resolve_tabs()
     local bufname = api.nvim_buf_get_name(b)
     local tail = bufname ~= "" and fnamemodify(bufname, ":t") or "[No Name]"
     counts[tail] = (counts[tail] or 0) + 1
-    buf_names[#buf_names + 1] = { bufname = bufname, tail = tail }
+    buf_names[#buf_names + 1] = { bufnr = b, bufname = bufname, tail = tail }
   end
 
   local tabs = {}
@@ -110,7 +128,6 @@ local function resolve_tabs()
       display = " " .. info.tail .. " "
     end
     local width = strwidth(display)
-    -- tabs[#tabs + 1] = { str = display .. "%@v:lua.CloseTab@" .. "close" .. "%X", width = width }
     tabs[#tabs + 1] = { str = display, width = width }
     total_w = total_w + width
   end
@@ -271,7 +288,7 @@ local function calc_truncated_tabs(width)
       if w < 0 then
         local size = width + w - space
         if size > 0 then
-          viewport.prefix = viewport.prefix .. resolve_prefix_str(size)
+          viewport.prefix = focus_on_click(viewport.lo - 1) .. viewport.prefix .. resolve_prefix_str(size)
         end
       end
     end
@@ -280,7 +297,7 @@ local function calc_truncated_tabs(width)
       if w > 0 then
         local size = width - w - space
         if size > 0 then
-          viewport.postfix = resolve_post_str(size) .. viewport.postfix
+          viewport.postfix = focus_on_click(viewport.hi + 1) .. resolve_post_str(size) .. viewport.postfix
         end
       end
     end
@@ -319,7 +336,7 @@ function M.make_tabline()
       ---@type table
       local tab = tabs_cache[i]
       local buf = buf_cache[i] --[[@as integer]]
-      tabs[#tabs + 1] = resolve_hl(buf, buf == viewport.buf) .. tab.str
+      tabs[#tabs + 1] = focus_on_click(buf) .. resolve_hl(buf, buf == viewport.buf) .. tab.str .. close_on_click()
     end
     tabs[#tabs + 1] = viewport.postfix
     tabs[#tabs + 1] = viewport.endfix
@@ -608,6 +625,13 @@ vim.opt.showtabline = 2
 
 _G.CloseTab = function()
   M.close_tab(false)
+end
+
+_G.FocusTab = function(bufnr, clicks, button)
+  if button == "l" then
+    api.nvim_set_current_buf(bufnr)
+    viewport.index = buf_index[bufnr]
+  end
 end
 
 function M.setup(opts)
