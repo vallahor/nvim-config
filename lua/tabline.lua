@@ -46,8 +46,8 @@ local viewport = {
 ---@field winnr integer?
 local sidebar = {
   str = "",
-  label = "Explorer",
-  label_width = strwidth("Explorer"),
+  label = "",
+  label_width = 0,
   width = 0,
   focus = false,
   winnr = nil,
@@ -68,6 +68,44 @@ local diag_cache = {}
 
 ---@type {[integer]: Tab}
 local tabs_cache = {}
+
+local config = {
+  sidebar = {
+    label = "Explorer",
+    highlights = {},
+  },
+  viewport = {
+    hilights = {},
+  },
+  highlights = {
+    fill = "TablineFill",
+    tab = {
+      focused = "TablineFocused",
+      visible = "TablineVisible",
+      modified_focused = "TablineFocusedModified",
+      modified_visible = "TablineVisibleModified",
+    },
+    sidebar = {
+      label_focused = "TablineSidebarFocusedLabel",
+      label_visible = "TablineSidebarVisibleLabel",
+      sep = "TablineSidebarSep",
+    },
+    diag = {
+      focused = {
+        error = "TablineFocusedDiagError",
+        warn = "TablineFocusedDiagWarn",
+        modified_error = "TablineFocusedDiagModifiedError",
+        modified_warn = "TablineFocusedDiagModifiedWarn",
+      },
+      visible = {
+        error = "TablineVisibleDiagError",
+        warn = "TablineVisibleDiagWarn",
+        modified_error = "TablineVisibleDiagModifiedError",
+        modified_warn = "TablineVisibleDiagModifiedWarn",
+      },
+    },
+  },
+}
 
 local function update_buf_index()
   for i, b in ipairs(buf_cache) do
@@ -157,12 +195,12 @@ end
 ---@type table<integer, table<integer, table<integer, string>>>
 local diag_hl_map = {
   [1] = {
-    { "%#TablineDiagErrorHid#", "%#TablineDiagError#" },
-    { "%#TablineDiagModifiedErrorHid#", "%#TablineDiagModifiedError#" },
+    { "%#TablineVisibleDiagError#", "%#TablineFocusedDiagError#" },
+    { "%#TablineVisibleDiagModifiedError#", "%#TablineFocusedDiagModifiedError#" },
   },
   [2] = {
-    { "%#TablineDiagWarnHid#", "%#TablineDiagWarn#" },
-    { "%#TablineDiagModifiedWarnHid#", "%#TablineDiagModifiedWarn#" },
+    { "%#TablineVisibleDiagWarn#", "%#TablineFocusedDiagWarn#" },
+    { "%#TablineVisibleDiagModifiedWarn#", "%#TablineFocusedDiagModifiedWarn#" },
   },
 }
 
@@ -186,7 +224,7 @@ local function resolve_hl(b, focused)
     return diag_hl_map[sev][modified and 2 or 1][focused and 2 or 1]
   end
   if modified then
-    return focused and "%#TablineModifiedCurrent#" or "%#TablineModifiedVisible#"
+    return focused and "%#TablineFocusedModified#" or "%#TablineVisibleModified#"
   end
   return focused and "%#TablineCurrent#" or "%#TablineVisible#"
 end
@@ -260,7 +298,7 @@ local function calc_truncated_tabs(width)
     viewport.postfix = ""
     local space = (viewport.lo > 1 and 2 or 0) + (viewport.hi < #tabs_cache and 2 or 0)
     if viewport.lo > 1 then
-      viewport.prefix = " %#TablineHidden#…"
+      viewport.prefix = " %#TablineVisible#…"
       if w < 0 then
         local size = width + w - space
         if size > 0 then
@@ -269,7 +307,7 @@ local function calc_truncated_tabs(width)
       end
     end
     if viewport.hi < #tabs_cache then
-      viewport.postfix = "%#TablineHidden#… "
+      viewport.postfix = "%#TablineVisible#… "
       if w > 0 then
         local size = width - w - space
         if size > 0 then
@@ -303,7 +341,7 @@ function M.make_tabline()
     local sidebar_str = ""
     local hl = ""
     if sidebar_width > 0 then
-      hl = sidebar.focus and "%#TablineSidebarLabelFocused#" or "%#TablineSidebarLabelHidden#"
+      hl = sidebar.focus and "%#TablineSidebarFocusedLabel#" or "%#TablineSidebarVisibleLabel#"
       sidebar_str = sidebar.str
     end
 
@@ -349,14 +387,18 @@ function M.move_to_begin()
   if sidebar.focus then
     return
   end
-  api.nvim_set_current_buf(buf_cache[1])
+  local buf = buf_cache[1]
+  api.nvim_set_current_buf(buf)
+  viewport.index = buf_index[buf]
 end
 
 function M.move_to_end()
   if sidebar.focus then
     return
   end
-  api.nvim_set_current_buf(buf_cache[#buf_cache])
+  local buf = buf_cache[#buf_cache]
+  api.nvim_set_current_buf(buf)
+  viewport.index = buf_index[buf]
 end
 
 local function swap(i, j)
@@ -487,24 +529,23 @@ local function setup_tabline_hl()
   local warning_fg = get_hex("DiagnosticWarn", "fg")
 
   local hl = api.nvim_set_hl
+  hl(0, "TablineFill", { bg = hidden_bg })
   hl(0, "TablineCurrent", { fg = normal_fg, bg = focused_bg })
   hl(0, "TablineVisible", { fg = dim_fg, bg = hidden_bg })
-  hl(0, "TablineHidden", { fg = dim_fg, bg = hidden_bg })
-  hl(0, "TablineModifiedCurrent", { fg = normal_fg, bg = focused_bg, italic = true })
-  hl(0, "TablineModifiedVisible", { fg = dim_fg, bg = hidden_bg, italic = true })
-  hl(0, "TablineModifiedHidden", { fg = dim_fg, bg = hidden_bg, italic = true })
-  hl(0, "TablineFill", { bg = hidden_bg })
-  hl(0, "TablineSidebarLabelFocused", { fg = normal_fg, bg = focused_bg })
-  hl(0, "TablineSidebarLabelHidden", { fg = normal_fg, bg = hidden_bg })
+  hl(0, "TablineVisible", { fg = dim_fg, bg = hidden_bg })
+  hl(0, "TablineFocusedModified", { fg = normal_fg, bg = focused_bg, italic = true })
+  hl(0, "TablineVisibleModified", { fg = dim_fg, bg = hidden_bg, italic = true })
+  hl(0, "TablineSidebarFocusedLabel", { fg = normal_fg, bg = focused_bg })
+  hl(0, "TablineSidebarVisibleLabel", { fg = normal_fg, bg = hidden_bg })
   hl(0, "TablineSidebarSep", { fg = win_sep_fg, bg = hidden_bg })
-  hl(0, "TablineDiagError", { fg = errors_fg, bg = focused_bg })
-  hl(0, "TablineDiagErrorHid", { fg = errors_fg, bg = hidden_bg })
-  hl(0, "TablineDiagWarn", { fg = warning_fg, bg = focused_bg })
-  hl(0, "TablineDiagWarnHid", { fg = warning_fg, bg = hidden_bg })
-  hl(0, "TablineDiagModifiedError", { fg = errors_fg, bg = focused_bg, italic = true })
-  hl(0, "TablineDiagModifiedErrorHid", { fg = errors_fg, bg = hidden_bg, italic = true })
-  hl(0, "TablineDiagModifiedWarn", { fg = warning_fg, bg = focused_bg, italic = true })
-  hl(0, "TablineDiagModifiedWarnHid", { fg = warning_fg, bg = hidden_bg, italic = true })
+  hl(0, "TablineFocusedDiagError", { fg = errors_fg, bg = focused_bg })
+  hl(0, "TablineVisibleDiagError", { fg = errors_fg, bg = hidden_bg })
+  hl(0, "TablineFocusedDiagWarn", { fg = warning_fg, bg = focused_bg })
+  hl(0, "TablineVisibleDiagWarn", { fg = warning_fg, bg = hidden_bg })
+  hl(0, "TablineFocusedDiagModifiedError", { fg = errors_fg, bg = focused_bg, italic = true })
+  hl(0, "TablineVisibleDiagModifiedError", { fg = errors_fg, bg = hidden_bg, italic = true })
+  hl(0, "TablineFocusedDiagModifiedWarn", { fg = warning_fg, bg = focused_bg, italic = true })
+  hl(0, "TablineVisibleDiagModifiedWarn", { fg = warning_fg, bg = hidden_bg, italic = true })
 end
 
 local function setup_autocmds()
@@ -598,6 +639,8 @@ vim.opt.tabline = "%!v:lua.make_tabline()"
 vim.opt.showtabline = 2
 
 function M.setup(opts)
+  config = vim.tbl_deep_extend("force", vim.deepcopy(config), opts or {})
+
   init_bufs()
   setup_autocmds()
   setup_keymaps()
@@ -606,6 +649,9 @@ function M.setup(opts)
   if opts and type(opts.update_cursor_line_hl) == "function" then
     M.update_cursor_line_hl = opts.update_cursor_line_hl
   end
+
+  sidebar.label = config.sidebar.label
+  sidebar.label_width = strwidth(sidebar.label)
 end
 
 return M
