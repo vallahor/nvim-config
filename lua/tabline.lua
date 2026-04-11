@@ -515,14 +515,19 @@ local function setup_autocmds()
   api.nvim_create_autocmd("DiagnosticChanged", {
     callback = function(ev)
       diag_cache[ev.buf] = nil
-      viewport.diag_or_input_changed = true
-      vim.cmd.redrawtabline()
     end,
   })
 
-  api.nvim_create_autocmd({ "TextChanged", "TextChangedI", "TextChangedP", "BufWritePost", "BufModifiedSet" }, {
+  api.nvim_create_autocmd({ "TextChanged", "TextChangedI", "TextChangedP", "BufWritePost" }, {
     callback = function()
       viewport.diag_or_input_changed = true
+    end,
+  })
+
+  api.nvim_create_autocmd({ "BufModifiedSet", "DiagnosticChanged" }, {
+    callback = function()
+      viewport.diag_or_input_changed = true
+      vim.cmd.redrawtabline()
     end,
   })
 
