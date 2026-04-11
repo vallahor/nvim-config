@@ -1,3 +1,5 @@
+local nvim_tree_view = require("nvim-tree.view")
+
 local api, fn, bo = vim.api, vim.fn, vim.bo
 local floor, strwidth, fnamemodify = math.floor, fn.strwidth, fn.fnamemodify
 
@@ -37,11 +39,15 @@ local viewport = {
 
 ---@class Sidebar
 ---@field str string
+---@field label string
+---@field label_width integer
 ---@field width integer
 ---@field focus boolean
 ---@field winnr integer?
 local sidebar = {
   str = "",
+  label = "Explorer",
+  label_width = strwidth("Explorer"),
   width = 0,
   focus = false,
   winnr = nil,
@@ -111,10 +117,6 @@ local function get_current_index()
   return buf_index[viewport.buf] or 1
 end
 
-local nvim_tree_view = require("nvim-tree.view")
-local explorer_label = "Explorer"
-local explorer_label_len = strwidth(explorer_label)
-
 local cached_pad = -1
 local cached_spaces = ""
 local function make_spaces(n)
@@ -134,9 +136,9 @@ local function render_sidebar()
   local sidebar_width = api.nvim_win_get_width(sidebar.winnr) + 1
   if sidebar_width ~= sidebar.width then
     sidebar.width = sidebar_width
-    local pad = math.max(0, floor((sidebar_width - explorer_label_len) / 2))
+    local pad = math.max(0, floor((sidebar_width - sidebar.label_width) / 2))
     local p = make_spaces(pad)
-    sidebar.str = p .. explorer_label .. p .. "%#TablineSidebarSep#│"
+    sidebar.str = p .. sidebar.label .. p .. "%#TablineSidebarSep#│"
   end
   return sidebar_width
 end
