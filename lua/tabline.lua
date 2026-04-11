@@ -189,7 +189,8 @@ end
 local function resolve_prefix_str(size)
   local tab = tabs_cache[viewport.lo - 1] --[[@as table]]
   local buf = buf_cache[viewport.lo - 1] --[[@as integer]]
-  return string.rep(" ", math.max(0, size - #tab.str)) .. resolve_hl(buf, false) .. string.sub(tab.str, -size)
+  local pad = string.rep(" ", math.max(0, size - #tab.str))
+  return pad .. resolve_hl(buf, false) .. string.sub(tab.str, -size)
 end
 
 local function resolve_post_str(size)
