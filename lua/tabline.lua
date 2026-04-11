@@ -110,6 +110,7 @@ local function resolve_tabs()
       display = " " .. info.tail .. " "
     end
     local width = strwidth(display)
+    -- tabs[#tabs + 1] = { str = display .. "%@v:lua.CloseTab@" .. "close" .. "%X", width = width }
     tabs[#tabs + 1] = { str = display, width = width }
     total_w = total_w + width
   end
@@ -429,7 +430,7 @@ function M.move_tab_end()
   end
 end
 
-function M.buf_delete(force)
+function M.close_tab(force)
   local bufnr = api.nvim_get_current_buf()
   local idx = buf_index[bufnr]
   if not idx then
@@ -447,9 +448,9 @@ function M.buf_delete(force)
       pcall(api.nvim_buf_call, bufnr, function()
         vim.cmd.write()
       end)
-      M.buf_delete(true)
+      M.close_tab(true)
     elseif choice == 2 then
-      M.buf_delete(true)
+      M.close_tab(true)
     end
     return
   end
@@ -594,16 +595,20 @@ local function setup_keymaps()
   map("n", "<c-s-home>", M.move_tab_begin, { silent = true })
   map("n", "<c-s-end>", M.move_tab_end, { silent = true })
   map("n", "<c-w>", function()
-    M.buf_delete(false)
+    M.close_tab(false)
   end, { silent = true, nowait = true })
   map("n", "<c-x>", function()
-    M.buf_delete(true)
+    M.close_tab(true)
   end, { silent = true, nowait = true })
 end
 
 _G.make_tabline = M.make_tabline
 vim.opt.tabline = "%!v:lua.make_tabline()"
 vim.opt.showtabline = 2
+
+_G.CloseTab = function()
+  M.close_tab(false)
+end
 
 function M.setup(opts)
   config = vim.tbl_deep_extend("force", vim.deepcopy(config), opts or {})
