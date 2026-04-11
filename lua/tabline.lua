@@ -72,38 +72,6 @@ local tabs_cache = {}
 local config = {
   sidebar = {
     label = "Explorer",
-    highlights = {},
-  },
-  viewport = {
-    hilights = {},
-  },
-  highlights = {
-    fill = "TablineFill",
-    tab = {
-      focused = "TablineFocused",
-      visible = "TablineVisible",
-      modified_focused = "TablineFocusedModified",
-      modified_visible = "TablineVisibleModified",
-    },
-    sidebar = {
-      label_focused = "TablineSidebarFocusedLabel",
-      label_visible = "TablineSidebarVisibleLabel",
-      sep = "TablineSidebarSep",
-    },
-    diag = {
-      focused = {
-        error = "TablineFocusedDiagError",
-        warn = "TablineFocusedDiagWarn",
-        modified_error = "TablineFocusedDiagModifiedError",
-        modified_warn = "TablineFocusedDiagModifiedWarn",
-      },
-      visible = {
-        error = "TablineVisibleDiagError",
-        warn = "TablineVisibleDiagWarn",
-        modified_error = "TablineVisibleDiagModifiedError",
-        modified_warn = "TablineVisibleDiagModifiedWarn",
-      },
-    },
   },
 }
 
@@ -226,7 +194,7 @@ local function resolve_hl(b, focused)
   if modified then
     return focused and "%#TablineFocusedModified#" or "%#TablineVisibleModified#"
   end
-  return focused and "%#TablineCurrent#" or "%#TablineVisible#"
+  return focused and "%#TablineFocused#" or "%#TablineVisible#"
 end
 
 local function get_ruler_hi(idx, width)
@@ -511,41 +479,40 @@ function M.buf_delete(force)
 end
 
 local function setup_tabline_hl()
+  ---@return string?
   local function get_hex(group, attr)
     local ok, val = pcall(api.nvim_get_hl, 0, { name = group, link = false })
     if not ok or not val then
-      return
+      return nil
     end
     local n = attr == "fg" and val.fg or val.bg
     return n and string.format("#%06x", n)
   end
 
-  local dim_fg = "#7e706c"
-  local focused_bg = "#3f303f"
-  local hidden_bg = "#191319"
-  local normal_fg = get_hex("Normal", "fg")
+  local focused_fg = get_hex("TablineFocused", "fg") or get_hex("Normal", "fg")
+  local focused_bg = get_hex("TablineFocused", "bg") or get_hex("CursorLine", "bg") or get_hex("Visual", "bg")
+  local visible_fg = get_hex("TablineVisible", "fg") or get_hex("Comment", "fg")
+  local visible_bg = get_hex("TablineVisible", "bg") or get_hex("StatusLineNC", "bg") or get_hex("TablineFill", "bg")
   local win_sep_fg = get_hex("WinSeparator", "fg")
   local errors_fg = get_hex("DiagnosticError", "fg")
   local warning_fg = get_hex("DiagnosticWarn", "fg")
 
   local hl = api.nvim_set_hl
-  hl(0, "TablineFill", { bg = hidden_bg })
-  hl(0, "TablineCurrent", { fg = normal_fg, bg = focused_bg })
-  hl(0, "TablineVisible", { fg = dim_fg, bg = hidden_bg })
-  hl(0, "TablineVisible", { fg = dim_fg, bg = hidden_bg })
-  hl(0, "TablineFocusedModified", { fg = normal_fg, bg = focused_bg, italic = true })
-  hl(0, "TablineVisibleModified", { fg = dim_fg, bg = hidden_bg, italic = true })
-  hl(0, "TablineSidebarFocusedLabel", { fg = normal_fg, bg = focused_bg })
-  hl(0, "TablineSidebarVisibleLabel", { fg = normal_fg, bg = hidden_bg })
-  hl(0, "TablineSidebarSep", { fg = win_sep_fg, bg = hidden_bg })
+  hl(0, "TablineFocused", { fg = focused_fg, bg = focused_bg })
+  hl(0, "TablineVisible", { fg = visible_fg, bg = visible_bg })
+  hl(0, "TablineFocusedModified", { fg = focused_fg, bg = focused_bg, italic = true })
+  hl(0, "TablineVisibleModified", { fg = visible_fg, bg = visible_bg, italic = true })
+  hl(0, "TablineSidebarFocusedLabel", { fg = focused_fg, bg = focused_bg })
+  hl(0, "TablineSidebarVisibleLabel", { fg = focused_fg, bg = visible_bg })
+  hl(0, "TablineSidebarSep", { fg = win_sep_fg, bg = visible_bg })
   hl(0, "TablineFocusedDiagError", { fg = errors_fg, bg = focused_bg })
-  hl(0, "TablineVisibleDiagError", { fg = errors_fg, bg = hidden_bg })
+  hl(0, "TablineVisibleDiagError", { fg = errors_fg, bg = visible_bg })
   hl(0, "TablineFocusedDiagWarn", { fg = warning_fg, bg = focused_bg })
-  hl(0, "TablineVisibleDiagWarn", { fg = warning_fg, bg = hidden_bg })
+  hl(0, "TablineVisibleDiagWarn", { fg = warning_fg, bg = visible_bg })
   hl(0, "TablineFocusedDiagModifiedError", { fg = errors_fg, bg = focused_bg, italic = true })
-  hl(0, "TablineVisibleDiagModifiedError", { fg = errors_fg, bg = hidden_bg, italic = true })
+  hl(0, "TablineVisibleDiagModifiedError", { fg = errors_fg, bg = visible_bg, italic = true })
   hl(0, "TablineFocusedDiagModifiedWarn", { fg = warning_fg, bg = focused_bg, italic = true })
-  hl(0, "TablineVisibleDiagModifiedWarn", { fg = warning_fg, bg = hidden_bg, italic = true })
+  hl(0, "TablineVisibleDiagModifiedWarn", { fg = warning_fg, bg = visible_bg, italic = true })
 end
 
 local function setup_autocmds()
