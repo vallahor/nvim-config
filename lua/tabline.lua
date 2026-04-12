@@ -5,12 +5,15 @@ local strwidth, fnamemodify = fn.strwidth, fn.fnamemodify
 
 local M = {}
 
+local prefix_size = 0
+
 M.update_cursor_line_hl = function(_, _) end
 
 ---@class Viewport
 ---@field str string
 ---@field width integer
 ---@field changed boolean
+---@field buf_deleted boolean
 ---@field diag_or_input_changed boolean
 ---@field lo integer
 ---@field hi integer
@@ -26,6 +29,7 @@ local viewport = {
   str = "",
   width = 0,
   changed = true,
+  buf_deleted = false,
   diag_or_input_changed = true,
   lo = 1,
   hi = 1,
@@ -79,6 +83,18 @@ local diag_cache = {}
 
 ---@type {[integer]: Tab}
 local tabs_cache = {}
+
+local redraw_scheduled = false
+
+local function schedule_redraw()
+  if not redraw_scheduled then
+    redraw_scheduled = true
+    vim.schedule(function()
+      redraw_scheduled = false
+      vim.cmd.redrawtabline()
+    end)
+  end
+end
 
 local function focus_on_click(bufnr)
   if M.focus_on_click then
@@ -261,7 +277,7 @@ local function get_ruler_lo(idx, width)
     w = w + tabs_cache[pos].width
     lo = pos
   end
-  return lo, -w
+  return lo, w
 end
 
 local function resolve_prefix_str(size)
@@ -280,70 +296,98 @@ end
 
 ---@param width integer
 local function calc_truncated_tabs(width)
-  local w = 0
+  local w_left = 0
+  local w_right = 0
 
-  if viewport.index > viewport.hi then
-    viewport.hi = viewport.index
-    viewport.lo, w = get_ruler_lo(viewport.index, width)
-  elseif viewport.index < viewport.lo then
-    viewport.hi, w = get_ruler_hi(viewport.index, width)
-    viewport.lo = viewport.index
-  elseif viewport.width ~= width or viewport.changed then
-    viewport.width = width
-    viewport.hi, w = get_ruler_hi(viewport.lo, width)
-    if viewport.hi == #tabs_cache then
-      viewport.lo, w = get_ruler_lo(viewport.hi, width)
+  -- if viewport.buf_deleted then
+  viewport.buf_deleted = false
+  if false then
+    local tab_x_position = prefix_size
+    for i = viewport.lo, viewport.index do
+      local tab_width = tabs_cache[i].width
+      tab_x_position = tab_x_position + tab_width
     end
+
+    viewport.hi, w_right = get_ruler_hi(viewport.lo, width - prefix_size)
+    if viewport.hi == #tabs_cache then
+      viewport.lo, w_left = get_ruler_lo(viewport.hi, width)
+    else
+      viewport.lo, w_left = get_ruler_lo(viewport.hi, width - w_right)
+      w_right = w_right + prefix_size
+      w_left = w_left + w_right
+    end
+  elseif viewport.index > viewport.hi or viewport.hi > #buf_cache then
+    viewport.hi = viewport.index
+    viewport.lo, w_left = get_ruler_lo(viewport.index, width)
+  elseif viewport.index < viewport.lo then
+    viewport.lo = viewport.index
+    viewport.hi, w_right = get_ruler_hi(viewport.index, width)
+  elseif viewport.width ~= width then
+    viewport.width = width
+    viewport.hi, w_right = get_ruler_hi(viewport.lo, width)
+    if viewport.hi == #tabs_cache then
+      viewport.lo, w_left = get_ruler_lo(viewport.hi, width)
+    end
+
+    -- opening the sidebar or resizing the window.
     if viewport.index < viewport.lo then
       viewport.lo = viewport.index
-      viewport.hi, w = get_ruler_hi(viewport.lo, width)
+      viewport.hi, w_right = get_ruler_hi(viewport.lo, width)
     elseif viewport.index > viewport.hi then
       viewport.hi = viewport.index
-      viewport.lo, w = get_ruler_lo(viewport.hi, width)
+      viewport.lo, w_left = get_ruler_lo(viewport.hi, width)
     end
   end
 
-  if w ~= 0 then
+  local space = (viewport.lo > 1 and 2 or 0) + (viewport.hi < #tabs_cache and 2 or 0) --[[@as integer]]
+
+  if viewport.lo > 1 then
+    viewport.prefix = " %#TablineVisible#…"
+    -- the issue is here ...
+    -- w_left still 0
+    -- that logics worked before when i only wanted partial strings
+    -- from just one side.
+    -- now i have to deal with both sides.
+    if w_left > 0 then
+      local size = width - w_left - space
+      if size > 0 then
+        if size - viewport.close_icon_width > 0 then
+          size = size - viewport.close_icon_width
+          local buf = buf_cache[viewport.lo - 1]
+          viewport.prefix = focus_on_click(buf) .. viewport.prefix .. resolve_prefix_str(size) .. close_on_click(buf)
+        else
+          viewport.prefix = viewport.prefix .. string.rep(" ", size)
+        end
+      end
+      prefix_size = size
+    end
+  else
     viewport.prefix = ""
+    prefix_size = 0
+  end
+
+  if viewport.hi < #tabs_cache then
+    viewport.postfix = "%#TablineVisible#… "
+    if w_right > 0 then
+      local size = width - w_right - space
+      if size > 0 then
+        viewport.postfix = focus_on_click(buf_cache[viewport.hi + 1]) .. resolve_post_str(size) .. viewport.postfix
+      end
+    end
+  else
     viewport.postfix = ""
-    local space = (viewport.lo > 1 and 2 or 0) + (viewport.hi < #tabs_cache and 2 or 0)
-    if viewport.lo > 1 then
-      viewport.prefix = " %#TablineVisible#…"
-      if w < 0 then
-        ---@type integer
-        local size = width + w - space
-        if size > 0 then
-          if size - viewport.close_icon_width > 0 then
-            size = size - viewport.close_icon_width
-            local buf = buf_cache[viewport.lo - 1]
-            viewport.prefix = focus_on_click(buf) .. viewport.prefix .. resolve_prefix_str(size) .. close_on_click(buf)
-          else
-            viewport.prefix = viewport.prefix .. string.rep(" ", size)
-          end
-        end
-      end
-    end
-    if viewport.hi < #tabs_cache then
-      viewport.postfix = "%#TablineVisible#… "
-      if w > 0 then
-        local size = width - w - space
-        if size > 0 then
-          viewport.postfix = focus_on_click(buf_cache[viewport.hi + 1]) .. resolve_post_str(size) .. viewport.postfix
-        end
-      end
-    end
   end
 end
 
 function M.make_tabline()
   local sidebar_width = render_sidebar()
   local width = vim.o.columns - sidebar_width
-  if #tabs_cache > 0 and viewport.width ~= width or viewport.changed or viewport.diag_or_input_changed then
+  if viewport.width ~= width or viewport.changed or viewport.diag_or_input_changed or viewport.buf_deleted then
     if viewport.diag_or_input_changed and not viewport.changed then
       goto build_viewport_str
     end
 
-    if viewport.total_tabs_width > width and viewport.changed then
+    if viewport.total_tabs_width > width then
       calc_truncated_tabs(width)
     else
       viewport.lo = 1
@@ -383,9 +427,9 @@ function M.make_tabline()
     tabs[#tabs + 1] = viewport.postfix
     tabs[#tabs + 1] = viewport.endfix
 
-    viewport.changed = false
     viewport.str = table.concat(tabs)
 
+    viewport.changed = false
     viewport.diag_or_input_changed = false
   end
   return viewport.str
@@ -438,7 +482,7 @@ local function swap(i, j)
   buf_index[buf_cache[j]] = j
   viewport.index = buf_index[viewport.buf]
   viewport.changed = true
-  vim.cmd.redrawtabline()
+  schedule_redraw()
 end
 
 function M.move_tab_left()
@@ -472,7 +516,7 @@ function M.move_tab_begin()
     local t = table.remove(tabs_cache, i)
     table.insert(tabs_cache, 1, t)
     update_buf_index()
-    vim.cmd.redrawtabline()
+    schedule_redraw()
   end
 end
 
@@ -487,7 +531,7 @@ function M.move_tab_end()
     local t = table.remove(tabs_cache, i)
     tabs_cache[#tabs_cache + 1] = t
     update_buf_index()
-    vim.cmd.redrawtabline()
+    schedule_redraw()
   end
 end
 
@@ -534,6 +578,7 @@ function M.close_tab(bufnr, force)
   buf_index[bufnr] = nil
   diag_cache[bufnr] = nil
 
+  viewport.buf_deleted = true
   resolve_tabs()
 
   if api.nvim_buf_is_valid(bufnr) then
@@ -603,6 +648,11 @@ M.get_icon_hl = function(ext, color, focused)
   return icon_hl_cache[key]
 end
 
+local ignore_buftypes = {
+  ["qf"] = true,
+  ["terminal"] = true,
+}
+
 local function setup_autocmds()
   api.nvim_create_autocmd("BufEnter", {
     callback = function()
@@ -611,12 +661,12 @@ local function setup_autocmds()
         return
       end
       vim.schedule(function()
-        if not api.nvim_buf_is_valid(b) or buf_index[b] then
+        if not api.nvim_buf_is_valid(b) or buf_index[b] or ignore_buftypes[bo[b].buftype] then
           return
         end
         buf_cache[#buf_cache + 1] = b
         resolve_tabs()
-        vim.cmd.redrawtabline()
+        schedule_redraw()
       end)
     end,
   })
@@ -629,29 +679,22 @@ local function setup_autocmds()
         return
       end
 
-      -- table.remove(buf_cache, idx)
-      --
-      -- buf_index[b] = nil
-      -- diag_cache[b] = nil
-
       table.remove(buf_cache, idx)
 
       ---@type integer?
       local replacement = buf_cache[idx] or buf_cache[idx - 1]
-      if not replacement then
-        replacement = api.nvim_create_buf(true, false)
-        buf_cache[idx] = replacement
-      end
-
-      local cur_win = api.nvim_get_current_win()
-      for _, win in ipairs(fn.win_findbuf(bufnr)) do
-        api.nvim_win_set_buf(win, replacement)
-        M.update_cursor_line_hl(cur_win, win)
+      if replacement then
+        local cur_win = api.nvim_get_current_win()
+        for _, win in ipairs(fn.win_findbuf(bufnr)) do
+          api.nvim_win_set_buf(win, replacement)
+          M.update_cursor_line_hl(cur_win, win)
+        end
       end
 
       buf_index[bufnr] = nil
       diag_cache[bufnr] = nil
 
+      viewport.buf_deleted = true
       resolve_tabs()
     end,
   })
@@ -665,7 +708,7 @@ local function setup_autocmds()
   api.nvim_create_autocmd({ "BufModifiedSet", "DiagnosticChanged" }, {
     callback = function()
       viewport.diag_or_input_changed = true
-      vim.schedudle(vim.cmd.redrawtabline)
+      schedule_redraw()
     end,
   })
 

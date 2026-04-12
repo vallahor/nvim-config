@@ -63,7 +63,7 @@ MiniStatusline.setup({
         "%=",
         { strings = { "%S" } },
         { strings = { vim.bo.filetype } },
-        { strings = { location } },
+        { hl = "MiniStatuslineModeNormal", strings = { location } },
       })
     end,
   },
