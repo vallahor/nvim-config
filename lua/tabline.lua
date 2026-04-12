@@ -38,9 +38,7 @@ local viewport = {
   prefix = "",
   postfix = "",
   endfix = "%#TablineFill#",
-  -- ghost_space = 4,
-  -- ghost_space = 2,
-  ghost_space = 0,
+  ghost_space = 4,
   total_tabs_width = 0,
   close_icon_width = 0,
 }
@@ -265,7 +263,6 @@ local function get_ruler_hi(idx, width)
   local hi = idx
   for pos = hi + 1, #tabs_cache do
     if w + tabs_cache[pos].width > width - viewport.ghost_space then
-      -- if w + tabs_cache[pos].width > width then
       break
     end
     w = w + tabs_cache[pos].width
@@ -311,16 +308,19 @@ local function calc_truncated_tabs(width)
   local l_size = 0
   local r_size = 0
 
-  local prefix = " %#TablineVisible#…"
-
   if viewport.buf_deleted then
     viewport.buf_deleted = false
 
-    viewport.hi, r_size = get_ruler_hi(viewport.lo, width - prefix_size)
-    if viewport.hi == #tabs_cache then
-      viewport.lo, l_size = get_ruler_lo(viewport.hi, width)
+    if viewport.lo == 1 then
+      viewport.hi, r_size = get_ruler_hi(viewport.lo, width)
     else
-      prefix = viewport.prefix
+      viewport.hi, r_size = get_ruler_hi(viewport.lo, width - prefix_size)
+      if viewport.hi == #tabs_cache then
+        viewport.lo, l_size = get_ruler_lo(viewport.hi, width)
+      else
+        l_size = prefix_size
+        r_size = r_size + 4
+      end
     end
   elseif viewport.index > viewport.hi then
     viewport.hi = viewport.index
@@ -350,7 +350,7 @@ local function calc_truncated_tabs(width)
   local space = (viewport.lo > 1 and 2 or 0) + (viewport.hi < #tabs_cache and 2 or 0) --[[@as integer]]
 
   if viewport.lo > 1 then
-    viewport.prefix = prefix
+    viewport.prefix = " %#TablineVisible#…"
     if l_size > 0 then
       local size = l_size - space
       if size > 0 then
@@ -362,11 +362,10 @@ local function calc_truncated_tabs(width)
           viewport.prefix = viewport.prefix .. string.rep(" ", size)
         end
       end
-      prefix_size = l_size
     end
+    prefix_size = l_size
   else
     viewport.prefix = ""
-    prefix_size = 0
   end
 
   if viewport.hi < #tabs_cache then
@@ -650,7 +649,7 @@ M.get_icon_hl = function(ext, color, focused)
 end
 
 local ignore_buftypes = {
-  ["qf"] = true,
+  ["quickfix"] = true,
   ["terminal"] = true,
 }
 
@@ -658,11 +657,11 @@ local function setup_autocmds()
   api.nvim_create_autocmd("BufEnter", {
     callback = function()
       local b = api.nvim_get_current_buf()
-      if not bo[b].buflisted then
+      if not bo[b].buflisted or ignore_buftypes[bo[b].buftype] then
         return
       end
       vim.schedule(function()
-        if not api.nvim_buf_is_valid(b) or buf_index[b] or ignore_buftypes[bo[b].buftype] then
+        if not api.nvim_buf_is_valid(b) or buf_index[b] then
           return
         end
         buf_cache[#buf_cache + 1] = b
@@ -764,13 +763,16 @@ _G.FocusTab = function(bufnr, _clicks, button)
   if button == "l" then
     api.nvim_set_current_buf(bufnr)
     viewport.index = buf_index[bufnr]
+  elseif button == "m" then
+    M.close_tab(bufnr, false)
   end
 end
 
 local config = {
   focus_on_click = true,
   unique_names = true,
-  close_icon = "󰅖 ",
+  close_icon = "",
+  -- close_icon = "󰅖 ",
 
   icons = {
     enabled = false,
