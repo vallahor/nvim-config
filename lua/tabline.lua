@@ -38,7 +38,9 @@ local viewport = {
   prefix = "",
   postfix = "",
   endfix = "%#TablineFill#",
-  ghost_space = 4,
+  -- ghost_space = 4,
+  -- ghost_space = 2,
+  ghost_space = 0,
   total_tabs_width = 0,
   close_icon_width = 0,
 }
@@ -74,7 +76,8 @@ local diag_cache = {}
 
 ---@class Icon
 ---@field str string
----@field icon_hl function
+---@field width integer
+---@field get function
 
 ---@class Tab
 ---@field str string
@@ -146,23 +149,26 @@ local function resolve_tabs()
       display = " " .. info.tail .. " "
     end
     local width = strwidth(display) + viewport.close_icon_width
-    local icon
+    local tab_icon
     if M.icons.enabled then
-      local str, color = M.get_icon(info.ext)
-      if str ~= "" then
-        width = width + 2
+      local icon, color = M.get_icon(info.ext)
+      if icon ~= "" then
+        icon = " " .. icon
+        local icon_width = strwidth(icon)
+        width = width + icon_width
+        tab_icon = {
+          str = icon,
+          width = icon_width,
+          get = function(focused, hl)
+            return M.get_icon_hl(info.ext, color, focused) .. icon .. hl
+          end,
+        }
       end
-      icon = {
-        str = str,
-        icon_hl = function(focused)
-          return M.get_icon_hl(info.ext, color, focused)
-        end,
-      }
     end
     tabs_cache[#tabs_cache + 1] = {
       str = display,
       width = width,
-      icon = icon,
+      icon = tab_icon,
     }
     total_w = total_w + width
   end
@@ -259,12 +265,13 @@ local function get_ruler_hi(idx, width)
   local hi = idx
   for pos = hi + 1, #tabs_cache do
     if w + tabs_cache[pos].width > width - viewport.ghost_space then
+      -- if w + tabs_cache[pos].width > width then
       break
     end
     w = w + tabs_cache[pos].width
     hi = pos
   end
-  return hi, w
+  return hi, width - w
 end
 
 local function get_ruler_lo(idx, width)
@@ -277,79 +284,75 @@ local function get_ruler_lo(idx, width)
     w = w + tabs_cache[pos].width
     lo = pos
   end
-  return lo, w
+  return lo, width - w
 end
 
 local function resolve_prefix_str(size)
   local tab = tabs_cache[viewport.lo - 1]
   local buf = buf_cache[viewport.lo - 1]
   local pad = string.rep(" ", math.max(0, size - #tab.str))
-  -- return pad .. resolve_hl(buf, false) .. string.upper(string.sub(tab.str, -size))
   return pad .. resolve_hl(buf, false) .. string.sub(tab.str, -size)
 end
 
 local function resolve_post_str(size)
-  local tab = tabs_cache[viewport.hi + 1] --[[@as table]]
-  local buf = buf_cache[viewport.hi + 1] --[[@as integer]]
-  return resolve_hl(buf, false) .. string.sub(tab.str, 1, size)
+  local tab = tabs_cache[viewport.hi + 1]
+  local buf = buf_cache[viewport.hi + 1]
+  local tab_hl = resolve_hl(buf, false)
+  local icon = ""
+  if tab.icon then
+    icon = tab.icon.get(false, tab_hl)
+    size = size - tab.icon.width
+  end
+  return icon .. tab_hl .. string.sub(tab.str, 1, size)
 end
 
 ---@param width integer
 local function calc_truncated_tabs(width)
-  local w_left = 0
-  local w_right = 0
+  local l_size = 0
+  local r_size = 0
 
-  -- if viewport.buf_deleted then
-  viewport.buf_deleted = false
-  if false then
-    local tab_x_position = prefix_size
-    for i = viewport.lo, viewport.index do
-      local tab_width = tabs_cache[i].width
-      tab_x_position = tab_x_position + tab_width
-    end
+  local prefix = " %#TablineVisible#…"
 
-    viewport.hi, w_right = get_ruler_hi(viewport.lo, width - prefix_size)
+  if viewport.buf_deleted then
+    viewport.buf_deleted = false
+
+    viewport.hi, r_size = get_ruler_hi(viewport.lo, width - prefix_size)
     if viewport.hi == #tabs_cache then
-      viewport.lo, w_left = get_ruler_lo(viewport.hi, width)
+      viewport.lo, l_size = get_ruler_lo(viewport.hi, width)
     else
-      viewport.lo, w_left = get_ruler_lo(viewport.hi, width - w_right)
-      w_right = w_right + prefix_size
-      w_left = w_left + w_right
+      prefix = viewport.prefix
     end
-  elseif viewport.index > viewport.hi or viewport.hi > #buf_cache then
+  elseif viewport.index > viewport.hi then
     viewport.hi = viewport.index
-    viewport.lo, w_left = get_ruler_lo(viewport.index, width)
+    viewport.lo, l_size = get_ruler_lo(viewport.hi, width)
   elseif viewport.index < viewport.lo then
     viewport.lo = viewport.index
-    viewport.hi, w_right = get_ruler_hi(viewport.index, width)
+    viewport.hi, r_size = get_ruler_hi(viewport.lo, width)
   elseif viewport.width ~= width then
     viewport.width = width
-    viewport.hi, w_right = get_ruler_hi(viewport.lo, width)
+    viewport.hi, r_size = get_ruler_hi(viewport.lo, width)
     if viewport.hi == #tabs_cache then
-      viewport.lo, w_left = get_ruler_lo(viewport.hi, width)
+      viewport.lo, l_size = get_ruler_lo(viewport.hi, width)
     end
 
     -- opening the sidebar or resizing the window.
     if viewport.index < viewport.lo then
       viewport.lo = viewport.index
-      viewport.hi, w_right = get_ruler_hi(viewport.lo, width)
+      viewport.hi, r_size = get_ruler_hi(viewport.lo, width)
     elseif viewport.index > viewport.hi then
       viewport.hi = viewport.index
-      viewport.lo, w_left = get_ruler_lo(viewport.hi, width)
+      viewport.lo, l_size = get_ruler_lo(viewport.hi, width)
     end
+  else
+    return
   end
 
   local space = (viewport.lo > 1 and 2 or 0) + (viewport.hi < #tabs_cache and 2 or 0) --[[@as integer]]
 
   if viewport.lo > 1 then
-    viewport.prefix = " %#TablineVisible#…"
-    -- the issue is here ...
-    -- w_left still 0
-    -- that logics worked before when i only wanted partial strings
-    -- from just one side.
-    -- now i have to deal with both sides.
-    if w_left > 0 then
-      local size = width - w_left - space
+    viewport.prefix = prefix
+    if l_size > 0 then
+      local size = l_size - space
       if size > 0 then
         if size - viewport.close_icon_width > 0 then
           size = size - viewport.close_icon_width
@@ -359,7 +362,7 @@ local function calc_truncated_tabs(width)
           viewport.prefix = viewport.prefix .. string.rep(" ", size)
         end
       end
-      prefix_size = size
+      prefix_size = l_size
     end
   else
     viewport.prefix = ""
@@ -368,8 +371,8 @@ local function calc_truncated_tabs(width)
 
   if viewport.hi < #tabs_cache then
     viewport.postfix = "%#TablineVisible#… "
-    if w_right > 0 then
-      local size = width - w_right - space
+    if r_size > 0 then
+      local size = r_size - space
       if size > 0 then
         viewport.postfix = focus_on_click(buf_cache[viewport.hi + 1]) .. resolve_post_str(size) .. viewport.postfix
       end
@@ -416,10 +419,7 @@ function M.make_tabline()
       tabs[#tabs + 1] = focus_on_click(buf)
       tabs[#tabs + 1] = tab_hl
       if tab.icon then
-        tabs[#tabs + 1] = " "
-        tabs[#tabs + 1] = tab.icon.icon_hl(focused)
-        tabs[#tabs + 1] = tab.icon.str
-        tabs[#tabs + 1] = tab_hl
+        tabs[#tabs + 1] = tab.icon.get(focused, tab_hl)
       end
       tabs[#tabs + 1] = tab.str
       tabs[#tabs + 1] = close_on_click(buf)
@@ -561,6 +561,7 @@ function M.close_tab(bufnr, force)
   end
 
   table.remove(buf_cache, idx)
+  viewport.hi = math.min(viewport.hi, #buf_cache)
 
   ---@type integer?
   local replacement = buf_cache[idx] or buf_cache[idx - 1]
@@ -680,6 +681,7 @@ local function setup_autocmds()
       end
 
       table.remove(buf_cache, idx)
+      viewport.hi = math.min(viewport.hi, #buf_cache)
 
       ---@type integer?
       local replacement = buf_cache[idx] or buf_cache[idx - 1]
@@ -771,7 +773,7 @@ local config = {
   close_icon = "󰅖 ",
 
   icons = {
-    enabled = true,
+    enabled = false,
     no_hl = true,
     provider = "mini.icons",
   },
@@ -786,8 +788,10 @@ local config = {
 
 function M.setup(opts)
   config = vim.tbl_deep_extend("force", vim.deepcopy(config), opts or {})
+  M.icons = {
+    enabled = false,
+  }
   if config.icons.enabled then
-    M.icons = {}
     M.icons.enabled = config.icons.enabled
     M.icons.no_hl = config.icons.no_hl or false
 
