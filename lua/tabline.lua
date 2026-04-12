@@ -3,22 +3,7 @@ local nvim_tree_view = require("nvim-tree.view")
 local api, fn, bo = vim.api, vim.fn, vim.bo
 local strwidth, fnamemodify = fn.strwidth, fn.fnamemodify
 
----@class Module
----@field focus_on_click boolean
----@field unique_names boolean
----@field close_icon string
----@field icons {enabled: boolean, provider: string, no_hl: boolean}
-local M = {
-  focus_on_click = true,
-  unique_names = true,
-  close_icon = "",
-
-  icons = {
-    enabled = true,
-    no_hl = true,
-    provider = "mini.icons",
-  },
-}
+local M = {}
 
 M.update_cursor_line_hl = function(_, _) end
 
@@ -116,12 +101,13 @@ local function update_buf_index()
   if not sidebar.focus and buf_index[viewport.buf] then
     viewport.index = buf_index[viewport.buf]
   end
-  viewport.width = 0
   viewport.changed = true
 end
 
 local function resolve_tabs()
   update_buf_index()
+
+  tabs_cache = {}
 
   local buf_names = {}
   local counts = {}
@@ -131,10 +117,9 @@ local function resolve_tabs()
     local tail = bufname ~= "" and fnamemodify(bufname, ":t") or "[No Name]"
     local ext = bufname ~= "" and fnamemodify(bufname, ":e") or ""
     counts[tail] = (counts[tail] or 0) + 1
-    buf_names[#buf_names + 1] = { buf = b, ext = ext, bufname = bufname, tail = tail }
+    buf_names[#buf_names + 1] = { ext = ext, bufname = bufname, tail = tail }
   end
 
-  local tabs = {}
   local total_w = 0
 
   for _, info in ipairs(buf_names) do
@@ -158,7 +143,7 @@ local function resolve_tabs()
         end,
       }
     end
-    tabs[#tabs + 1] = {
+    tabs_cache[#tabs_cache + 1] = {
       str = display,
       width = width,
       icon = icon,
@@ -166,10 +151,7 @@ local function resolve_tabs()
     total_w = total_w + width
   end
 
-  tabs_cache = tabs
   viewport.total_tabs_width = total_w
-
-  viewport.changed = true
 end
 
 local icon_hl_cache = {}
@@ -286,6 +268,7 @@ local function resolve_prefix_str(size)
   local tab = tabs_cache[viewport.lo - 1]
   local buf = buf_cache[viewport.lo - 1]
   local pad = string.rep(" ", math.max(0, size - #tab.str))
+  -- return pad .. resolve_hl(buf, false) .. string.upper(string.sub(tab.str, -size))
   return pad .. resolve_hl(buf, false) .. string.sub(tab.str, -size)
 end
 
@@ -305,7 +288,7 @@ local function calc_truncated_tabs(width)
   elseif viewport.index < viewport.lo then
     viewport.hi, w = get_ruler_hi(viewport.index, width)
     viewport.lo = viewport.index
-  elseif viewport.width ~= width then
+  elseif viewport.width ~= width or viewport.changed then
     viewport.width = width
     viewport.hi, w = get_ruler_hi(viewport.lo, width)
     if viewport.hi == #tabs_cache then
@@ -327,9 +310,16 @@ local function calc_truncated_tabs(width)
     if viewport.lo > 1 then
       viewport.prefix = " %#TablineVisible#…"
       if w < 0 then
+        ---@type integer
         local size = width + w - space
         if size > 0 then
-          viewport.prefix = focus_on_click(viewport.lo - 1) .. viewport.prefix .. resolve_prefix_str(size)
+          if size - viewport.close_icon_width > 0 then
+            size = size - viewport.close_icon_width
+            local buf = buf_cache[viewport.lo - 1]
+            viewport.prefix = focus_on_click(buf) .. viewport.prefix .. resolve_prefix_str(size) .. close_on_click(buf)
+          else
+            viewport.prefix = viewport.prefix .. string.rep(" ", size)
+          end
         end
       end
     end
@@ -338,7 +328,7 @@ local function calc_truncated_tabs(width)
       if w > 0 then
         local size = width - w - space
         if size > 0 then
-          viewport.postfix = focus_on_click(viewport.hi + 1) .. resolve_post_str(size) .. viewport.postfix
+          viewport.postfix = focus_on_click(buf_cache[viewport.hi + 1]) .. resolve_post_str(size) .. viewport.postfix
         end
       end
     end
@@ -348,13 +338,12 @@ end
 function M.make_tabline()
   local sidebar_width = render_sidebar()
   local width = vim.o.columns - sidebar_width
-  if viewport.width ~= width or viewport.changed or viewport.diag_or_input_changed then
+  if #tabs_cache > 0 and viewport.width ~= width or viewport.changed or viewport.diag_or_input_changed then
     if viewport.diag_or_input_changed and not viewport.changed then
-      viewport.diag_or_input_changed = false
       goto build_viewport_str
     end
 
-    if viewport.total_tabs_width > width then
+    if viewport.total_tabs_width > width and viewport.changed then
       calc_truncated_tabs(width)
     else
       viewport.lo = 1
@@ -373,6 +362,7 @@ function M.make_tabline()
     end
 
     local tabs = { hl, sidebar_str, viewport.prefix }
+
     for i = viewport.lo, viewport.hi do
       ---@type table
       local tab = tabs_cache[i]
@@ -395,6 +385,8 @@ function M.make_tabline()
 
     viewport.changed = false
     viewport.str = table.concat(tabs)
+
+    viewport.diag_or_input_changed = false
   end
   return viewport.str
 end
@@ -517,9 +509,9 @@ function M.close_tab(bufnr, force)
       pcall(api.nvim_buf_call, bufnr, function()
         vim.cmd.write()
       end)
-      M.close_tab(true)
+      M.close_tab(bufnr, true)
     elseif choice == 2 then
-      M.close_tab(true)
+      M.close_tab(bufnr, true)
     end
     return
   end
@@ -541,6 +533,7 @@ function M.close_tab(bufnr, force)
 
   buf_index[bufnr] = nil
   diag_cache[bufnr] = nil
+
   resolve_tabs()
 
   if api.nvim_buf_is_valid(bufnr) then
@@ -630,16 +623,34 @@ local function setup_autocmds()
 
   api.nvim_create_autocmd("BufDelete", {
     callback = function(ev)
-      local b = ev.buf
-      local idx = buf_index[b]
+      local bufnr = ev.buf
+      local idx = buf_index[bufnr]
       if not idx then
         return
       end
 
+      -- table.remove(buf_cache, idx)
+      --
+      -- buf_index[b] = nil
+      -- diag_cache[b] = nil
+
       table.remove(buf_cache, idx)
 
-      buf_index[b] = nil
-      diag_cache[b] = nil
+      ---@type integer?
+      local replacement = buf_cache[idx] or buf_cache[idx - 1]
+      if not replacement then
+        replacement = api.nvim_create_buf(true, false)
+        buf_cache[idx] = replacement
+      end
+
+      local cur_win = api.nvim_get_current_win()
+      for _, win in ipairs(fn.win_findbuf(bufnr)) do
+        api.nvim_win_set_buf(win, replacement)
+        M.update_cursor_line_hl(cur_win, win)
+      end
+
+      buf_index[bufnr] = nil
+      diag_cache[bufnr] = nil
 
       resolve_tabs()
     end,
@@ -654,7 +665,7 @@ local function setup_autocmds()
   api.nvim_create_autocmd({ "BufModifiedSet", "DiagnosticChanged" }, {
     callback = function()
       viewport.diag_or_input_changed = true
-      vim.cmd.redrawtabline()
+      vim.schedudle(vim.cmd.redrawtabline)
     end,
   })
 
@@ -701,7 +712,6 @@ vim.opt.tabline = "%!v:lua.make_tabline()"
 vim.opt.showtabline = 2
 
 _G.CloseTab = function(bufnr)
-  print(bufnr)
   M.close_tab(bufnr, false)
 end
 
@@ -713,23 +723,28 @@ _G.FocusTab = function(bufnr, _clicks, button)
 end
 
 local config = {
-  close_icon = "X ",
-  sidebar = {
-    -- label = "Explorer",
-    -- label = "Files",
-    -- separator = "│",
-    separator = " ",
-  },
+  focus_on_click = true,
+  unique_names = true,
+  close_icon = "󰅖 ",
+
   icons = {
     enabled = true,
-    no_hl = false,
-    provider = "nvim-web-devicons",
+    no_hl = true,
+    provider = "mini.icons",
+  },
+
+  sidebar = {
+    label = "Explorer",
+    -- label = "Files",
+    separator = "│",
+    -- separator = " ",
   },
 }
 
 function M.setup(opts)
   config = vim.tbl_deep_extend("force", vim.deepcopy(config), opts or {})
   if config.icons.enabled then
+    M.icons = {}
     M.icons.enabled = config.icons.enabled
     M.icons.no_hl = config.icons.no_hl or false
 
@@ -755,6 +770,14 @@ function M.setup(opts)
   if config.sidebar.label then
     sidebar.label = config.sidebar.label
     sidebar.label_width = strwidth(sidebar.label)
+  end
+
+  if config.focus_on_click then
+    M.focus_on_click = config.focus_on_click
+  end
+
+  if config.unique_names then
+    M.unique_names = config.unique_names
   end
 
   init_bufs()
