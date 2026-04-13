@@ -19,10 +19,11 @@ M.update_cursor_line_hl = function(_, _) end
 ---@field hi integer
 ---@field buf integer
 ---@field index integer
+---@field indicator_left integer
+---@field indicator_right integer
 ---@field prefix string
 ---@field postfix string
 ---@field endfix string
----@field ghost_space integer
 ---@field total_tabs_width integer
 ---@field close_icon_width integer
 local viewport = {
@@ -38,7 +39,8 @@ local viewport = {
   prefix = "",
   postfix = "",
   endfix = "%#TablineFill#",
-  ghost_space = 4,
+  indicator_left = 2,
+  indicator_right = 2,
   total_tabs_width = 0,
   close_icon_width = 0,
 }
@@ -146,13 +148,13 @@ local function resolve_tabs()
     else
       display = " " .. info.tail .. " "
     end
-    local width = strwidth(display) + viewport.close_icon_width
+    local width = vim.api.nvim_strwidth(display) + viewport.close_icon_width
     local tab_icon
     if M.icons.enabled then
       local icon, color = M.get_icon(info.ext)
       if icon ~= "" then
         icon = " " .. icon
-        local icon_width = strwidth(icon)
+        local icon_width = vim.api.nvim_strwidth(icon)
         width = width + icon_width
         tab_icon = {
           str = icon,
@@ -258,11 +260,11 @@ local function resolve_hl(b, focused)
   return focused and "%#TablineFocused#" or "%#TablineVisible#"
 end
 
-local function get_ruler_hi(idx, width)
+local function get_viewport_hi(idx, width)
   local w = tabs_cache[idx].width
   local hi = idx
   for pos = hi + 1, #tabs_cache do
-    if w + tabs_cache[pos].width > width - viewport.ghost_space then
+    if w + tabs_cache[pos].width > width - viewport.indicator_right then
       break
     end
     w = w + tabs_cache[pos].width
@@ -271,11 +273,11 @@ local function get_ruler_hi(idx, width)
   return hi, width - w
 end
 
-local function get_ruler_lo(idx, width)
+local function get_viewport_lo(idx, width)
   local w = tabs_cache[idx].width
   local lo = idx
   for pos = lo - 1, 1, -1 do
-    if w + tabs_cache[pos].width > width - viewport.ghost_space then
+    if w + tabs_cache[pos].width > width - viewport.indicator_left then
       break
     end
     w = w + tabs_cache[pos].width
@@ -287,8 +289,8 @@ end
 local function resolve_prefix_str(size)
   local tab = tabs_cache[viewport.lo - 1]
   local buf = buf_cache[viewport.lo - 1]
-  local pad = string.rep(" ", math.max(0, size - #tab.str))
-  return pad .. resolve_hl(buf, false) .. string.sub(tab.str, -size)
+  local pad = string.rep(" ", math.max(0, size - vim.api.nvim_strwidth(tab.str)))
+  return pad .. resolve_hl(buf, false) .. vim.fn.strcharpart(tab.str, vim.fn.strcharlen(tab.str) - size, size)
 end
 
 local function resolve_post_str(size)
@@ -297,10 +299,15 @@ local function resolve_post_str(size)
   local tab_hl = resolve_hl(buf, false)
   local icon = ""
   if tab.icon then
-    icon = tab.icon.get(false, tab_hl)
-    size = size - tab.icon.width
+    local remaining = size - tab.icon.width
+    if remaining >= 0 then
+      icon = tab.icon.get(false, tab_hl)
+      size = remaining
+    else
+      return string.rep(" ", size)
+    end
   end
-  return icon .. tab_hl .. string.sub(tab.str, 1, size)
+  return icon .. tab_hl .. vim.fn.strcharpart(tab.str, 0, size)
 end
 
 ---@param width integer
@@ -312,47 +319,50 @@ local function calc_truncated_tabs(width)
     viewport.buf_deleted = false
 
     if viewport.lo == 1 then
-      viewport.hi, r_size = get_ruler_hi(viewport.lo, width)
+      viewport.hi, r_size = get_viewport_hi(viewport.lo, width)
     else
-      viewport.hi, r_size = get_ruler_hi(viewport.lo, width - prefix_size)
+      viewport.hi, r_size = get_viewport_hi(viewport.lo, width - prefix_size - viewport.indicator_left)
       if viewport.hi == #tabs_cache then
-        viewport.lo, l_size = get_ruler_lo(viewport.hi, width)
+        viewport.lo, l_size = get_viewport_lo(viewport.hi, width)
       else
         l_size = prefix_size
-        r_size = r_size + 4
+        if r_size > 0 then
+          r_size = r_size + viewport.indicator_left
+        end
       end
     end
   elseif viewport.index > viewport.hi then
     viewport.hi = viewport.index
-    viewport.lo, l_size = get_ruler_lo(viewport.hi, width)
+    viewport.lo, l_size = get_viewport_lo(viewport.hi, width)
   elseif viewport.index < viewport.lo then
     viewport.lo = viewport.index
-    viewport.hi, r_size = get_ruler_hi(viewport.lo, width)
+    viewport.hi, r_size = get_viewport_hi(viewport.lo, width)
   elseif viewport.width ~= width then
     viewport.width = width
-    viewport.hi, r_size = get_ruler_hi(viewport.lo, width)
+    viewport.hi, r_size = get_viewport_hi(viewport.lo, width)
     if viewport.hi == #tabs_cache then
-      viewport.lo, l_size = get_ruler_lo(viewport.hi, width)
+      viewport.lo, l_size = get_viewport_lo(viewport.hi, width)
     end
 
     -- opening the sidebar or resizing the window.
     if viewport.index < viewport.lo then
       viewport.lo = viewport.index
-      viewport.hi, r_size = get_ruler_hi(viewport.lo, width)
+      viewport.hi, r_size = get_viewport_hi(viewport.lo, width)
     elseif viewport.index > viewport.hi then
       viewport.hi = viewport.index
-      viewport.lo, l_size = get_ruler_lo(viewport.hi, width)
+      viewport.lo, l_size = get_viewport_lo(viewport.hi, width)
     end
   else
     return
   end
 
-  local space = (viewport.lo > 1 and 2 or 0) + (viewport.hi < #tabs_cache and 2 or 0) --[[@as integer]]
-
+  -- local indicator = 0
+  local indicator_size = (viewport.lo > 1 and viewport.indicator_left or 0)
+    + (viewport.hi < #tabs_cache and viewport.indicator_right or 0)
   if viewport.lo > 1 then
     viewport.prefix = " %#TablineVisible#…"
     if l_size > 0 then
-      local size = l_size - space
+      local size = l_size - indicator_size
       if size > 0 then
         if size - viewport.close_icon_width > 0 then
           size = size - viewport.close_icon_width
@@ -367,11 +377,10 @@ local function calc_truncated_tabs(width)
   else
     viewport.prefix = ""
   end
-
   if viewport.hi < #tabs_cache then
     viewport.postfix = "%#TablineVisible#… "
     if r_size > 0 then
-      local size = r_size - space
+      local size = r_size - indicator_size
       if size > 0 then
         viewport.postfix = focus_on_click(buf_cache[viewport.hi + 1]) .. resolve_post_str(size) .. viewport.postfix
       end
@@ -771,11 +780,12 @@ end
 local config = {
   focus_on_click = true,
   unique_names = true,
-  close_icon = "",
+  -- close_icon = "",
   -- close_icon = "󰅖 ",
+  close_icon = "X ",
 
   icons = {
-    enabled = false,
+    enabled = true,
     no_hl = true,
     provider = "mini.icons",
   },
@@ -808,7 +818,7 @@ function M.setup(opts)
 
   if config.close_icon then
     M.close_icon = config.close_icon
-    viewport.close_icon_width = strwidth(config.close_icon)
+    viewport.close_icon_width = vim.api.nvim_strwidth(config.close_icon)
   end
 
   if config.sidebar.separator then
