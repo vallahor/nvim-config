@@ -81,6 +81,7 @@ local diag_cache = {}
 
 ---@class Tab
 ---@field str string
+---@field tail string
 ---@field width integer
 ---@field strlen integer
 ---@field strwidth integer
@@ -91,6 +92,9 @@ local diag_cache = {}
 
 ---@type {[integer]: Tab}
 local tabs_cache = {}
+
+---@type table<string, table<integer, boolean?>>
+local tabs_repeated_names_buf_cache = {}
 
 local redraw_scheduled = false
 
@@ -128,79 +132,187 @@ local function update_buf_index()
   viewport.changed = true
 end
 
+local function resolve_buf_name(buf)
+  local bufname = api.nvim_buf_get_name(buf)
+  local tail = bufname ~= "" and fnamemodify(bufname, ":t") or "[No Name]"
+  local ext = bufname ~= "" and fnamemodify(bufname, ":e") or ""
+  return bufname, tail, ext
+end
+
+local function resolve_buf_repeated_names(bufname, tail)
+  local display
+  if #tabs_repeated_names_buf_cache[tail] > 1 and bufname ~= "" then
+    display = " " .. fnamemodify(bufname, ":~:."):gsub("^%./", "") .. " "
+  else
+    display = " " .. tail .. " "
+  end
+  return display
+end
+
+local function make_tab(buf, tail, display, ext)
+  local display_width = vim.api.nvim_strwidth(display)
+  local width = display_width + viewport.close_icon_width
+  local tab_icon
+  if M.icons.enabled then
+    local icon, color = M.get_icon(ext)
+    if icon ~= "" then
+      icon = " " .. icon
+      local icon_width = vim.api.nvim_strwidth(icon)
+      width = width + icon_width
+      tab_icon = {
+        str = icon,
+        width = icon_width,
+        get = function(focused, hl)
+          return M.get_icon_hl(ext, color, focused) .. icon .. hl
+        end,
+      }
+    end
+  end
+
+  local index = #tabs_cache + 1
+  tabs_cache[index] = {
+    str = display,
+    tail = tail,
+    width = width,
+    icon = tab_icon,
+    strlen = vim.fn.strcharlen(display),
+    strwidth = display_width,
+    rendered_visible = nil,
+    rendered_focused = nil,
+    update = function()
+      local tab_visible_hl = M.resolve_hl(buf, false)
+      local tab_focused_hl = M.resolve_hl(buf, true)
+      tabs_cache[index].rendered_visible = table.concat({
+        focus_on_click(buf),
+        tab_visible_hl,
+        tab_icon and tab_icon.get(false, tab_visible_hl) or "",
+        display,
+        close_on_click(buf),
+      })
+      tabs_cache[index].rendered_focused = table.concat({
+        focus_on_click(buf),
+        tab_focused_hl,
+        tab_icon and tab_icon.get(true, tab_focused_hl) or "",
+        display,
+        close_on_click(buf),
+      })
+    end,
+  }
+  tabs_cache[index].update()
+
+  return width
+end
+
+local function update_tab(index, buf, tail)
+  local tab = tabs_cache[index]
+  if tab == nil then
+    return
+  end
+  local bufname, _, ext = resolve_buf_name(buf)
+  local display = resolve_buf_repeated_names(bufname, tail)
+  local display_width = vim.api.nvim_strwidth(display)
+  local width = display_width + viewport.close_icon_width
+  local tab_icon
+  if M.icons.enabled then
+    local icon, color = M.get_icon(ext)
+    if icon ~= "" then
+      icon = " " .. icon
+      local icon_width = vim.api.nvim_strwidth(icon)
+      width = width + icon_width
+      tab_icon = {
+        str = icon,
+        width = icon_width,
+        get = function(focused, hl)
+          return M.get_icon_hl(ext, color, focused) .. icon .. hl
+        end,
+      }
+    end
+  end
+
+  tabs_cache[index] = {
+    str = display,
+    tail = tail,
+    width = width,
+    icon = tab_icon,
+    strlen = vim.fn.strcharlen(display),
+    strwidth = display_width,
+    rendered_visible = nil,
+    rendered_focused = nil,
+    update = function()
+      local tab_visible_hl = M.resolve_hl(buf, false)
+      local tab_focused_hl = M.resolve_hl(buf, true)
+      tabs_cache[index].rendered_visible = table.concat({
+        focus_on_click(buf),
+        tab_visible_hl,
+        tab_icon and tab_icon.get(false, tab_visible_hl) or "",
+        display,
+        close_on_click(buf),
+      })
+      tabs_cache[index].rendered_focused = table.concat({
+        focus_on_click(buf),
+        tab_focused_hl,
+        tab_icon and tab_icon.get(true, tab_focused_hl) or "",
+        display,
+        close_on_click(buf),
+      })
+    end,
+  }
+  tabs_cache[index].update()
+end
+
+local function resolve_tabs_repeated_names(bufnr, index)
+  local tail = tabs_cache[index].tail
+  if tabs_repeated_names_buf_cache[tail] and tabs_repeated_names_buf_cache[tail][bufnr] then
+    tabs_repeated_names_buf_cache[tail][bufnr] = nil
+    for buf, _ in pairs(tabs_repeated_names_buf_cache[tail]) do
+      local i = buf_index[buf]
+      update_tab(i, buf, tail)
+    end
+  end
+
+  table.remove(tabs_cache, index)
+  table.remove(buf_cache, index)
+  viewport.hi = math.min(viewport.hi, #buf_cache)
+
+  ---@type integer?
+  local replacement = buf_cache[index] or buf_cache[index - 1]
+  if replacement then
+    local cur_win = api.nvim_get_current_win()
+    for _, win in ipairs(fn.win_findbuf(bufnr)) do
+      api.nvim_win_set_buf(win, replacement)
+      M.update_cursor_line_hl(cur_win, win)
+    end
+  end
+
+  buf_index[bufnr] = nil
+  diag_cache[bufnr] = nil
+
+  viewport.buf_deleted = true
+  update_buf_index()
+end
+
 local function resolve_tabs()
   update_buf_index()
 
   tabs_cache = {}
 
   local buf_names = {}
-  local counts = {}
 
-  for _, buf in ipairs(buf_cache) do
-    local bufname = api.nvim_buf_get_name(buf)
-    local tail = bufname ~= "" and fnamemodify(bufname, ":t") or "[No Name]"
-    local ext = bufname ~= "" and fnamemodify(bufname, ":e") or ""
-    counts[tail] = (counts[tail] or 0) + 1
+  for index, buf in ipairs(buf_cache) do
+    local bufname, tail, ext = resolve_buf_name(buf)
+    if tabs_repeated_names_buf_cache[tail] == nil then
+      tabs_repeated_names_buf_cache[tail] = {}
+    end
+    tabs_repeated_names_buf_cache[tail][buf] = true
     buf_names[#buf_names + 1] = { buf = buf, ext = ext, bufname = bufname, tail = tail }
   end
 
   local total_w = 0
+  -- M.unique_names @check later
 
   for _, info in ipairs(buf_names) do
-    local display
-    if counts[info.tail] > 1 and info.bufname ~= "" and M.unique_names then
-      display = " " .. fnamemodify(info.bufname, ":~:."):gsub("^%./", "") .. " "
-    else
-      display = " " .. info.tail .. " "
-    end
-    local display_width = vim.api.nvim_strwidth(display)
-    local width = display_width + viewport.close_icon_width
-    local tab_icon
-    if M.icons.enabled then
-      local icon, color = M.get_icon(info.ext)
-      if icon ~= "" then
-        icon = " " .. icon
-        local icon_width = vim.api.nvim_strwidth(icon)
-        width = width + icon_width
-        tab_icon = {
-          str = icon,
-          width = icon_width,
-          get = function(focused, hl)
-            return M.get_icon_hl(info.ext, color, focused) .. icon .. hl
-          end,
-        }
-      end
-    end
-
-    local index = #tabs_cache + 1
-    tabs_cache[index] = {
-      str = display,
-      width = width + viewport.close_icon_width,
-      icon = tab_icon,
-      strlen = vim.fn.strcharlen(display),
-      strwidth = display_width,
-      rendered_visible = nil,
-      rendered_focused = nil,
-      update = function()
-        local tab_visible_hl = M.resolve_hl(info.buf, false)
-        local tab_focused_hl = M.resolve_hl(info.buf, true)
-        tabs_cache[index].rendered_visible = table.concat({
-          focus_on_click(info.buf),
-          tab_visible_hl,
-          tab_icon and tab_icon.get(false, tab_visible_hl) or "",
-          display,
-          close_on_click(info.buf),
-        })
-        tabs_cache[index].rendered_focused = table.concat({
-          focus_on_click(info.buf),
-          tab_focused_hl,
-          tab_icon and tab_icon.get(true, tab_focused_hl) or "",
-          display,
-          close_on_click(info.buf),
-        })
-      end,
-    }
-    tabs_cache[index].update()
+    local display = resolve_buf_repeated_names(info.bufname, info.tail)
+    local width = make_tab(info.buf, display, info.tail, info.ext)
     total_w = total_w + width
   end
 
@@ -621,27 +733,7 @@ function M.close_tab(bufnr, force)
     return
   end
 
-  table.remove(buf_cache, idx)
-  viewport.hi = math.min(viewport.hi, #buf_cache)
-
-  ---@type integer?
-  local replacement = buf_cache[idx] or buf_cache[idx - 1]
-  if not replacement then
-    replacement = api.nvim_create_buf(true, false)
-    buf_cache[idx] = replacement
-  end
-
-  local cur_win = api.nvim_get_current_win()
-  for _, win in ipairs(fn.win_findbuf(bufnr)) do
-    api.nvim_win_set_buf(win, replacement)
-    M.update_cursor_line_hl(cur_win, win)
-  end
-
-  buf_index[bufnr] = nil
-  diag_cache[bufnr] = nil
-
-  viewport.buf_deleted = true
-  resolve_tabs()
+  resolve_tabs_repeated_names(bufnr, idx)
 
   if api.nvim_buf_is_valid(bufnr) then
     api.nvim_buf_delete(bufnr, { force = true })
@@ -741,24 +833,7 @@ local function setup_autocmds()
         return
       end
 
-      table.remove(buf_cache, idx)
-      viewport.hi = math.min(viewport.hi, #buf_cache)
-
-      ---@type integer?
-      local replacement = buf_cache[idx] or buf_cache[idx - 1]
-      if replacement then
-        local cur_win = api.nvim_get_current_win()
-        for _, win in ipairs(fn.win_findbuf(bufnr)) do
-          api.nvim_win_set_buf(win, replacement)
-          M.update_cursor_line_hl(cur_win, win)
-        end
-      end
-
-      buf_index[bufnr] = nil
-      diag_cache[bufnr] = nil
-
-      viewport.buf_deleted = true
-      resolve_tabs()
+      resolve_tabs_repeated_names(ev.buf, idx)
     end,
   })
 
