@@ -131,12 +131,12 @@ local function resolve_tabs()
   local buf_names = {}
   local counts = {}
 
-  for _, b in ipairs(buf_cache) do
-    local bufname = api.nvim_buf_get_name(b)
+  for _, buf in ipairs(buf_cache) do
+    local bufname = api.nvim_buf_get_name(buf)
     local tail = bufname ~= "" and fnamemodify(bufname, ":t") or "[No Name]"
     local ext = bufname ~= "" and fnamemodify(bufname, ":e") or ""
     counts[tail] = (counts[tail] or 0) + 1
-    buf_names[#buf_names + 1] = { ext = ext, bufname = bufname, tail = tail }
+    buf_names[#buf_names + 1] = { buf = buf, ext = ext, bufname = bufname, tail = tail }
   end
 
   local total_w = 0
@@ -240,7 +240,7 @@ local diag_filter = { severity = { min = vim.diagnostic.severity.WARN, max = vim
 ---@param b integer
 ---@param focused boolean
 ---@return string
-local function resolve_hl(b, focused)
+M.resolve_hl = function(b, focused)
   if not b then
     return ""
   end
@@ -290,13 +290,13 @@ local function resolve_prefix_str(size)
   local tab = tabs_cache[viewport.lo - 1]
   local buf = buf_cache[viewport.lo - 1]
   local pad = string.rep(" ", math.max(0, size - vim.api.nvim_strwidth(tab.str)))
-  return pad .. resolve_hl(buf, false) .. vim.fn.strcharpart(tab.str, vim.fn.strcharlen(tab.str) - size, size)
+  return pad .. M.resolve_hl(buf, false) .. vim.fn.strcharpart(tab.str, vim.fn.strcharlen(tab.str) - size, size)
 end
 
 local function resolve_post_str(size)
   local tab = tabs_cache[viewport.hi + 1]
   local buf = buf_cache[viewport.hi + 1]
-  local tab_hl = resolve_hl(buf, false)
+  local tab_hl = M.resolve_hl(buf, false)
   local icon = ""
   if tab.icon then
     local remaining = size - tab.icon.width
@@ -417,6 +417,7 @@ local function calc_truncated_tabs(width)
 end
 
 function M.make_tabline()
+  local start = vim.uv.hrtime()
   local sidebar_width = render_sidebar()
   local width = vim.o.columns - sidebar_width
   if viewport.width ~= width or viewport.changed or viewport.diag_or_input_changed or viewport.buf_deleted then
@@ -449,7 +450,7 @@ function M.make_tabline()
       local tab = tabs_cache[i]
       local buf = buf_cache[i] --[[@as integer]]
       local focused = buf == viewport.buf
-      local tab_hl = resolve_hl(buf, focused)
+      local tab_hl = M.resolve_hl(buf, focused)
       tabs[#tabs + 1] = focus_on_click(buf)
       tabs[#tabs + 1] = tab_hl
       if tab.icon then
@@ -466,6 +467,8 @@ function M.make_tabline()
     viewport.changed = false
     viewport.diag_or_input_changed = false
   end
+  local elapsed = (vim.uv.hrtime() - start) / 1e6 -- milliseconds
+  vim.notify(string.format("tabline: %.3fms", elapsed))
   return viewport.str
 end
 
