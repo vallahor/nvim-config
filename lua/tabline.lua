@@ -264,7 +264,7 @@ local function get_viewport_hi(idx, width)
   local w = tabs_cache[idx].width
   local hi = idx
   for pos = hi + 1, #tabs_cache do
-    if w + tabs_cache[pos].width > width - viewport.indicator_right then
+    if w + tabs_cache[pos].width > width then
       break
     end
     w = w + tabs_cache[pos].width
@@ -277,7 +277,7 @@ local function get_viewport_lo(idx, width)
   local w = tabs_cache[idx].width
   local lo = idx
   for pos = lo - 1, 1, -1 do
-    if w + tabs_cache[pos].width > width - viewport.indicator_left then
+    if w + tabs_cache[pos].width > width then
       break
     end
     w = w + tabs_cache[pos].width
@@ -310,59 +310,11 @@ local function resolve_post_str(size)
   return icon .. tab_hl .. vim.fn.strcharpart(tab.str, 0, size)
 end
 
----@param width integer
-local function calc_truncated_tabs(width)
-  local l_size = 0
-  local r_size = 0
-
-  if viewport.buf_deleted then
-    viewport.buf_deleted = false
-
-    if viewport.lo == 1 then
-      viewport.hi, r_size = get_viewport_hi(viewport.lo, width)
-    else
-      viewport.hi, r_size = get_viewport_hi(viewport.lo, width - prefix_size - viewport.indicator_left)
-      if viewport.hi == #tabs_cache then
-        viewport.lo, l_size = get_viewport_lo(viewport.hi, width)
-      else
-        l_size = prefix_size
-        if r_size > 0 then
-          r_size = r_size + viewport.indicator_left
-        end
-      end
-    end
-  elseif viewport.index > viewport.hi then
-    viewport.hi = viewport.index
-    viewport.lo, l_size = get_viewport_lo(viewport.hi, width)
-  elseif viewport.index < viewport.lo then
-    viewport.lo = viewport.index
-    viewport.hi, r_size = get_viewport_hi(viewport.lo, width)
-  elseif viewport.width ~= width then
-    viewport.width = width
-    viewport.hi, r_size = get_viewport_hi(viewport.lo, width)
-    if viewport.hi == #tabs_cache then
-      viewport.lo, l_size = get_viewport_lo(viewport.hi, width)
-    end
-
-    -- opening the sidebar or resizing the window.
-    if viewport.index < viewport.lo then
-      viewport.lo = viewport.index
-      viewport.hi, r_size = get_viewport_hi(viewport.lo, width)
-    elseif viewport.index > viewport.hi then
-      viewport.hi = viewport.index
-      viewport.lo, l_size = get_viewport_lo(viewport.hi, width)
-    end
-  else
-    return
-  end
-
-  -- local indicator = 0
-  local indicator_size = (viewport.lo > 1 and viewport.indicator_left or 0)
-    + (viewport.hi < #tabs_cache and viewport.indicator_right or 0)
+local function make_prefix(l_size, indicator)
   if viewport.lo > 1 then
     viewport.prefix = " %#TablineVisible#…"
     if l_size > 0 then
-      local size = l_size - indicator_size
+      local size = l_size - indicator
       if size > 0 then
         if size - viewport.close_icon_width > 0 then
           size = size - viewport.close_icon_width
@@ -377,17 +329,91 @@ local function calc_truncated_tabs(width)
   else
     viewport.prefix = ""
   end
+end
+local function make_postfix(r_size, indicator)
   if viewport.hi < #tabs_cache then
     viewport.postfix = "%#TablineVisible#… "
     if r_size > 0 then
-      local size = r_size - indicator_size
+      local size = r_size - indicator
       if size > 0 then
         viewport.postfix = focus_on_click(buf_cache[viewport.hi + 1]) .. resolve_post_str(size) .. viewport.postfix
+      elseif size < 0 then
+        viewport.postfix = string.rep(" ", r_size) .. viewport.postfix
       end
     end
   else
     viewport.postfix = ""
   end
+end
+
+---@param width integer
+local function calc_truncated_tabs(width)
+  local l_size = 0
+  local r_size = 0
+
+  if viewport.buf_deleted then
+    viewport.buf_deleted = false
+
+    if viewport.lo == 1 then
+      viewport.hi, r_size = get_viewport_hi(viewport.lo, width)
+    else
+      local reserved = prefix_size > 0 and (prefix_size + viewport.indicator_left - viewport.indicator_right)
+        or (viewport.indicator_left + viewport.indicator_right)
+      viewport.hi, r_size = get_viewport_hi(viewport.lo, width - reserved)
+      if viewport.hi == #tabs_cache then
+        viewport.lo, l_size = get_viewport_lo(viewport.hi, width - viewport.indicator_left)
+        l_size = l_size + viewport.indicator_left
+      else
+        make_postfix(r_size, 0)
+        return
+      end
+    end
+  elseif viewport.index > viewport.hi then
+    viewport.hi = viewport.index
+    local indicator = viewport.indicator_left + (viewport.hi < #tabs_cache and viewport.indicator_right or 0)
+    viewport.lo, l_size = get_viewport_lo(viewport.hi, width - indicator)
+    l_size = l_size + indicator
+  elseif viewport.index < viewport.lo then
+    viewport.lo = viewport.index
+    if viewport.lo == 1 then
+      viewport.hi, r_size = get_viewport_hi(viewport.lo, width)
+    else
+      local indicator = viewport.indicator_right + (viewport.lo > 1 and viewport.indicator_left or 0)
+      viewport.hi, r_size = get_viewport_hi(viewport.lo, width - indicator)
+      r_size = r_size + indicator
+    end
+  elseif viewport.width ~= width then
+    viewport.width = width
+    local indicator_right = viewport.hi < #tabs_cache and viewport.indicator_right or 0
+    local indicator_left = viewport.lo > 1 and viewport.indicator_left or 0
+    viewport.hi, r_size = get_viewport_hi(viewport.lo, width - indicator_left - indicator_right)
+    r_size = r_size + indicator_left + indicator_right
+    if viewport.hi == #tabs_cache then
+      indicator_right = 0
+      viewport.lo, l_size = get_viewport_lo(viewport.hi, width - indicator_left)
+      l_size = l_size + indicator_left
+    end
+
+    if viewport.index < viewport.lo then
+      viewport.lo = viewport.index
+      local indicator = viewport.indicator_right + (viewport.lo > 1 and viewport.indicator_left or 0)
+      viewport.hi, r_size = get_viewport_hi(viewport.lo, width - indicator)
+      r_size = r_size + indicator
+    elseif viewport.index > viewport.hi then
+      viewport.hi = viewport.index
+      local indicator = viewport.indicator_left + (viewport.hi < #tabs_cache and viewport.indicator_right or 0)
+      viewport.lo, l_size = get_viewport_lo(viewport.hi, width - indicator)
+      l_size = l_size + indicator
+    end
+  else
+    return
+  end
+
+  local indicator_size = (viewport.lo > 1 and viewport.indicator_left or 0)
+    + (viewport.hi < #tabs_cache and viewport.indicator_right or 0)
+
+  make_prefix(l_size, indicator_size)
+  make_postfix(r_size, indicator_size)
 end
 
 function M.make_tabline()
