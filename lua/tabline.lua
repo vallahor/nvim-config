@@ -82,7 +82,12 @@ local diag_cache = {}
 ---@class Tab
 ---@field str string
 ---@field width integer
+---@field strlen integer
+---@field strwidth integer
 ---@field icon Icon?
+---@field rendered_visible string?
+---@field rendered_focused string?
+---@field update function
 
 ---@type {[integer]: Tab}
 local tabs_cache = {}
@@ -148,7 +153,8 @@ local function resolve_tabs()
     else
       display = " " .. info.tail .. " "
     end
-    local width = vim.api.nvim_strwidth(display) + viewport.close_icon_width
+    local display_width = vim.api.nvim_strwidth(display)
+    local width = display_width + viewport.close_icon_width
     local tab_icon
     if M.icons.enabled then
       local icon, color = M.get_icon(info.ext)
@@ -165,11 +171,36 @@ local function resolve_tabs()
         }
       end
     end
-    tabs_cache[#tabs_cache + 1] = {
+
+    local index = #tabs_cache + 1
+    tabs_cache[index] = {
       str = display,
-      width = width,
+      width = width + viewport.close_icon_width,
       icon = tab_icon,
+      strlen = vim.fn.strcharlen(display),
+      strwidth = display_width,
+      rendered_visible = nil,
+      rendered_focused = nil,
+      update = function()
+        local tab_visible_hl = M.resolve_hl(info.buf, false)
+        local tab_focused_hl = M.resolve_hl(info.buf, true)
+        tabs_cache[index].rendered_visible = table.concat({
+          focus_on_click(info.buf),
+          tab_visible_hl,
+          tab_icon and tab_icon.get(false, tab_visible_hl) or "",
+          display,
+          close_on_click(info.buf),
+        })
+        tabs_cache[index].rendered_focused = table.concat({
+          focus_on_click(info.buf),
+          tab_focused_hl,
+          tab_icon and tab_icon.get(true, tab_focused_hl) or "",
+          display,
+          close_on_click(info.buf),
+        })
+      end,
     }
+    tabs_cache[index].update()
     total_w = total_w + width
   end
 
@@ -289,8 +320,8 @@ end
 local function resolve_prefix_str(size)
   local tab = tabs_cache[viewport.lo - 1]
   local buf = buf_cache[viewport.lo - 1]
-  local pad = string.rep(" ", math.max(0, size - vim.api.nvim_strwidth(tab.str)))
-  return pad .. M.resolve_hl(buf, false) .. vim.fn.strcharpart(tab.str, vim.fn.strcharlen(tab.str) - size, size)
+  local pad = string.rep(" ", math.max(0, size - tab.strwidth))
+  return pad .. M.resolve_hl(buf, false) .. vim.fn.strcharpart(tab.str, tab.strlen - size, size)
 end
 
 local function resolve_post_str(size)
@@ -450,14 +481,7 @@ function M.make_tabline()
       local tab = tabs_cache[i]
       local buf = buf_cache[i] --[[@as integer]]
       local focused = buf == viewport.buf
-      local tab_hl = M.resolve_hl(buf, focused)
-      tabs[#tabs + 1] = focus_on_click(buf)
-      tabs[#tabs + 1] = tab_hl
-      if tab.icon then
-        tabs[#tabs + 1] = tab.icon.get(focused, tab_hl)
-      end
-      tabs[#tabs + 1] = tab.str
-      tabs[#tabs + 1] = close_on_click(buf)
+      tabs[#tabs + 1] = focused and tab.rendered_focused or tab.rendered_visible
     end
     tabs[#tabs + 1] = viewport.postfix
     tabs[#tabs + 1] = viewport.endfix
@@ -738,14 +762,14 @@ local function setup_autocmds()
     end,
   })
 
-  api.nvim_create_autocmd("DiagnosticChanged", {
-    callback = function(ev)
-      diag_cache[ev.buf] = nil
-    end,
-  })
-
   api.nvim_create_autocmd({ "BufModifiedSet", "DiagnosticChanged" }, {
-    callback = function()
+    callback = function(ev)
+      local index = buf_index[ev.buf]
+      diag_cache[ev.buf] = nil
+      if not index then
+        return
+      end
+      tabs_cache[index].update()
       viewport.diag_or_input_changed = true
       schedule_redraw()
     end,
