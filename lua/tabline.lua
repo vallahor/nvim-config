@@ -46,7 +46,8 @@ local viewport = {
 }
 
 ---@class Sidebar
----@field str string
+---@field rendered_visible string
+---@field rendered_focused string
 ---@field label string
 ---@field label_width integer
 ---@field separator_wdith integer
@@ -55,7 +56,8 @@ local viewport = {
 ---@field focus boolean
 ---@field winnr integer?
 local sidebar = {
-  str = "",
+  rendered_visible = "",
+  rendered_focused = "",
   label = "",
   label_width = 0,
   separator = "",
@@ -93,7 +95,7 @@ local diag_cache = {}
 ---@type {[integer]: Tab}
 local tabs_cache = {}
 
----@type table<string, table<integer, boolean?>>
+---@type table<string, {count: integer, bufs: table<integer, boolean?>}>
 local tabs_repeated_names_buf_cache = {}
 
 local redraw_scheduled = false
@@ -123,8 +125,11 @@ local function close_on_click(bufnr)
 end
 
 local function update_buf_index()
+  buf_index = {}
+  viewport.total_tabs_width = 0
   for i, b in ipairs(buf_cache) do
     buf_index[b] = i
+    viewport.total_tabs_width = viewport.total_tabs_width + tabs_cache[i].width
   end
   if not sidebar.focus and buf_index[viewport.buf] then
     viewport.index = buf_index[viewport.buf]
@@ -141,7 +146,7 @@ end
 
 local function resolve_buf_repeated_names(bufname, tail)
   local display
-  if #tabs_repeated_names_buf_cache[tail] > 1 and bufname ~= "" then
+  if tabs_repeated_names_buf_cache[tail] and tabs_repeated_names_buf_cache[tail].count > 1 and bufname ~= "" then
     display = " " .. fnamemodify(bufname, ":~:."):gsub("^%./", "") .. " "
   else
     display = " " .. tail .. " "
@@ -149,28 +154,30 @@ local function resolve_buf_repeated_names(bufname, tail)
   return display
 end
 
-local function make_tab(buf, tail, display, ext)
-  local display_width = vim.api.nvim_strwidth(display)
-  local width = display_width + viewport.close_icon_width
-  local tab_icon
-  if M.icons.enabled then
-    local icon, color = M.get_icon(ext)
-    if icon ~= "" then
-      icon = " " .. icon
-      local icon_width = vim.api.nvim_strwidth(icon)
-      width = width + icon_width
-      tab_icon = {
-        str = icon,
-        width = icon_width,
-        get = function(focused, hl)
-          return M.get_icon_hl(ext, color, focused) .. icon .. hl
-        end,
-      }
-    end
+local function make_tab_icon(ext)
+  if not M.icons.enabled then
+    return nil
   end
+  local icon, color = M.get_icon(ext)
+  if icon == "" then
+    return nil
+  end
+  icon = " " .. icon
+  return {
+    str = icon,
+    width = vim.api.nvim_strwidth(icon),
+    get = function(focused, hl)
+      return M.get_icon_hl(ext, color, focused) .. icon .. hl
+    end,
+  }
+end
 
-  local index = #tabs_cache + 1
-  tabs_cache[index] = {
+local function build_tab(buf, tail, display, ext)
+  local display_width = vim.api.nvim_strwidth(display)
+  local tab_icon = make_tab_icon(ext)
+  local width = display_width + viewport.close_icon_width + (tab_icon and tab_icon.width or 0)
+
+  local tab = {
     str = display,
     tail = tail,
     width = width,
@@ -179,100 +186,99 @@ local function make_tab(buf, tail, display, ext)
     strwidth = display_width,
     rendered_visible = nil,
     rendered_focused = nil,
-    update = function()
-      local tab_visible_hl = M.resolve_hl(buf, false)
-      local tab_focused_hl = M.resolve_hl(buf, true)
-      tabs_cache[index].rendered_visible = table.concat({
-        focus_on_click(buf),
-        tab_visible_hl,
-        tab_icon and tab_icon.get(false, tab_visible_hl) or "",
-        display,
-        close_on_click(buf),
-      })
-      tabs_cache[index].rendered_focused = table.concat({
-        focus_on_click(buf),
-        tab_focused_hl,
-        tab_icon and tab_icon.get(true, tab_focused_hl) or "",
-        display,
-        close_on_click(buf),
-      })
-    end,
   }
-  tabs_cache[index].update()
-
-  return width
+  tab.update = function()
+    local tab_visible_hl = M.resolve_hl(buf, false)
+    local tab_focused_hl = M.resolve_hl(buf, true)
+    tab.rendered_visible = table.concat({
+      focus_on_click(buf),
+      tab_visible_hl,
+      tab_icon and tab_icon.get(false, tab_visible_hl) or "",
+      display,
+      close_on_click(buf),
+    })
+    tab.rendered_focused = table.concat({
+      focus_on_click(buf),
+      tab_focused_hl,
+      tab_icon and tab_icon.get(true, tab_focused_hl) or "",
+      display,
+      close_on_click(buf),
+    })
+  end
+  tab.update()
+  return tab
 end
 
-local function update_tab(index, buf, tail)
-  local tab = tabs_cache[index]
-  if tab == nil then
+local function refresh_tab(index, buf, tail)
+  if not tabs_cache[index] then
     return
   end
   local bufname, _, ext = resolve_buf_name(buf)
   local display = resolve_buf_repeated_names(bufname, tail)
-  local display_width = vim.api.nvim_strwidth(display)
-  local width = display_width + viewport.close_icon_width
-  local tab_icon
-  if M.icons.enabled then
-    local icon, color = M.get_icon(ext)
-    if icon ~= "" then
-      icon = " " .. icon
-      local icon_width = vim.api.nvim_strwidth(icon)
-      width = width + icon_width
-      tab_icon = {
-        str = icon,
-        width = icon_width,
-        get = function(focused, hl)
-          return M.get_icon_hl(ext, color, focused) .. icon .. hl
-        end,
-      }
-    end
-  end
-
-  tabs_cache[index] = {
-    str = display,
-    tail = tail,
-    width = width,
-    icon = tab_icon,
-    strlen = vim.fn.strcharlen(display),
-    strwidth = display_width,
-    rendered_visible = nil,
-    rendered_focused = nil,
-    update = function()
-      local tab_visible_hl = M.resolve_hl(buf, false)
-      local tab_focused_hl = M.resolve_hl(buf, true)
-      tabs_cache[index].rendered_visible = table.concat({
-        focus_on_click(buf),
-        tab_visible_hl,
-        tab_icon and tab_icon.get(false, tab_visible_hl) or "",
-        display,
-        close_on_click(buf),
-      })
-      tabs_cache[index].rendered_focused = table.concat({
-        focus_on_click(buf),
-        tab_focused_hl,
-        tab_icon and tab_icon.get(true, tab_focused_hl) or "",
-        display,
-        close_on_click(buf),
-      })
-    end,
-  }
-  tabs_cache[index].update()
+  local tab = build_tab(buf, tail, display, ext)
+  tabs_cache[index] = tab
 end
 
-local function resolve_tabs_repeated_names(bufnr, index)
-  local tail = tabs_cache[index].tail
-  if tabs_repeated_names_buf_cache[tail] and tabs_repeated_names_buf_cache[tail][bufnr] then
-    tabs_repeated_names_buf_cache[tail][bufnr] = nil
-    for buf, _ in pairs(tabs_repeated_names_buf_cache[tail]) do
-      local i = buf_index[buf]
-      update_tab(i, buf, tail)
+local function repeated_names_remove(buf, tail)
+  if not tabs_repeated_names_buf_cache[tail] then
+    return
+  end
+  tabs_repeated_names_buf_cache[tail].bufs[buf] = nil
+  tabs_repeated_names_buf_cache[tail].count = tabs_repeated_names_buf_cache[tail].count - 1
+  if tabs_repeated_names_buf_cache[tail].count == 0 then
+    tabs_repeated_names_buf_cache[tail] = nil
+  else
+    for b, _ in pairs(tabs_repeated_names_buf_cache[tail].bufs) do
+      if b ~= buf then
+        refresh_tab(buf_index[b], b, tail)
+      end
     end
   end
+end
+
+local function repeated_names_insert(buf, tail)
+  tabs_repeated_names_buf_cache[tail] = tabs_repeated_names_buf_cache[tail] or { count = 0, bufs = {} }
+  if not tabs_repeated_names_buf_cache[tail].bufs[buf] then
+    tabs_repeated_names_buf_cache[tail].bufs[buf] = true
+    tabs_repeated_names_buf_cache[tail].count = tabs_repeated_names_buf_cache[tail].count + 1
+    if tabs_repeated_names_buf_cache[tail].count > 1 then
+      for b, _ in pairs(tabs_repeated_names_buf_cache[tail].bufs) do
+        if b ~= buf then
+          refresh_tab(buf_index[b], b, tail)
+        end
+      end
+    end
+  end
+end
+
+local function resolve_update_tab(buf)
+  local index = buf_index[buf]
+  if not index then
+    return
+  end
+  local tail = tabs_cache[index].tail
+  local bufname, new_tail, ext = resolve_buf_name(buf)
+  if tail ~= new_tail then
+    repeated_names_remove(buf, tail)
+    repeated_names_insert(buf, new_tail)
+  end
+  local display = resolve_buf_repeated_names(bufname, new_tail)
+  local tab = build_tab(buf, new_tail, display, ext)
+  tabs_cache[index] = tab
+  update_buf_index()
+end
+
+local function remove_buf_from_tabline(bufnr)
+  local index = buf_index[bufnr]
+  if not index then
+    return
+  end
+
+  local tab = tabs_cache[index]
+  repeated_names_remove(bufnr, tab.tail)
 
   table.remove(tabs_cache, index)
   table.remove(buf_cache, index)
-  viewport.hi = math.min(viewport.hi, #buf_cache)
 
   ---@type integer?
   local replacement = buf_cache[index] or buf_cache[index - 1]
@@ -284,39 +290,20 @@ local function resolve_tabs_repeated_names(bufnr, index)
     end
   end
 
-  buf_index[bufnr] = nil
   diag_cache[bufnr] = nil
 
   viewport.buf_deleted = true
   update_buf_index()
 end
 
-local function resolve_tabs()
+local function insert_buf_into_tabline(buf)
+  local bufname, tail, ext = resolve_buf_name(buf)
+  repeated_names_insert(buf, tail)
+  local display = resolve_buf_repeated_names(bufname, tail)
+  local tab = build_tab(buf, tail, display, ext)
+  table.insert(buf_cache, buf)
+  table.insert(tabs_cache, tab)
   update_buf_index()
-
-  tabs_cache = {}
-
-  local buf_names = {}
-
-  for index, buf in ipairs(buf_cache) do
-    local bufname, tail, ext = resolve_buf_name(buf)
-    if tabs_repeated_names_buf_cache[tail] == nil then
-      tabs_repeated_names_buf_cache[tail] = {}
-    end
-    tabs_repeated_names_buf_cache[tail][buf] = true
-    buf_names[#buf_names + 1] = { buf = buf, ext = ext, bufname = bufname, tail = tail }
-  end
-
-  local total_w = 0
-  -- M.unique_names @check later
-
-  for _, info in ipairs(buf_names) do
-    local display = resolve_buf_repeated_names(info.bufname, info.tail)
-    local width = make_tab(info.buf, display, info.tail, info.ext)
-    total_w = total_w + width
-  end
-
-  viewport.total_tabs_width = total_w
 end
 
 local icon_hl_cache = {}
@@ -324,10 +311,9 @@ local icon_hl_cache = {}
 local function init_bufs()
   for _, b in ipairs(api.nvim_list_bufs()) do
     if bo[b].buflisted then
-      buf_cache[#buf_cache + 1] = b
+      insert_buf_into_tabline(b)
     end
   end
-  resolve_tabs()
 end
 
 --- @return integer
@@ -352,7 +338,6 @@ local function render_sidebar()
   if not sidebar.winnr or not api.nvim_win_is_valid(sidebar.winnr) then
     return 0
   end
-  -- add the `separator` width to sidebar_width
   local sidebar_width = api.nvim_win_get_width(sidebar.winnr) + sidebar.separator_width
   if sidebar_width ~= sidebar.width then
     sidebar.width = sidebar_width
@@ -361,7 +346,18 @@ local function render_sidebar()
     local pad_right = math.floor(total_pad / 2)
     local spaces_left = make_spaces(cached_pad_left, sidebar_spaces_left, pad_left)
     local spaces_right = make_spaces(cached_pad_right, sidebar_spaces_right, pad_right)
-    sidebar.str = spaces_left .. sidebar.label .. spaces_right .. "%#TablineSidebarSep#" .. sidebar.separator
+    sidebar.rendered_focused = "%#TablineSidebarFocusedLabel#"
+      .. spaces_left
+      .. sidebar.label
+      .. spaces_right
+      .. "%#TablineSidebarSep#"
+      .. sidebar.separator
+    sidebar.rendered_visible = "%#TablineSidebarVisibleLabel#"
+      .. spaces_left
+      .. sidebar.label
+      .. spaces_right
+      .. "%#TablineSidebarSep#"
+      .. sidebar.separator
   end
   return sidebar_width
 end
@@ -580,13 +576,11 @@ function M.make_tabline()
     ::build_viewport_str::
 
     local sidebar_str = ""
-    local hl = ""
     if sidebar_width > 0 then
-      hl = sidebar.focus and "%#TablineSidebarFocusedLabel#" or "%#TablineSidebarVisibleLabel#"
-      sidebar_str = sidebar.str
+      sidebar_str = sidebar.focus and sidebar.rendered_focused or sidebar.rendered_visible
     end
 
-    local tabs = { hl, sidebar_str, viewport.prefix }
+    local tabs = { sidebar_str, viewport.prefix }
 
     for i = viewport.lo, viewport.hi do
       ---@type table
@@ -604,7 +598,7 @@ function M.make_tabline()
     viewport.diag_or_input_changed = false
   end
   local elapsed = (vim.uv.hrtime() - start) / 1e6 -- milliseconds
-  vim.notify(string.format("tabline: %.3fms", elapsed))
+  -- vim.notify(string.format("tabline: %.3fms", elapsed))
   return viewport.str
 end
 
@@ -733,7 +727,7 @@ function M.close_tab(bufnr, force)
     return
   end
 
-  resolve_tabs_repeated_names(bufnr, idx)
+  remove_buf_from_tabline(bufnr)
 
   if api.nvim_buf_is_valid(bufnr) then
     api.nvim_buf_delete(bufnr, { force = true })
@@ -814,14 +808,11 @@ local function setup_autocmds()
       if not bo[b].buflisted or ignore_buftypes[bo[b].buftype] then
         return
       end
-      vim.schedule(function()
-        if not api.nvim_buf_is_valid(b) or buf_index[b] then
-          return
-        end
-        buf_cache[#buf_cache + 1] = b
-        resolve_tabs()
-        schedule_redraw()
-      end)
+      if not api.nvim_buf_is_valid(b) or buf_index[b] then
+        return
+      end
+      insert_buf_into_tabline(b)
+      schedule_redraw()
     end,
   })
 
@@ -832,8 +823,7 @@ local function setup_autocmds()
       if not idx then
         return
       end
-
-      resolve_tabs_repeated_names(ev.buf, idx)
+      remove_buf_from_tabline(ev.buf)
     end,
   })
 
@@ -851,7 +841,9 @@ local function setup_autocmds()
   })
 
   api.nvim_create_autocmd("BufFilePost", {
-    callback = resolve_tabs,
+    callback = function(ev)
+      resolve_update_tab(ev.buf)
+    end,
   })
 
   api.nvim_create_autocmd("ColorScheme", {
