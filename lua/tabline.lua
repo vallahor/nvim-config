@@ -497,7 +497,7 @@ local function resolve_post_str(size)
       return string.rep(" ", size)
     end
   end
-  return icon .. tab_hl .. vim.fn.strcharpart(tab.str, 0, size)
+  return tab_hl .. icon .. tab_hl .. vim.fn.strcharpart(tab.str, 0, size)
 end
 
 local function make_prefix(l_size, indicator)
