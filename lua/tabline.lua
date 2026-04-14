@@ -84,6 +84,7 @@ local diag_cache = {}
 ---@class Tab
 ---@field str string
 ---@field tail string
+---@field ext string
 ---@field width integer
 ---@field strlen integer
 ---@field strwidth integer
@@ -194,8 +195,8 @@ local function icon_cache_remove(ext)
   icons_ext_cache[ext].count = icons_ext_cache[ext].count - 1
   if icons_ext_cache[ext].count == 0 then
     icons_ext_cache[ext] = nil
-    M.icon_hl_cache["f_" .. ext] = nil
-    M.icon_hl_cache["v_" .. ext] = nil
+    icons_hl_cache["f_" .. ext] = nil
+    icons_hl_cache["v_" .. ext] = nil
   end
 end
 
@@ -205,7 +206,7 @@ local function make_tab_icon(ext)
   end
   local icon, color = icon_cache_insert(ext)
   if icon == "" then
-    icon_cache_remove(ext) -- undo insert since no icon
+    icon_cache_remove(ext)
     return nil
   end
   icon = " " .. icon
@@ -226,6 +227,7 @@ local function build_tab(buf, tail, display, ext)
   local tab = {
     str = display,
     tail = tail,
+    ext = ext,
     width = width,
     icon = tab_icon,
     strlen = vim.fn.strcharlen(display),
@@ -321,6 +323,9 @@ local function remove_buf_from_tabline(bufnr)
   end
 
   local tab = tabs_cache[index]
+  if tab.icon then
+    icon_cache_remove(tab.ext)
+  end
   repeated_names_remove(bufnr, tab.tail)
 
   table.remove(tabs_cache, index)
