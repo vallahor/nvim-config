@@ -349,6 +349,7 @@ local function insert_buf_into_tabline(buf)
   local tab = build_tab(buf, tail, display, ext)
   table.insert(buf_cache, buf)
   table.insert(tabs_cache, tab)
+  viewport.buf = buf
   update_buf_index()
 end
 
