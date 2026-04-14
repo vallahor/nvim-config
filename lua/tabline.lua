@@ -95,6 +95,9 @@ local diag_cache = {}
 ---@type {[integer]: Tab}
 local tabs_cache = {}
 
+local icons_ext_cache = {}
+local icons_hl_cache = {}
+
 ---@type table<string, {count: integer, bufs: table<integer, boolean?>}>
 local tabs_repeated_names_buf_cache = {}
 
@@ -108,6 +111,16 @@ local function schedule_redraw()
       vim.cmd.redrawtabline()
     end)
   end
+end
+
+---@return string?
+local function get_hex(group, attr)
+  local ok, val = pcall(api.nvim_get_hl, 0, { name = group, link = false })
+  if not ok or not val then
+    return nil
+  end
+  local n = attr == "fg" and val.fg or val.bg
+  return n and string.format("#%06x", n)
 end
 
 local function focus_on_click(bufnr)
@@ -154,12 +167,45 @@ local function resolve_buf_repeated_names(bufname, tail)
   return display
 end
 
+local get_icon_fn = {
+  ["mini.icons"] = function(ext)
+    local icon, hl = M.icons.provider.get("extension", ext)
+    return icon, get_hex(hl, "fg")
+  end,
+  ["nvim-web-devicons"] = function(ext)
+    return M.icons.provider.get_icon_color(nil, ext, { default = true })
+  end,
+}
+
+local function icon_cache_insert(ext)
+  if icons_ext_cache[ext] then
+    icons_ext_cache[ext].count = icons_ext_cache[ext].count + 1
+    return icons_ext_cache[ext].icon, icons_ext_cache[ext].color
+  end
+  local icon, color = M.get_icon(ext)
+  icons_ext_cache[ext] = { icon = icon, color = color, count = 1 }
+  return icon, color
+end
+
+local function icon_cache_remove(ext)
+  if not icons_ext_cache[ext] then
+    return
+  end
+  icons_ext_cache[ext].count = icons_ext_cache[ext].count - 1
+  if icons_ext_cache[ext].count == 0 then
+    icons_ext_cache[ext] = nil
+    M.icon_hl_cache["f_" .. ext] = nil
+    M.icon_hl_cache["v_" .. ext] = nil
+  end
+end
+
 local function make_tab_icon(ext)
   if not M.icons.enabled then
     return nil
   end
-  local icon, color = M.get_icon(ext)
+  local icon, color = icon_cache_insert(ext)
   if icon == "" then
+    icon_cache_remove(ext) -- undo insert since no icon
     return nil
   end
   icon = " " .. icon
@@ -305,8 +351,6 @@ local function insert_buf_into_tabline(buf)
   table.insert(tabs_cache, tab)
   update_buf_index()
 end
-
-local icon_hl_cache = {}
 
 local function init_bufs()
   for _, b in ipairs(api.nvim_list_bufs()) do
@@ -598,7 +642,7 @@ function M.make_tabline()
     viewport.diag_or_input_changed = false
   end
   local elapsed = (vim.uv.hrtime() - start) / 1e6 -- milliseconds
-  -- vim.notify(string.format("tabline: %.3fms", elapsed))
+  vim.notify(string.format("tabline: %.3fms", elapsed))
   return viewport.str
 end
 
@@ -734,16 +778,6 @@ function M.close_tab(bufnr, force)
   end
 end
 
----@return string?
-local function get_hex(group, attr)
-  local ok, val = pcall(api.nvim_get_hl, 0, { name = group, link = false })
-  if not ok or not val then
-    return nil
-  end
-  local n = attr == "fg" and val.fg or val.bg
-  return n and string.format("#%06x", n)
-end
-
 local function setup_tabline_hl()
   local focused_fg = get_hex("TablineFocused", "fg") or get_hex("Normal", "fg")
   local focused_bg = get_hex("TablineFocused", "bg") or get_hex("CursorLine", "bg") or get_hex("Visual", "bg")
@@ -771,29 +805,19 @@ local function setup_tabline_hl()
   hl(0, "TablineVisibleDiagModifiedWarn", { fg = warning_fg, bg = visible_bg, italic = true })
 end
 
-local get_icon_fn = {
-  ["mini.icons"] = function(ext)
-    local icon, hl = M.icons.provider.get("extension", ext)
-    return icon, get_hex(hl, "fg")
-  end,
-  ["nvim-web-devicons"] = function(ext)
-    return M.icons.provider.get_icon_color(nil, ext, { default = true })
-  end,
-}
-
 M.get_icon_hl = function(ext, color, focused)
   if M.icons.no_hl then
     return ""
   end
   local key = focused and "f_" .. ext or "v_" .. ext
-  if not icon_hl_cache[key] then
+  if not icons_hl_cache[key] then
     local bg = focused and (get_hex("TablineFocused", "bg") or get_hex("Normal", "bg"))
       or (get_hex("TablineVisible", "bg") or get_hex("Normal", "bg"))
     local name = (focused and "TablineFocusedIcon_" or "TablineVisibleIcon_") .. ext
     api.nvim_set_hl(0, name, { fg = color, bg = bg })
-    icon_hl_cache[key] = "%#" .. name .. "#"
+    icons_hl_cache[key] = "%#" .. name .. "#"
   end
-  return icon_hl_cache[key]
+  return icons_hl_cache[key]
 end
 
 local ignore_buftypes = {
