@@ -32,6 +32,7 @@ local viewport = {
   changed = true,
   buf_deleted = false,
   diag_or_input_changed = true,
+  is_in_small_size = true,
   lo = 1,
   hi = 1,
   buf = 1,
@@ -519,6 +520,7 @@ local function make_prefix(l_size, indicator)
     viewport.prefix = ""
   end
 end
+
 local function make_postfix(r_size, indicator)
   if viewport.hi < #tabs_cache then
     viewport.postfix = "%#TablineVisible#… "
@@ -565,9 +567,11 @@ local function calc_truncated_tabs(width)
   elseif viewport.index < viewport.lo then
     viewport.lo = viewport.index
     if viewport.lo == 1 then
-      viewport.hi, r_size = get_viewport_hi(viewport.lo, width)
+      local indicator_right = viewport.hi < #tabs_cache and viewport.indicator_right or 0
+      viewport.hi, r_size = get_viewport_hi(viewport.lo, width - indicator_right)
+      r_size = r_size + indicator_right
     else
-      local indicator = viewport.indicator_right + (viewport.lo > 1 and viewport.indicator_left or 0)
+      local indicator = viewport.indicator_right + viewport.indicator_left
       viewport.hi, r_size = get_viewport_hi(viewport.lo, width - indicator)
       r_size = r_size + indicator
     end
@@ -605,11 +609,17 @@ local function calc_truncated_tabs(width)
   make_postfix(r_size, indicator_size)
 end
 
-function M.make_tabline()
+function M.tabline_make()
   local start = vim.uv.hrtime()
   local sidebar_width = render_sidebar()
   local width = vim.o.columns - sidebar_width
-  if viewport.width ~= width or viewport.changed or viewport.diag_or_input_changed or viewport.buf_deleted then
+  if
+    viewport.width ~= width
+    or viewport.changed
+    or viewport.diag_or_input_changed
+    or viewport.buf_deleted
+    or viewport.is_in_small_size
+  then
     if viewport.diag_or_input_changed and not viewport.changed then
       goto build_viewport_str
     end
@@ -625,6 +635,30 @@ function M.make_tabline()
 
     ::build_viewport_str::
 
+    local indicator = (viewport.hi < #tabs_cache and viewport.indicator_right or 0)
+      + (viewport.lo > 1 and viewport.indicator_left or 0)
+    local available = width
+    local current_tab = tabs_cache[viewport.index]
+
+    if current_tab.width > available - indicator then
+      viewport.lo = viewport.index
+      viewport.hi = viewport.index
+      local indicator_left = viewport.lo > 1 and viewport.indicator_left or 0
+      local indicator_right = viewport.hi < #tabs_cache and viewport.indicator_right or 0
+      if viewport.hi == #tabs_cache then
+        make_prefix(width - available - indicator_right, indicator_left)
+        make_postfix(0, 0)
+      elseif viewport.lo == 1 then
+        make_prefix(0, 0)
+        make_postfix(width - available - indicator_left, indicator_right)
+      else
+        make_prefix(0, indicator_left)
+        make_postfix(width - available, indicator_right)
+      end
+
+      available = width - indicator_left - indicator_right
+    end
+
     local sidebar_str = ""
     if sidebar_width > 0 then
       sidebar_str = sidebar.focus and sidebar.rendered_focused or sidebar.rendered_visible
@@ -633,22 +667,33 @@ function M.make_tabline()
     local tabs = { sidebar_str, viewport.prefix }
 
     for i = viewport.lo, viewport.hi do
-      ---@type table
       local tab = tabs_cache[i]
-      local buf = buf_cache[i] --[[@as integer]]
+      local buf = buf_cache[i]
       local focused = buf == viewport.buf
-      tabs[#tabs + 1] = focused and tab.rendered_focused or tab.rendered_visible
+      if focused and tab.width >= available then
+        local tab_hl = M.resolve_hl(buf_cache[viewport.index], true)
+        available = available - viewport.close_icon_width
+        tabs[#tabs + 1] = tab_hl
+          .. focus_on_click(buf)
+          .. vim.fn.strcharpart(tab.str, tab.strlen - available, available)
+          .. close_on_click(buf)
+      else
+        tabs[#tabs + 1] = focused and tab.rendered_focused or tab.rendered_visible
+      end
     end
+
     tabs[#tabs + 1] = viewport.postfix
     tabs[#tabs + 1] = viewport.endfix
 
     viewport.str = table.concat(tabs)
 
+    viewport.width = width
+
     viewport.changed = false
     viewport.diag_or_input_changed = false
   end
   local elapsed = (vim.uv.hrtime() - start) / 1e6 -- milliseconds
-  vim.notify(string.format("tabline: %.3fms", elapsed))
+  -- vim.notify(string.format("tabline: %.3fms", elapsed))
   return viewport.str
 end
 
@@ -910,7 +955,7 @@ local function setup_keymaps()
   end, { silent = true, nowait = true })
 end
 
-_G.make_tabline = M.make_tabline
+_G.make_tabline = M.tabline_make
 vim.opt.tabline = "%!v:lua.make_tabline()"
 vim.opt.showtabline = 2
 
