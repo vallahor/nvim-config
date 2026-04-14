@@ -530,7 +530,7 @@ local function make_prefix(l_size, indicator)
     prefix_size = l_size
   else
     viewport.prefix = ""
-    -- viewport.prefix = viewport.indicator_end
+    -- viewport.prefix = viewport.indicator_start
   end
 end
 
@@ -547,7 +547,7 @@ local function make_postfix(r_size, indicator)
     end
   else
     viewport.postfix = ""
-    -- viewport.postfix = viewport.indicator_start
+    -- viewport.postfix = viewport.indicator_end
   end
 end
 
@@ -567,8 +567,7 @@ local function calc_truncated_tabs(width)
         or (viewport.indicator_left_width + viewport.indicator_right_width)
       viewport.hi, r_size = get_viewport_hi(viewport.lo, width - reserved)
       if viewport.hi == #tabs_cache then
-        viewport.lo, l_size =
-          get_viewport_lo(viewport.hi, width - viewport.indicator_left_width - viewport.indicator_start_width)
+        viewport.lo, l_size = get_viewport_lo(viewport.hi, width - viewport.indicator_left_width)
         l_size = l_size + viewport.indicator_left_width
       else
         make_postfix(r_size, 0)
@@ -585,7 +584,7 @@ local function calc_truncated_tabs(width)
     viewport.lo = viewport.index
     if viewport.lo == 1 then
       local indicator_right = viewport.hi < #tabs_cache and viewport.indicator_right_width or 0
-      viewport.hi, r_size = get_viewport_hi(viewport.lo, width - indicator_right - viewport.indicator_end_width)
+      viewport.hi, r_size = get_viewport_hi(viewport.lo, width - indicator_right)
       r_size = r_size + indicator_right
     else
       local indicator = viewport.indicator_right_width + viewport.indicator_left_width
@@ -600,7 +599,7 @@ local function calc_truncated_tabs(width)
     r_size = r_size + indicator_left + indicator_right
     if viewport.hi == #tabs_cache then
       indicator_right = 0
-      viewport.lo, l_size = get_viewport_lo(viewport.hi, width - indicator_left - viewport.indicator_start_width)
+      viewport.lo, l_size = get_viewport_lo(viewport.hi, width - indicator_left)
       l_size = l_size + indicator_left
     end
 
@@ -647,7 +646,8 @@ function M.tabline_make()
     else
       viewport.lo = 1
       viewport.hi = #tabs_cache
-      viewport.prefix = ""
+      -- viewport.prefix = ""
+      viewport.prefix = viewport.indicator_start
       viewport.postfix = ""
     end
 
@@ -658,7 +658,7 @@ function M.tabline_make()
     local available = width
     local current_tab = tabs_cache[viewport.index]
 
-    if current_tab.width > available - indicator then
+    if current_tab and current_tab.width > available - indicator then
       viewport.lo = viewport.index
       viewport.hi = viewport.index
       local indicator_left = viewport.lo > 1 and viewport.indicator_left_width or 0
