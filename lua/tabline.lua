@@ -670,7 +670,7 @@ function M.tabline_make()
       local tab = tabs_cache[i]
       local buf = buf_cache[i]
       local focused = buf == viewport.buf
-      if focused and tab.width >= available then
+      if tab.width > available then
         local tab_hl = M.resolve_hl(buf_cache[viewport.index], true)
         available = available - viewport.close_icon_width
         tabs[#tabs + 1] = tab_hl
@@ -687,11 +687,11 @@ function M.tabline_make()
 
     viewport.str = table.concat(tabs)
 
-    viewport.width = width
-
     viewport.changed = false
     viewport.diag_or_input_changed = false
   end
+  viewport.width = width
+
   local elapsed = (vim.uv.hrtime() - start) / 1e6 -- milliseconds
   -- vim.notify(string.format("tabline: %.3fms", elapsed))
   return viewport.str
