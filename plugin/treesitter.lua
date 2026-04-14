@@ -62,9 +62,18 @@ local disable_indent = {
   zig = true,
 }
 
+local patterns = {}
+for _, parser in ipairs(languages) do
+  local parser_patterns = vim.treesitter.language.get_filetypes(parser)
+  for _, pp in pairs(parser_patterns) do
+    table.insert(patterns, pp)
+  end
+end
+
 vim.api.nvim_create_autocmd("FileType", {
+  pattern = patterns,
   callback = function(ev)
-    pcall(vim.treesitter.start)
+    vim.treesitter.start()
     local lang = vim.bo[ev.buf].filetype
     if not disable_indent[lang] then
       vim.bo[ev.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
@@ -73,7 +82,7 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 -- require("nvim-treesitter.install").compilers = { "clang" }
-require("nvim-treesitter.install").compilers = { "zig" }
+-- require("nvim-treesitter.install").compilers = { "zig" }
 
 require("nvim-ts-autotag").setup()
 require("nvim-treesitter.endwise")
