@@ -751,10 +751,11 @@ function M.tabline_make()
     or viewport.buf_deleted
     or viewport.is_in_small_size
   then
-    -- Mitigate the situation where the finde-file of nvim_tree open
-    -- wen open-file with `{focus = false}
+    -- Mitigate the situation where the find-file of nvim_tree
+    -- open-file with `{focus = false}
     -- runs vim.cmd("noautocmd wincmd p")
     -- which not trigger the leaving and reenter in the buffer.
+    -- without calling the autocmd events
     if api.nvim_get_current_win() ~= sidebar.winnr and sidebar.focus then
       sidebar.focus = false
       viewport.buf = buf_cache[viewport.index]
