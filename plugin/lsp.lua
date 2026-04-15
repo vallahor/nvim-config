@@ -40,8 +40,8 @@ vim.lsp.config("gdscript", {
   cmd = { "ncat", "localhost", port },
 })
 
--- vim.lsp.config("emmylua_ls", {
-vim.lsp.config("lua_ls", {
+-- vim.lsp.config("lua_ls", {
+vim.lsp.config("emmylua_ls", {
   settings = {
     Lua = {
       runtime = {
@@ -98,8 +98,8 @@ mason_lspconfig.setup({
     "basedpyright",
     "clangd",
     "cssls",
-    -- "emmylua_ls",
-    "lua_ls",
+    "emmylua_ls",
+    -- "lua_ls",
     "html",
     "jsonls",
     "rust_analyzer",

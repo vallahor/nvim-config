@@ -226,7 +226,7 @@ local function make_tab_icon(ext)
   icon = " " .. icon
   return {
     str = icon,
-    width = vim.api.nvim_strwidth(icon),
+    width = api.nvim_strwidth(icon),
     get = function(focused, hl)
       return M.get_icon_hl(ext, color, focused) .. icon .. hl
     end,
@@ -235,7 +235,7 @@ end
 
 local function build_tab(buf, tail, display, ext)
   display = " " .. display .. " "
-  local display_width = vim.api.nvim_strwidth(display)
+  local display_width = api.nvim_strwidth(display)
   local tab_icon = make_tab_icon(ext)
   local width = display_width + viewport.close_icon_width + (tab_icon and tab_icon.width or 0)
 
@@ -245,7 +245,7 @@ local function build_tab(buf, tail, display, ext)
     ext = ext,
     width = width,
     icon = tab_icon,
-    strlen = vim.fn.strcharlen(display),
+    strlen = fn.strcharlen(display),
     strwidth = display_width,
     rendered_visible = nil,
     rendered_focused = nil,
@@ -1008,16 +1008,34 @@ local ignore_buftypes = {
 
 local function setup_autocmds()
   api.nvim_create_autocmd("BufEnter", {
-    callback = function()
-      local b = api.nvim_get_current_buf()
-      if not bo[b].buflisted or ignore_buftypes[bo[b].buftype] then
+    callback = function(ev)
+      local buf = ev.buf
+      if
+        buf_index[buf]
+        or not bo[buf].buflisted
+        or ignore_buftypes[bo[buf].buftype]
+        or not api.nvim_buf_is_valid(buf)
+      then
         return
       end
-      if not api.nvim_buf_is_valid(b) or buf_index[b] then
-        return
-      end
-      insert_buf_into_tabline(b)
+      insert_buf_into_tabline(buf)
       schedule_redraw()
+    end,
+  })
+
+  api.nvim_create_autocmd({ "WinEnter", "BufEnter" }, {
+    callback = function(ev)
+      if sidebar_filetypes[bo[ev.buf].filetype] then
+        sidebar.winnr = api.nvim_get_current_win()
+        sidebar.focus = true
+        viewport.buf = -1
+      else
+        sidebar.focus = false
+        viewport.buf = api.nvim_get_current_buf()
+        viewport.index = buf_index[viewport.buf]
+      end
+
+      viewport.changed = true
     end,
   })
 
@@ -1054,21 +1072,6 @@ local function setup_autocmds()
   api.nvim_create_autocmd("ColorScheme", {
     once = true,
     callback = setup_tabline_hl,
-  })
-
-  api.nvim_create_autocmd({ "WinEnter", "BufEnter" }, {
-    callback = function(ev)
-      if sidebar_filetypes[bo[ev.buf].filetype] then
-        sidebar.winnr = api.nvim_get_current_win()
-        sidebar.focus = true
-        viewport.buf = -1
-      else
-        sidebar.focus = false
-        viewport.buf = api.nvim_get_current_buf()
-      end
-
-      viewport.changed = true
-    end,
   })
 end
 
@@ -1162,7 +1165,7 @@ function M.setup(opts)
 
   if config.close_icon then
     M.close_icon = config.close_icon
-    viewport.close_icon_width = vim.api.nvim_strwidth(config.close_icon)
+    viewport.close_icon_width = api.nvim_strwidth(config.close_icon)
   end
 
   if config.sidebar.separator then
@@ -1202,14 +1205,14 @@ function M.setup(opts)
   viewport.indicator_left = "%#TablineVisible#" .. config.indicator_left
   viewport.indicator_right = "%#TablineVisible#" .. config.indicator_right
 
-  viewport.indicator_left_width = vim.api.nvim_strwidth(config.indicator_left)
-  viewport.indicator_right_width = vim.api.nvim_strwidth(config.indicator_right)
+  viewport.indicator_left_width = api.nvim_strwidth(config.indicator_left)
+  viewport.indicator_right_width = api.nvim_strwidth(config.indicator_right)
 
   viewport.indicator_start = "%#TablineVisible#" .. config.indicator_start
   viewport.indicator_end = "%#TablineVisible#" .. config.indicator_end
 
-  viewport.indicator_start_width = vim.api.nvim_strwidth(config.indicator_start)
-  viewport.indicator_end_width = vim.api.nvim_strwidth(config.indicator_end)
+  viewport.indicator_start_width = api.nvim_strwidth(config.indicator_start)
+  viewport.indicator_end_width = api.nvim_strwidth(config.indicator_end)
 
   init_bufs()
   setup_autocmds()
