@@ -751,6 +751,15 @@ function M.tabline_make()
     or viewport.buf_deleted
     or viewport.is_in_small_size
   then
+    -- Mitigate the situation where the finde-file of nvim_tree open
+    -- wen open-file with `{focus = false}
+    -- runs vim.cmd("noautocmd wincmd p")
+    -- which not trigger the leaving and reenter in the buffer.
+    if api.nvim_get_current_win() ~= sidebar.winnr and sidebar.focus then
+      sidebar.focus = false
+      viewport.buf = buf_cache[viewport.index]
+    end
+
     if viewport.diag_or_input_changed and not viewport.changed then
       goto build_viewport_str
     end
@@ -823,7 +832,7 @@ function M.tabline_make()
   viewport.width = width
 
   local elapsed = (vim.uv.hrtime() - start) / 1e6 -- milliseconds
-  vim.notify(string.format("tabline: %.3fms", elapsed))
+  -- vim.notify(string.format("tabline: %.3fms", elapsed))
   return viewport.str
 end
 
@@ -1001,7 +1010,8 @@ M.get_icon_hl = function(ext, color, focused)
   return icons_hl_cache[key]
 end
 
-local ignore_buftypes = {
+local ignore_filetypes = {
+  ["qf"] = true,
   ["quickfix"] = true,
   ["terminal"] = true,
 }
@@ -1013,7 +1023,8 @@ local function setup_autocmds()
       if
         buf_index[buf]
         or not bo[buf].buflisted
-        or ignore_buftypes[bo[buf].buftype]
+        or ignore_filetypes[bo[buf].buftype]
+        or ignore_filetypes[bo[buf].filetype]
         or not api.nvim_buf_is_valid(buf)
       then
         return
@@ -1023,15 +1034,16 @@ local function setup_autocmds()
     end,
   })
 
-  api.nvim_create_autocmd({ "WinEnter", "BufEnter" }, {
+  api.nvim_create_autocmd({ "BufEnter" }, {
     callback = function(ev)
       if sidebar_filetypes[bo[ev.buf].filetype] then
-        sidebar.winnr = api.nvim_get_current_win()
+        local winnr = api.nvim_get_current_win()
+        sidebar.winnr = winnr
         sidebar.focus = true
         viewport.buf = -1
       else
         sidebar.focus = false
-        viewport.buf = api.nvim_get_current_buf()
+        viewport.buf = ev.buf
         viewport.index = buf_index[viewport.buf]
       end
 

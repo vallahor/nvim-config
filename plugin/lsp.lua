@@ -5,9 +5,34 @@ vim.lsp.config("*", {
   capabilities = capabilities,
 })
 
-local lsp_augroup = vim.api.nvim_create_augroup("UserLspConfig", { clear = true })
+vim.diagnostic.config({
+  severity_sort = true,
+  virtual_text = {
+    prefix = "",
+  },
+  float = {
+    show_header = false,
+  },
+  jump = {
+    on_jump = function() end,
+  },
+  signs = {
+    linehl = {
+      [vim.diagnostic.severity.ERROR] = "DiagnosticLinehlError",
+      [vim.diagnostic.severity.WARN] = "DiagnosticLinehlWarn",
+      [vim.diagnostic.severity.INFO] = "DiagnosticLinehlInfo",
+      [vim.diagnostic.severity.HINT] = "DiagnosticLinehlHint",
+    },
+    numhl = {
+      [vim.diagnostic.severity.ERROR] = "DiagnosticNumhlError",
+      [vim.diagnostic.severity.WARN] = "DiagnosticNumhlWarn",
+      [vim.diagnostic.severity.INFO] = "DiagnosticNumhlInfo",
+      [vim.diagnostic.severity.HINT] = "DiagnosticNumhlHint",
+    },
+  },
+})
+
 vim.api.nvim_create_autocmd("LspAttach", {
-  group = lsp_augroup,
   callback = function(args)
     local bufnr = args.buf
     vim.lsp.document_color.enable(true, { bufnr = bufnr }, { style = "● " })
@@ -21,13 +46,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
     end, opts)
     vim.keymap.set("n", "&", vim.diagnostic.open_float, opts)
     vim.keymap.set("n", "<f2>", vim.lsp.buf.rename, opts)
-
-    -- local client = vim.lsp.get_client_by_id(args.data.client_id)
-    -- if client and client:supports_method("textDocument/diagnostic") then
-    --   client:request("textDocument/diagnostic", {
-    --     textDocument = { uri = vim.uri_from_bufnr(bufnr) },
-    --   }, nil, bufnr)
-    -- end
   end,
 })
 

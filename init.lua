@@ -454,32 +454,6 @@ if godot_project_path ~= "" then
 end
 -- GODOT END
 
-vim.diagnostic.config({
-  virtual_text = {
-    prefix = "",
-  },
-  float = {
-    show_header = false,
-  },
-  jump = {
-    on_jump = function() end,
-  },
-  signs = {
-    linehl = {
-      [vim.diagnostic.severity.ERROR] = "DiagnosticLinehlError",
-      [vim.diagnostic.severity.WARN] = "DiagnosticLinehlWarn",
-      [vim.diagnostic.severity.INFO] = "DiagnosticLinehlInfo",
-      [vim.diagnostic.severity.HINT] = "DiagnosticLinehlHint",
-    },
-    numhl = {
-      [vim.diagnostic.severity.ERROR] = "DiagnosticNumhlError",
-      [vim.diagnostic.severity.WARN] = "DiagnosticNumhlWarn",
-      [vim.diagnostic.severity.INFO] = "DiagnosticNumhlInfo",
-      [vim.diagnostic.severity.HINT] = "DiagnosticNumhlHint",
-    },
-  },
-})
-
 -- vim.api.nvim_set_hl(0, "@attribute.gdscript", { fg = "#9B668F" })
 vim.api.nvim_set_hl(0, "@attribute.gdscript", { fg = "#96674E" })
 -- vim.api.nvim_set_hl(0, "@string.special.url.gdscript", { fg = "#926C83" })
@@ -529,11 +503,12 @@ vim.api.nvim_create_autocmd("ModeChanged", {
     if in_visual then
       update_visual_cursor(ev.buf)
     else
-      vim.schedule(function()
-        for _, w in ipairs(vim.fn.win_findbuf(ev.buf)) do
-          vim.api.nvim__redraw({ win = w, statuscolumn = true })
-        end
-      end)
+      -- @check: it was inside a vim.schedule
+      -- the issue is while i was moving through the tabline
+      -- it fired an error.
+      for _, w in ipairs(vim.fn.win_findbuf(ev.buf)) do
+        vim.api.nvim__redraw({ win = w, statuscolumn = true })
+      end
     end
   end,
 })
@@ -567,13 +542,13 @@ function _G.StatusColumn()
     else
       local mode = vim.api.nvim_get_mode().mode
       if mode ~= "i" and mode ~= "ic" and mode ~= "ix" and mode ~= "R" and mode ~= "Rc" then
-        local diags = vim.diagnostic.get(buf, { lnum = vim.v.lnum - 1 })
+        local diags = vim.diagnostic.count(buf, { lnum = vim.v.lnum - 1 })
         if #diags > 0 then
-          hl = cursor_diag_hl_map[diags[#diags].severity]
+          hl = cursor_diag_hl_map[next(diags)]
         end
       end
     end
-  elseif state and state.in_visual and not state.has_cursors then
+  elseif state and state.in_visual and not state.hasecursors then
     local lnum = vim.v.lnum
     if lnum >= state.visual_start and lnum <= state.visual_end then
       hl = "%#VisualNr#"

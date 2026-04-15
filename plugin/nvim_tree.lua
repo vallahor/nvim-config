@@ -122,13 +122,6 @@ local function on_attach(bufnr)
     resize()
   end)
 
-  vim.keymap.set("n", "<c-e>", function()
-    require("nvim-tree.api").tree.find_file({ update_root = false })
-  end)
-  vim.keymap.set("n", "<c-s-e>", function()
-    require("nvim-tree.api").tree.find_file({ update_root = false, open = true, focus = true })
-  end)
-
   -- vim.keymap.set("n", "<c-f>", vim.cmd.NvimTreeFindFile, { buffer = true })
 end
 
@@ -175,6 +168,13 @@ require("nvim-tree").setup({
     },
   },
 })
+
+vim.keymap.set("n", "<c-e>", function()
+  require("nvim-tree.api").tree.find_file({ update_root = false, open = true })
+end)
+vim.keymap.set("n", "<c-s-e>", function()
+  require("nvim-tree.api").tree.find_file({ update_root = false, open = true, focus = true })
+end)
 
 vim.keymap.set("n", "<c-t>", vim.cmd.NvimTreeFocus)
 vim.keymap.set("n", "<c-b>", vim.cmd.NvimTreeClose)
