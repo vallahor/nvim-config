@@ -401,29 +401,36 @@ local function render_sidebar()
   if not sidebar.winnr or not api.nvim_win_is_valid(sidebar.winnr) then
     return 0
   end
-  local sidebar_width = api.nvim_win_get_width(sidebar.winnr) + sidebar.separator_width
+  local sidebar_width = api.nvim_win_get_width(sidebar.winnr)
   if sidebar_width ~= sidebar.width then
     sidebar.width = sidebar_width
     -- @check: make options to set if the label will be in the midddle or any other place
-    local total_pad = math.max(0, sidebar_width - sidebar.label_width - sidebar.separator_width)
+    local total_pad = math.max(0, sidebar_width - sidebar.label_width)
     local pad_left = math.ceil(total_pad / 2)
     local pad_right = math.floor(total_pad / 2)
     local spaces_left = make_spaces(cached_pad_left, sidebar_spaces_left, pad_left)
     local spaces_right = make_spaces(cached_pad_right, sidebar_spaces_right, pad_right)
-    sidebar.rendered_focused = "%#TablineSidebarFocusedLabel#"
-      .. spaces_left
-      .. sidebar.label
-      .. spaces_right
-      .. "%#TablineSidebarSep#"
-      .. sidebar.separator
-    sidebar.rendered_visible = "%#TablineSidebarVisibleLabel#"
-      .. spaces_left
-      .. sidebar.label
-      .. spaces_right
-      .. "%#TablineSidebarSep#"
-      .. sidebar.separator
+    local label = spaces_left .. sidebar.label .. spaces_right
+    local label_width = sidebar.label_width + pad_left + pad_right
+
+    if label_width > sidebar_width then
+      label = vim.fn.strcharpart(label, 0, sidebar_width)
+    end
+
+    sidebar.rendered_focused = table.concat({
+      "%#TablineSidebarFocusedLabel#",
+      label,
+      "%#TablineSidebarSep#",
+      sidebar.separator,
+    })
+    sidebar.rendered_visible = table.concat({
+      "%#TablineSidebarVisibleLabel#",
+      label,
+      "%#TablineSidebarSep#",
+      sidebar.separator,
+    })
   end
-  return sidebar_width
+  return sidebar_width + sidebar.separator_width
 end
 
 ---@type table<integer, table<integer, table<integer, string>>>
