@@ -512,11 +512,11 @@ local function resolve_post_str(size)
   return tab_hl .. icon .. tab_hl .. vim.fn.strcharpart(tab.str, 0, size)
 end
 
-local function make_prefix(l_size, indicator)
+local function make_prefix(left_remaining, indicator)
   if viewport.lo > 1 then
     viewport.prefix = viewport.indicator_left
-    if l_size > 0 then
-      local size = l_size - indicator
+    if left_remaining > 0 then
+      local size = left_remaining - indicator
       if size > 0 then
         if size - viewport.close_icon_width > 0 then
           size = size - viewport.close_icon_width
@@ -527,117 +527,142 @@ local function make_prefix(l_size, indicator)
         end
       end
     end
-    prefix_size = l_size
+    prefix_size = left_remaining
   else
-    viewport.prefix = ""
-    -- viewport.prefix = viewport.indicator_start
+    viewport.prefix = viewport.indicator_start
   end
 end
 
-local function make_postfix(r_size, indicator)
+local function make_postfix(right_remaining, indicator)
   if viewport.hi < #tabs_cache then
     viewport.postfix = viewport.indicator_right
-    if r_size > 0 then
-      local size = r_size - indicator
+    if right_remaining > 0 then
+      local size = right_remaining - indicator
       if size > 0 then
         viewport.postfix = focus_on_click(buf_cache[viewport.hi + 1]) .. resolve_post_str(size) .. viewport.postfix
       elseif size < 0 then
-        viewport.postfix = string.rep(" ", r_size) .. viewport.postfix
+        viewport.postfix = string.rep(" ", right_remaining) .. viewport.postfix
       end
     end
   else
-    viewport.postfix = ""
-    -- viewport.postfix = viewport.indicator_end
+    viewport.postfix = viewport.indicator_end
   end
 end
 
-local function gen_prefix_postfix(l_size, r_size)
-  local indicator_size = (viewport.lo > 1 and viewport.indicator_left_width or 0)
-    + (viewport.hi < #tabs_cache and viewport.indicator_right_width or 0)
+local function compute_left_indicator()
+  return viewport.lo > 1 and viewport.indicator_left_width or 0
+end
 
-  make_prefix(l_size, indicator_size)
-  make_postfix(r_size, indicator_size)
+local function compute_right_indicator()
+  return viewport.hi < #tabs_cache and viewport.indicator_right_width or 0
+end
+
+local function compute_both_indicators()
+  return compute_left_indicator() + compute_right_indicator()
+end
+
+local function gen_prefix_postfix(left_remaining, right_remaining)
+  local indicator_size = compute_both_indicators()
+
+  make_prefix(left_remaining, indicator_size)
+  make_postfix(right_remaining, indicator_size)
 end
 
 local function handle_buf_delete(width)
-  local l_size = 0
-  local r_size = 0
+  local left_remaining = 0
+  local right_remaining = 0
   viewport.buf_deleted = false
 
   if viewport.lo == 1 then
-    viewport.hi, r_size = get_viewport_hi(viewport.lo, width)
+    local indicator_left = viewport.indicator_start_width
+    local indicator_right = compute_right_indicator()
+    local indicators = indicator_left + indicator_right
+    viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators)
+    right_remaining = right_remaining + indicator_right
   else
     local reserved = prefix_size > 0 and (prefix_size + viewport.indicator_left_width - viewport.indicator_right_width)
       or (viewport.indicator_left_width + viewport.indicator_right_width)
-    viewport.hi, r_size = get_viewport_hi(viewport.lo, width - reserved)
+    viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - reserved)
     if viewport.hi == #tabs_cache then
-      viewport.lo, l_size = get_viewport_lo(viewport.hi, width - viewport.indicator_left_width)
-      l_size = l_size + viewport.indicator_left_width
+      local indicator_left = viewport.indicator_left_width
+      viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicator_left - viewport.indicator_end_width)
+      left_remaining = left_remaining + viewport.indicator_left_width
     else
-      make_postfix(r_size, 0)
+      make_postfix(right_remaining, 0)
       return
     end
   end
 
-  gen_prefix_postfix(l_size, r_size)
+  gen_prefix_postfix(left_remaining, right_remaining)
 end
 
 local function handle_index_before(width)
-  local l_size = 0
-  local r_size = 0
+  local left_remaining = 0
+  local right_remaining = 0
   viewport.lo = viewport.index
   if viewport.lo == 1 then
-    local indicator_right = viewport.hi < #tabs_cache and viewport.indicator_right_width or 0
-    viewport.hi, r_size = get_viewport_hi(viewport.lo, width - indicator_right)
-    r_size = r_size + indicator_right
+    local indicator_left = viewport.indicator_start_width
+    local indicator_right = compute_right_indicator()
+    local indicators = indicator_left + indicator_right
+    viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators)
+    right_remaining = right_remaining + indicator_right
   else
     local indicator = viewport.indicator_right_width + viewport.indicator_left_width
-    viewport.hi, r_size = get_viewport_hi(viewport.lo, width - indicator)
-    r_size = r_size + indicator
+    viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicator)
+    right_remaining = right_remaining + indicator
   end
 
-  gen_prefix_postfix(l_size, r_size)
+  gen_prefix_postfix(left_remaining, right_remaining)
 end
 
 local function handle_index_after(width)
-  local l_size = 0
-  local r_size = 0
+  local left_remaining = 0
+  local right_remaining = 0
   viewport.hi = viewport.index
-  local indicator = viewport.indicator_left_width + (viewport.hi < #tabs_cache and viewport.indicator_right_width or 0)
-  viewport.lo, l_size = get_viewport_lo(viewport.hi, width - indicator)
-  l_size = l_size + indicator
+  if viewport.hi == #tabs_cache then
+    local indicator_left = compute_left_indicator()
+    local indicator_right = viewport.indicator_end_width
+    local indicators = indicator_left + indicator_right
+    viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicators)
+    left_remaining = left_remaining + indicator_left
+  else
+    local indicator = viewport.indicator_left_width + compute_right_indicator()
+    viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicator)
+    left_remaining = left_remaining + indicator
+  end
 
-  gen_prefix_postfix(l_size, r_size)
+  gen_prefix_postfix(left_remaining, right_remaining)
 end
 
 local function handle_width_change(width)
-  local l_size = 0
-  local r_size = 0
+  local left_remaining = 0
+  local right_remaining = 0
   viewport.width = width
-  local indicator_right = viewport.hi < #tabs_cache and viewport.indicator_right_width or 0
-  local indicator_left = viewport.lo > 1 and viewport.indicator_left_width or 0
-  viewport.hi, r_size = get_viewport_hi(viewport.lo, width - indicator_left - indicator_right)
-  r_size = r_size + indicator_left + indicator_right
+  local indicator_right = compute_right_indicator()
+  local indicator_left = compute_left_indicator()
+  viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicator_left - indicator_right)
+  right_remaining = right_remaining + indicator_left + indicator_right
   if viewport.hi == #tabs_cache then
-    indicator_right = 0
-    viewport.lo, l_size = get_viewport_lo(viewport.hi, width - indicator_left)
-    l_size = l_size + indicator_left
+    indicator_left = compute_left_indicator()
+    indicator_right = viewport.indicator_end_width
+    local indicators = indicator_left + indicator_right
+    viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicators)
+    left_remaining = left_remaining + indicator_left
   end
 
   if viewport.index < viewport.lo then
     viewport.lo = viewport.index
-    local indicator = viewport.indicator_right_width + (viewport.lo > 1 and viewport.indicator_left_width or 0)
-    viewport.hi, r_size = get_viewport_hi(viewport.lo, width - indicator)
-    r_size = r_size + indicator
+    local indicator = viewport.indicator_right_width + compute_left_indicator()
+    viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicator)
+    right_remaining = right_remaining + indicator
   elseif viewport.index > viewport.hi then
     viewport.hi = viewport.index
-    local indicator = viewport.indicator_left_width
-      + (viewport.hi < #tabs_cache and viewport.indicator_right_width or 0)
-    viewport.lo, l_size = get_viewport_lo(viewport.hi, width - indicator)
-    l_size = l_size + indicator
+    local indicator = viewport.indicator_left_width + compute_right_indicator()
+    viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicator)
+    left_remaining = left_remaining + indicator
   end
 
-  gen_prefix_postfix(l_size, r_size)
+  gen_prefix_postfix(left_remaining, right_remaining)
 end
 
 ---@param width integer
@@ -673,23 +698,21 @@ function M.tabline_make()
     else
       viewport.lo = 1
       viewport.hi = #tabs_cache
-      viewport.prefix = ""
-      -- viewport.prefix = viewport.indicator_start
+      viewport.prefix = viewport.indicator_start
       viewport.postfix = ""
     end
 
     ::build_viewport_str::
 
-    local indicator = (viewport.hi < #tabs_cache and viewport.indicator_right_width or 0)
-      + (viewport.lo > 1 and viewport.indicator_left_width or 0)
+    local indicator = compute_both_indicators()
     local available = width
     local current_tab = tabs_cache[viewport.index]
 
     if current_tab and current_tab.width > available - indicator then
       viewport.lo = viewport.index
       viewport.hi = viewport.index
-      local indicator_left = viewport.lo > 1 and viewport.indicator_left_width or 0
-      local indicator_right = viewport.hi < #tabs_cache and viewport.indicator_right_width or 0
+      local indicator_left = compute_left_indicator()
+      local indicator_right = compute_right_indicator()
       if viewport.hi == #tabs_cache then
         make_prefix(width - available - indicator_right, indicator_left)
         make_postfix(0, 0)
