@@ -451,7 +451,7 @@ local function render_sidebar()
     local label_width = sidebar.label_width + pad_left + pad_right
 
     if label_width > sidebar_width then
-      label = vim.fn.strcharpart(label, 0, sidebar_width)
+      label = fn.strcharpart(label, 0, sidebar_width)
     end
 
     sidebar.rendered_focused = table.concat({
@@ -538,7 +538,7 @@ local function resolve_prefix_str(size)
   local tab = tabs_cache[viewport.lo - 1]
   local buf = buf_cache[viewport.lo - 1]
   local pad = string.rep(" ", math.max(0, size - tab.strwidth))
-  return pad .. M.resolve_hl(buf, false) .. vim.fn.strcharpart(tab.str, tab.strlen - size, size)
+  return pad .. M.resolve_hl(buf, false) .. fn.strcharpart(tab.str, tab.strlen - size, size)
 end
 
 local function resolve_post_str(size)
@@ -556,7 +556,7 @@ local function resolve_post_str(size)
     end
   end
   local pad = string.rep(" ", math.max(0, size - tab.strwidth))
-  return tab_hl .. icon .. tab_hl .. vim.fn.strcharpart(tab.str, 0, size) .. pad
+  return tab_hl .. icon .. tab_hl .. fn.strcharpart(tab.str, 0, size) .. pad
 end
 
 local function make_prefix(left_remaining, indicator)
@@ -649,7 +649,7 @@ local function handle_buf_delete(width)
     if viewport.hi == #tabs_cache then
       local indicator_left = viewport.indicator_left_width
       viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicator_left - viewport.indicator_end_width)
-      left_remaining = left_remaining + viewport.indicator_left_width
+      left_remaining = left_remaining + indicator_left
     else
       make_postfix(right_remaining, 0)
       return
@@ -805,7 +805,7 @@ function M.tabline_make()
         available = available - viewport.close_icon_width
         tabs[#tabs + 1] = tab_hl
           .. focus_on_click(buf)
-          .. vim.fn.strcharpart(tab.str, tab.strlen - available, available)
+          .. fn.strcharpart(tab.str, tab.strlen - available, available)
           .. close_on_click(buf)
       else
         tabs[#tabs + 1] = focused and tab.rendered_focused or tab.rendered_visible
@@ -823,7 +823,7 @@ function M.tabline_make()
   viewport.width = width
 
   local elapsed = (vim.uv.hrtime() - start) / 1e6 -- milliseconds
-  -- vim.notify(string.format("tabline: %.3fms", elapsed))
+  vim.notify(string.format("tabline: %.3fms", elapsed))
   return viewport.str
 end
 
@@ -1046,7 +1046,7 @@ local function setup_autocmds()
       if not idx then
         return
       end
-      remove_buf_from_tabline(ev.buf)
+      remove_buf_from_tabline(bufnr)
     end,
   })
 
