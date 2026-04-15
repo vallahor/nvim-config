@@ -597,7 +597,7 @@ local function compute_left_remain_from_end(width)
   local indicator_left = compute_left_indicator()
   local indicator_right = viewport.indicator_end_width
   local indicators = indicator_left + indicator_right
-  local lo, left_remaining = get_viewport_lo(viewport.hi, width - indicators)
+  local lo, left_remaining = get_viewport_lo(#tabs_cache, width - indicators)
   return lo, left_remaining + indicator_left
 end
 
@@ -605,7 +605,7 @@ local function compute_right_remain_from_end(width)
   local indicator_left = viewport.indicator_start_width
   local indicator_right = compute_right_indicator()
   local indicators = indicator_left + indicator_right
-  local hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators)
+  local hi, right_remaining = get_viewport_hi(1, width - indicators)
   return hi, right_remaining + indicator_right
 end
 
@@ -683,24 +683,26 @@ local function handle_width_change(width)
   if viewport.lo == 1 then
     viewport.hi, right_remaining = compute_right_remain_from_end(width)
   else
-    local indicator_right = compute_right_indicator()
-    local indicator_left = compute_left_indicator()
-    local indicators = indicator_left + indicator_right
-    viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators)
-    right_remaining = right_remaining + indicators
     if viewport.hi == #tabs_cache then
       viewport.lo, left_remaining = compute_left_remain_from_end(width)
     end
 
-    if viewport.index < viewport.lo then
+    local indicator_left_size = compute_left_indicator()
+    local indicator_right_size = compute_right_indicator()
+    local indicators = indicator_left_size + indicator_right_size
+
+    if viewport.index <= viewport.lo then
       viewport.lo = viewport.index
-      viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators)
+      viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators - viewport.offset_left)
+      left_remaining = viewport.offset_left + indicators
       right_remaining = right_remaining + indicators
-    elseif viewport.index > viewport.hi then
-      viewport.hi = viewport.index
-      viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicators)
+    elseif viewport.hi < #tabs_cache then
+      if viewport.index > viewport.hi then
+        viewport.hi = viewport.index
+      end
+      viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicators - viewport.offset_right)
       left_remaining = left_remaining + indicators
-      right_remaining = 0
+      right_remaining = viewport.offset_right + indicators
     end
   end
 
@@ -1088,8 +1090,8 @@ local config = {
   focus_on_click = true,
   unique_names = true,
   -- close_icon = "",
-  -- close_icon = "󰅖 ",
-  close_icon = "X ",
+  close_icon = "󰅖 ",
+  -- close_icon = "X ",
 
   -- maybe highlight?
   indicator_left = " …",
@@ -1099,12 +1101,12 @@ local config = {
   indicator_start = "*",
   indicator_end = "*",
 
-  offset_left = 5,
-  offset_right = 5,
+  offset_left = 10,
+  offset_right = 10,
 
   icons = {
     enabled = true,
-    no_hl = true,
+    no_hl = false,
     provider = "mini.icons",
   },
 
