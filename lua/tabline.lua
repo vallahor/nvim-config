@@ -1,5 +1,3 @@
-local nvim_tree_view = require("nvim-tree.view")
-
 local api, fn, bo = vim.api, vim.fn, vim.bo
 local strwidth, fnamemodify = fn.strwidth, fn.fnamemodify
 
@@ -83,6 +81,8 @@ local sidebar = {
   focus = false,
   winnr = nil,
 }
+
+local sidebar_filetypes = { ["NvimTree"] = true }
 
 ---@type {[integer]: integer}
 local buf_cache = {}
@@ -418,6 +418,23 @@ local function make_spaces(cached_pad, str, n)
   return str
 end
 
+local function sidebar_label_start(pad)
+  local pad_left = math.ceil(0)
+  local pad_right = math.floor(pad)
+  return pad_left, pad_right
+end
+
+local function sidebar_label_mid(pad)
+  local pad_left = math.ceil(pad / 2)
+  local pad_right = math.floor(pad / 2)
+  return pad_left, pad_right
+end
+local function sidebar_label_end(pad)
+  local pad_left = math.ceil(pad)
+  local pad_right = math.floor(0)
+  return pad_left, pad_right
+end
+
 ---@return integer
 local function render_sidebar()
   if not sidebar.winnr or not api.nvim_win_is_valid(sidebar.winnr) then
@@ -426,10 +443,8 @@ local function render_sidebar()
   local sidebar_width = api.nvim_win_get_width(sidebar.winnr)
   if sidebar_width ~= sidebar.width then
     sidebar.width = sidebar_width
-    -- @check: make options to set if the label will be in the midddle or any other place
     local total_pad = math.max(0, sidebar_width - sidebar.label_width)
-    local pad_left = math.ceil(total_pad / 2)
-    local pad_right = math.floor(total_pad / 2)
+    local pad_left, pad_right = M.sidebar_label_position(total_pad)
     local spaces_left = make_spaces(cached_pad_left, sidebar_spaces_left, pad_left)
     local spaces_right = make_spaces(cached_pad_right, sidebar_spaces_right, pad_right)
     local label = spaces_left .. sidebar.label .. spaces_right
@@ -1042,10 +1057,15 @@ local function setup_autocmds()
   })
 
   api.nvim_create_autocmd({ "WinEnter", "BufEnter" }, {
-    callback = function()
-      sidebar.winnr = nvim_tree_view.get_winnr()
-      sidebar.focus = api.nvim_get_current_win() == sidebar.winnr
-      viewport.buf = sidebar.focus and -1 or api.nvim_get_current_buf()
+    callback = function(ev)
+      if sidebar_filetypes[bo[ev.buf].filetype] then
+        sidebar.winnr = api.nvim_get_current_win()
+        sidebar.focus = true
+        viewport.buf = -1
+      else
+        sidebar.focus = false
+        viewport.buf = api.nvim_get_current_buf()
+      end
 
       viewport.changed = true
     end,
@@ -1115,6 +1135,7 @@ local config = {
 
   sidebar = {
     label = "Explorer",
+    label_position = "mid", -- "start"|"mid"|"end"
     -- label = "Files",
     separator = "│",
     -- separator = " ",
@@ -1147,6 +1168,20 @@ function M.setup(opts)
   if config.sidebar.separator then
     sidebar.separator = config.sidebar.separator
     sidebar.separator_width = strwidth(config.sidebar.separator)
+  end
+
+  if config.sidebar.label_position then
+    if config.sidebar.label_position == "start" then
+      M.sidebar_label_position = sidebar_label_start
+    elseif config.sidebar.label_position == "mid" then
+      M.sidebar_label_position = sidebar_label_mid
+    elseif config.sidebar.label_position == "end" then
+      M.sidebar_label_position = sidebar_label_end
+    else
+      M.sidebar_label_position = sidebar_label_mid
+    end
+  else
+    M.sidebar_label_position = sidebar_label_mid
   end
 
   if config.sidebar.label then
