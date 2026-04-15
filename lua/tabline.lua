@@ -562,6 +562,22 @@ local function compute_both_indicators()
   return compute_left_indicator() + compute_right_indicator()
 end
 
+local function compute_left_remain_from_end(width)
+  local indicator_left = compute_left_indicator()
+  local indicator_right = viewport.indicator_end_width
+  local indicators = indicator_left + indicator_right
+  local lo, left_remaining = get_viewport_lo(viewport.hi, width - indicators)
+  return lo, left_remaining + indicator_left
+end
+
+local function compute_right_remain_from_end(width)
+  local indicator_left = viewport.indicator_start_width
+  local indicator_right = compute_right_indicator()
+  local indicators = indicator_left + indicator_right
+  local hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators)
+  return hi, right_remaining + indicator_right
+end
+
 local function gen_prefix_postfix(left_remaining, right_remaining)
   local indicator_size = compute_both_indicators()
 
@@ -602,11 +618,7 @@ local function handle_index_before(width)
   local right_remaining = 0
   viewport.lo = viewport.index
   if viewport.lo == 1 then
-    local indicator_left = viewport.indicator_start_width
-    local indicator_right = compute_right_indicator()
-    local indicators = indicator_left + indicator_right
-    viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators)
-    right_remaining = right_remaining + indicator_right
+    viewport.hi, right_remaining = compute_right_remain_from_end(width)
   else
     local indicator = viewport.indicator_right_width + viewport.indicator_left_width
     viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicator)
@@ -621,11 +633,7 @@ local function handle_index_after(width)
   local right_remaining = 0
   viewport.hi = viewport.index
   if viewport.hi == #tabs_cache then
-    local indicator_left = compute_left_indicator()
-    local indicator_right = viewport.indicator_end_width
-    local indicators = indicator_left + indicator_right
-    viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicators)
-    left_remaining = left_remaining + indicator_left
+    viewport.lo, left_remaining = compute_left_remain_from_end(width)
   else
     local indicator = viewport.indicator_left_width + compute_right_indicator()
     viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicator)
@@ -640,11 +648,7 @@ local function handle_width_change(width)
   local right_remaining = 0
   viewport.width = width
   if viewport.lo == 1 then
-    local indicator_left = viewport.indicator_start_width
-    local indicator_right = compute_right_indicator()
-    local indicators = indicator_left + indicator_right
-    viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators)
-    right_remaining = right_remaining + indicator_right
+    viewport.hi, right_remaining = compute_right_remain_from_end(width)
   else
     local indicator_right = compute_right_indicator()
     local indicator_left = compute_left_indicator()
@@ -652,11 +656,7 @@ local function handle_width_change(width)
     viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators)
     right_remaining = right_remaining + indicators
     if viewport.hi == #tabs_cache then
-      indicator_left = compute_left_indicator()
-      indicator_right = viewport.indicator_end_width
-      indicators = indicator_left + indicator_right
-      viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicators)
-      left_remaining = left_remaining + indicator_left
+      viewport.lo, left_remaining = compute_left_remain_from_end(width)
     end
 
     if viewport.index < viewport.lo then
