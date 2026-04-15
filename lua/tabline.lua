@@ -23,6 +23,8 @@ M.update_cursor_line_hl = function(_, _) end
 ---@field indicator_right string
 ---@field indicator_left_width integer
 ---@field indicator_right_width integer
+---@field offset_left integer
+---@field offset_right integer
 ---@field indicator_start string
 ---@field indicator_end string
 ---@field indicator_start_width integer
@@ -50,6 +52,8 @@ local viewport = {
   indicator_right = "",
   indicator_left_width = 2,
   indicator_right_width = 2,
+  offset_left = 0,
+  offset_right = 0,
   indicator_start = "",
   indicator_end = "",
   indicator_start_width = 2,
@@ -473,11 +477,12 @@ M.resolve_hl = function(b, focused)
     return ""
   end
   local modified = bo[b].modified
-  if not diag_cache[b] then
-    diag_cache[b] = vim.diagnostic.count(b, diag_filter)
+  local cached = diag_cache[b]
+  if not cached then
+    cached = vim.diagnostic.count(b, diag_filter)
   end
-  local sev = diag_cache[b] and (diag_cache[b][vim.diagnostic.severity.ERROR] or 0) > 0 and 1
-    or (diag_cache[b][vim.diagnostic.severity.WARN] or 0) > 0 and 2
+  local sev = cached and (cached[vim.diagnostic.severity.ERROR] or 0) > 0 and 1
+    or (cached[vim.diagnostic.severity.WARN] or 0) > 0 and 2
     or nil
   if sev then
     return diag_hl_map[sev][modified and 2 or 1][focused and 2 or 1]
@@ -535,7 +540,8 @@ local function resolve_post_str(size)
       return string.rep(" ", size)
     end
   end
-  return tab_hl .. icon .. tab_hl .. vim.fn.strcharpart(tab.str, 0, size)
+  local pad = string.rep(" ", math.max(0, size - tab.strwidth))
+  return tab_hl .. icon .. tab_hl .. vim.fn.strcharpart(tab.str, 0, size) .. pad
 end
 
 local function make_prefix(left_remaining, indicator)
@@ -645,9 +651,10 @@ local function handle_index_before(width)
   if viewport.lo == 1 then
     viewport.hi, right_remaining = compute_right_remain_from_end(width)
   else
-    local indicator = viewport.indicator_right_width + viewport.indicator_left_width
-    viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicator)
+    local indicator = viewport.indicator_right_width + compute_left_indicator()
+    viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicator - viewport.offset_left)
     right_remaining = right_remaining + indicator
+    left_remaining = viewport.offset_left + indicator
   end
 
   gen_prefix_postfix(left_remaining, right_remaining)
@@ -661,8 +668,9 @@ local function handle_index_after(width)
     viewport.lo, left_remaining = compute_left_remain_from_end(width)
   else
     local indicator = viewport.indicator_left_width + compute_right_indicator()
-    viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicator)
+    viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicator - viewport.offset_right)
     left_remaining = left_remaining + indicator
+    right_remaining = viewport.offset_right + indicator
   end
 
   gen_prefix_postfix(left_remaining, right_remaining)
@@ -1091,6 +1099,9 @@ local config = {
   indicator_start = "*",
   indicator_end = "*",
 
+  offset_left = 5,
+  offset_right = 5,
+
   icons = {
     enabled = true,
     no_hl = true,
@@ -1144,6 +1155,9 @@ function M.setup(opts)
 
   M.make_tab = config.unique_names and make_tab_unique_names or make_tab
   M.resolve_update_tab = config.unique_names and resolve_update_tab_unique_names or resolve_update_tab
+
+  viewport.offset_left = config.offset_left
+  viewport.offset_right = config.offset_right
 
   viewport.indicator_left = "%#TablineVisible#" .. config.indicator_left
   viewport.indicator_right = "%#TablineVisible#" .. config.indicator_right
