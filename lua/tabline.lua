@@ -404,6 +404,7 @@ local function render_sidebar()
   local sidebar_width = api.nvim_win_get_width(sidebar.winnr) + sidebar.separator_width
   if sidebar_width ~= sidebar.width then
     sidebar.width = sidebar_width
+    -- @check: make options to set if the label will be in the midddle or any other place
     local total_pad = math.max(0, sidebar_width - sidebar.label_width - sidebar.separator_width)
     local pad_left = math.ceil(total_pad / 2)
     local pad_right = math.floor(total_pad / 2)
@@ -638,28 +639,36 @@ local function handle_width_change(width)
   local left_remaining = 0
   local right_remaining = 0
   viewport.width = width
-  local indicator_right = compute_right_indicator()
-  local indicator_left = compute_left_indicator()
-  viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicator_left - indicator_right)
-  right_remaining = right_remaining + indicator_left + indicator_right
-  if viewport.hi == #tabs_cache then
-    indicator_left = compute_left_indicator()
-    indicator_right = viewport.indicator_end_width
+  if viewport.lo == 1 then
+    local indicator_left = viewport.indicator_start_width
+    local indicator_right = compute_right_indicator()
     local indicators = indicator_left + indicator_right
-    viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicators)
-    left_remaining = left_remaining + indicator_left
-  end
+    viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators)
+    right_remaining = right_remaining + indicator_right
+  else
+    local indicator_right = compute_right_indicator()
+    local indicator_left = compute_left_indicator()
+    local indicators = indicator_left + indicator_right
+    viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators)
+    right_remaining = right_remaining + indicators
+    if viewport.hi == #tabs_cache then
+      indicator_left = compute_left_indicator()
+      indicator_right = viewport.indicator_end_width
+      indicators = indicator_left + indicator_right
+      viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicators)
+      left_remaining = left_remaining + indicator_left
+    end
 
-  if viewport.index < viewport.lo then
-    viewport.lo = viewport.index
-    local indicator = viewport.indicator_right_width + compute_left_indicator()
-    viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicator)
-    right_remaining = right_remaining + indicator
-  elseif viewport.index > viewport.hi then
-    viewport.hi = viewport.index
-    local indicator = viewport.indicator_left_width + compute_right_indicator()
-    viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicator)
-    left_remaining = left_remaining + indicator
+    if viewport.index < viewport.lo then
+      viewport.lo = viewport.index
+      viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators)
+      right_remaining = right_remaining + indicators
+    elseif viewport.index > viewport.hi then
+      viewport.hi = viewport.index
+      viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicators)
+      left_remaining = left_remaining + indicators
+      right_remaining = 0
+    end
   end
 
   gen_prefix_postfix(left_remaining, right_remaining)
@@ -1031,6 +1040,8 @@ _G.CloseTab = function(bufnr)
   M.close_tab(bufnr, false)
 end
 
+-- @check maybe change to click tab
+-- and give more options to do
 _G.FocusTab = function(bufnr, _clicks, button)
   if button == "l" then
     api.nvim_set_current_buf(bufnr)
