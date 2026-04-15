@@ -172,13 +172,10 @@ local function resolve_buf_name(buf)
 end
 
 local function resolve_buf_repeated_names(bufname, tail)
-  local display
   if tabs_repeated_names_buf_cache[tail] and tabs_repeated_names_buf_cache[tail].count > 1 and bufname ~= "" then
-    display = " " .. fnamemodify(bufname, ":~:."):gsub("^%./", "") .. " "
-  else
-    display = " " .. tail .. " "
+    return fnamemodify(bufname, ":~:."):gsub("^%./", "")
   end
-  return display
+  return tail
 end
 
 local get_icon_fn = {
@@ -233,6 +230,7 @@ local function make_tab_icon(ext)
 end
 
 local function build_tab(buf, tail, display, ext)
+  display = " " .. display .. " "
   local display_width = vim.api.nvim_strwidth(display)
   local tab_icon = make_tab_icon(ext)
   local width = display_width + viewport.close_icon_width + (tab_icon and tab_icon.width or 0)
@@ -317,6 +315,15 @@ local function resolve_update_tab(buf)
   if not index then
     return
   end
+  tabs_cache[index] = M.make_tab(buf)
+  update_buf_index()
+end
+
+local function resolve_update_tab_unique_names(buf)
+  local index = buf_index[buf]
+  if not index then
+    return
+  end
   local tail = tabs_cache[index].tail
   local bufname, new_tail, ext = resolve_buf_name(buf)
   if tail ~= new_tail then
@@ -339,7 +346,9 @@ local function remove_buf_from_tabline(bufnr)
   if tab.icon then
     icon_cache_remove(tab.ext)
   end
-  repeated_names_remove(bufnr, tab.tail)
+  if M.unique_names then
+    repeated_names_remove(bufnr, tab.tail)
+  end
 
   table.remove(tabs_cache, index)
   table.remove(buf_cache, index)
@@ -360,11 +369,20 @@ local function remove_buf_from_tabline(bufnr)
   update_buf_index()
 end
 
-local function insert_buf_into_tabline(buf)
+local function make_tab(buf)
+  local _, tail, ext = resolve_buf_name(buf)
+  return build_tab(buf, tail, tail, ext)
+end
+
+local function make_tab_unique_names(buf)
   local bufname, tail, ext = resolve_buf_name(buf)
   repeated_names_insert(buf, tail)
   local display = resolve_buf_repeated_names(bufname, tail)
-  local tab = build_tab(buf, tail, display, ext)
+  return build_tab(buf, tail, display, ext)
+end
+
+local function insert_buf_into_tabline(buf)
+  local tab = M.make_tab(buf)
   table.insert(buf_cache, buf)
   table.insert(tabs_cache, tab)
   viewport.buf = buf
@@ -1001,7 +1019,7 @@ local function setup_autocmds()
 
   api.nvim_create_autocmd("BufFilePost", {
     callback = function(ev)
-      resolve_update_tab(ev.buf)
+      M.resolve_update_tab(ev.buf)
     end,
   })
 
@@ -1124,9 +1142,8 @@ function M.setup(opts)
     M.focus_on_click = config.focus_on_click
   end
 
-  if config.unique_names then
-    M.unique_names = config.unique_names
-  end
+  M.make_tab = config.unique_names and make_tab_unique_names or make_tab
+  M.resolve_update_tab = config.unique_names and resolve_update_tab_unique_names or resolve_update_tab
 
   viewport.indicator_left = "%#TablineVisible#" .. config.indicator_left
   viewport.indicator_right = "%#TablineVisible#" .. config.indicator_right
