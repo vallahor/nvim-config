@@ -1058,6 +1058,7 @@ local function setup_autocmds()
       end
 
       viewport.changed = true
+      schedule_redraw()
     end,
   })
 
