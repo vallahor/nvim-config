@@ -21,8 +21,6 @@ M.update_cursor_line_hl = function(_, _) end
 ---@field indicator_right string
 ---@field indicator_left_width integer
 ---@field indicator_right_width integer
----@field offset_left integer
----@field offset_right integer
 ---@field indicator_start string
 ---@field indicator_end string
 ---@field indicator_start_width integer
@@ -50,8 +48,6 @@ local viewport = {
   indicator_right = "",
   indicator_left_width = 2,
   indicator_right_width = 2,
-  offset_left = 0,
-  offset_right = 0,
   indicator_start = "",
   indicator_end = "",
   indicator_start_width = 2,
@@ -657,9 +653,9 @@ local function handle_index_before(width)
     viewport.hi, right_remaining = compute_right_remain_from_end(width)
   else
     local indicator = viewport.indicator_right_width + compute_left_indicator()
-    viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicator - viewport.offset_left)
+    viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicator)
     right_remaining = right_remaining + indicator
-    left_remaining = viewport.offset_left + indicator
+    left_remaining = indicator
   end
 
   gen_prefix_postfix(left_remaining, right_remaining)
@@ -673,9 +669,9 @@ local function handle_index_after(width)
     viewport.lo, left_remaining = compute_left_remain_from_end(width)
   else
     local indicator = viewport.indicator_left_width + compute_right_indicator()
-    viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicator - viewport.offset_right)
+    viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicator)
     left_remaining = left_remaining + indicator
-    right_remaining = viewport.offset_right + indicator
+    right_remaining = indicator
   end
 
   gen_prefix_postfix(left_remaining, right_remaining)
@@ -696,21 +692,22 @@ local function handle_width_change(width)
     local indicator_right_size = compute_right_indicator()
     local indicators = indicator_left_size + indicator_right_size
 
-    if viewport.index <= viewport.lo then
+    if viewport.index <= viewport.lo and viewport.lo < viewport.hi then
       if viewport.hi == #tabs_cache then
         indicators = viewport.indicator_left_width + viewport.indicator_right_width
       end
       viewport.lo = viewport.index
-      viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators - viewport.offset_left)
-      left_remaining = viewport.offset_left + indicators
+      viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators)
+      indicators = compute_both_indicators()
+      left_remaining = indicators
       right_remaining = right_remaining + indicators
     elseif viewport.hi < #tabs_cache then
       if viewport.index > viewport.hi then
         viewport.hi = viewport.index
       end
-      viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicators - viewport.offset_right)
+      viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicators)
       left_remaining = left_remaining + indicators
-      right_remaining = viewport.offset_right + indicators
+      right_remaining = indicators
     end
   end
 
@@ -751,6 +748,10 @@ function M.tabline_make()
       viewport.buf = buf_cache[viewport.index]
     end
 
+    local indicators = compute_both_indicators()
+    local available = width
+    local current_tab = tabs_cache[viewport.index]
+
     -- if viewport.diag_or_input_changed and not viewport.changed then
     if viewport.diag_or_input_changed then
       viewport.diag_or_input_changed = false
@@ -768,27 +769,25 @@ function M.tabline_make()
 
     ::build_viewport_str::
 
-    local indicator = compute_both_indicators()
-    local available = width
-    local current_tab = tabs_cache[viewport.index]
-
-    if current_tab and current_tab.width > available - indicator then
+    if current_tab and current_tab.width > available - indicators then
       viewport.lo = viewport.index
       viewport.hi = viewport.index
       local indicator_left = compute_left_indicator()
       local indicator_right = compute_right_indicator()
       if viewport.hi == #tabs_cache then
-        make_prefix(width - available - indicator_right, indicator_left)
+        make_prefix(0, indicator_left)
         make_postfix(0, 0)
+        available = available - viewport.indicator_end_width
       elseif viewport.lo == 1 then
         make_prefix(0, 0)
-        make_postfix(width - available - indicator_left, indicator_right)
+        make_postfix(0, indicator_right)
+        available = available - viewport.indicator_start_width
       else
         make_prefix(0, indicator_left)
-        make_postfix(width - available, indicator_right)
+        make_postfix(0, indicator_right)
       end
 
-      available = width - indicator_left - indicator_right
+      available = available - indicator_left - indicator_right
     end
 
     local sidebar_str = ""
@@ -803,7 +802,8 @@ function M.tabline_make()
       local buf = buf_cache[i]
       local focused = buf == viewport.buf
       if tab.width > available then
-        local tab_hl = M.resolve_hl(buf_cache[viewport.index], true)
+        local tab_visible_hl, tab_focused_hl = M.resolve_hl(buf_cache[viewport.index])
+        local tab_hl = focused and tab_focused_hl or tab_visible_hl
         available = available - viewport.close_icon_width
         tabs[#tabs + 1] = tab_hl
           .. focus_on_click(buf)
@@ -1154,9 +1154,6 @@ local config = {
   indicator_start = "*",
   indicator_end = "*",
 
-  offset_left = 10,
-  offset_right = 10,
-
   icons = {
     enabled = true,
     no_hl = false,
@@ -1211,11 +1208,9 @@ function M.setup(opts)
     M.focus_on_click = config.focus_on_click
   end
 
+  M.unique_names = config.unique_names
   M.make_tab = config.unique_names and make_tab_unique_names or make_tab
   M.resolve_update_tab = config.unique_names and resolve_update_tab_unique_names or resolve_update_tab
-
-  viewport.offset_left = config.offset_left
-  viewport.offset_right = config.offset_right
 
   viewport.indicator_left = "%#TablineVisible#" .. config.indicator_left
   viewport.indicator_right = "%#TablineVisible#" .. config.indicator_right
