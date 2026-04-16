@@ -628,6 +628,21 @@ vim.api.nvim_create_autocmd("VimEnter", {
         vim.api.nvim_set_option_value("winhighlight", hl, { win = win })
       end,
     })
+    local map = vim.keymap.set
+    map("n", "<home>", tabline.prev_tab, { silent = true })
+    map("n", "<end>", tabline.next_tab, { silent = true })
+    map("n", "<s-home>", tabline.move_to_begin, { silent = true })
+    map("n", "<s-end>", tabline.move_to_end, { silent = true })
+    map("n", "<c-home>", tabline.move_tab_left, { silent = true })
+    map("n", "<c-end>", tabline.move_tab_right, { silent = true })
+    map("n", "<c-s-home>", tabline.move_tab_begin, { silent = true })
+    map("n", "<c-s-end>", tabline.move_tab_end, { silent = true })
+    map("n", "<c-w>", function()
+      tabline.close_tab(0, false)
+    end, { silent = true, nowait = true })
+    map("n", "<c-x>", function()
+      tabline.close_tab(0, true)
+    end, { silent = true, nowait = true })
   end,
 })
 

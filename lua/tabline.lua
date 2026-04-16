@@ -1146,24 +1146,6 @@ local function setup_autocmds()
   })
 end
 
-local function setup_keymaps()
-  local map = vim.keymap.set
-  map("n", "<home>", M.prev_tab, { silent = true })
-  map("n", "<end>", M.next_tab, { silent = true })
-  map("n", "<s-home>", M.move_to_begin, { silent = true })
-  map("n", "<s-end>", M.move_to_end, { silent = true })
-  map("n", "<c-home>", M.move_tab_left, { silent = true })
-  map("n", "<c-end>", M.move_tab_right, { silent = true })
-  map("n", "<c-s-home>", M.move_tab_begin, { silent = true })
-  map("n", "<c-s-end>", M.move_tab_end, { silent = true })
-  map("n", "<c-w>", function()
-    M.close_tab(0, false)
-  end, { silent = true, nowait = true })
-  map("n", "<c-x>", function()
-    M.close_tab(0, true)
-  end, { silent = true, nowait = true })
-end
-
 _G.make_tabline = M.tabline_make
 vim.opt.tabline = "%!v:lua.make_tabline()"
 vim.opt.showtabline = 2
@@ -1237,7 +1219,6 @@ function M.setup(opts)
 
   init_bufs()
   setup_autocmds()
-  setup_keymaps()
   setup_tabline_hl()
 
   if opts and type(opts.update_cursor_line_hl) == "function" then
