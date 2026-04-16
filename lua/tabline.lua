@@ -534,7 +534,7 @@ local function resolve_post_str(size)
   local icon = ""
   if tab.icon then
     local remaining = size - tab.icon.width
-    if remaining >= 0 then
+    if remaining > 0 then
       icon = tab.icon.get(false, tab_hl)
       size = remaining
     else
