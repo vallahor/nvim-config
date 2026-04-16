@@ -698,9 +698,12 @@ local function handle_width_change(width)
       end
       viewport.lo = viewport.index
       viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators)
-      indicators = compute_both_indicators()
-      left_remaining = indicators
-      right_remaining = right_remaining + indicators
+      if viewport.hi == #tabs_cache then
+        viewport.lo, left_remaining = compute_left_remain_from_end(width)
+      else
+        left_remaining = indicators
+        right_remaining = right_remaining + indicators
+      end
     elseif viewport.hi < #tabs_cache then
       if viewport.index > viewport.hi then
         viewport.hi = viewport.index
