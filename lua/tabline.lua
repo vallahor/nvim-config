@@ -709,8 +709,12 @@ local function handle_width_change(width)
         viewport.hi = viewport.index
       end
       viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicators)
-      left_remaining = left_remaining + indicators
-      right_remaining = indicators
+      if viewport.lo == 1 then
+        viewport.hi, right_remaining = compute_right_remain_from_end(width)
+      else
+        left_remaining = left_remaining + indicators
+        right_remaining = indicators
+      end
     end
   end
 
