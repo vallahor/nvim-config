@@ -541,7 +541,7 @@ function _G.StatusColumn()
       hl = "%#CursorVisualNr#"
     else
       local mode = vim.api.nvim_get_mode().mode
-      if mode ~= "i" and mode ~= "ic" and mode ~= "ix" and mode ~= "R" and mode ~= "Rc" then
+      if mode ~= "i" and mode ~= "ic" and mode ~= "ix" then
         local diags = vim.diagnostic.count(buf, { lnum = vim.v.lnum - 1 })
         if #diags > 0 then
           hl = cursor_diag_hl_map[next(diags)]

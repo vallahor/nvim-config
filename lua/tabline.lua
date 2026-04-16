@@ -3,7 +3,35 @@ local strwidth, fnamemodify = fn.strwidth, fn.fnamemodify
 
 local M = {}
 
-local prefix_size = 0
+local config = {
+  focus_on_click = true,
+  unique_names = true,
+  -- close_icon = "",
+  close_icon = "󰅖 ",
+  -- close_icon = "X ",
+
+  -- maybe highlight?
+  indicator_left = " …",
+  indicator_right = "… ",
+  -- indicator_left = "<<",
+  -- indicator_right = ">>",
+  indicator_start = "*",
+  indicator_end = "*",
+
+  icons = {
+    enabled = true,
+    no_hl = false,
+    provider = "mini.icons", -- "mini.icons"|"nvim-web-devicons" default: "mini.icons"
+  },
+
+  sidebar = {
+    label = "Explorer",
+    label_position = "mid", -- "start"|"mid"|"end"
+    -- label = "Files",
+    separator = "│",
+    -- separator = " ",
+  },
+}
 
 M.update_cursor_line_hl = function(_, _) end
 
@@ -116,6 +144,8 @@ local icons_hl_cache = {}
 ---@type table<string, {count: integer, bufs: table<integer, boolean?>}>
 local tabs_repeated_names_buf_cache = {}
 
+local prefix_size = 0
+
 local redraw_scheduled = false
 
 local function schedule_redraw()
@@ -212,7 +242,7 @@ local function icon_cache_remove(ext)
 end
 
 local function make_tab_icon(ext)
-  if not M.icons.enabled then
+  if not config.icons.enabled then
     return nil
   end
   local icon, color = icon_cache_insert(ext)
@@ -224,6 +254,7 @@ local function make_tab_icon(ext)
   return {
     str = icon,
     width = api.nvim_strwidth(icon),
+    ---@return string
     get = function(focused, hl)
       return M.get_icon_hl(ext, color, focused) .. icon .. hl
     end,
@@ -252,10 +283,16 @@ local function build_tab(buf, tail, display, ext)
     local close = close_on_click(buf)
     local hl_visible, hl_focused = M.resolve_hl(buf)
 
-    tab.rendered_visible =
-      table.concat({ click, hl_visible, tab_icon and tab_icon.get(false, hl_visible) or "", display, close })
-    tab.rendered_focused =
-      table.concat({ click, hl_focused, tab_icon and tab_icon.get(true, hl_focused) or "", display, close })
+    tab.rendered_visible = click
+      .. hl_visible
+      .. (tab_icon and tab_icon.get(false, hl_visible) or "")
+      .. display
+      .. close
+    tab.rendered_focused = click
+      .. hl_focused
+      .. (tab_icon and tab_icon.get(true, hl_focused) or "")
+      .. display
+      .. close
   end
   tab.update()
   return tab
@@ -443,18 +480,9 @@ local function render_sidebar()
       label = fn.strcharpart(label, 0, sidebar_width)
     end
 
-    sidebar.rendered_focused = table.concat({
-      "%#TablineSidebarFocusedLabel#",
-      label,
-      "%#TablineSidebarSep#",
-      sidebar.separator,
-    })
-    sidebar.rendered_visible = table.concat({
-      "%#TablineSidebarVisibleLabel#",
-      label,
-      "%#TablineSidebarSep#",
-      sidebar.separator,
-    })
+    sidebar.rendered_focused = "%#TablineSidebarFocusedLabel#" .. label .. "%#TablineSidebarSep#" .. sidebar.separator
+
+    sidebar.rendered_visible = "%#TablineSidebarVisibleLabel#" .. label .. "%#TablineSidebarSep#" .. sidebar.separator
   end
   return sidebar_width + sidebar.separator_width
 end
@@ -486,7 +514,7 @@ M.resolve_hl = function(b)
     or nil
   if sev then
     local t = diag_hl_map[sev][modified and 2 or 1]
-    return t[1], t[2] -- visible, focused
+    return t[1], t[2]
   end
   if modified then
     return "%#TablineVisibleModified#", "%#TablineFocusedModified#"
@@ -524,13 +552,14 @@ local function resolve_prefix_str(size)
   local tab = tabs_cache[viewport.lo - 1]
   local buf = buf_cache[viewport.lo - 1]
   local pad = string.rep(" ", math.max(0, size - tab.strwidth))
-  return pad .. M.resolve_hl(buf, false) .. fn.strcharpart(tab.str, tab.strlen - size, size)
+  local tab_hl = (M.resolve_hl(buf))
+  return pad .. tab_hl .. fn.strcharpart(tab.str, tab.strlen - size, size)
 end
 
 local function resolve_post_str(size)
   local tab = tabs_cache[viewport.hi + 1]
   local buf = buf_cache[viewport.hi + 1]
-  local tab_hl = M.resolve_hl(buf, false)
+  local tab_hl = (M.resolve_hl(buf))
   local icon = ""
   if tab.icon then
     local remaining = size - tab.icon.width
@@ -790,14 +819,12 @@ function M.tabline_make()
 
       local pad = string.rep(" ", math.max(0, available - current_tab.strlen))
 
-      tab_str = table.concat({
-        tab_hl,
-        focus_on_click(buf),
-        fn.strcharpart(current_tab.str, current_tab.strlen - available, available),
-        close_on_click(buf),
-        "%#TablineVisible#",
-        pad,
-      })
+      tab_str = tab_hl
+        .. focus_on_click(buf)
+        .. fn.strcharpart(current_tab.str, current_tab.strlen - available, available)
+        .. close_on_click(buf)
+        .. "%#TablineVisible#"
+        .. pad
     elseif viewport.total_tabs_width > width then
       calc_truncated_tabs(width)
     else
@@ -1000,6 +1027,7 @@ local function setup_tabline_hl()
   hl(0, "TablineVisibleDiagModifiedWarn", { fg = warning_fg, bg = visible_bg, italic = true })
 end
 
+---@return string
 M.get_icon_hl = function(ext, color, focused)
   if M.icons.no_hl then
     return ""
@@ -1155,43 +1183,10 @@ _G.FocusTab = function(bufnr, _clicks, button)
   end
 end
 
-local config = {
-  focus_on_click = true,
-  unique_names = true,
-  -- close_icon = "",
-  close_icon = "󰅖 ",
-  -- close_icon = "X ",
-
-  -- maybe highlight?
-  indicator_left = " …",
-  indicator_right = "… ",
-  -- indicator_left = "<<",
-  -- indicator_right = ">>",
-  indicator_start = "*",
-  indicator_end = "*",
-
-  icons = {
-    enabled = true,
-    no_hl = false,
-    provider = "mini.icons", -- "mini.icons"|"nvim-web-devicons" default: "mini.icons"
-  },
-
-  sidebar = {
-    label = "Explorer",
-    label_position = "mid", -- "start"|"mid"|"end"
-    -- label = "Files",
-    separator = "│",
-    -- separator = " ",
-  },
-}
-
 function M.setup(opts)
   config = vim.tbl_deep_extend("force", vim.deepcopy(config), opts or {})
-  M.icons = {
-    enabled = false,
-  }
   if config.icons.enabled then
-    M.icons.enabled = config.icons.enabled
+    M.icons = {}
     M.icons.no_hl = config.icons.no_hl
 
     local provider = config.icons.provider
