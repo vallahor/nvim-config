@@ -6,6 +6,7 @@ vim.lsp.config("*", {
 })
 
 vim.diagnostic.config({
+  update_in_insert = false,
   severity_sort = true,
   virtual_text = {
     prefix = "",

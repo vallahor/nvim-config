@@ -252,25 +252,14 @@ local function build_tab(buf, tail, display, ext)
     rendered_focused = nil,
   }
   tab.update = function()
-    local update = coroutine.create(function()
-      local tab_visible_hl = M.resolve_hl(buf, false)
-      local tab_focused_hl = M.resolve_hl(buf, true)
-      tab.rendered_visible = table.concat({
-        focus_on_click(buf),
-        tab_visible_hl,
-        tab_icon and tab_icon.get(false, tab_visible_hl) or "",
-        display,
-        close_on_click(buf),
-      })
-      tab.rendered_focused = table.concat({
-        focus_on_click(buf),
-        tab_focused_hl,
-        tab_icon and tab_icon.get(true, tab_focused_hl) or "",
-        display,
-        close_on_click(buf),
-      })
-    end)
-    coroutine.resume(update)
+    local click = focus_on_click(buf)
+    local close = close_on_click(buf)
+    local hl_visible, hl_focused = M.resolve_hl(buf)
+
+    tab.rendered_visible =
+      table.concat({ click, hl_visible, tab_icon and tab_icon.get(false, hl_visible) or "", display, close })
+    tab.rendered_focused =
+      table.concat({ click, hl_focused, tab_icon and tab_icon.get(true, hl_focused) or "", display, close })
   end
   tab.update()
   return tab
@@ -489,27 +478,24 @@ local diag_hl_map = {
 local diag_filter = { severity = { min = vim.diagnostic.severity.WARN, max = vim.diagnostic.severity.ERROR } }
 
 ---@param b integer
----@param focused boolean
----@return string
-M.resolve_hl = function(b, focused)
+---@return string, string
+M.resolve_hl = function(b)
   if not b then
-    return ""
+    return "", ""
   end
   local modified = bo[b].modified
-  local cached = diag_cache[b]
-  if not cached then
-    cached = vim.diagnostic.count(b, diag_filter)
-  end
+  local cached = diag_cache[b] or vim.diagnostic.count(b, diag_filter)
   local sev = cached and (cached[vim.diagnostic.severity.ERROR] or 0) > 0 and 1
     or (cached[vim.diagnostic.severity.WARN] or 0) > 0 and 2
     or nil
   if sev then
-    return diag_hl_map[sev][modified and 2 or 1][focused and 2 or 1]
+    local t = diag_hl_map[sev][modified and 2 or 1]
+    return t[1], t[2] -- visible, focused
   end
   if modified then
-    return focused and "%#TablineFocusedModified#" or "%#TablineVisibleModified#"
+    return "%#TablineVisibleModified#", "%#TablineFocusedModified#"
   end
-  return focused and "%#TablineFocused#" or "%#TablineVisible#"
+  return "%#TablineVisible#", "%#TablineFocused#"
 end
 
 local function get_viewport_hi(idx, width)
