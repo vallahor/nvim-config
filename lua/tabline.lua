@@ -755,22 +755,10 @@ function M.tabline_make()
     local available = width
     local current_tab = tabs_cache[viewport.index]
 
-    -- if viewport.diag_or_input_changed and not viewport.changed then
-    if viewport.diag_or_input_changed then
+    if viewport.diag_or_input_changed and not viewport.changed then
       viewport.diag_or_input_changed = false
       goto build_viewport_str
     end
-
-    if viewport.total_tabs_width > width then
-      calc_truncated_tabs(width)
-    else
-      viewport.lo = 1
-      viewport.hi = #tabs_cache
-      viewport.prefix = viewport.indicator_start
-      viewport.postfix = ""
-    end
-
-    ::build_viewport_str::
 
     if current_tab and current_tab.width > available - indicators then
       viewport.lo = viewport.index
@@ -791,7 +779,16 @@ function M.tabline_make()
       end
 
       available = available - indicator_left - indicator_right
+    elseif viewport.total_tabs_width > width then
+      calc_truncated_tabs(width)
+    else
+      viewport.lo = 1
+      viewport.hi = #tabs_cache
+      viewport.prefix = viewport.indicator_start
+      viewport.postfix = ""
     end
+
+    ::build_viewport_str::
 
     local sidebar_str = ""
     if sidebar_width > 0 then
@@ -827,7 +824,7 @@ function M.tabline_make()
   viewport.width = width
 
   local elapsed = (vim.uv.hrtime() - start) / 1e6 -- milliseconds
-  -- vim.notify(string.format("tabline: %.3fms", elapsed))
+  vim.notify(string.format("tabline: %.3fms", elapsed))
   return viewport.str
 end
 
