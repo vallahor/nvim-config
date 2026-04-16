@@ -1002,23 +1002,30 @@ M.get_icon_hl = function(ext, color, focused)
   return icons_hl_cache[key]
 end
 
+local ignore_buftypes = {
+  ["quickfix"] = true,
+  ["nofile"] = true,
+  ["terminal"] = true,
+  ["prompt"] = true,
+}
+
 local ignore_filetypes = {
   ["qf"] = true,
-  ["quickfix"] = true,
-  ["terminal"] = true,
 }
 
 local function setup_autocmds()
-  api.nvim_create_autocmd("BufEnter", {
+  api.nvim_create_autocmd("BufWinEnter", {
     callback = function(ev)
       local buf = ev.buf
       if
-        buf_index[buf]
+        not api.nvim_buf_is_valid(buf)
         or not bo[buf].buflisted
-        or ignore_filetypes[bo[buf].buftype]
+        or ignore_buftypes[bo[buf].buftype]
         or ignore_filetypes[bo[buf].filetype]
-        or not api.nvim_buf_is_valid(buf)
       then
+        return
+      end
+      if buf_index[buf] then
         return
       end
       insert_buf_into_tabline(buf)
