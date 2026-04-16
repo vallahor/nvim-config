@@ -105,6 +105,7 @@ local diag_cache = {}
 ---@field width integer
 ---@field strlen integer
 ---@field strwidth integer
+---@field modified boolean
 ---@field icon Icon?
 ---@field rendered_visible string?
 ---@field rendered_focused string?
@@ -251,22 +252,25 @@ local function build_tab(buf, tail, display, ext)
     rendered_focused = nil,
   }
   tab.update = function()
-    local tab_visible_hl = M.resolve_hl(buf, false)
-    local tab_focused_hl = M.resolve_hl(buf, true)
-    tab.rendered_visible = table.concat({
-      focus_on_click(buf),
-      tab_visible_hl,
-      tab_icon and tab_icon.get(false, tab_visible_hl) or "",
-      display,
-      close_on_click(buf),
-    })
-    tab.rendered_focused = table.concat({
-      focus_on_click(buf),
-      tab_focused_hl,
-      tab_icon and tab_icon.get(true, tab_focused_hl) or "",
-      display,
-      close_on_click(buf),
-    })
+    local update = coroutine.create(function()
+      local tab_visible_hl = M.resolve_hl(buf, false)
+      local tab_focused_hl = M.resolve_hl(buf, true)
+      tab.rendered_visible = table.concat({
+        focus_on_click(buf),
+        tab_visible_hl,
+        tab_icon and tab_icon.get(false, tab_visible_hl) or "",
+        display,
+        close_on_click(buf),
+      })
+      tab.rendered_focused = table.concat({
+        focus_on_click(buf),
+        tab_focused_hl,
+        tab_icon and tab_icon.get(true, tab_focused_hl) or "",
+        display,
+        close_on_click(buf),
+      })
+    end)
+    coroutine.resume(update)
   end
   tab.update()
   return tab
@@ -761,7 +765,9 @@ function M.tabline_make()
       viewport.buf = buf_cache[viewport.index]
     end
 
-    if viewport.diag_or_input_changed and not viewport.changed then
+    -- if viewport.diag_or_input_changed and not viewport.changed then
+    if viewport.diag_or_input_changed then
+      viewport.diag_or_input_changed = false
       goto build_viewport_str
     end
 
@@ -828,7 +834,6 @@ function M.tabline_make()
     viewport.str = table.concat(tabs)
 
     viewport.changed = false
-    viewport.diag_or_input_changed = false
   end
   viewport.width = width
 
@@ -1063,13 +1068,29 @@ local function setup_autocmds()
     end,
   })
 
-  api.nvim_create_autocmd({ "BufModifiedSet", "DiagnosticChanged" }, {
+  api.nvim_create_autocmd("BufModifiedSet", {
     callback = function(ev)
       local index = buf_index[ev.buf]
-      diag_cache[ev.buf] = nil
       if not index then
         return
       end
+      local tab = tabs_cache[index]
+      local modified = bo[ev.buf].modified
+      if tab.modified ~= modified then
+        tabs_cache[index].update()
+        viewport.diag_or_input_changed = true
+        schedule_redraw()
+      end
+    end,
+  })
+
+  api.nvim_create_autocmd("DiagnosticChanged", {
+    callback = function(ev)
+      local index = buf_index[ev.buf]
+      if not index then
+        return
+      end
+      diag_cache[ev.buf] = nil
       tabs_cache[index].update()
       viewport.diag_or_input_changed = true
       schedule_redraw()
