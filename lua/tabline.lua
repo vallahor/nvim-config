@@ -573,7 +573,7 @@ local function make_postfix(right_remaining, indicator)
       local size = right_remaining - indicator
       if size > 0 then
         viewport.postfix = focus_on_click(buf_cache[viewport.hi + 1]) .. resolve_post_str(size) .. viewport.postfix
-      else
+      elseif size < 0 then
         viewport.postfix = "%#TablineVisible#" .. string.rep(" ", right_remaining) .. viewport.postfix
       end
     end
@@ -761,23 +761,21 @@ function M.tabline_make()
     end
 
     if current_tab and current_tab.width > width - indicators then
+      local available = width - indicators - viewport.close_icon_width
       viewport.lo = viewport.index
       viewport.hi = viewport.index
       if viewport.hi == #tabs_cache then
         viewport.prefix = viewport.indicator_left
         viewport.postfix = viewport.indicator_end
-        width = width - viewport.indicator_left_width - viewport.indicator_end_width
+        available = available - viewport.indicator_end_width
       elseif viewport.lo == 1 then
         viewport.prefix = viewport.indicator_start
         viewport.postfix = viewport.indicator_right
-        width = width - viewport.indicator_right_width - viewport.indicator_start_width
+        available = available - viewport.indicator_start_width
       else
         viewport.prefix = viewport.indicator_left
         viewport.postfix = viewport.indicator_right
-        width = width - viewport.indicator_left_width - viewport.indicator_right_width
       end
-
-      width = width - viewport.close_icon_width
 
       tab_shrink = true
 
@@ -785,11 +783,16 @@ function M.tabline_make()
       local focused = buf == viewport.buf
       local tab_visible_hl, tab_focused_hl = M.resolve_hl(buf)
       local tab_hl = focused and tab_focused_hl or tab_visible_hl
+
+      local pad = string.rep(" ", math.max(0, available - current_tab.strlen))
+
       tab_str = table.concat({
         tab_hl,
         focus_on_click(buf),
-        fn.strcharpart(current_tab.str, current_tab.strlen - width, width),
+        fn.strcharpart(current_tab.str, current_tab.strlen - available, available),
         close_on_click(buf),
+        "%#TablineVisible#",
+        pad,
       })
     elseif viewport.total_tabs_width > width then
       calc_truncated_tabs(width)
