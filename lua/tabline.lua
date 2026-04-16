@@ -573,8 +573,8 @@ local function make_postfix(right_remaining, indicator)
       local size = right_remaining - indicator
       if size > 0 then
         viewport.postfix = focus_on_click(buf_cache[viewport.hi + 1]) .. resolve_post_str(size) .. viewport.postfix
-      elseif size < 0 then
-        viewport.postfix = string.rep(" ", right_remaining) .. viewport.postfix
+      else
+        viewport.postfix = "%#TablineVisible#" .. string.rep(" ", right_remaining) .. viewport.postfix
       end
     end
   else
@@ -763,41 +763,22 @@ function M.tabline_make()
     if current_tab and current_tab.width > width - indicators then
       viewport.lo = viewport.index
       viewport.hi = viewport.index
-      local indicator_left = compute_left_indicator()
-      local indicator_right = compute_right_indicator()
       if viewport.hi == #tabs_cache then
-        make_prefix(0, indicator_left)
-        make_postfix(0, 0)
-        width = width - viewport.indicator_end_width
+        viewport.prefix = viewport.indicator_left
+        viewport.postfix = viewport.indicator_end
+        width = width - viewport.indicator_left_width - viewport.indicator_end_width
       elseif viewport.lo == 1 then
-        make_prefix(0, 0)
-        make_postfix(0, indicator_right)
-        width = width - viewport.indicator_start_width
+        viewport.prefix = viewport.indicator_start
+        viewport.postfix = viewport.indicator_right
+        width = width - viewport.indicator_right_width - viewport.indicator_start_width
       else
-        make_prefix(0, 0)
-        make_postfix(0, 0)
+        viewport.prefix = viewport.indicator_left
+        viewport.postfix = viewport.indicator_right
+        width = width - viewport.indicator_left_width - viewport.indicator_right_width
       end
 
-      -- if current_tab and current_tab.width > width - indicators then
-      --   viewport.lo = viewport.index
-      --   viewport.hi = viewport.index
-      --   if viewport.hi == #tabs_cache then
-      --     viewport.prefix = viewport.indicator_left
-      --     viewport.postfix = viewport.indicator_end
-      --     width = width - viewport.indicator_left_width - viewport.indicator_end_width
-      --   elseif viewport.lo == 1 then
-      --     viewport.prefix = viewport.indicator_start
-      --     viewport.postfix = viewport.indicator_right
-      --     width = width - viewport.indicator_right_width - viewport.indicator_start_width
-      --   else
-      --     viewport.prefix = viewport.indicator_left
-      --     viewport.postfix = viewport.indicator_right
-      --     width = width - viewport.indicator_left_width - viewport.indicator_right_width
-      --   end
-      --
-      --   width = width - viewport.close_icon_width
+      width = width - viewport.close_icon_width
 
-      width = width - indicator_left - indicator_right - viewport.close_icon_width
       tab_shrink = true
 
       local buf = buf_cache[viewport.index]
@@ -849,7 +830,7 @@ function M.tabline_make()
   viewport.width = width
 
   local elapsed = (vim.uv.hrtime() - start) / 1e6 -- milliseconds
-  vim.notify(string.format("tabline: %.3fms", elapsed))
+  -- vim.notify(string.format("tabline: %.3fms", elapsed))
   return viewport.str
 end
 
@@ -1068,7 +1049,9 @@ local function setup_autocmds()
       else
         sidebar.focus = false
         viewport.buf = ev.buf
-        viewport.index = buf_index[viewport.buf]
+        if not sidebar.focus and buf_index[viewport.buf] then
+          viewport.index = buf_index[viewport.buf]
+        end
       end
 
       viewport.changed = true
