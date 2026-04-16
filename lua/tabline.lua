@@ -751,8 +751,8 @@ function M.tabline_make()
       viewport.buf = buf_cache[viewport.index]
     end
 
+    local tab_str, tab_shrink = "", false
     local indicators = compute_both_indicators()
-    local available = width
     local current_tab = tabs_cache[viewport.index]
 
     if viewport.diag_or_input_changed and not viewport.changed then
@@ -760,7 +760,7 @@ function M.tabline_make()
       goto build_viewport_str
     end
 
-    if current_tab and current_tab.width > available - indicators then
+    if current_tab and current_tab.width > width - indicators then
       viewport.lo = viewport.index
       viewport.hi = viewport.index
       local indicator_left = compute_left_indicator()
@@ -768,17 +768,48 @@ function M.tabline_make()
       if viewport.hi == #tabs_cache then
         make_prefix(0, indicator_left)
         make_postfix(0, 0)
-        available = available - viewport.indicator_end_width
+        width = width - viewport.indicator_end_width
       elseif viewport.lo == 1 then
         make_prefix(0, 0)
         make_postfix(0, indicator_right)
-        available = available - viewport.indicator_start_width
+        width = width - viewport.indicator_start_width
       else
-        make_prefix(0, indicator_left)
-        make_postfix(0, indicator_right)
+        make_prefix(0, 0)
+        make_postfix(0, 0)
       end
 
-      available = available - indicator_left - indicator_right
+      -- if current_tab and current_tab.width > width - indicators then
+      --   viewport.lo = viewport.index
+      --   viewport.hi = viewport.index
+      --   if viewport.hi == #tabs_cache then
+      --     viewport.prefix = viewport.indicator_left
+      --     viewport.postfix = viewport.indicator_end
+      --     width = width - viewport.indicator_left_width - viewport.indicator_end_width
+      --   elseif viewport.lo == 1 then
+      --     viewport.prefix = viewport.indicator_start
+      --     viewport.postfix = viewport.indicator_right
+      --     width = width - viewport.indicator_right_width - viewport.indicator_start_width
+      --   else
+      --     viewport.prefix = viewport.indicator_left
+      --     viewport.postfix = viewport.indicator_right
+      --     width = width - viewport.indicator_left_width - viewport.indicator_right_width
+      --   end
+      --
+      --   width = width - viewport.close_icon_width
+
+      width = width - indicator_left - indicator_right - viewport.close_icon_width
+      tab_shrink = true
+
+      local buf = buf_cache[viewport.index]
+      local focused = buf == viewport.buf
+      local tab_visible_hl, tab_focused_hl = M.resolve_hl(buf)
+      local tab_hl = focused and tab_focused_hl or tab_visible_hl
+      tab_str = table.concat({
+        tab_hl,
+        focus_on_click(buf),
+        fn.strcharpart(current_tab.str, current_tab.strlen - width, width),
+        close_on_click(buf),
+      })
     elseif viewport.total_tabs_width > width then
       calc_truncated_tabs(width)
     else
@@ -797,19 +828,13 @@ function M.tabline_make()
 
     local tabs = { sidebar_str, viewport.prefix }
 
-    for i = viewport.lo, viewport.hi do
-      local tab = tabs_cache[i]
-      local buf = buf_cache[i]
-      local focused = buf == viewport.buf
-      if tab.width > available then
-        local tab_visible_hl, tab_focused_hl = M.resolve_hl(buf_cache[viewport.index])
-        local tab_hl = focused and tab_focused_hl or tab_visible_hl
-        available = available - viewport.close_icon_width
-        tabs[#tabs + 1] = tab_hl
-          .. focus_on_click(buf)
-          .. fn.strcharpart(tab.str, tab.strlen - available, available)
-          .. close_on_click(buf)
-      else
+    if tab_shrink then
+      tabs[#tabs + 1] = tab_str
+    else
+      for i = viewport.lo, viewport.hi do
+        local tab = tabs_cache[i]
+        local buf = buf_cache[i]
+        local focused = buf == viewport.buf
         tabs[#tabs + 1] = focused and tab.rendered_focused or tab.rendered_visible
       end
     end
