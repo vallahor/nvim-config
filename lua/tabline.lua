@@ -1160,7 +1160,7 @@ local config = {
   icons = {
     enabled = true,
     no_hl = false,
-    provider = "mini.icons",
+    provider = "mini.icons", -- "mini.icons"|"nvim-web-devicons" default: "mini.icons"
   },
 
   sidebar = {
@@ -1179,13 +1179,9 @@ function M.setup(opts)
   }
   if config.icons.enabled then
     M.icons.enabled = config.icons.enabled
-    M.icons.no_hl = config.icons.no_hl or false
+    M.icons.no_hl = config.icons.no_hl
 
-    -- "mini.icons"|"nvim-web-devicons" default: "mini.icons"
-    local provider = "mini.icons"
-    if config.icons.provider and config.icons.provider ~= "" then
-      provider = config.icons.provider
-    end
+    local provider = config.icons.provider
     M.icons.provider = require(provider)
     M.get_icon = get_icon_fn[provider]
   end
@@ -1195,29 +1191,21 @@ function M.setup(opts)
     viewport.close_icon_width = api.nvim_strwidth(config.close_icon)
   end
 
-  if config.sidebar.separator then
-    sidebar.separator = config.sidebar.separator
-    sidebar.separator_width = strwidth(config.sidebar.separator)
-  end
+  sidebar.separator = config.sidebar.separator
+  sidebar.separator_width = strwidth(config.sidebar.separator)
 
-  if config.sidebar.label_position then
-    if config.sidebar.label_position == "start" then
-      M.sidebar_label_position = sidebar_label_start
-    elseif config.sidebar.label_position == "mid" then
-      M.sidebar_label_position = sidebar_label_mid
-    elseif config.sidebar.label_position == "end" then
-      M.sidebar_label_position = sidebar_label_end
-    else
-      M.sidebar_label_position = sidebar_label_mid
-    end
+  if config.sidebar.label_position == "start" then
+    M.sidebar_label_position = sidebar_label_start
+  elseif config.sidebar.label_position == "mid" then
+    M.sidebar_label_position = sidebar_label_mid
+  elseif config.sidebar.label_position == "end" then
+    M.sidebar_label_position = sidebar_label_end
   else
     M.sidebar_label_position = sidebar_label_mid
   end
 
-  if config.sidebar.label then
-    sidebar.label = config.sidebar.label
-    sidebar.label_width = strwidth(sidebar.label)
-  end
+  sidebar.label = config.sidebar.label
+  sidebar.label_width = strwidth(sidebar.label)
 
   if config.focus_on_click then
     M.focus_on_click = config.focus_on_click
