@@ -10,10 +10,10 @@ local config = {
   close_icon = "󰅖",
   -- close_icon = "X ",
   tab = {
-    separator_start = " ",
-    separator_end = " ",
-    -- separator_start = " ",
-    -- separator_end = " ",
+    -- separator_start = " ",
+    -- separator_end = " ",
+    separator_start = " ",
+    separator_end = " ",
     -- separator_start = "  ",
     -- separator_end = "  ",
   },
@@ -33,11 +33,13 @@ local config = {
   },
 
   sidebar = {
+    enabled = true,
     label = "Explorer",
     label_position = "mid", -- "start"|"mid"|"end"
     -- label = "Files",
     separator = "│",
     -- separator = " ",
+    filetypes = {}, -- Default with ["NvimTree", "neo-tree"]
   },
 }
 
@@ -97,6 +99,7 @@ local viewport = {
 }
 
 ---@class Sidebar
+---@field enabled boolean
 ---@field rendered_visible string
 ---@field rendered_focused string
 ---@field label string
@@ -115,10 +118,11 @@ local sidebar = {
   separator_width = 0,
   width = 0,
   focus = false,
+  enabled = true,
   winnr = nil,
 }
 
-local sidebar_filetypes = { ["NvimTree"] = true }
+local sidebar_filetypes = { ["NvimTree"] = true, ["neo-tree"] = true }
 
 ---@type {[integer]: integer}
 local buf_cache = {}
@@ -489,7 +493,7 @@ end
 
 ---@return integer
 local function render_sidebar()
-  if not sidebar.winnr or not api.nvim_win_is_valid(sidebar.winnr) then
+  if not sidebar.enabled or not sidebar.winnr or not api.nvim_win_is_valid(sidebar.winnr) then
     return 0
   end
   local sidebar_width = api.nvim_win_get_width(sidebar.winnr)
@@ -1159,7 +1163,7 @@ local function setup_autocmds()
 
   api.nvim_create_autocmd({ "BufEnter" }, {
     callback = function(ev)
-      if sidebar_filetypes[bo[ev.buf].filetype] then
+      if sidebar.enabled and sidebar_filetypes[bo[ev.buf].filetype] then
         local winnr = api.nvim_get_current_win()
         sidebar.winnr = winnr
         sidebar.focus = true
@@ -1270,6 +1274,12 @@ function M.setup(opts)
 
   sidebar.separator = config.sidebar.separator
   sidebar.separator_width = strwidth(config.sidebar.separator)
+
+  sidebar.enabled = config.sidebar.enabled
+
+  for _, ft in ipairs(config.sidebar.filetypes) do
+    sidebar_filetypes[ft] = true
+  end
 
   if config.sidebar.label_position == "start" then
     M.sidebar_label_position = sidebar_label_start
