@@ -10,12 +10,12 @@ local config = {
   close_icon = "󰅖",
   -- close_icon = "X ",
   tab = {
-    -- separator_start = " ",
-    -- separator_end = " ",
+    separator_start = " ",
+    separator_end = " ",
     -- separator_start = " ",
     -- separator_end = " ",
-    separator_start = "  ",
-    separator_end = "  ",
+    -- separator_start = "  ",
+    -- separator_end = "  ",
   },
 
   -- maybe highlight?
