@@ -34,8 +34,8 @@ vim.opt.isfname:append("(") -- " @windows: nextjs and sveltekit folder name patt
 vim.opt.swapfile = false
 vim.opt.wrap = false
 vim.opt.history = 20
-vim.opt.timeout = false
-vim.opt.timeoutlen = 0
+-- vim.opt.timeout = false
+vim.opt.timeoutlen = 200
 
 vim.wo.signcolumn = "no"
 vim.wo.relativenumber = true

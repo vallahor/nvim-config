@@ -127,7 +127,6 @@ local diag_cache = {}
 ---@field tail string
 ---@field ext string
 ---@field width integer
----@field strlen integer
 ---@field strwidth integer
 ---@field modified boolean
 ---@field icon Icon?
@@ -197,16 +196,19 @@ end
 
 local function resolve_buf_name(buf)
   local bufname = api.nvim_buf_get_name(buf)
-  local tail = bufname ~= "" and fnamemodify(bufname, ":t") or "[No Name]"
-  local ext = bufname ~= "" and fnamemodify(bufname, ":e") or ""
-  return bufname, tail, ext
+  if bufname == "" then
+    return "", "[No Name]", ""
+  end
+  local tail = fnamemodify(bufname, ":t")
+  local ext = fnamemodify(bufname, ":e")
+  local relative = fnamemodify(bufname, ":~:.")
+  local dir = relative:match("^(.*[/\\])") or ""
+  return dir, tail, ext
 end
 
-local function resolve_buf_repeated_names(bufname, tail)
-  if tabs_repeated_names_buf_cache[tail] and tabs_repeated_names_buf_cache[tail].count > 1 and bufname ~= "" then
-    return fnamemodify(bufname, ":~:."):gsub("^%./", "")
-  end
-  return tail
+local function resolve_buf_repeated_names(tail)
+  return tabs_repeated_names_buf_cache[tail] and tabs_repeated_names_buf_cache[tail].count > 1 and tail ~= ""
+  -- and tail ~= "[No Name]"
 end
 
 local get_icon_fn = {
@@ -261,20 +263,21 @@ local function make_tab_icon(ext)
   }
 end
 
-local function build_tab(buf, tail, display, ext)
-  display = " " .. display .. " "
-  local display_width = api.nvim_strwidth(display)
+local function build_tab(buf, dir, tail, ext)
+  local path = M.unique_names and resolve_buf_repeated_names(tail) and dir or ""
+  local str = " " .. path .. tail .. " "
+  local str_width = api.nvim_strwidth(str)
   local tab_icon = make_tab_icon(ext)
-  local width = display_width + viewport.close_icon_width + (tab_icon and tab_icon.width or 0)
+  local width = str_width + viewport.close_icon_width + (tab_icon and tab_icon.width or 0)
 
   local tab = {
-    str = display,
+    str = str,
+    dir = dir,
     tail = tail,
     ext = ext,
     width = width,
     icon = tab_icon,
-    strlen = fn.strcharlen(display),
-    strwidth = display_width,
+    strwidth = str_width,
     rendered_visible = nil,
     rendered_focused = nil,
   }
@@ -286,12 +289,22 @@ local function build_tab(buf, tail, display, ext)
     tab.rendered_visible = click
       .. hl_visible
       .. (tab_icon and tab_icon.get(false, hl_visible) or "")
-      .. display
+      .. " "
+      .. "%#Normal#"
+      .. path
+      .. hl_visible
+      .. tail
+      .. " "
       .. close
     tab.rendered_focused = click
       .. hl_focused
       .. (tab_icon and tab_icon.get(true, hl_focused) or "")
-      .. display
+      .. " "
+      .. "%#Visual#"
+      .. path
+      .. hl_focused
+      .. tail
+      .. " "
       .. close
   end
   tab.update()
@@ -302,9 +315,8 @@ local function refresh_tab(index, buf, tail)
   if not tabs_cache[index] then
     return
   end
-  local bufname, _, ext = resolve_buf_name(buf)
-  local display = resolve_buf_repeated_names(bufname, tail)
-  local tab = build_tab(buf, tail, display, ext)
+  local dir, _, ext = resolve_buf_name(buf)
+  local tab = build_tab(buf, dir, tail, ext)
   tabs_cache[index] = tab
 end
 
@@ -355,13 +367,12 @@ local function resolve_update_tab_unique_names(buf)
     return
   end
   local tail = tabs_cache[index].tail
-  local bufname, new_tail, ext = resolve_buf_name(buf)
+  local dir, new_tail, ext = resolve_buf_name(buf)
   if tail ~= new_tail then
     repeated_names_remove(buf, tail)
     repeated_names_insert(buf, new_tail)
   end
-  local display = resolve_buf_repeated_names(bufname, new_tail)
-  local tab = build_tab(buf, new_tail, display, ext)
+  local tab = build_tab(buf, dir, new_tail, ext)
   tabs_cache[index] = tab
   update_buf_index()
 end
@@ -401,14 +412,13 @@ end
 
 local function make_tab(buf)
   local _, tail, ext = resolve_buf_name(buf)
-  return build_tab(buf, tail, tail, ext)
+  return build_tab(buf, "", tail, ext)
 end
 
 local function make_tab_unique_names(buf)
-  local bufname, tail, ext = resolve_buf_name(buf)
+  local dir, tail, ext = resolve_buf_name(buf)
   repeated_names_insert(buf, tail)
-  local display = resolve_buf_repeated_names(bufname, tail)
-  return build_tab(buf, tail, display, ext)
+  return build_tab(buf, dir, tail, ext)
 end
 
 local function insert_buf_into_tabline(buf)
@@ -553,7 +563,7 @@ local function resolve_prefix_str(size)
   local buf = buf_cache[viewport.lo - 1]
   local pad = string.rep(" ", math.max(0, size - tab.strwidth))
   local tab_hl = (M.resolve_hl(buf))
-  return pad .. tab_hl .. fn.strcharpart(tab.str, tab.strlen - size, size)
+  return pad .. tab_hl .. fn.strcharpart(tab.str, tab.strwidth - size, size)
 end
 
 local function resolve_post_str(size)
@@ -817,11 +827,11 @@ function M.tabline_make()
       local tab_visible_hl, tab_focused_hl = M.resolve_hl(buf)
       local tab_hl = focused and tab_focused_hl or tab_visible_hl
 
-      local pad = string.rep(" ", math.max(0, available - current_tab.strlen))
+      local pad = string.rep(" ", math.max(0, available - current_tab.strwidth))
 
       tab_str = tab_hl
         .. focus_on_click(buf)
-        .. fn.strcharpart(current_tab.str, current_tab.strlen - available, available)
+        .. fn.strcharpart(current_tab.str, current_tab.strwidth - available, available)
         .. close_on_click(buf)
         .. "%#TablineVisible#"
         .. pad
@@ -1269,5 +1279,12 @@ function M.setup(opts)
     M.update_cursor_line_hl = opts.update_cursor_line_hl
   end
 end
+
+local function aeho()
+  vim.notify(vim.inspect(tabs_cache))
+  vim.print(viewport.total_tabs_width)
+end
+
+api.nvim_create_user_command("Aeho", aeho, {})
 
 return M
