@@ -890,6 +890,26 @@ function M.next_tab()
   end
 end
 
+function M.prev_tab_cycle()
+  if sidebar.focus then
+    return
+  end
+  local n = #tabs_cache
+  local i = ((get_current_index() - 2) % n) + 1
+  api.nvim_set_current_buf(buf_cache[i])
+  viewport.index = i
+end
+
+function M.next_tab_cycle()
+  if sidebar.focus then
+    return
+  end
+  local n = #tabs_cache
+  local i = (get_current_index() % n) + 1
+  api.nvim_set_current_buf(buf_cache[i])
+  viewport.index = i
+end
+
 function M.move_to_begin()
   if sidebar.focus then
     return
@@ -935,6 +955,30 @@ function M.move_tab_right()
   local i = get_current_index()
   if i < #buf_cache then
     swap(i, i + 1)
+  end
+end
+
+function M.move_tab_left_cycle()
+  if sidebar.focus then
+    return
+  end
+  local i = get_current_index()
+  if i > 1 then
+    swap(i, i - 1)
+  else
+    M.move_tab_end()
+  end
+end
+
+function M.move_tab_right_cycle()
+  if sidebar.focus then
+    return
+  end
+  local i = get_current_index()
+  if i < #buf_cache then
+    swap(i, i + 1)
+  else
+    M.move_tab_begin()
   end
 end
 
