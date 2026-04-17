@@ -7,8 +7,8 @@ local config = {
   focus_on_click = true,
   unique_names = true,
   -- close_icon = "",
-  close_icon = "󰅖 ",
-  -- close_icon = "X ",
+  close_icon = "󰅖",
+  -- close_icon = "X",
 
   -- maybe highlight?
   indicator_left = " …",
@@ -176,7 +176,7 @@ end
 
 local function close_on_click(bufnr)
   if M.close_icon ~= "" then
-    return "%" .. bufnr .. "@v:lua.CloseTab@" .. M.close_icon .. "%X"
+    return "%" .. bufnr .. "@v:lua.CloseTab@" .. M.close_icon .. "%X "
   end
   return ""
 end
@@ -208,7 +208,6 @@ end
 
 local function resolve_buf_repeated_names(tail)
   return tabs_repeated_names_buf_cache[tail] and tabs_repeated_names_buf_cache[tail].count > 1 and tail ~= ""
-  -- and tail ~= "[No Name]"
 end
 
 local get_icon_fn = {
@@ -286,26 +285,8 @@ local function build_tab(buf, dir, tail, ext)
     local close = close_on_click(buf)
     local hl_visible, hl_focused = M.resolve_hl(buf)
 
-    tab.rendered_visible = click
-      .. hl_visible
-      .. (tab_icon and tab_icon.get(false, hl_visible) or "")
-      .. " "
-      .. "%#Normal#"
-      .. path
-      .. hl_visible
-      .. tail
-      .. " "
-      .. close
-    tab.rendered_focused = click
-      .. hl_focused
-      .. (tab_icon and tab_icon.get(true, hl_focused) or "")
-      .. " "
-      .. "%#Visual#"
-      .. path
-      .. hl_focused
-      .. tail
-      .. " "
-      .. close
+    tab.rendered_visible = click .. hl_visible .. (tab_icon and tab_icon.get(false, hl_visible) or "") .. str .. close
+    tab.rendered_focused = click .. hl_focused .. (tab_icon and tab_icon.get(true, hl_focused) or "") .. str .. close
   end
   tab.update()
   return tab
@@ -874,7 +855,7 @@ function M.tabline_make()
   viewport.width = width
 
   local elapsed = (vim.uv.hrtime() - start) / 1e6 -- milliseconds
-  -- vim.notify(string.format("tabline: %.3fms", elapsed))
+  vim.notify(string.format("tabline: %.3fms", elapsed))
   return viewport.str
 end
 

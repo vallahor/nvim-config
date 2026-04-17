@@ -628,6 +628,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
         vim.api.nvim_set_option_value("winhighlight", hl, { win = win })
       end,
     })
+
     local map = vim.keymap.set
     -- map("n", "<home>", tabline.prev_tab_cycle, { silent = true })
     -- map("n", "<end>", tabline.next_tab_cycle, { silent = true })
