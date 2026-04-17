@@ -14,15 +14,13 @@ local config = {
     -- separator_end = " ",
     separator_start = " ",
     separator_end = " ",
-    -- separator_start = "  ",
-    -- separator_end = "  ",
+    bufname_left = " ",
+    bufname_right = " ",
   },
 
-  -- maybe highlight?
   indicator_left = " …",
   indicator_right = "… ",
-  -- indicator_left = "<<",
-  -- indicator_right = ">>",
+
   indicator_start = "*",
   indicator_end = "*",
 
@@ -39,7 +37,7 @@ local config = {
     -- label = "Files",
     separator = "│",
     -- separator = " ",
-    filetypes = {}, -- Default with ["NvimTree", "neo-tree"]
+    filetypes = { "NvimTree", "neo-tree" }, -- Default with ["NvimTree", "neo-tree"]
   },
 }
 
@@ -122,7 +120,7 @@ local sidebar = {
   winnr = nil,
 }
 
-local sidebar_filetypes = { ["NvimTree"] = true, ["neo-tree"] = true }
+local sidebar_filetypes = {}
 
 ---@type {[integer]: integer}
 local buf_cache = {}
@@ -282,7 +280,7 @@ end
 
 local function build_tab(buf, dir, tail, ext)
   local path = M.unique_names and resolve_buf_repeated_names(tail) and dir or ""
-  local str = " " .. path .. tail .. " "
+  local str = viewport.bufname_left .. path .. tail .. viewport.bufname_right
   local str_width = api.nvim_strwidth(str)
   local tab_icon = make_tab_icon(ext)
   local start_width = viewport.separator_start_width + (tab_icon and tab_icon.width or 0)
@@ -1301,6 +1299,9 @@ function M.setup(opts)
   M.unique_names = config.unique_names
   M.make_tab = config.unique_names and make_tab_unique_names or make_tab
   M.resolve_update_tab = config.unique_names and resolve_update_tab_unique_names or resolve_update_tab
+
+  viewport.bufname_left = config.tab.bufname_left
+  viewport.bufname_right = config.tab.bufname_right
 
   viewport.indicator_left = "%#TablineIndicatorSep#" .. config.indicator_left
   viewport.indicator_right = "%#TablineIndicatorSep#" .. config.indicator_right
