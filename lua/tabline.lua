@@ -46,7 +46,9 @@ M.update_cursor_line_hl = function(_, _) end
 ---@class Viewport
 ---@field str string
 ---@field width integer
+---@field sidebar_width integer
 ---@field changed boolean
+---@field size_changed boolean
 ---@field buf_deleted boolean
 ---@field diag_or_input_changed boolean
 ---@field lo integer
@@ -71,7 +73,9 @@ M.update_cursor_line_hl = function(_, _) end
 local viewport = {
   str = "",
   width = 0,
+  sidebar_width = 0,
   changed = true,
+  size_changed = true,
   buf_deleted = false,
   diag_or_input_changed = true,
   is_in_small_size = true,
@@ -740,9 +744,9 @@ local function handle_index_after(width)
 end
 
 local function handle_width_change(width)
+  viewport.size_changed = false
   local left_remaining = 0
   local right_remaining = 0
-  viewport.width = width
   if viewport.lo == 1 then
     viewport.hi, right_remaining = compute_right_remain_from_start(width)
   else
@@ -791,17 +795,15 @@ local function calc_truncated_tabs(width)
     handle_index_after(width)
   elseif viewport.index < viewport.lo then
     handle_index_before(width)
-  elseif viewport.width ~= width then
+  elseif viewport.size_changed then
     handle_width_change(width)
   end
 end
 
 function M.tabline_make()
   local start = vim.uv.hrtime()
-  local sidebar_width = render_sidebar()
-  local width = vim.o.columns - sidebar_width
   if
-    viewport.width ~= width
+    viewport.size_changed
     or viewport.changed
     or viewport.diag_or_input_changed
     or viewport.buf_deleted
@@ -816,6 +818,8 @@ function M.tabline_make()
       sidebar.focus = false
       viewport.buf = buf_cache[viewport.index]
     end
+
+    local width = viewport.width - viewport.sidebar_width
 
     local tab_str, tab_shrink = "", false
     local indicators = compute_both_indicators()
@@ -873,7 +877,7 @@ function M.tabline_make()
     ::build_viewport_str::
 
     local sidebar_str = ""
-    if sidebar_width > 0 then
+    if viewport.sidebar_width > 0 then
       sidebar_str = sidebar.focus and sidebar.rendered_focused or sidebar.rendered_visible
     end
 
@@ -897,10 +901,9 @@ function M.tabline_make()
 
     viewport.changed = false
   end
-  viewport.width = width
 
   local elapsed = (vim.uv.hrtime() - start) / 1e6 -- milliseconds
-  -- vim.notify(string.format("tabline: %.3fms", elapsed))
+  vim.notify(string.format("tabline: %.3fms", elapsed))
   return viewport.str
 end
 
@@ -1219,6 +1222,14 @@ local function setup_autocmds()
     end,
   })
 
+  api.nvim_create_autocmd({ "VimResized", "WinResized" }, {
+    callback = function()
+      viewport.sidebar_width = render_sidebar()
+      viewport.width = vim.o.columns
+      viewport.size_changed = true
+    end,
+  })
+
   api.nvim_create_autocmd("BufFilePost", {
     callback = function(ev)
       M.resolve_update_tab(ev.buf)
@@ -1315,6 +1326,9 @@ function M.setup(opts)
   viewport.indicator_start_width = api.nvim_strwidth(config.indicator_start)
   viewport.indicator_end_width = api.nvim_strwidth(config.indicator_end)
 
+  viewport.sidebar_width = render_sidebar()
+  viewport.width = vim.o.columns
+
   init_bufs()
   setup_autocmds()
   setup_tabline_hl()
@@ -1325,8 +1339,18 @@ function M.setup(opts)
 end
 
 local function aeho()
-  vim.notify(vim.inspect(tabs_cache))
-  vim.print(viewport.total_tabs_width)
+  local tab = tabs_cache[viewport.index]
+  vim.print(tab.rendered_focused)
+  vim.print(tab.width)
+  local ihul = tab
+    .rendered_focused
+    :gsub("%%#[^#]*#", "") -- strip hl groups
+    :gsub("%%%d+@[^@]*@", "") -- strip click start  %1@v:lua.Fn@
+    :gsub("%%X", "") -- strip click end
+    :gsub("%%<", "") -- strip truncation marker
+    :gsub("%%=", "") -- strip separator
+  print(ihul)
+  print(api.nvim_strwidth(ihul))
 end
 
 api.nvim_create_user_command("Aeho", aeho, {})
