@@ -834,7 +834,15 @@ function M.tabline_make()
       local available = width - indicators - viewport.close_icon_width - viewport.separator_end_width
       viewport.lo = viewport.index
       viewport.hi = viewport.index
-      if viewport.hi == #tabs_cache then
+      if viewport.lo == viewport.hi then
+        viewport.prefix = viewport.indicator_left
+        viewport.postfix = viewport.indicator_end
+        available = available - viewport.indicator_end_width - viewport.indicator_left_width
+        if available <= viewport.indicator_left_width then
+          viewport.prefix = ""
+          available = available - viewport.indicator_left_width
+        end
+      elseif viewport.hi == #tabs_cache then
         viewport.prefix = viewport.indicator_left
         viewport.postfix = viewport.indicator_end
         available = available - viewport.indicator_end_width
@@ -903,7 +911,7 @@ function M.tabline_make()
   end
 
   local elapsed = (vim.uv.hrtime() - start) / 1e6 -- milliseconds
-  vim.notify(string.format("tabline: %.3fms", elapsed))
+  -- vim.notify(string.format("tabline: %.3fms", elapsed))
   return viewport.str
 end
 
