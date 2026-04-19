@@ -645,6 +645,8 @@ vim.api.nvim_create_autocmd("VimEnter", {
         visible = { default = "TablineVisible", modified = "TablineVisibleModified" },
         focused = { default = "TablineFocused", modified = "TablineFocusedModified" },
       },
+      -- dynamic = { diagnostics = true, focused = { diagnostics = false }, visible = { diagnostics = true } },
+      -- dynamic = { diagnostics = true },
       tabs = {
         {
           static = " ",
@@ -665,8 +667,44 @@ vim.api.nvim_create_autocmd("VimEnter", {
           highlights = {
             diagnostics = {
               error = {
-                focused = { default = "DiagnosticError", modified = "TablineVisible" },
-                visible = { default = "DiagnosticError", modified = "TablineVisible" },
+                focused = { default = "TablineFocusedDiagError", modified = "TablineFocusedDiagModifiedError" },
+                visible = { default = "TablineVisibleDiagError", modified = "TablineVisibleDiagModifiedError" },
+              },
+              warn = {
+                focused = { default = "TablineFocusedDiagWarn", modified = "TablineFocusedDiagModifiedWarn" },
+                visible = { default = "TablineVisibleDiagWarn", modified = "TablineVisibleDiagModifiedWarn" },
+              },
+            },
+          },
+        },
+        { static = " " },
+        {
+          text = function(info)
+            return info.diagnostics[vim.diagnostic.severity.ERROR]
+                and info.diagnostics[vim.diagnostic.severity.ERROR] .. " E"
+              or ""
+          end,
+          highlights = {
+            diagnostics = {
+              error = {
+                focused = { default = "TablineFocusedDiagError", modified = "TablineFocusedDiagModifiedError" },
+                visible = { default = "TablineVisibleDiagError", modified = "TablineVisibleDiagModifiedError" },
+              },
+            },
+          },
+        },
+        { static = " " },
+        {
+          text = function(info)
+            return info.diagnostics[vim.diagnostic.severity.WARN]
+                and info.diagnostics[vim.diagnostic.severity.WARN] .. " W"
+              or ""
+          end,
+          highlights = {
+            diagnostics = {
+              warn = {
+                focused = { default = "TablineFocusedDiagWarn", modified = "TablineFocusedDiagModifiedWarn" },
+                visible = { default = "TablineVisibleDiagWarn", modified = "TablineVisibleDiagModifiedWarn" },
               },
             },
           },

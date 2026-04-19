@@ -23,6 +23,9 @@ local config = {
     { text = "" },
   },
 
+  severity_filter = { min = vim.diagnostic.severity.WARN, max = vim.diagnostic.severit },
+  dynamic = { diagnostics = false },
+
   indicator_left = " …",
   indicator_right = "… ",
 
@@ -170,6 +173,37 @@ local function schedule_redraw()
       redraw_scheduled = false
       vim.cmd.redrawtabline()
     end)
+  end
+end
+
+M.dynamic = {
+  diagnostics = {},
+}
+
+local function init_dynamic(dynamic)
+  if not dynamic then
+    return
+  end
+
+  local severity_states = { STATES.ERROR, STATES.WARN, STATES.HINT, STATES.INFO }
+
+  local function mark_diags(flag)
+    for _, severity in ipairs(severity_states) do
+      M.dynamic.diagnostics[flag + severity] = true
+      M.dynamic.diagnostics[flag + STATES.MODIFIED + severity] = true
+    end
+  end
+
+  if dynamic.diagnostics then
+    mark_diags(STATES.VISIBLE)
+    mark_diags(STATES.FOCUSED)
+    return
+  end
+
+  if dynamic.visible and dynamic.visible.diagnostics then
+    mark_diags(STATES.VISIBLE)
+  elseif dynamic.focused and dynamic.focused.diagnostics then
+    mark_diags(STATES.FOCUSED)
   end
 end
 
@@ -673,29 +707,6 @@ local diag_hl_map = {
   },
 }
 
-local diag_filter = { severity = { min = vim.diagnostic.severity.WARN, max = vim.diagnostic.severity.ERROR } }
-
----@param b integer
----@return string, string
-M.resolve_hl = function(b)
-  if not b then
-    return "", ""
-  end
-  local modified = bo[b].modified
-  local cached = diag_cache[b] or vim.diagnostic.count(b, diag_filter)
-  local sev = cached and (cached[vim.diagnostic.severity.ERROR] or 0) > 0 and 1
-    or (cached[vim.diagnostic.severity.WARN] or 0) > 0 and 2
-    or nil
-  if sev then
-    local t = diag_hl_map[sev][modified and 2 or 1]
-    return t[1], t[2]
-  end
-  if modified then
-    return "%#TablineVisibleModified#", "%#TablineFocusedModified#"
-  end
-  return "%#TablineVisible#", "%#TablineFocused#"
-end
-
 local function get_viewport_hi(idx, width)
   local w = tabs_cache[idx].width
   local hi = idx
@@ -1028,7 +1039,7 @@ function M.tabline_make()
   end
 
   local elapsed = (vim.uv.hrtime() - start) / 1e6 -- milliseconds
-  vim.notify(string.format("tabline: %.3fms", elapsed))
+  -- vim.notify(string.format("tabline: %.3fms", elapsed))
   return viewport.str
 end
 
@@ -1340,13 +1351,26 @@ local function setup_autocmds()
       if not index then
         return
       end
-      diag_cache[ev.buf] = vim.diagnostic.count(ev.buf, diag_filter)
+
+      diag_cache[ev.buf] = vim.diagnostic.count(ev.buf, M.diag_filter)
       local tab = tabs_cache[index]
       local new_severity = resolve_severity(diag_cache[ev.buf])
+      local old_severity = tab.severity
 
-      if new_severity ~= tab.severity then
+      local changed = old_severity ~= new_severity
+
+      if next(M.dynamic.diagnostics) ~= nil then
+        for state in pairs(M.dynamic.diagnostics) do
+          if tab.rendered[state] ~= nil then
+            tab.rendered[state] = nil
+            changed = true
+          end
+        end
+      end
+
+      if changed then
         tab.severity = new_severity
-        tabs_cache[index].update()
+        tab.update()
         if viewport.lo <= index and index <= viewport.hi then
           viewport.diag_or_input_changed = true
           schedule_redraw()
@@ -1396,6 +1420,8 @@ end
 
 function M.setup(opts)
   config = vim.tbl_deep_extend("force", vim.deepcopy(config), opts or {})
+
+  M.diag_filter = config.severity_filter
 
   M.tabs = config.tabs
   M.base_highlights = config.base_highlights
@@ -1450,6 +1476,7 @@ function M.setup(opts)
   viewport.sidebar_width = render_sidebar()
   viewport.width = vim.o.columns
 
+  init_dynamic(config.dynamic)
   init_bufs()
   setup_autocmds()
   setup_tabline_hl()
