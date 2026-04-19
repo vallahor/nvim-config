@@ -1,5 +1,5 @@
 local bit = require("bit")
-local band, bor, bnot, lshift = bit.band, bit.bor, bit.bnot, bit.lshift
+local band, bor, bnot, lshift, rshift = bit.band, bit.bor, bit.bnot, bit.lshift, bit.rshift
 
 local api, fn, bo = vim.api, vim.fn, vim.bo
 local strwidth, fnamemodify = fn.strwidth, fn.fnamemodify
@@ -277,6 +277,8 @@ local function get_hex(group, attr)
   return n and string.format("#%06x", n)
 end
 
+local click_handlers = {}
+
 local function focus_on_click(bufnr)
   if M.focus_on_click then
     return "%" .. bufnr .. "@v:lua.FocusTab@"
@@ -284,8 +286,8 @@ local function focus_on_click(bufnr)
   return ""
 end
 
-local function close_on_click(bufnr, symbol)
-  return "%" .. bufnr .. "@v:lua.CloseTab@" .. symbol .. "%X"
+local function on_click(bufnr, index, text)
+  return "%" .. (lshift(bufnr, 16) + index) .. "@v:lua.OnClick@" .. text .. "%X"
 end
 
 local function update_buf_index()
@@ -442,6 +444,7 @@ local function build_tab(buf, dir, tail, ext)
   end
 
   tab.resolve_string = function(state)
+    local start = vim.uv.hrtime()
     state = bor(state, tab.modified + tab.severity)
 
     local tab_state = {
@@ -450,12 +453,16 @@ local function build_tab(buf, dir, tail, ext)
       is_focused = band(state, STATES.FOCUSED) ~= 0,
       is_modified = band(state, STATES.MODIFIED) ~= 0,
       diagnostics = diag_cache[buf] or {},
+      close = function(force)
+        force = force or false
+        M.close_tab(buf, force)
+      end,
     }
 
     local display = { focus_on_click(buf) }
     local raw = {}
 
-    for _, comp in ipairs(M.tabs) do
+    for i, comp in ipairs(M.tabs) do
       local text
       local hl = comp.highlights and resolve_hl(comp.highlights, state) or resolve_hl(M.base_highlights, state)
       if comp.icon and tab_icon then
@@ -465,29 +472,30 @@ local function build_tab(buf, dir, tail, ext)
         text = comp.static
       elseif comp.text then
         text = comp.text(tab_state)
-        -- use on_click() version
-      elseif comp.close then
-        local close_data = comp.close(tab_state)
-        display[#display + 1] = "%#"
-          .. hl
-          .. "#"
-          .. (close_data.clickable and close_on_click(buf, close_data.symbol) or close_data.symbol)
-        raw[#raw + 1] = close_data.symbol
-        goto continue
+        if comp.on_click then
+          local on_click_str = on_click(buf, i, text)
+          click_handlers[buf] = click_handlers[buf] or {}
+          click_handlers[buf][i] = comp.on_click
+          display[#display + 1] = "%#" .. hl .. "#" .. on_click_str
+          raw[#raw + 1] = { text = text, text_width = api.nvim_strwidth(text), hl = hl, on_click = on_click_str or nil }
+          goto continue
+        end
       end
       if text then
         display[#display + 1] = "%#" .. hl .. "#" .. text
-        raw[#raw + 1] = text
+        raw[#raw + 1] = { text = text, text_width = api.nvim_strwidth(text), hl = hl }
       end
       ::continue::
     end
 
-    local raw_str = table.concat(raw)
+    -- local raw_str = table.concat(raw)
 
+    local elapsed = (vim.uv.hrtime() - start) / 1e6 -- milliseconds
+    vim.notify(string.format("tab: %.3fms", elapsed))
     return {
-      raw = raw_str,
+      raw = "Aeho",
       display = table.concat(display),
-      width = api.nvim_strwidth(raw_str),
+      width = api.nvim_strwidth("Aeho"),
     }
   end
 
@@ -504,7 +512,8 @@ local function build_tab(buf, dir, tail, ext)
 
   tab.rendered_visible = visible_.display
   tab.rendered_focused = focused_.display
-  tab.str = visible_.raw
+  -- tab.str = visible_.raw
+  tab.str = "aeho"
   tab.str_width = visible_.width
 
   local new_width = math.max(visible_.width, focused_.width)
@@ -1408,8 +1417,14 @@ _G.make_tabline = M.tabline_make
 vim.opt.tabline = "%!v:lua.make_tabline()"
 vim.opt.showtabline = 2
 
-_G.CloseTab = function(bufnr)
-  M.close_tab(bufnr, false)
+_G.OnClick = function(id, clicks, button, mods)
+  local bufnr = rshift(id, 16)
+  local comp_index = band(id, 0xFFFF)
+  local fn = click_handlers[bufnr] and click_handlers[bufnr][comp_index]
+  print(bufnr, comp_index)
+  if fn then
+    fn(bufnr, clicks, button, mods)
+  end
 end
 
 -- @check maybe change to click tab

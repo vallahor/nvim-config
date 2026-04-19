@@ -711,8 +711,11 @@ vim.api.nvim_create_autocmd("VimEnter", {
         },
         { static = " " },
         {
-          close = function()
-            return { symbol = "󰅖", clickable = true }
+          text = function()
+            return "󰅖"
+          end,
+          on_click = function(bufnr, clicks, button, mods)
+            tabline.close_tab(bufnr, false)
           end,
         },
         {
