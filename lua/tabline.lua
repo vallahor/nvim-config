@@ -459,8 +459,9 @@ local function build_tab(buf, dir, tail, ext)
       end,
     }
 
+    local tab_width = 0
     local display = { focus_on_click(buf) }
-    local raw = {}
+    local components = {}
 
     for i, comp in ipairs(M.tabs) do
       local text
@@ -474,26 +475,29 @@ local function build_tab(buf, dir, tail, ext)
         text = comp.text(tab_state)
         if comp.on_click then
           local on_click_str = on_click(buf, i, text) .. focus_on_click(buf)
+          local text_width = api.nvim_strwidth(text)
+          tab_width = tab_width + text_width
           click_handlers[buf] = click_handlers[buf] or {}
           click_handlers[buf][i] = comp.on_click
           display[#display + 1] = "%#" .. hl .. "#" .. on_click_str
-          raw[#raw + 1] = { text = text, text_width = api.nvim_strwidth(text), hl = hl, on_click = on_click_str or nil }
+          components[#components + 1] =
+            { text = text, text_width = text_width, hl = hl, on_click = on_click_str or nil }
           goto continue
         end
       end
       if text then
+        local text_width = api.nvim_strwidth(text)
+        tab_width = tab_width + text_width
         display[#display + 1] = "%#" .. hl .. "#" .. text
-        raw[#raw + 1] = { text = text, text_width = api.nvim_strwidth(text), hl = hl }
+        components[#components + 1] = { text = text, text_width = text_width, hl = hl }
       end
       ::continue::
     end
 
-    -- local raw_str = table.concat(raw)
-
     local elapsed = (vim.uv.hrtime() - start) / 1e6 -- milliseconds
-    vim.notify(string.format("tab: %.3fms", elapsed))
+    -- vim.notify(string.format("tab: %.3fms", elapsed))
     return {
-      raw = "Aeho",
+      components = components,
       display = table.concat(display),
       width = api.nvim_strwidth("Aeho"),
     }
