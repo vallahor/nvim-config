@@ -473,7 +473,7 @@ local function build_tab(buf, dir, tail, ext)
       elseif comp.text then
         text = comp.text(tab_state)
         if comp.on_click then
-          local on_click_str = on_click(buf, i, text)
+          local on_click_str = on_click(buf, i, text) .. focus_on_click(buf)
           click_handlers[buf] = click_handlers[buf] or {}
           click_handlers[buf][i] = comp.on_click
           display[#display + 1] = "%#" .. hl .. "#" .. on_click_str
