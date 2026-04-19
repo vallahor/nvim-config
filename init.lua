@@ -646,7 +646,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
         focused = { default = "TablineFocused", modified = "TablineFocusedModified" },
       },
       -- dynamic = { diagnostics = true, focused = { diagnostics = false }, visible = { diagnostics = true } },
-      -- dynamic = { diagnostics = true },
+      dynamic = { diagnostics = true },
       tabs = {
         {
           static = " ",

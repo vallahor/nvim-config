@@ -32,6 +32,9 @@ local config = {
   indicator_start = "*",
   indicator_end = "*",
 
+  no_diagnostic = false,
+  no_modified = false,
+
   icons = {
     enabled = true,
     no_hl = false,
@@ -210,12 +213,10 @@ end
 local hl_cache = {}
 
 local function to_int(color)
-  if type(color) == "number" then
-    return color
-  end
   if type(color) == "string" then
     return tonumber(color:gsub("^#", ""), 16)
   end
+  return color
 end
 
 M.derive_hl = function(group, overrides)
@@ -441,7 +442,7 @@ local function build_tab(buf, dir, tail, ext)
   end
 
   tab.resolve_string = function(state)
-    state = bor(state, bor(tab.modified, tab.severity))
+    state = bor(state, tab.modified + tab.severity)
 
     local tab_state = {
       name = tail,
@@ -510,9 +511,9 @@ local function build_tab(buf, dir, tail, ext)
   tab.width = new_width
 
   tab.update = function()
-    local flags = bor(tab.modified, tab.severity)
-    local visible = tab.rendered[bor(STATES.VISIBLE, flags)]
-    local focused = tab.rendered[bor(STATES.FOCUSED, flags)]
+    local flags = tab.modified + tab.severity
+    local visible = tab.rendered[STATES.VISIBLE + flags]
+    local focused = tab.rendered[STATES.FOCUSED + flags]
 
     tab.rendered_visible = visible.display
     tab.rendered_focused = focused.display
@@ -735,7 +736,7 @@ end
 
 local function resolve_prefix_str(size)
   local tab = tabs_cache[viewport.lo - 1]
-  local state = bor(tab.modified, tab.severity)
+  local state = tab.modified + tab.severity
   local hl = "%#" .. resolve_hl(M.base_highlights, state) .. "#"
   local pad = string.rep(" ", math.max(0, size - tab.str_width))
   return pad .. hl .. fn.strcharpart(tab.str, tab.str_width - size, size)
@@ -743,7 +744,7 @@ end
 
 local function resolve_post_str(size)
   local tab = tabs_cache[viewport.hi + 1]
-  local state = bor(tab.modified, tab.severity)
+  local state = tab.modified + tab.severity
   local hl = "%#" .. resolve_hl(M.base_highlights, state) .. "#"
   local pad = string.rep(" ", math.max(0, size - tab.str_width))
   return hl .. fn.strcharpart(tab.str, 0, size) .. pad
@@ -991,7 +992,7 @@ function M.tabline_make()
       tab_shrink = true
 
       local buf = buf_cache[viewport.index]
-      local state = bor(STATES.FOCUSED, bor(current_tab.modified, current_tab.severity))
+      local state = STATES.FOCUSED + current_tab.modified + current_tab.severity
       local hl = "%#" .. resolve_hl(M.base_highlights, state) .. "#"
 
       local pad = string.rep(" ", math.max(0, available - current_tab.str_width))
@@ -1321,63 +1322,67 @@ local function setup_autocmds()
     end,
   })
 
-  api.nvim_create_autocmd("BufModifiedSet", {
-    callback = function(ev)
-      local index = buf_index[ev.buf]
-      if not index then
-        return
-      end
-
-      local tab = tabs_cache[index]
-      local modified = bo[ev.buf].modified and STATES.MODIFIED or 0
-
-      if tab.modified == modified then
-        return
-      end
-
-      tab.modified = modified
-      tab.update()
-
-      if viewport.lo <= index and index <= viewport.hi then
-        viewport.diag_or_input_changed = true
-        schedule_redraw()
-      end
-    end,
-  })
-
-  api.nvim_create_autocmd("DiagnosticChanged", {
-    callback = function(ev)
-      local index = buf_index[ev.buf]
-      if not index then
-        return
-      end
-
-      diag_cache[ev.buf] = vim.diagnostic.count(ev.buf, M.diag_filter)
-      local tab = tabs_cache[index]
-      local new_severity = resolve_severity(diag_cache[ev.buf])
-      local old_severity = tab.severity
-
-      local changed = old_severity ~= new_severity
-
-      if next(M.dynamic.diagnostics) ~= nil then
-        for state in pairs(M.dynamic.diagnostics) do
-          if tab.rendered[state] ~= nil then
-            tab.rendered[state] = nil
-            changed = true
-          end
+  if not config.no_modified then
+    api.nvim_create_autocmd("BufModifiedSet", {
+      callback = function(ev)
+        local index = buf_index[ev.buf]
+        if not index then
+          return
         end
-      end
 
-      if changed then
-        tab.severity = new_severity
+        local tab = tabs_cache[index]
+        local modified = bo[ev.buf].modified and STATES.MODIFIED or 0
+
+        if tab.modified == modified then
+          return
+        end
+
+        tab.modified = modified
         tab.update()
+
         if viewport.lo <= index and index <= viewport.hi then
           viewport.diag_or_input_changed = true
           schedule_redraw()
         end
-      end
-    end,
-  })
+      end,
+    })
+  end
+
+  if not config.no_diagnostic then
+    api.nvim_create_autocmd("DiagnosticChanged", {
+      callback = function(ev)
+        local index = buf_index[ev.buf]
+        if not index then
+          return
+        end
+
+        diag_cache[ev.buf] = vim.diagnostic.count(ev.buf, M.diag_filter)
+        local tab = tabs_cache[index]
+        local new_severity = resolve_severity(diag_cache[ev.buf])
+        local old_severity = tab.severity
+
+        local changed = old_severity ~= new_severity
+
+        if next(M.dynamic.diagnostics) ~= nil then
+          for state in pairs(M.dynamic.diagnostics) do
+            if tab.rendered[state] ~= nil then
+              tab.rendered[state] = nil
+              changed = true
+            end
+          end
+        end
+
+        if changed then
+          tab.severity = new_severity
+          tab.update()
+          if viewport.lo <= index and index <= viewport.hi then
+            viewport.diag_or_input_changed = true
+            schedule_redraw()
+          end
+        end
+      end,
+    })
+  end
 
   api.nvim_create_autocmd({ "VimResized", "WinResized" }, {
     callback = function()
