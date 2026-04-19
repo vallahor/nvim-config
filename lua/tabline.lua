@@ -359,7 +359,6 @@ local function resolve_hl(hl, state)
   if is_error or is_warn then
     local diag = hl.diagnostics and (is_error and hl.diagnostics.error or hl.diagnostics.warn)
     local variant = diag and (focused and diag.focused or diag.visible)
-
     if variant then
       if modified and variant.modified then
         return variant.modified
@@ -370,7 +369,12 @@ local function resolve_hl(hl, state)
     end
   end
 
-  local bucket = focused and hl.focused or hl.visible
+  local focused_hl = (hl.focused or M.base_highlights.focused)
+  local visible_hl = (hl.visible or M.base_highlights.visible)
+  local bucket = focused and focused_hl or visible_hl
+  if not bucket then
+    return ""
+  end
   if modified and bucket.modified then
     return bucket.modified
   end
@@ -426,6 +430,7 @@ local function build_tab(buf, dir, tail, ext)
         text = comp.static
       elseif comp.text then
         text = comp.text(tab_state)
+        -- use on_click() version
       elseif comp.close then
         local close_data = comp.close(tab_state)
         display[#display + 1] = "%#"
@@ -947,7 +952,7 @@ function M.tabline_make()
     end
 
     if current_tab and current_tab.width > width - indicators then
-      local available = width - indicators
+      local available = width
       viewport.lo = viewport.index
       viewport.hi = viewport.index
       if viewport.lo == viewport.hi then
@@ -969,6 +974,7 @@ function M.tabline_make()
       else
         viewport.prefix = viewport.indicator_left
         viewport.postfix = viewport.indicator_right
+        available = width - indicators
       end
 
       tab_shrink = true

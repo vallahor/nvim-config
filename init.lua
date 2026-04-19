@@ -649,30 +649,20 @@ vim.api.nvim_create_autocmd("VimEnter", {
         {
           static = " ",
           highlights = {
-            visible = { default = "TablineVisible", modified = "TablineVisibleModified" },
-            focused = { default = "TablineFocused", modified = "TablineFocusedModified" },
+            visible = { default = "TablineVisibleSeparator", modified = "TablineVisibleSeparator" },
+            focused = { default = "TablineFocusedSeparator", modified = "TablineFocusedSeparator" },
           },
         },
         {
           icon = function(icon, _info)
             return "" .. icon .. " "
           end,
-          -- highlights = {
-          --   visible = { default = "TablineVisible", modified = "TablineVisibleModified" },
-          --   focused = { default = "TablineFocused", modified = "TablineFocusedModified" },
-          -- },
         },
         {
           text = function(info)
             return info.unique_prefix .. info.name
           end,
           highlights = {
-            visible = { default = "TablineVisible", modified = "TablineVisibleModified" },
-            -- focused = { default = "TablineFocused", modified = "TablineFocusedModified" },
-            focused = {
-              default = tabline.derive_hl("DiagnosticError", { bg = "#112244", underline = true }),
-              modified = "TablineFocusedModified",
-            },
             diagnostics = {
               error = {
                 focused = { default = "DiagnosticError", modified = "TablineVisible" },
@@ -681,6 +671,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
             },
           },
         },
+        { static = " " },
         {
           close = function()
             return { symbol = "󰅖", clickable = true }
@@ -689,8 +680,8 @@ vim.api.nvim_create_autocmd("VimEnter", {
         {
           static = " ",
           highlights = {
-            visible = { default = "TablineVisible", modified = "TablineVisibleModified" },
-            focused = { default = "TablineFocused", modified = "TablineFocusedModified" },
+            visible = { default = "TablineVisibleSeparator", modified = "TablineVisibleSeparator" },
+            focused = { default = "TablineFocusedSeparator", modified = "TablineFocusedSeparator" },
           },
         },
       },

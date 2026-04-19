@@ -75,10 +75,10 @@ MiniStatusline.setup({
 --
 -- vim.keymap.set("n", "<c-w>", function()
 --   _G.MiniBufremove.delete(0, false)
--- end)
+-- end, { nowait = true })
 -- vim.keymap.set("n", "<c-x>", function()
 --   _G.MiniBufremove.delete(0, true)
--- end)
+-- end, { nowait = true })
 
 -- closes the current window and buffer
 -- to close the current buffer and not the window use <c-w>
