@@ -611,6 +611,8 @@ local function remove_buf_from_tabline(bufnr)
   table.remove(tabs_cache, index)
   table.remove(buf_cache, index)
 
+  click_handlers[bufnr] = nil
+
   ---@type integer?
   local replacement = buf_cache[index] or buf_cache[index - 1]
   if replacement then
@@ -1505,5 +1507,11 @@ function M.setup(opts)
     M.update_cursor_line_hl = opts.update_cursor_line_hl
   end
 end
+
+local function debug_command()
+  vim.notify(vim.inspect(click_handlers))
+end
+
+api.nvim_create_user_command("Aeho", debug_command, {})
 
 return M
