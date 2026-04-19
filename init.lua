@@ -503,9 +503,6 @@ vim.api.nvim_create_autocmd("ModeChanged", {
     if in_visual then
       update_visual_cursor(ev.buf)
     else
-      -- @check: it was inside a vim.schedule
-      -- the issue is while i was moving through the tabline
-      -- it fired an error.
       for _, w in ipairs(vim.fn.win_findbuf(ev.buf)) do
         vim.api.nvim__redraw({ win = w, statuscolumn = true })
       end
@@ -618,11 +615,85 @@ local guicursor_hidden = "n:block-Cursor,i-ci-c:block-iCursor,v:block-vCursor,a:
 local cursor_line_active = "CursorLine:CursorLine,CursorLineNr:CursorLineNr"
 local cursor_line_inactive = "CursorLine:CursorLineInative,CursorLineNr:CursorLineNrInative"
 
+-- highlights = {
+--   visible = {
+--     default = "",
+--     modified = "",
+--   },
+--   focused = {
+--     default = "",
+--     modified = "",
+--   },
+--   diagnostics = {
+--     error = {
+--       visible = { default = "", modified = "" },
+--       focused = { default = "", modified = "" },
+--     },
+--     warn = {
+--       visible = { default = "", modified = "" },
+--       focused = { default = "", modified = "" },
+--     },
+--   },
+-- }
+
 vim.api.nvim_create_autocmd("VimEnter", {
   once = true,
   callback = function()
     local tabline = require("tabline")
     tabline.setup({
+      base_highlights = {
+        visible = { default = "TablineVisible", modified = "TablineVisibleModified" },
+        focused = { default = "TablineFocused", modified = "TablineFocusedModified" },
+      },
+      tabs = {
+        {
+          static = " ",
+          highlights = {
+            visible = { default = "TablineVisible", modified = "TablineVisibleModified" },
+            focused = { default = "TablineFocused", modified = "TablineFocusedModified" },
+          },
+        },
+        {
+          icon = function(icon, _info)
+            return "" .. icon .. " "
+          end,
+          -- highlights = {
+          --   visible = { default = "TablineVisible", modified = "TablineVisibleModified" },
+          --   focused = { default = "TablineFocused", modified = "TablineFocusedModified" },
+          -- },
+        },
+        {
+          text = function(info)
+            return info.unique_prefix .. info.name
+          end,
+          highlights = {
+            visible = { default = "TablineVisible", modified = "TablineVisibleModified" },
+            -- focused = { default = "TablineFocused", modified = "TablineFocusedModified" },
+            focused = {
+              default = tabline.derive_hl("DiagnosticError", { bg = "#112244", underline = true }),
+              modified = "TablineFocusedModified",
+            },
+            diagnostics = {
+              error = {
+                focused = { default = "DiagnosticError", modified = "TablineVisible" },
+                visible = { default = "DiagnosticError", modified = "TablineVisible" },
+              },
+            },
+          },
+        },
+        {
+          close = function()
+            return { symbol = "󰅖", clickable = true }
+          end,
+        },
+        {
+          static = " ",
+          highlights = {
+            visible = { default = "TablineVisible", modified = "TablineVisibleModified" },
+            focused = { default = "TablineFocused", modified = "TablineFocusedModified" },
+          },
+        },
+      },
       update_cursor_line_hl = function(cur_win, win)
         local hl = cur_win == win and cursor_line_active or cursor_line_inactive
         vim.api.nvim_set_option_value("winhighlight", hl, { win = win })

@@ -1,21 +1,26 @@
+local bit = require("bit")
+local band, bor, bnot, lshift = bit.band, bit.bor, bit.bnot, bit.lshift
+
 local api, fn, bo = vim.api, vim.fn, vim.bo
 local strwidth, fnamemodify = fn.strwidth, fn.fnamemodify
+
+local STATES = {
+  VISIBLE = lshift(1, 0), -- 1
+  FOCUSED = lshift(1, 1), -- 2
+  MODIFIED = lshift(1, 2), -- 4
+  ERROR = lshift(1, 3), -- 8
+  WARN = lshift(1, 4), -- 16
+  HINT = lshift(1, 5), -- 32
+  INFO = lshift(1, 6), -- 64
+}
 
 local M = {}
 
 local config = {
   focus_on_click = true,
-  unique_names = true,
-  -- close_icon = "",
-  close_icon = "󰅖",
-  -- close_icon = "X ",
-  tab = {
-    -- separator_start = " ",
-    -- separator_end = " ",
-    separator_start = " ",
-    separator_end = " ",
-    bufname_left = " ",
-    bufname_right = " ",
+
+  tabs = {
+    { text = "" },
   },
 
   indicator_left = " …",
@@ -34,9 +39,7 @@ local config = {
     enabled = true,
     label = "Explorer",
     label_position = "mid", -- "start"|"mid"|"end"
-    -- label = "Files",
     separator = "│",
-    -- separator = " ",
     filetypes = { "NvimTree", "neo-tree" }, -- Default with ["NvimTree", "neo-tree"]
   },
 }
@@ -67,9 +70,6 @@ M.update_cursor_line_hl = function(_, _) end
 ---@field postfix string
 ---@field endfix string
 ---@field total_tabs_width integer
----@field close_icon_width integer
----@field separator_start_width integer
----@field separator_end_width integer
 local viewport = {
   str = "",
   width = 0,
@@ -95,11 +95,9 @@ local viewport = {
   indicator_start_width = 2,
   indicator_end_width = 2,
   total_tabs_width = 0,
-  close_icon_width = 0,
-  separator_start_width = 0,
-  separator_end_width = 0,
 }
 
+-- @CHECK: If its in the right side ......... heheheh you know.
 ---@class Sidebar
 ---@field enabled boolean
 ---@field rendered_visible string
@@ -146,9 +144,7 @@ local diag_cache = {}
 ---@field ext string
 ---@field width integer
 ---@field str_width integer
----@field start_width integer
----@field end_width integer
----@field modified boolean
+---@field modified integer
 ---@field icon Icon?
 ---@field rendered_visible string?
 ---@field rendered_focused string?
@@ -177,6 +173,65 @@ local function schedule_redraw()
   end
 end
 
+local hl_cache = {}
+
+local function to_int(color)
+  if type(color) == "number" then
+    return color
+  end
+  if type(color) == "string" then
+    return tonumber(color:gsub("^#", ""), 16)
+  end
+end
+
+M.derive_hl = function(group, overrides)
+  local ok, val = pcall(api.nvim_get_hl, 0, { name = group, link = false })
+  if not ok then
+    return group
+  end
+
+  local attrs = {
+    fg = to_int(overrides.fg) or val.fg,
+    bg = to_int(overrides.bg) or val.bg,
+    sp = to_int(overrides.sp) or val.sp,
+    bold = overrides.bold or val.bold,
+    italic = overrides.italic or val.italic,
+    underline = overrides.underline or val.underline,
+    undercurl = overrides.undercurl or val.undercurl,
+    strikethrough = overrides.strikethrough or val.strikethrough,
+  }
+
+  local key = (attrs.fg or 0)
+    .. "|"
+    .. (attrs.bg or 0)
+    .. "|"
+    .. (attrs.sp or 0)
+    .. "|"
+    .. (attrs.bold and "b" or "")
+    .. (attrs.italic and "i" or "")
+    .. (attrs.underline and "u" or "")
+    .. (attrs.undercurl and "c" or "")
+    .. (attrs.strikethrough and "s" or "")
+
+  local hl_name = hl_cache[key]
+  if hl_name then
+    return hl_name
+  end
+
+  local name = "Tbl"
+    .. (attrs.fg or 0)
+    .. (attrs.bg or 0)
+    .. (attrs.bold and "b" or "")
+    .. (attrs.italic and "i" or "")
+    .. (attrs.underline and "u" or "")
+    .. (attrs.undercurl and "c" or "")
+    .. (attrs.strikethrough and "s" or "")
+
+  api.nvim_set_hl(0, name, attrs)
+  hl_cache[key] = name
+  return name
+end
+
 ---@return string?
 local function get_hex(group, attr)
   local ok, val = pcall(api.nvim_get_hl, 0, { name = group, link = false })
@@ -194,11 +249,8 @@ local function focus_on_click(bufnr)
   return ""
 end
 
-local function close_on_click(bufnr)
-  if M.close_icon ~= "" then
-    return "%" .. bufnr .. "@v:lua.CloseTab@" .. M.close_icon .. "%X"
-  end
-  return ""
+local function close_on_click(bufnr, symbol)
+  return "%" .. bufnr .. "@v:lua.CloseTab@" .. symbol .. "%X"
 end
 
 local function update_buf_index()
@@ -233,6 +285,7 @@ end
 local get_icon_fn = {
   ["mini.icons"] = function(ext)
     local icon, hl = M.icons.provider.get("extension", ext)
+    -- @check: get_hex should be removed
     return icon, get_hex(hl, "fg")
   end,
   ["nvim-web-devicons"] = function(ext)
@@ -271,75 +324,179 @@ local function make_tab_icon(ext)
     icon_cache_remove(ext)
     return nil
   end
-  icon = icon
   return {
     str = icon,
     width = api.nvim_strwidth(icon),
-    ---@return string
-    get = function(focused, hl)
-      return M.get_icon_hl(ext, color, focused) .. icon .. hl
-    end,
+    color = color,
   }
+end
+
+local function resolve_severity(diags)
+  if not diags then
+    return 0
+  end
+  if (diags[vim.diagnostic.severity.ERROR] or 0) > 0 then
+    return STATES.ERROR
+  end
+  if (diags[vim.diagnostic.severity.WARN] or 0) > 0 then
+    return STATES.WARN
+  end
+  if (diags[vim.diagnostic.severity.INFO] or 0) > 0 then
+    return STATES.INFO
+  end
+  if (diags[vim.diagnostic.severity.HINT] or 0) > 0 then
+    return STATES.HINT
+  end
+  return 0
+end
+
+local function resolve_hl(hl, state)
+  local focused = band(state, STATES.FOCUSED) ~= 0
+  local modified = band(state, STATES.MODIFIED) ~= 0
+  local is_error = band(state, STATES.ERROR) ~= 0
+  local is_warn = band(state, STATES.WARN) ~= 0
+
+  if is_error or is_warn then
+    local diag = hl.diagnostics and (is_error and hl.diagnostics.error or hl.diagnostics.warn)
+    local variant = diag and (focused and diag.focused or diag.visible)
+
+    if variant then
+      if modified and variant.modified then
+        return variant.modified
+      end
+      if variant.default then
+        return variant.default
+      end
+    end
+  end
+
+  local bucket = focused and hl.focused or hl.visible
+  if modified and bucket.modified then
+    return bucket.modified
+  end
+  return bucket.default or ""
 end
 
 local function build_tab(buf, dir, tail, ext)
-  local path = M.unique_names and resolve_buf_repeated_names(tail) and dir or ""
-  local str = viewport.bufname_left .. path .. tail .. viewport.bufname_right
-  local str_width = api.nvim_strwidth(str)
+  local unique_prefix = resolve_buf_repeated_names(tail) and dir or ""
   local tab_icon = make_tab_icon(ext)
-  local start_width = viewport.separator_start_width + (tab_icon and tab_icon.width or 0)
-  local end_width = viewport.close_icon_width + viewport.separator_end_width
-  local width = start_width + str_width + end_width
 
   local tab = {
-    str = str,
     dir = dir,
     tail = tail,
+    unique_prefix = unique_prefix,
     ext = ext,
-    width = width,
+    display = "",
+    str = "",
     icon = tab_icon,
-    str_width = str_width,
-    end_width = str_width,
-    start_width = str_width,
-    rendered_visible = nil,
-    rendered_focused = nil,
+    str_width = 0,
+    modified = 0,
+    width = 0,
+    rendered = {},
+    severity = 0,
+    rendered_visible = "",
+    rendered_focused = "",
   }
-  tab.update = function()
-    local click = focus_on_click(buf)
-    local close = close_on_click(buf)
-    local hl_visible, hl_focused = M.resolve_hl(buf)
 
-    tab.rendered_visible = click
-      .. "%#TablineVisibleSeparator#"
-      .. M.separator_start
-      .. hl_visible
-      .. (tab_icon and tab_icon.get(false, hl_visible) or "")
-      .. str
-      .. close
-      .. "%#TablineVisibleSeparator#"
-      .. M.separator_end
-
-    tab.rendered_focused = click
-      .. "%#TablineFocusedSeparator#"
-      .. M.separator_start
-      .. hl_focused
-      .. (tab_icon and tab_icon.get(true, hl_focused) or "")
-      .. str
-      .. close
-      .. "%#TablineFocusedSeparator#"
-      .. M.separator_end
+  tab.update_unique_prefix = function()
+    tab.unique_prefix = resolve_buf_repeated_names(tail) and dir or ""
   end
-  tab.update()
+
+  tab.resolve_string = function(state)
+    state = bor(state, bor(tab.modified, tab.severity))
+
+    local tab_state = {
+      name = tail,
+      unique_prefix = tab.unique_prefix,
+      is_focused = band(state, STATES.FOCUSED) ~= 0,
+      is_modified = band(state, STATES.MODIFIED) ~= 0,
+      diagnostics = diag_cache[buf] or {},
+    }
+
+    local display = { focus_on_click(buf) }
+    local raw = {}
+
+    for _, comp in ipairs(M.tabs) do
+      local text
+      local hl = comp.highlights and resolve_hl(comp.highlights, state) or resolve_hl(M.base_highlights, state)
+      if comp.icon and tab_icon then
+        hl = comp.highlights and hl or M.derive_hl(hl, { fg = tab_icon.color })
+        text = comp.icon(tab_icon.str, tab_state)
+      elseif comp.static then
+        text = comp.static
+      elseif comp.text then
+        text = comp.text(tab_state)
+      elseif comp.close then
+        local close_data = comp.close(tab_state)
+        display[#display + 1] = "%#"
+          .. hl
+          .. "#"
+          .. (close_data.clickable and close_on_click(buf, close_data.symbol) or close_data.symbol)
+        raw[#raw + 1] = close_data.symbol
+        goto continue
+      end
+      if text then
+        display[#display + 1] = "%#" .. hl .. "#" .. text
+        raw[#raw + 1] = text
+      end
+      ::continue::
+    end
+
+    local raw_str = table.concat(raw)
+
+    return {
+      raw = raw_str,
+      display = table.concat(display),
+      width = api.nvim_strwidth(raw_str),
+    }
+  end
+
+  tab.rendered = setmetatable({}, {
+    __index = function(t, state)
+      local result = tab.resolve_string(state)
+      rawset(t, state, result)
+      return result
+    end,
+  })
+
+  local visible_ = tab.rendered[STATES.VISIBLE]
+  local focused_ = tab.rendered[STATES.FOCUSED]
+
+  tab.rendered_visible = visible_.display
+  tab.rendered_focused = focused_.display
+  tab.str = visible_.raw
+  tab.str_width = visible_.width
+
+  local new_width = math.max(visible_.width, focused_.width)
+  tab.width = new_width
+
+  tab.update = function()
+    local flags = bor(tab.modified, tab.severity)
+    local visible = tab.rendered[bor(STATES.VISIBLE, flags)]
+    local focused = tab.rendered[bor(STATES.FOCUSED, flags)]
+
+    tab.rendered_visible = visible.display
+    tab.rendered_focused = focused.display
+
+    local new_width = math.max(visible.width, focused.width)
+    if new_width ~= tab.width then
+      viewport.total_tabs_width = viewport.total_tabs_width - tab.width + new_width
+      tab.width = new_width
+      -- this should be another flag
+      viewport.size_changed = true
+    end
+  end
   return tab
 end
 
-local function refresh_tab(index, buf, tail)
-  if not tabs_cache[index] then
+local function refresh_tab(index)
+  local tab = tabs_cache[index]
+  if not tab then
     return
   end
-  local dir, _, ext = resolve_buf_name(buf)
-  local tab = build_tab(buf, dir, tail, ext)
-  tabs_cache[index] = tab
+  tab.update_unique_prefix()
+  tab.rendered = setmetatable({}, getmetatable(tab.rendered)) -- wipe all variants
+  tab.update()
 end
 
 local function repeated_names_remove(buf, tail)
@@ -353,7 +510,7 @@ local function repeated_names_remove(buf, tail)
   else
     for b, _ in pairs(tabs_repeated_names_buf_cache[tail].bufs) do
       if b ~= buf then
-        refresh_tab(buf_index[b], b, tail)
+        refresh_tab(buf_index[b])
       end
     end
   end
@@ -367,7 +524,7 @@ local function repeated_names_insert(buf, tail)
     if tabs_repeated_names_buf_cache[tail].count > 1 then
       for b, _ in pairs(tabs_repeated_names_buf_cache[tail].bufs) do
         if b ~= buf then
-          refresh_tab(buf_index[b], b, tail)
+          refresh_tab(buf_index[b])
         end
       end
     end
@@ -375,15 +532,6 @@ local function repeated_names_insert(buf, tail)
 end
 
 local function resolve_update_tab(buf)
-  local index = buf_index[buf]
-  if not index then
-    return
-  end
-  tabs_cache[index] = M.make_tab(buf)
-  update_buf_index()
-end
-
-local function resolve_update_tab_unique_names(buf)
   local index = buf_index[buf]
   if not index then
     return
@@ -409,9 +557,7 @@ local function remove_buf_from_tabline(bufnr)
   if tab.icon then
     icon_cache_remove(tab.ext)
   end
-  if M.unique_names then
-    repeated_names_remove(bufnr, tab.tail)
-  end
+  repeated_names_remove(bufnr, tab.tail)
 
   table.remove(tabs_cache, index)
   table.remove(buf_cache, index)
@@ -432,19 +578,10 @@ local function remove_buf_from_tabline(bufnr)
   update_buf_index()
 end
 
-local function make_tab(buf)
-  local _, tail, ext = resolve_buf_name(buf)
-  return build_tab(buf, "", tail, ext)
-end
-
-local function make_tab_unique_names(buf)
+local function insert_buf_into_tabline(buf)
   local dir, tail, ext = resolve_buf_name(buf)
   repeated_names_insert(buf, tail)
-  return build_tab(buf, dir, tail, ext)
-end
-
-local function insert_buf_into_tabline(buf)
-  local tab = M.make_tab(buf)
+  local tab = build_tab(buf, dir, tail, ext)
   table.insert(buf_cache, buf)
   table.insert(tabs_cache, tab)
   viewport.buf = buf
@@ -582,28 +719,18 @@ end
 
 local function resolve_prefix_str(size)
   local tab = tabs_cache[viewport.lo - 1]
-  local buf = buf_cache[viewport.lo - 1]
+  local state = bor(tab.modified, tab.severity)
+  local hl = "%#" .. resolve_hl(M.base_highlights, state) .. "#"
   local pad = string.rep(" ", math.max(0, size - tab.str_width))
-  local tab_hl = (M.resolve_hl(buf))
-  return pad .. tab_hl .. fn.strcharpart(tab.str, tab.str_width - size, size)
+  return pad .. hl .. fn.strcharpart(tab.str, tab.str_width - size, size)
 end
 
 local function resolve_post_str(size)
   local tab = tabs_cache[viewport.hi + 1]
-  local buf = buf_cache[viewport.hi + 1]
-  local tab_hl = (M.resolve_hl(buf))
-  local icon = ""
-  if tab.icon then
-    local remaining = size - tab.icon.width - viewport.separator_start_width
-    if remaining > 0 then
-      icon = tab.icon.get(false, tab_hl)
-      size = remaining
-    else
-      return "%#TablineFill#" .. string.rep(" ", size)
-    end
-  end
+  local state = bor(tab.modified, tab.severity)
+  local hl = "%#" .. resolve_hl(M.base_highlights, state) .. "#"
   local pad = string.rep(" ", math.max(0, size - tab.str_width))
-  return "%#TablineVisibleSeparator#" .. M.separator_start .. icon .. tab_hl .. fn.strcharpart(tab.str, 0, size) .. pad
+  return hl .. fn.strcharpart(tab.str, 0, size) .. pad
 end
 
 local function make_prefix(left_remaining, indicator)
@@ -612,15 +739,9 @@ local function make_prefix(left_remaining, indicator)
     if left_remaining > 0 then
       local size = left_remaining - indicator
       if size > 0 then
-        if size - viewport.close_icon_width - viewport.separator_end_width > 0 then
-          size = size - viewport.close_icon_width - viewport.separator_end_width
+        if size > 0 then
           local buf = buf_cache[viewport.lo - 1]
-          viewport.prefix = focus_on_click(buf)
-            .. viewport.prefix
-            .. resolve_prefix_str(size)
-            .. close_on_click(buf)
-            .. "%#TablineVisibleSeparator#"
-            .. M.separator_end
+          viewport.prefix = focus_on_click(buf) .. viewport.prefix .. resolve_prefix_str(size)
         else
           viewport.prefix = viewport.prefix .. string.rep(" ", size)
         end
@@ -809,11 +930,6 @@ function M.tabline_make()
     or viewport.buf_deleted
     or viewport.is_in_small_size
   then
-    -- Mitigate the situation where the find-file of nvim_tree
-    -- open-file with `{focus = false}
-    -- runs vim.cmd("noautocmd wincmd p")
-    -- which not trigger the leaving and reenter in the buffer.
-    -- without calling the autocmd events
     if api.nvim_get_current_win() ~= sidebar.winnr and sidebar.focus then
       sidebar.focus = false
       viewport.buf = buf_cache[viewport.index]
@@ -831,7 +947,7 @@ function M.tabline_make()
     end
 
     if current_tab and current_tab.width > width - indicators then
-      local available = width - indicators - viewport.close_icon_width - viewport.separator_end_width
+      local available = width - indicators
       viewport.lo = viewport.index
       viewport.hi = viewport.index
       if viewport.lo == viewport.hi then
@@ -858,19 +974,14 @@ function M.tabline_make()
       tab_shrink = true
 
       local buf = buf_cache[viewport.index]
-      local focused = buf == viewport.buf
-      local tab_visible_hl, tab_focused_hl = M.resolve_hl(buf)
-      local tab_hl = focused and tab_focused_hl or tab_visible_hl
-      local tab_sep_hl = focused and "%#TablineFocusedSeparator#" or "%#TablineVisibleSeparator#"
+      local state = bor(STATES.FOCUSED, bor(current_tab.modified, current_tab.severity))
+      local hl = "%#" .. resolve_hl(M.base_highlights, state) .. "#"
 
       local pad = string.rep(" ", math.max(0, available - current_tab.str_width))
 
-      tab_str = tab_hl
+      tab_str = hl
         .. focus_on_click(buf)
         .. fn.strcharpart(current_tab.str, current_tab.str_width - available, available)
-        .. close_on_click(buf)
-        .. tab_sep_hl
-        .. M.separator_end
         .. "%#TablineFill#"
         .. pad
     elseif viewport.total_tabs_width > width then
@@ -911,7 +1022,7 @@ function M.tabline_make()
   end
 
   local elapsed = (vim.uv.hrtime() - start) / 1e6 -- milliseconds
-  -- vim.notify(string.format("tabline: %.3fms", elapsed))
+  vim.notify(string.format("tabline: %.3fms", elapsed))
   return viewport.str
 end
 
@@ -1124,19 +1235,11 @@ local function setup_tabline_hl()
 end
 
 ---@return string
-M.get_icon_hl = function(ext, color, focused)
+M.get_icon_hl = function(color, hl_group)
   if M.icons.no_hl then
-    return ""
+    return hl_group
   end
-  local key = focused and "f_" .. ext or "v_" .. ext
-  if not icons_hl_cache[key] then
-    local bg = focused and (get_hex("TablineFocused", "bg") or get_hex("Normal", "bg"))
-      or (get_hex("TablineVisible", "bg") or get_hex("Normal", "bg"))
-    local name = (focused and "TablineFocusedIcon_" or "TablineVisibleIcon_") .. ext
-    api.nvim_set_hl(0, name, { fg = color, bg = bg })
-    icons_hl_cache[key] = "%#" .. name .. "#"
-  end
-  return icons_hl_cache[key]
+  return M.derive_hl(hl_group, { fg = color })
 end
 
 local ignore_buftypes = {
@@ -1207,10 +1310,18 @@ local function setup_autocmds()
       if not index then
         return
       end
+
       local tab = tabs_cache[index]
-      local modified = bo[ev.buf].modified
-      if tab.modified ~= modified then
-        tabs_cache[index].update()
+      local modified = bo[ev.buf].modified and STATES.MODIFIED or 0
+
+      if tab.modified == modified then
+        return
+      end
+
+      tab.modified = modified
+      tab.update()
+
+      if viewport.lo <= index and index <= viewport.hi then
         viewport.diag_or_input_changed = true
         schedule_redraw()
       end
@@ -1223,10 +1334,18 @@ local function setup_autocmds()
       if not index then
         return
       end
-      diag_cache[ev.buf] = nil
-      tabs_cache[index].update()
-      viewport.diag_or_input_changed = true
-      schedule_redraw()
+      diag_cache[ev.buf] = vim.diagnostic.count(ev.buf, diag_filter)
+      local tab = tabs_cache[index]
+      local new_severity = resolve_severity(diag_cache[ev.buf])
+
+      if new_severity ~= tab.severity then
+        tab.severity = new_severity
+        tabs_cache[index].update()
+        if viewport.lo <= index and index <= viewport.hi then
+          viewport.diag_or_input_changed = true
+          schedule_redraw()
+        end
+      end
     end,
   })
 
@@ -1240,7 +1359,7 @@ local function setup_autocmds()
 
   api.nvim_create_autocmd("BufFilePost", {
     callback = function(ev)
-      M.resolve_update_tab(ev.buf)
+      resolve_update_tab(ev.buf)
     end,
   })
 
@@ -1271,6 +1390,10 @@ end
 
 function M.setup(opts)
   config = vim.tbl_deep_extend("force", vim.deepcopy(config), opts or {})
+
+  M.tabs = config.tabs
+  M.base_highlights = config.base_highlights
+
   if config.icons.enabled then
     M.icons = {}
     M.icons.no_hl = config.icons.no_hl
@@ -1279,15 +1402,6 @@ function M.setup(opts)
     M.icons.provider = require(provider)
     M.get_icon = get_icon_fn[provider]
   end
-
-  M.close_icon = config.close_icon
-  viewport.close_icon_width = api.nvim_strwidth(config.close_icon)
-
-  M.separator_start = config.tab.separator_start
-  viewport.separator_start_width = api.nvim_strwidth(config.tab.separator_start)
-
-  M.separator_end = config.tab.separator_end
-  viewport.separator_end_width = api.nvim_strwidth(config.tab.separator_end)
 
   sidebar.separator = config.sidebar.separator
   sidebar.separator_width = strwidth(config.sidebar.separator)
@@ -1315,13 +1429,6 @@ function M.setup(opts)
     M.focus_on_click = config.focus_on_click
   end
 
-  M.unique_names = config.unique_names
-  M.make_tab = config.unique_names and make_tab_unique_names or make_tab
-  M.resolve_update_tab = config.unique_names and resolve_update_tab_unique_names or resolve_update_tab
-
-  viewport.bufname_left = config.tab.bufname_left
-  viewport.bufname_right = config.tab.bufname_right
-
   viewport.indicator_left = "%#TablineIndicatorSep#" .. config.indicator_left
   viewport.indicator_right = "%#TablineIndicatorSep#" .. config.indicator_right
 
@@ -1345,22 +1452,5 @@ function M.setup(opts)
     M.update_cursor_line_hl = opts.update_cursor_line_hl
   end
 end
-
-local function aeho()
-  local tab = tabs_cache[viewport.index]
-  vim.print(tab.rendered_focused)
-  vim.print(tab.width)
-  local ihul = tab
-    .rendered_focused
-    :gsub("%%#[^#]*#", "") -- strip hl groups
-    :gsub("%%%d+@[^@]*@", "") -- strip click start  %1@v:lua.Fn@
-    :gsub("%%X", "") -- strip click end
-    :gsub("%%<", "") -- strip truncation marker
-    :gsub("%%=", "") -- strip separator
-  print(ihul)
-  print(api.nvim_strwidth(ihul))
-end
-
-api.nvim_create_user_command("Aeho", aeho, {})
 
 return M
