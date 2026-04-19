@@ -1422,10 +1422,9 @@ vim.opt.showtabline = 2
 _G.OnClick = function(id, clicks, button, mods)
   local bufnr = rshift(id, 16)
   local comp_index = band(id, 0xFFFF)
-  local fn = click_handlers[bufnr] and click_handlers[bufnr][comp_index]
-  print(bufnr, comp_index)
-  if fn then
-    fn(bufnr, clicks, button, mods)
+  local fn_handler = click_handlers[bufnr] and click_handlers[bufnr][comp_index]
+  if fn_handler then
+    fn_handler(bufnr, clicks, button, mods)
   end
 end
 
