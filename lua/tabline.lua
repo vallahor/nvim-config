@@ -287,7 +287,7 @@ local function focus_on_click(bufnr)
 end
 
 local function on_click(bufnr, index, text)
-  return "%" .. (lshift(bufnr, 16) + index) .. "@v:lua.OnClick@" .. text .. "%X"
+  return "%" .. (lshift(bufnr, 16) + index) .. "@v:lua.OnClick@" .. text .. "%X" .. focus_on_click(bufnr)
 end
 
 local function update_buf_index()
@@ -474,7 +474,7 @@ local function build_tab(buf, dir, tail, ext)
       elseif comp.text then
         text = comp.text(tab_state)
         if comp.on_click then
-          local on_click_str = on_click(buf, i, text) .. focus_on_click(buf)
+          local on_click_str = on_click(buf, i, text)
           local text_width = api.nvim_strwidth(text)
           tab_width = tab_width + text_width
           click_handlers[buf] = click_handlers[buf] or {}
@@ -544,13 +544,16 @@ local function build_tab(buf, dir, tail, ext)
     local components = tab.rendered[STATES.VISIBLE + tab.modified + tab.severity].components
     local partial_right = { focus_on_click(buf) }
     local w = 0
-    for _, component in ipairs(components) do
+    for i, component in ipairs(components) do
       if w + component.text_width > width then
         local remaining = width - w
         if remaining > 0 then
-          local text = component.on_click or component.text
+          local text = component.text
           local part = fn.strcharpart(text, 0, remaining)
-          partial_right[#partial_right + 1] = "%#" .. component.hl .. "#" .. part
+          partial_right[#partial_right + 1] = "%#"
+            .. component.hl
+            .. "#"
+            .. (components.on_click and on_click(buf, i, part) or part)
         end
         w = w + remaining
         break
@@ -561,6 +564,48 @@ local function build_tab(buf, dir, tail, ext)
     local pad = string.rep(" ", math.max(0, width - w))
     partial_right[#partial_right + 1] = pad
     return table.concat(partial_right)
+  end
+
+  tab.partial_left = function(width, state)
+    state = state or STATES.VISIBLE
+    local components = tab.rendered[bor(state, tab.modified + tab.severity)].components
+    local partial_left = {}
+    local comp_pos = 0
+    local w = 0
+
+    for pos = #components, 1, -1 do
+      if w + components[pos].text_width > width then
+        comp_pos = pos
+        break
+      end
+      w = w + components[pos].text_width
+      comp_pos = pos
+    end
+
+    partial_left[#partial_left + 1] = focus_on_click(buf)
+
+    if w > 0 then
+      local remaining = width - w
+      if remaining > 0 then
+        local text = components[comp_pos].text
+        local part = fn.strcharpart(text, components[comp_pos].text_width - remaining, remaining)
+        partial_left[#partial_left + 1] = "%#"
+          .. components[comp_pos].hl
+          .. "#"
+          .. (components[comp_pos].on_click and on_click(buf, comp_pos, part) or part)
+      end
+
+      for pos = comp_pos + 1, #components do
+        partial_left[#partial_left + 1] = "%#"
+          .. components[pos].hl
+          .. "#"
+          .. (components[pos].on_click or components[pos].text)
+      end
+    end
+    -- vim.notify(string.format("%d %d %d", width, w, width - w))
+    -- vim.notify(vim.inspect(components))
+
+    return table.concat(partial_left)
   end
 
   return tab
@@ -641,6 +686,10 @@ local function remove_buf_from_tabline(bufnr)
 
   click_handlers[bufnr] = nil
 
+  -- @check
+  -- here could be the logic to delete and go to left
+  -- right not its goes to right as default
+  -- but some user maybe would like to have this option
   ---@type integer?
   local replacement = buf_cache[index] or buf_cache[index - 1]
   if replacement then
@@ -773,25 +822,6 @@ local function get_viewport_lo(idx, width)
   return lo, width - w
 end
 
-local function resolve_prefix_str(size)
-  local tab = tabs_cache[viewport.lo - 1]
-  -- local state = tab.modified + tab.severity
-  -- local hl = "%#" .. resolve_hl(M.base_highlights, state) .. "#"
-  -- local pad = string.rep(" ", math.max(0, size - tab.str_width))
-  -- return pad .. hl .. fn.strcharpart(tab.str, tab.str_width - size, size)
-  return "Aeho"
-end
-
-local function resolve_post_str(size)
-  local tab = tabs_cache[viewport.hi + 1]
-  -- local state = tab.modified + tab.severity
-  -- local hl = "%#" .. resolve_hl(M.base_highlights, state) .. "#"
-  -- local pad = string.rep(" ", math.max(0, size - tab.str_width))
-  -- return hl .. fn.strcharpart(tab.str, 0, size) .. pad
-  print(tab.partial_right(size))
-  return tab.partial_right(size)
-end
-
 local function make_prefix(left_remaining, indicator)
   if viewport.lo > 1 then
     viewport.prefix = viewport.indicator_left
@@ -799,8 +829,8 @@ local function make_prefix(left_remaining, indicator)
       local size = left_remaining - indicator
       if size > 0 then
         if size > 0 then
-          local buf = buf_cache[viewport.lo - 1]
-          viewport.prefix = focus_on_click(buf) .. viewport.prefix .. resolve_prefix_str(size)
+          local tab = tabs_cache[viewport.lo - 1]
+          viewport.prefix = viewport.prefix .. tab.partial_left(size)
         else
           viewport.prefix = viewport.prefix .. string.rep(" ", size)
         end
@@ -818,7 +848,8 @@ local function make_postfix(right_remaining, indicator)
     if right_remaining > 0 then
       local size = right_remaining - indicator
       if size > 0 then
-        viewport.postfix = resolve_post_str(size) .. viewport.postfix
+        local tab = tabs_cache[viewport.hi + 1]
+        viewport.postfix = tab.partial_right(size) .. viewport.postfix
       elseif size < 0 then
         viewport.postfix = "%#TablineFill#" .. string.rep(" ", right_remaining) .. viewport.postfix
       end
@@ -1007,8 +1038,8 @@ function M.tabline_make()
 
     if current_tab and current_tab.width > width - indicators then
       local available = width
-      viewport.lo = viewport.index
-      viewport.hi = viewport.index
+      -- viewport.lo = viewport.index
+      -- viewport.hi = viewport.index
       if viewport.lo == viewport.hi then
         viewport.prefix = viewport.indicator_left
         viewport.postfix = viewport.indicator_end
@@ -1017,11 +1048,11 @@ function M.tabline_make()
           viewport.prefix = ""
           available = available - viewport.indicator_left_width
         end
-      elseif viewport.hi == #tabs_cache then
+      elseif viewport.index == #tabs_cache then
         viewport.prefix = viewport.indicator_left
         viewport.postfix = viewport.indicator_end
         available = available - viewport.indicator_end_width
-      elseif viewport.lo == 1 then
+      elseif viewport.index == 1 then
         viewport.prefix = viewport.indicator_start
         viewport.postfix = viewport.indicator_right
         available = available - viewport.indicator_start_width
@@ -1034,16 +1065,10 @@ function M.tabline_make()
       tab_shrink = true
 
       local buf = buf_cache[viewport.index]
-      local state = STATES.FOCUSED + current_tab.modified + current_tab.severity
-      local hl = "%#" .. resolve_hl(M.base_highlights, state) .. "#"
+      local state = buf == viewport.buf and STATES.FOCUSED or STATES.VISIBLE
 
       local pad = string.rep(" ", math.max(0, available - current_tab.str_width))
-
-      tab_str = hl
-        .. focus_on_click(buf)
-        .. fn.strcharpart(current_tab.str, current_tab.str_width - available, available)
-        .. "%#TablineFill#"
-        .. pad
+      tab_str = current_tab.partial_left(available, state) .. pad
     elseif viewport.total_tabs_width > width then
       calc_truncated_tabs(width)
     else
@@ -1082,7 +1107,7 @@ function M.tabline_make()
   end
 
   local elapsed = (vim.uv.hrtime() - start) / 1e6 -- milliseconds
-  -- vim.notify(string.format("tabline: %.3fms", elapsed))
+  vim.notify(string.format("tabline: %.3fms", elapsed))
   return viewport.str
 end
 
