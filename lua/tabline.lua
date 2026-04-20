@@ -967,11 +967,14 @@ local function handle_buf_delete(width)
   elseif viewport.hi == #tabs_cache then
     viewport.lo, left_remaining = compute_left_remain_from_end(width)
   elseif partial_deleted then
-    local indicators = compute_both_indicators()
+    local indicators = viewport.indicator_left_width + viewport.indicator_right_width
     viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators)
     if viewport.hi == #tabs_cache then
       viewport.lo, left_remaining = compute_left_remain_from_end(width)
       right_remaining = 0
+    else
+      right_remaining = right_remaining + indicators
+      left_remaining = indicators
     end
   else
     local reserved = prefix_size > 0 and (prefix_size + viewport.indicator_left_width - viewport.indicator_right_width)
