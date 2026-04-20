@@ -985,6 +985,13 @@ local function handle_buf_delete(width)
     local indicators = indicator_left + indicator_right
     viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators)
     right_remaining = right_remaining + indicator_right
+  elseif viewport.buf_deleted_partial then
+    viewport.buf_deleted_partial = false
+    local indicators = compute_both_indicators()
+    viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators)
+    make_prefix(0, 0)
+    make_postfix(right_remaining, 0)
+    return
   else
     local reserved = prefix_size > 0 and (prefix_size + viewport.indicator_left_width - viewport.indicator_right_width)
       or (viewport.indicator_left_width + viewport.indicator_right_width)
@@ -994,14 +1001,8 @@ local function handle_buf_delete(width)
       viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicator_left - viewport.indicator_end_width)
       left_remaining = left_remaining + indicator_left
     else
-      if viewport.buf_deleted_partial then
-        viewport.buf_deleted_partial = false
-        handle_width_change(width)
-        return
-      else
-        make_postfix(right_remaining, 0)
-        return
-      end
+      make_postfix(right_remaining, 0)
+      return
     end
   end
 
