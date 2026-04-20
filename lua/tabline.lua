@@ -1,5 +1,5 @@
 local bit = require("bit")
-local band, bor, bnot, lshift, rshift = bit.band, bit.bor, bit.bnot, bit.lshift, bit.rshift
+local band, bor, lshift, rshift = bit.band, bit.bor, bit.lshift, bit.rshift
 
 local api, fn, bo = vim.api, vim.fn, vim.bo
 local strwidth, fnamemodify = fn.strwidth, fn.fnamemodify
@@ -59,6 +59,7 @@ M.update_cursor_line_hl = function(_, _) end
 ---@field changed boolean
 ---@field size_changed boolean
 ---@field buf_deleted boolean
+---@field buf_deleted_partial boolean
 ---@field diag_or_input_changed boolean
 ---@field lo integer
 ---@field hi integer
@@ -83,6 +84,7 @@ local viewport = {
   changed = true,
   size_changed = true,
   buf_deleted = false,
+  buf_deleted_partial = false,
   diag_or_input_changed = true,
   is_in_small_size = true,
   lo = 1,
@@ -681,6 +683,8 @@ local function remove_buf_from_tabline(bufnr)
   end
   repeated_names_remove(bufnr, tab.tail)
 
+  viewport.buf_deleted_partial = index == viewport.lo - 1
+
   table.remove(tabs_cache, index)
   table.remove(buf_cache, index)
 
@@ -894,34 +898,6 @@ local function gen_prefix_postfix(left_remaining, right_remaining)
   make_postfix(right_remaining, indicator_size)
 end
 
-local function handle_buf_delete(width)
-  local left_remaining = 0
-  local right_remaining = 0
-  viewport.buf_deleted = false
-
-  if viewport.lo == 1 then
-    local indicator_left = viewport.indicator_start_width
-    local indicator_right = compute_right_indicator()
-    local indicators = indicator_left + indicator_right
-    viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators)
-    right_remaining = right_remaining + indicator_right
-  else
-    local reserved = prefix_size > 0 and (prefix_size + viewport.indicator_left_width - viewport.indicator_right_width)
-      or (viewport.indicator_left_width + viewport.indicator_right_width)
-    viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - reserved)
-    if viewport.hi == #tabs_cache then
-      local indicator_left = viewport.indicator_left_width
-      viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicator_left - viewport.indicator_end_width)
-      left_remaining = left_remaining + indicator_left
-    else
-      make_postfix(right_remaining, 0)
-      return
-    end
-  end
-
-  gen_prefix_postfix(left_remaining, right_remaining)
-end
-
 local function handle_index_before(width)
   local left_remaining = 0
   local right_remaining = 0
@@ -998,6 +974,40 @@ local function handle_width_change(width)
   gen_prefix_postfix(left_remaining, right_remaining)
 end
 
+local function handle_buf_delete(width)
+  local left_remaining = 0
+  local right_remaining = 0
+  viewport.buf_deleted = false
+
+  if viewport.lo == 1 then
+    local indicator_left = viewport.indicator_start_width
+    local indicator_right = compute_right_indicator()
+    local indicators = indicator_left + indicator_right
+    viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators)
+    right_remaining = right_remaining + indicator_right
+  else
+    local reserved = prefix_size > 0 and (prefix_size + viewport.indicator_left_width - viewport.indicator_right_width)
+      or (viewport.indicator_left_width + viewport.indicator_right_width)
+    viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - reserved)
+    if viewport.hi == #tabs_cache then
+      local indicator_left = viewport.indicator_left_width
+      viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicator_left - viewport.indicator_end_width)
+      left_remaining = left_remaining + indicator_left
+    else
+      if viewport.buf_deleted_partial then
+        viewport.buf_deleted_partial = false
+        handle_width_change(width)
+        return
+      else
+        make_postfix(right_remaining, 0)
+        return
+      end
+    end
+  end
+
+  gen_prefix_postfix(left_remaining, right_remaining)
+end
+
 ---@param width integer
 local function calc_truncated_tabs(width)
   if viewport.buf_deleted then
@@ -1061,6 +1071,8 @@ function M.tabline_make()
         viewport.postfix = viewport.indicator_right
         available = width - indicators
       end
+
+      -- @check: sometimes missing by 1 again
 
       tab_shrink = true
 
