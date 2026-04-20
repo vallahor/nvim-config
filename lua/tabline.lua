@@ -151,7 +151,6 @@ local diag_cache = {}
 ---@field tail string
 ---@field ext string
 ---@field width integer
----@field str_width integer
 ---@field modified integer
 ---@field icon Icon?
 ---@field rendered_visible string?
@@ -432,7 +431,6 @@ local function build_tab(buf, dir, tail, ext)
     display = "",
     str = "",
     icon = tab_icon,
-    str_width = 0,
     modified = 0,
     width = 0,
     rendered = {},
@@ -518,9 +516,6 @@ local function build_tab(buf, dir, tail, ext)
 
   tab.rendered_visible = visible_.display
   tab.rendered_focused = focused_.display
-  -- tab.str = visible_.raw
-  tab.str = "aeho"
-  tab.str_width = visible_.width
 
   local new_width = math.max(visible_.width, focused_.width)
   tab.width = new_width
@@ -537,7 +532,7 @@ local function build_tab(buf, dir, tail, ext)
     if new_width ~= tab.width then
       viewport.total_tabs_width = viewport.total_tabs_width - tab.width + new_width
       tab.width = new_width
-      -- this should be another flag
+      -- @check: this should be another flag
       viewport.size_changed = true
     end
   end
@@ -604,8 +599,6 @@ local function build_tab(buf, dir, tail, ext)
           .. (components[pos].on_click or components[pos].text)
       end
     end
-    -- vim.notify(string.format("%d %d %d", width, w, width - w))
-    -- vim.notify(vim.inspect(components))
 
     return table.concat(partial_left)
   end
@@ -619,7 +612,7 @@ local function refresh_tab(index)
     return
   end
   tab.update_unique_prefix()
-  tab.rendered = setmetatable({}, getmetatable(tab.rendered)) -- wipe all variants
+  tab.rendered = setmetatable({}, getmetatable(tab.rendered))
   tab.update()
 end
 
@@ -788,18 +781,6 @@ local function render_sidebar()
   return sidebar_width + sidebar.separator_width
 end
 
----@type table<integer, table<integer, table<integer, string>>>
-local diag_hl_map = {
-  [1] = {
-    { "%#TablineVisibleDiagError#", "%#TablineFocusedDiagError#" },
-    { "%#TablineVisibleDiagModifiedError#", "%#TablineFocusedDiagModifiedError#" },
-  },
-  [2] = {
-    { "%#TablineVisibleDiagWarn#", "%#TablineFocusedDiagWarn#" },
-    { "%#TablineVisibleDiagModifiedWarn#", "%#TablineFocusedDiagModifiedWarn#" },
-  },
-}
-
 local function get_viewport_hi(idx, width)
   local w = tabs_cache[idx].width
   local hi = idx
@@ -885,7 +866,7 @@ end
 
 local function compute_right_remain_from_start(width)
   local indicator_left = viewport.indicator_start_width
-  local indicator_right = compute_right_indicator()
+  local indicator_right = viewport.indicator_right_width
   local indicators = indicator_left + indicator_right
   local hi, right_remaining = get_viewport_hi(1, width - indicators)
   return hi, right_remaining + indicator_right
@@ -989,9 +970,14 @@ local function handle_buf_delete(width)
     viewport.buf_deleted_partial = false
     local indicators = compute_both_indicators()
     viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators)
-    make_prefix(0, 0)
-    make_postfix(right_remaining, 0)
-    return
+    if viewport.hi == #tabs_cache then
+      viewport.lo, left_remaining = compute_left_remain_from_end(width)
+      right_remaining = 0
+    else
+      make_prefix(0, 0)
+      make_postfix(right_remaining, 0)
+      return
+    end
   else
     local reserved = prefix_size > 0 and (prefix_size + viewport.indicator_left_width - viewport.indicator_right_width)
       or (viewport.indicator_left_width + viewport.indicator_right_width)
@@ -1049,39 +1035,30 @@ function M.tabline_make()
 
     if current_tab and current_tab.width > width - indicators then
       local available = width
-      -- viewport.lo = viewport.index
-      -- viewport.hi = viewport.index
-      if viewport.lo == viewport.hi then
+      viewport.lo = viewport.index
+      viewport.hi = viewport.index
+      if viewport.hi == #tabs_cache then
         viewport.prefix = viewport.indicator_left
         viewport.postfix = viewport.indicator_end
-        available = available - viewport.indicator_end_width - viewport.indicator_left_width
-        if available <= viewport.indicator_left_width then
-          viewport.prefix = ""
-          available = available - viewport.indicator_left_width
-        end
-      elseif viewport.index == #tabs_cache then
-        viewport.prefix = viewport.indicator_left
-        viewport.postfix = viewport.indicator_end
-        available = available - viewport.indicator_end_width
-      elseif viewport.index == 1 then
+        available = available - viewport.indicator_left_width - viewport.indicator_end_width
+      elseif viewport.lo == 1 then
         viewport.prefix = viewport.indicator_start
         viewport.postfix = viewport.indicator_right
-        available = available - viewport.indicator_start_width
+        available = available - viewport.indicator_start_width - viewport.indicator_right_width
       else
         viewport.prefix = viewport.indicator_left
         viewport.postfix = viewport.indicator_right
         available = width - indicators
       end
 
-      -- @check: sometimes missing by 1 again
-
       tab_shrink = true
 
       local buf = buf_cache[viewport.index]
-      local state = buf == viewport.buf and STATES.FOCUSED or STATES.VISIBLE
+      local focused = buf == viewport.buf and STATES.FOCUSED or STATES.VISIBLE
+      local state = bor(focused, current_tab.modified + current_tab.severity)
 
-      local pad = string.rep(" ", math.max(0, available - current_tab.str_width))
-      tab_str = current_tab.partial_left(available, state) .. pad
+      local pad = string.rep(" ", math.max(0, available - current_tab.rendered[state].width))
+      tab_str = current_tab.partial_left(available, focused) .. pad
     elseif viewport.total_tabs_width > width then
       calc_truncated_tabs(width)
     else
@@ -1120,7 +1097,7 @@ function M.tabline_make()
   end
 
   local elapsed = (vim.uv.hrtime() - start) / 1e6 -- milliseconds
-  vim.notify(string.format("tabline: %.3fms", elapsed))
+  -- vim.notify(string.format("tabline: %.3fms", elapsed))
   return viewport.str
 end
 
