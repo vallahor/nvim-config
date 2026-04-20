@@ -581,23 +581,21 @@ local function build_tab(buf, dir, tail, ext)
 
     partial_left[#partial_left + 1] = focus_on_click(buf)
 
-    if w > 0 then
-      local remaining = width - w
-      if remaining > 0 then
-        local text = components[comp_pos].text
-        local part = fn.strcharpart(text, components[comp_pos].text_width - remaining, remaining)
-        partial_left[#partial_left + 1] = "%#"
-          .. components[comp_pos].hl
-          .. "#"
-          .. (components[comp_pos].on_click and on_click(buf, comp_pos, part) or part)
-      end
+    local remaining = w > 0 and width - w or width
+    if remaining > 0 then
+      local text = components[comp_pos].text
+      local part = fn.strcharpart(text, components[comp_pos].text_width - remaining)
+      partial_left[#partial_left + 1] = "%#"
+        .. components[comp_pos].hl
+        .. "#"
+        .. (components[comp_pos].on_click and on_click(buf, comp_pos, part) or part)
+    end
 
-      for pos = comp_pos + 1, #components do
-        partial_left[#partial_left + 1] = "%#"
-          .. components[pos].hl
-          .. "#"
-          .. (components[pos].on_click or components[pos].text)
-      end
+    for pos = comp_pos + 1, #components do
+      partial_left[#partial_left + 1] = "%#"
+        .. components[pos].hl
+        .. "#"
+        .. (components[pos].on_click or components[pos].text)
     end
 
     return table.concat(partial_left)
@@ -813,12 +811,10 @@ local function make_prefix(left_remaining, indicator)
     if left_remaining > 0 then
       local size = left_remaining - indicator
       if size > 0 then
-        if size > 0 then
-          local tab = tabs_cache[viewport.lo - 1]
-          viewport.prefix = viewport.prefix .. tab.partial_left(size)
-        else
-          viewport.prefix = viewport.prefix .. string.rep(" ", size)
-        end
+        local tab = tabs_cache[viewport.lo - 1]
+        viewport.prefix = viewport.prefix .. tab.partial_left(size)
+      else
+        viewport.prefix = viewport.prefix .. string.rep(" ", size)
       end
     end
     prefix_size = left_remaining
@@ -958,25 +954,24 @@ end
 local function handle_buf_delete(width)
   local left_remaining = 0
   local right_remaining = 0
+  local partial_deleted = viewport.buf_deleted_partial
   viewport.buf_deleted = false
 
-  if viewport.lo == 1 then
-    local indicator_left = viewport.indicator_start_width
-    local indicator_right = compute_right_indicator()
-    local indicators = indicator_left + indicator_right
-    viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators)
-    right_remaining = right_remaining + indicator_right
-  elseif viewport.buf_deleted_partial then
+  if partial_deleted then
     viewport.buf_deleted_partial = false
+    viewport.lo = viewport.lo - 1
+  end
+
+  if viewport.lo == 1 then
+    viewport.hi, right_remaining = compute_right_remain_from_start(width)
+  elseif viewport.hi == #tabs_cache then
+    viewport.lo, left_remaining = compute_left_remain_from_end(width)
+  elseif partial_deleted then
     local indicators = compute_both_indicators()
     viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators)
     if viewport.hi == #tabs_cache then
       viewport.lo, left_remaining = compute_left_remain_from_end(width)
       right_remaining = 0
-    else
-      make_prefix(0, 0)
-      make_postfix(right_remaining, 0)
-      return
     end
   else
     local reserved = prefix_size > 0 and (prefix_size + viewport.indicator_left_width - viewport.indicator_right_width)
@@ -1554,7 +1549,7 @@ function M.setup(opts)
 end
 
 local function debug_command()
-  vim.notify(vim.inspect(click_handlers))
+  --
 end
 
 api.nvim_create_user_command("Aeho", debug_command, {})
