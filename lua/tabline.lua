@@ -499,7 +499,7 @@ local function build_tab(buf, dir, tail, ext)
     return {
       components = components,
       display = table.concat(display),
-      width = api.nvim_strwidth("Aeho"),
+      width = tab_width,
     }
   end
 
@@ -539,6 +539,30 @@ local function build_tab(buf, dir, tail, ext)
       viewport.size_changed = true
     end
   end
+
+  tab.partial_right = function(width)
+    local components = tab.rendered[STATES.VISIBLE + tab.modified + tab.severity].components
+    local partial_right = { focus_on_click(buf) }
+    local w = 0
+    for _, component in ipairs(components) do
+      if w + component.text_width > width then
+        local remaining = width - w
+        if remaining > 0 then
+          local text = component.on_click or component.text
+          local part = fn.strcharpart(text, 0, remaining)
+          partial_right[#partial_right + 1] = "%#" .. component.hl .. "#" .. part
+        end
+        w = w + remaining
+        break
+      end
+      w = w + component.text_width
+      partial_right[#partial_right + 1] = "%#" .. component.hl .. "#" .. (component.on_click or component.text)
+    end
+    local pad = string.rep(" ", math.max(0, width - w))
+    partial_right[#partial_right + 1] = pad
+    return table.concat(partial_right)
+  end
+
   return tab
 end
 
@@ -751,18 +775,21 @@ end
 
 local function resolve_prefix_str(size)
   local tab = tabs_cache[viewport.lo - 1]
-  local state = tab.modified + tab.severity
-  local hl = "%#" .. resolve_hl(M.base_highlights, state) .. "#"
-  local pad = string.rep(" ", math.max(0, size - tab.str_width))
-  return pad .. hl .. fn.strcharpart(tab.str, tab.str_width - size, size)
+  -- local state = tab.modified + tab.severity
+  -- local hl = "%#" .. resolve_hl(M.base_highlights, state) .. "#"
+  -- local pad = string.rep(" ", math.max(0, size - tab.str_width))
+  -- return pad .. hl .. fn.strcharpart(tab.str, tab.str_width - size, size)
+  return "Aeho"
 end
 
 local function resolve_post_str(size)
   local tab = tabs_cache[viewport.hi + 1]
-  local state = tab.modified + tab.severity
-  local hl = "%#" .. resolve_hl(M.base_highlights, state) .. "#"
-  local pad = string.rep(" ", math.max(0, size - tab.str_width))
-  return hl .. fn.strcharpart(tab.str, 0, size) .. pad
+  -- local state = tab.modified + tab.severity
+  -- local hl = "%#" .. resolve_hl(M.base_highlights, state) .. "#"
+  -- local pad = string.rep(" ", math.max(0, size - tab.str_width))
+  -- return hl .. fn.strcharpart(tab.str, 0, size) .. pad
+  print(tab.partial_right(size))
+  return tab.partial_right(size)
 end
 
 local function make_prefix(left_remaining, indicator)
@@ -791,7 +818,7 @@ local function make_postfix(right_remaining, indicator)
     if right_remaining > 0 then
       local size = right_remaining - indicator
       if size > 0 then
-        viewport.postfix = focus_on_click(buf_cache[viewport.hi + 1]) .. resolve_post_str(size) .. viewport.postfix
+        viewport.postfix = resolve_post_str(size) .. viewport.postfix
       elseif size < 0 then
         viewport.postfix = "%#TablineFill#" .. string.rep(" ", right_remaining) .. viewport.postfix
       end
