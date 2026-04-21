@@ -19,6 +19,16 @@ local M = {}
 local config = {
   focus_on_click = true,
 
+  tab = {
+    on_click = function(tab, clicks, button, mods)
+      if button == "l" then
+        tab.focus()
+      elseif button == "m" then
+        tab.close(false)
+      end
+    end,
+  },
+
   tabs = {
     { text = "" },
   },
@@ -290,17 +300,18 @@ local function get_hex(group, attr)
   return n and string.format("#%06x", n)
 end
 
-local click_handlers = {}
+local click_components_handlers = {}
+local click_tab_handlers = {}
 
-local function focus_on_click(bufnr)
+local function tab_on_click(bufnr)
   if M.focus_on_click then
-    return "%" .. bufnr .. "@v:lua.FocusTab@"
+    return "%" .. bufnr .. "@v:lua.TabOnClick@"
   end
   return ""
 end
 
-local function on_click(bufnr, index, text)
-  return "%" .. (lshift(bufnr, 16) + index) .. "@v:lua.OnClick@" .. text .. "%X" .. focus_on_click(bufnr)
+local function component_on_click(bufnr, index, text)
+  return "%" .. (lshift(bufnr, 16) + index) .. "@v:lua.ComponentOnClick@" .. text .. "%X" .. tab_on_click(bufnr)
 end
 
 local function update_buf_index()
@@ -392,26 +403,10 @@ local function resolve_severity(diags)
   if not diags then
     return 0
   end
-  -- for diag, diag_state in pairs(diag_to_state) do
-  --   if (diags[diag] or 0) > 0 then
-  --     return diag_state
-  --   end
-  -- end
-  --- @check: make this an array, so the user can
-  --- make their on order
-  --- just a list with the order and a for thats
-  --- return in the first match
-  if (diags[vim.diagnostic.severity.ERROR] or 0) > 0 then
-    return STATES.ERROR
-  end
-  if (diags[vim.diagnostic.severity.WARN] or 0) > 0 then
-    return STATES.WARN
-  end
-  if (diags[vim.diagnostic.severity.INFO] or 0) > 0 then
-    return STATES.INFO
-  end
-  if (diags[vim.diagnostic.severity.HINT] or 0) > 0 then
-    return STATES.HINT
+  for _, diag in ipairs(M.diag_order) do
+    if (diags[diag] or 0) > 0 then
+      return diag_to_state[diag]
+    end
   end
   return 0
 end
@@ -481,14 +476,12 @@ local function build_tab(buf, dir, tail, ext)
       is_focused = band(state, STATES.FOCUSED) ~= 0,
       is_modified = band(state, STATES.MODIFIED) ~= 0,
       diagnostics = diag_cache[buf] or {},
-      close = function(force)
-        force = force or false
-        M.close_tab(buf, force)
-      end,
     }
 
+    click_tab_handlers[buf] = M.tab.on_click
+
     local tab_width = 0
-    local display = { focus_on_click(buf) }
+    local display = { tab_on_click(buf) }
     local components = {}
 
     for i, comp in ipairs(M.tabs) do
@@ -502,11 +495,11 @@ local function build_tab(buf, dir, tail, ext)
       elseif comp.text then
         text = comp.text(tab_state)
         if comp.on_click then
-          local on_click_str = on_click(buf, i, text)
+          local on_click_str = component_on_click(buf, i, text)
           local text_width = api.nvim_strwidth(text)
           tab_width = tab_width + text_width
-          click_handlers[buf] = click_handlers[buf] or {}
-          click_handlers[buf][i] = comp.on_click
+          click_components_handlers[buf] = click_components_handlers[buf] or {}
+          click_components_handlers[buf][i] = comp.on_click
           display[#display + 1] = "%#" .. hl .. "#" .. on_click_str
           components[#components + 1] =
             { text = text, text_width = text_width, hl = hl, on_click = on_click_str or nil }
@@ -565,7 +558,7 @@ local function build_tab(buf, dir, tail, ext)
 
   tab.partial_right = function(width)
     local components = tab.rendered[STATES.VISIBLE + tab.modified + tab.severity].components
-    local partial_right = { focus_on_click(buf) }
+    local partial_right = { tab_on_click(buf) }
     local w = 0
     for i, component in ipairs(components) do
       if w + component.text_width > width then
@@ -576,7 +569,7 @@ local function build_tab(buf, dir, tail, ext)
           partial_right[#partial_right + 1] = "%#"
             .. component.hl
             .. "#"
-            .. (components.on_click and on_click(buf, i, part) or part)
+            .. (components.on_click and component_on_click(buf, i, part) or part)
         end
         w = w + remaining
         break
@@ -605,7 +598,7 @@ local function build_tab(buf, dir, tail, ext)
       comp_pos = pos
     end
 
-    partial_left[#partial_left + 1] = focus_on_click(buf)
+    partial_left[#partial_left + 1] = tab_on_click(buf)
 
     local remaining = w > 0 and width - w or width
     if remaining > 0 then
@@ -614,7 +607,7 @@ local function build_tab(buf, dir, tail, ext)
       partial_left[#partial_left + 1] = "%#"
         .. components[comp_pos].hl
         .. "#"
-        .. (components[comp_pos].on_click and on_click(buf, comp_pos, part) or part)
+        .. (components[comp_pos].on_click and component_on_click(buf, comp_pos, part) or part)
     end
 
     for pos = comp_pos + 1, #components do
@@ -705,7 +698,8 @@ local function remove_buf_from_tabline(bufnr)
   table.remove(tabs_cache, index)
   table.remove(buf_cache, index)
 
-  click_handlers[bufnr] = nil
+  click_tab_handlers[bufnr] = nil
+  click_components_handlers[bufnr] = nil
 
   -- @check
   -- here could be the logic to delete and go to left
@@ -750,8 +744,12 @@ local function get_current_index()
   return buf_index[viewport.buf] or 1
 end
 
+local cached_pad_tab = -1
+local sidebar_spaces_tab = ""
+
 local cached_pad_left = -1
 local cached_pad_right = -1
+
 local sidebar_spaces_left = ""
 local sidebar_spaces_right = ""
 local function make_spaces(cached_pad, str, n)
@@ -798,9 +796,15 @@ local function render_sidebar()
       label = fn.strcharpart(label, 0, sidebar_width)
     end
 
-    sidebar.rendered_focused = "%#TablineSidebarFocusedLabel#" .. label .. "%#TablineSidebarSep#" .. sidebar.separator
+    sidebar.right = api.nvim_win_get_position(sidebar.winnr)[2] ~= 0
 
-    sidebar.rendered_visible = "%#TablineSidebarVisibleLabel#" .. label .. "%#TablineSidebarSep#" .. sidebar.separator
+    if sidebar.right then
+      sidebar.rendered_focused = "%#TablineSidebarSep#" .. sidebar.separator .. "%#TablineSidebarFocusedLabel#" .. label
+      sidebar.rendered_visible = "%#TablineSidebarSep#" .. sidebar.separator .. "%#TablineSidebarVisibleLabel#" .. label
+    else
+      sidebar.rendered_focused = "%#TablineSidebarFocusedLabel#" .. label .. "%#TablineSidebarSep#" .. sidebar.separator
+      sidebar.rendered_visible = "%#TablineSidebarVisibleLabel#" .. label .. "%#TablineSidebarSep#" .. sidebar.separator
+    end
   end
   return sidebar_width + sidebar.separator_width
 end
@@ -846,6 +850,7 @@ local function make_prefix(left_remaining, indicator)
     prefix_size = left_remaining
   else
     viewport.prefix = viewport.indicator_start
+    prefix_size = 0
   end
 end
 
@@ -864,6 +869,7 @@ local function make_postfix(right_remaining, indicator)
     postfix_size = right_remaining
   else
     viewport.postfix = viewport.indicator_end
+    postfix_size = 0
   end
 end
 
@@ -1093,10 +1099,6 @@ function M.tabline_make()
       goto build_viewport_str
     end
 
-    -- @check: theres a bug in here. -- solved? need more tests
-    -- im considering the indicators .. but just the left and right
-    -- when they are in start/right or left/end
-    -- they are off by one.
     if current_tab and current_tab.width > width - indicators then
       local available = width
       viewport.lo = viewport.index
@@ -1130,6 +1132,8 @@ function M.tabline_make()
       viewport.hi = #tabs_cache
       viewport.prefix = viewport.indicator_start
       viewport.postfix = ""
+      prefix_size = 0
+      postfix_size = 0
     end
 
     ::build_viewport_str::
@@ -1139,8 +1143,13 @@ function M.tabline_make()
       sidebar_str = sidebar.focus and sidebar.rendered_focused or sidebar.rendered_visible
     end
 
-    local tabs = { sidebar_str, viewport.prefix }
+    local tabs = {}
+    if not sidebar.right then
+      tabs[#tabs + 1] = sidebar_str
+    end
+    tabs[#tabs + 1] = viewport.prefix
 
+    local filled_spaces = 0
     if tab_shrink then
       tabs[#tabs + 1] = tab_str
     else
@@ -1149,11 +1158,29 @@ function M.tabline_make()
         local buf = buf_cache[i]
         local focused = buf == viewport.buf
         tabs[#tabs + 1] = focused and tab.rendered_focused or tab.rendered_visible
+        filled_spaces = filled_spaces + tab.width
       end
     end
 
     tabs[#tabs + 1] = viewport.postfix
     tabs[#tabs + 1] = viewport.endfix
+
+    if sidebar.right then
+      local pad = ""
+      if not tab_shrink then
+        if viewport.lo == 1 then
+          indicators = viewport.indicator_start_width + compute_right_indicator()
+        elseif viewport.hi == #tabs_cache then
+          indicators = viewport.indicator_left_width + compute_left_indicator()
+        else
+          indicators = compute_both_indicators()
+        end
+        local remaining = viewport.width - sidebar.width - prefix_size - postfix_size - filled_spaces - indicators
+        pad = make_spaces(cached_pad_tab, sidebar_spaces_tab, remaining)
+      end
+
+      tabs[#tabs + 1] = pad .. sidebar_str
+    end
 
     viewport.str = table.concat(tabs)
 
@@ -1535,23 +1562,30 @@ _G.make_tabline = M.tabline_make
 vim.opt.tabline = "%!v:lua.make_tabline()"
 vim.opt.showtabline = 2
 
-_G.OnClick = function(id, clicks, button, mods)
+_G.ComponentOnClick = function(id, clicks, button, mods)
   local bufnr = rshift(id, 16)
   local comp_index = band(id, 0xFFFF)
-  local fn_handler = click_handlers[bufnr] and click_handlers[bufnr][comp_index]
+  local fn_handler = click_components_handlers[bufnr] and click_components_handlers[bufnr][comp_index]
   if fn_handler then
     fn_handler(bufnr, clicks, button, mods)
   end
 end
 
--- @check maybe change to click tab
--- and give more options to do
-_G.FocusTab = function(bufnr, _clicks, button)
-  if button == "l" then
-    api.nvim_set_current_buf(bufnr)
-    viewport.index = buf_index[bufnr]
-  elseif button == "m" then
-    M.close_tab(bufnr, false)
+_G.TabOnClick = function(bufnr, clicks, button, mods)
+  local tab = {
+    bufnr = bufnr,
+    focus = function()
+      api.nvim_set_current_buf(bufnr)
+      viewport.index = buf_index[bufnr]
+    end,
+    close = function(force)
+      M.close_tab(bufnr, force)
+    end,
+  }
+
+  local tab_fn_handler = click_tab_handlers[bufnr]
+  if tab_fn_handler then
+    tab_fn_handler(tab, clicks, button, mods)
   end
 end
 
@@ -1560,6 +1594,8 @@ function M.setup(opts)
 
   M.diag_filter = config.diagnostics.filter
   M.diag_order = config.diagnostics.order
+  M.tab = {}
+  M.tab.on_click = config.tab.on_click
 
   M.tabs = config.tabs
   M.base_highlights = config.base_highlights
