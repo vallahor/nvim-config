@@ -60,6 +60,7 @@ M.update_cursor_line_hl = function(_, _) end
 ---@field size_changed boolean
 ---@field buf_deleted boolean
 ---@field buf_deleted_partial boolean
+---@field tab_width_changed boolean
 ---@field diag_or_input_changed boolean
 ---@field lo integer
 ---@field hi integer
@@ -85,6 +86,7 @@ local viewport = {
   size_changed = true,
   buf_deleted = false,
   buf_deleted_partial = false,
+  tab_width_changed = false,
   diag_or_input_changed = true,
   is_in_small_size = true,
   lo = 1,
@@ -167,6 +169,7 @@ local icons_hl_cache = {}
 local tabs_repeated_names_buf_cache = {}
 
 local prefix_size = 0
+local postfix_size = 0
 
 local redraw_scheduled = false
 
@@ -373,6 +376,10 @@ local function resolve_severity(diags)
   if not diags then
     return 0
   end
+  --- @check: make this an array, so the user can
+  --- make their on order
+  --- just a list with the order and a for thats
+  --- return in the first match
   if (diags[vim.diagnostic.severity.ERROR] or 0) > 0 then
     return STATES.ERROR
   end
@@ -532,8 +539,6 @@ local function build_tab(buf, dir, tail, ext)
     if new_width ~= tab.width then
       viewport.total_tabs_width = viewport.total_tabs_width - tab.width + new_width
       tab.width = new_width
-      -- @check: this should be another flag
-      viewport.size_changed = true
     end
   end
 
@@ -835,6 +840,7 @@ local function make_postfix(right_remaining, indicator)
         viewport.postfix = "%#TablineFill#" .. string.rep(" ", right_remaining) .. viewport.postfix
       end
     end
+    postfix_size = right_remaining
   else
     viewport.postfix = viewport.indicator_end
   end
@@ -885,7 +891,6 @@ local function handle_index_before(width)
     local indicator = viewport.indicator_left_width + viewport.indicator_right_width
     viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicator)
     right_remaining = right_remaining + indicator
-    left_remaining = indicator
   end
 
   gen_prefix_postfix(left_remaining, right_remaining)
@@ -901,7 +906,6 @@ local function handle_index_after(width)
     local indicator = viewport.indicator_left_width + viewport.indicator_right_width
     viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicator)
     left_remaining = left_remaining + indicator
-    right_remaining = indicator
   end
 
   gen_prefix_postfix(left_remaining, right_remaining)
@@ -977,17 +981,44 @@ local function handle_buf_delete(width)
       left_remaining = indicators
     end
   else
-    local reserved = prefix_size > 0 and (prefix_size + viewport.indicator_left_width - viewport.indicator_right_width)
-      or (viewport.indicator_left_width + viewport.indicator_right_width)
+    local reserved = prefix_size > 0 and prefix_size or (viewport.indicator_left_width + viewport.indicator_right_width)
     viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - reserved)
     if viewport.hi == #tabs_cache then
-      local indicator_left = viewport.indicator_left_width
-      viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicator_left - viewport.indicator_end_width)
-      left_remaining = left_remaining + indicator_left
+      viewport.lo, left_remaining = compute_left_remain_from_end(width)
+      right_remaining = 0
     else
       make_postfix(right_remaining, 0)
       return
     end
+  end
+
+  gen_prefix_postfix(left_remaining, right_remaining)
+end
+
+local function handle_tab_width_change(width)
+  local left_remaining = 0
+  local right_remaining = 0
+  viewport.tab_width_changed = false
+
+  if viewport.lo == 1 then
+    viewport.hi, right_remaining = compute_right_remain_from_start(width)
+  elseif viewport.hi == #tabs_cache then
+    viewport.lo, left_remaining = compute_left_remain_from_end(width)
+  else
+    local indicators = viewport.indicator_left_width + viewport.indicator_right_width
+    if viewport.index == viewport.hi then
+      if postfix_size == 0 then
+        viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicators)
+        make_prefix(left_remaining, 0)
+        return
+      end
+    end
+    local reserved = prefix_size + viewport.indicator_left_width + viewport.indicator_right_width
+    viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - reserved)
+    left_remaining = prefix_size
+    make_prefix(prefix_size, 0)
+    make_postfix(right_remaining, 0)
+    return
   end
 
   gen_prefix_postfix(left_remaining, right_remaining)
@@ -1003,6 +1034,8 @@ local function calc_truncated_tabs(width)
     handle_index_before(width)
   elseif viewport.size_changed then
     handle_width_change(width)
+  elseif viewport.tab_width_changed then
+    handle_tab_width_change(width)
   end
 end
 
@@ -1388,6 +1421,8 @@ local function setup_autocmds()
         local tab = tabs_cache[index]
         local modified = bo[ev.buf].modified and STATES.MODIFIED or 0
 
+        local old_width = tab.width
+
         if tab.modified == modified then
           return
         end
@@ -1396,7 +1431,11 @@ local function setup_autocmds()
         tab.update()
 
         if viewport.lo <= index and index <= viewport.hi then
-          viewport.diag_or_input_changed = true
+          if tab.width ~= old_width then
+            viewport.tab_width_changed = true
+          else
+            viewport.diag_or_input_changed = true
+          end
           schedule_redraw()
         end
       end,
@@ -1553,6 +1592,8 @@ end
 
 local function debug_command()
   --
+  print(viewport.lo, viewport.hi, viewport.index)
+  print(prefix_size, postfix_size)
 end
 
 api.nvim_create_user_command("Aeho", debug_command, {})

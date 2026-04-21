@@ -661,8 +661,8 @@ vim.api.nvim_create_autocmd("VimEnter", {
           end,
         },
         {
-          text = function(info)
-            return info.unique_prefix .. info.name
+          text = function(tab)
+            return (tab.is_modified and "[MODIFIED] " or "") .. tab.unique_prefix .. tab.name
           end,
           highlights = {
             diagnostics = {
