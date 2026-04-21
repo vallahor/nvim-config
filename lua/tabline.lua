@@ -78,6 +78,7 @@ M.update_cursor_line_hl = function(_, _) end
 ---@field changed boolean
 ---@field size_changed boolean
 ---@field buf_deleted boolean
+---@field buf_deleted_from_side boolean
 ---@field buf_deleted_partial boolean
 ---@field tab_width_changed boolean
 ---@field diag_or_input_changed boolean
@@ -104,6 +105,7 @@ local viewport = {
   changed = true,
   size_changed = true,
   buf_deleted = false,
+  buf_deleted_from_side = false,
   buf_deleted_partial = false,
   tab_width_changed = false,
   diag_or_input_changed = true,
@@ -680,6 +682,16 @@ local function resolve_update_tab(buf)
   update_buf_index()
 end
 
+local function insert_buf_into_tabline(buf)
+  local dir, tail, ext = resolve_buf_name(buf)
+  repeated_names_insert(buf, tail)
+  local tab = build_tab(buf, dir, tail, ext)
+  table.insert(buf_cache, buf)
+  table.insert(tabs_cache, tab)
+  viewport.buf = buf
+  update_buf_index()
+end
+
 local function remove_buf_from_tabline(bufnr)
   local index = buf_index[bufnr]
   if not index then
@@ -697,32 +709,23 @@ local function remove_buf_from_tabline(bufnr)
   table.remove(tabs_cache, index)
   table.remove(buf_cache, index)
 
+  diag_cache[bufnr] = nil
   click_tab_handlers[bufnr] = nil
   click_components_handlers[bufnr] = nil
 
-  ---@type integer?
+  ------@type integer?
   local replacement = buf_cache[index] or buf_cache[index - 1]
-  if replacement then
-    local cur_win = api.nvim_get_current_win()
-    for _, win in ipairs(fn.win_findbuf(bufnr)) do
-      api.nvim_win_set_buf(win, replacement)
-      M.update_cursor_line_hl(cur_win, win)
-    end
+  if not replacement then
+    replacement = api.nvim_create_buf(true, false)
   end
 
-  diag_cache[bufnr] = nil
+  local cur_win = api.nvim_get_current_win()
+  for _, win in ipairs(fn.win_findbuf(bufnr)) do
+    api.nvim_win_set_buf(win, replacement)
+    M.update_cursor_line_hl(cur_win, win)
+  end
 
   viewport.buf_deleted = true
-  update_buf_index()
-end
-
-local function insert_buf_into_tabline(buf)
-  local dir, tail, ext = resolve_buf_name(buf)
-  repeated_names_insert(buf, tail)
-  local tab = build_tab(buf, dir, tail, ext)
-  table.insert(buf_cache, buf)
-  table.insert(tabs_cache, tab)
-  viewport.buf = buf
   update_buf_index()
 end
 
@@ -1370,7 +1373,9 @@ function M.close_tab_left(force)
     return
   end
 
+  viewport.buf_deleted_from_side = true
   M.close_tab(bufnr, force)
+  viewport.buf_deleted_from_side = false
 end
 
 function M.close_tab_right(force)
@@ -1379,7 +1384,9 @@ function M.close_tab_right(force)
     return
   end
 
+  viewport.buf_deleted_from_side = true
   M.close_tab(bufnr, force)
+  viewport.buf_deleted_from_side = false
 end
 
 function M.close_all_tab_left(force)
@@ -1389,7 +1396,9 @@ function M.close_all_tab_left(force)
       return
     end
 
+    viewport.buf_deleted_from_side = true
     M.close_tab(bufnr, force)
+    viewport.buf_deleted_from_side = false
   end
 end
 
@@ -1400,7 +1409,9 @@ function M.close_all_tab_right(force)
       return
     end
 
+    viewport.buf_deleted_from_side = true
     M.close_tab(bufnr, force)
+    viewport.buf_deleted_from_side = false
   end
 end
 
@@ -1477,6 +1488,9 @@ local function setup_autocmds()
 
   api.nvim_create_autocmd({ "BufEnter" }, {
     callback = function(ev)
+      if viewport.buf_deleted_from_side then
+        return
+      end
       if sidebar.enabled and sidebar_filetypes[bo[ev.buf].filetype] then
         local winnr = api.nvim_get_current_win()
         sidebar.winnr = winnr
@@ -1703,8 +1717,7 @@ end
 
 local function debug_command()
   --
-  print(viewport.lo, viewport.hi, viewport.index)
-  print(prefix_size, postfix_size)
+  print(vim.inspect(buf_cache))
 end
 
 api.nvim_create_user_command("Aeho", debug_command, {})
