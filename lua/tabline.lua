@@ -23,7 +23,16 @@ local config = {
     { text = "" },
   },
 
-  severity_filter = { min = vim.diagnostic.severity.WARN, max = vim.diagnostic.severit },
+  diagnostics = {
+    filter = { min = vim.diagnostic.severity.WARN, max = vim.diagnostic.severit },
+    order = {
+      vim.diagnostic.severity.ERROR,
+      vim.diagnostic.severity.WARN,
+      vim.diagnostic.severity.INFO,
+      vim.diagnostic.severity.HINT,
+    },
+  },
+
   dynamic = { diagnostics = false },
 
   indicator_left = " …",
@@ -1064,6 +1073,10 @@ function M.tabline_make()
       goto build_viewport_str
     end
 
+    -- @check: theres a bug in here.
+    -- im considering the indicators .. but just the left and right
+    -- when they are in start/right or left/end
+    -- they are off by one.
     if current_tab and current_tab.width > width - indicators then
       local available = width
       viewport.lo = viewport.index
@@ -1525,7 +1538,8 @@ end
 function M.setup(opts)
   config = vim.tbl_deep_extend("force", vim.deepcopy(config), opts or {})
 
-  M.diag_filter = config.severity_filter
+  M.diag_filter = config.diagnostics.filter
+  M.diag_order = config.diagnostics.order
 
   M.tabs = config.tabs
   M.base_highlights = config.base_highlights
