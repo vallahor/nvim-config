@@ -381,10 +381,22 @@ local function make_tab_icon(ext)
   }
 end
 
+local diag_to_state = {
+  [vim.diagnostic.severity.ERROR] = STATES.ERROR,
+  [vim.diagnostic.severity.WARN] = STATES.WARN,
+  [vim.diagnostic.severity.INFO] = STATES.INFO,
+  [vim.diagnostic.severity.HINT] = STATES.HINT,
+}
+
 local function resolve_severity(diags)
   if not diags then
     return 0
   end
+  -- for diag, diag_state in pairs(diag_to_state) do
+  --   if (diags[diag] or 0) > 0 then
+  --     return diag_state
+  --   end
+  -- end
   --- @check: make this an array, so the user can
   --- make their on order
   --- just a list with the order and a for thats
@@ -1065,7 +1077,15 @@ function M.tabline_make()
     local width = viewport.width - viewport.sidebar_width
 
     local tab_str, tab_shrink = "", false
-    local indicators = compute_both_indicators()
+    local indicators = 0
+    if viewport.lo == 1 then
+      indicators = viewport.indicator_start_width + viewport.indicator_right_width
+    elseif viewport.hi == #tabs_cache then
+      indicators = viewport.indicator_left_width + viewport.indicator_end_width
+    else
+      indicators = compute_both_indicators()
+    end
+
     local current_tab = tabs_cache[viewport.index]
 
     if viewport.diag_or_input_changed and not viewport.changed then
@@ -1073,7 +1093,7 @@ function M.tabline_make()
       goto build_viewport_str
     end
 
-    -- @check: theres a bug in here.
+    -- @check: theres a bug in here. -- solved? need more tests
     -- im considering the indicators .. but just the left and right
     -- when they are in start/right or left/end
     -- they are off by one.
