@@ -126,7 +126,6 @@ local viewport = {
   total_tabs_width = 0,
 }
 
--- @CHECK: If its in the right side ......... heheheh you know.
 ---@class Sidebar
 ---@field enabled boolean
 ---@field rendered_visible string
@@ -752,6 +751,7 @@ local cached_pad_right = -1
 
 local sidebar_spaces_left = ""
 local sidebar_spaces_right = ""
+
 local function make_spaces(cached_pad, str, n)
   if cached_pad ~= n then
     cached_pad = n
@@ -1527,10 +1527,15 @@ local function setup_autocmds()
         end
 
         if changed then
+          local old_width = tab.width
           tab.severity = new_severity
           tab.update()
           if viewport.lo <= index and index <= viewport.hi then
-            viewport.diag_or_input_changed = true
+            if tab.width ~= old_width then
+              viewport.tab_width_changed = true
+            else
+              viewport.diag_or_input_changed = true
+            end
             schedule_redraw()
           end
         end
