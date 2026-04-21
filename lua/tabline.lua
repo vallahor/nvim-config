@@ -700,10 +700,6 @@ local function remove_buf_from_tabline(bufnr)
   click_tab_handlers[bufnr] = nil
   click_components_handlers[bufnr] = nil
 
-  -- @check
-  -- here could be the logic to delete and go to left
-  -- right not its goes to right as default
-  -- but some user maybe would like to have this option
   ---@type integer?
   local replacement = buf_cache[index] or buf_cache[index - 1]
   if replacement then
@@ -1365,6 +1361,46 @@ function M.close_tab(bufnr, force)
 
   if api.nvim_buf_is_valid(bufnr) then
     api.nvim_buf_delete(bufnr, { force = true })
+  end
+end
+
+function M.close_tab_left(force)
+  local bufnr = buf_cache[viewport.index - 1]
+  if not bufnr then
+    return
+  end
+
+  M.close_tab(bufnr, force)
+end
+
+function M.close_tab_right(force)
+  local bufnr = buf_cache[viewport.index + 1]
+  if not bufnr then
+    return
+  end
+
+  M.close_tab(bufnr, force)
+end
+
+function M.close_all_tab_left(force)
+  for i = viewport.index - 1, 1, -1 do
+    local bufnr = buf_cache[i]
+    if not bufnr then
+      return
+    end
+
+    M.close_tab(bufnr, force)
+  end
+end
+
+function M.close_all_tab_right(force)
+  for i = #tabs_cache, viewport.index + 1, -1 do
+    local bufnr = buf_cache[i]
+    if not bufnr then
+      return
+    end
+
+    M.close_tab(bufnr, force)
   end
 end
 
