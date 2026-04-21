@@ -645,6 +645,13 @@ vim.api.nvim_create_autocmd("VimEnter", {
         visible = { default = "TablineVisible", modified = "TablineVisibleModified" },
         focused = { default = "TablineFocused", modified = "TablineFocusedModified" },
       },
+      icons = {
+        enabled = true,
+        provider = "nvim-web-devicons", -- "mini.icons"|"nvim-web-devicons" default: "mini.icons"
+      },
+      tab = {
+        show_index = true,
+      },
       -- dynamic = { diagnostics = true, focused = { diagnostics = false }, visible = { diagnostics = true } },
       dynamic = { diagnostics = true },
       tabs = {
@@ -656,7 +663,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
           },
         },
         {
-          icon = function(icon, _info)
+          icon = function(icon, _tab)
             return "" .. icon .. " "
           end,
         },
@@ -678,38 +685,38 @@ vim.api.nvim_create_autocmd("VimEnter", {
           },
         },
         { static = " " },
-        {
-          text = function(info)
-            return info.diagnostics[vim.diagnostic.severity.ERROR]
-                and info.diagnostics[vim.diagnostic.severity.ERROR] .. " E"
-              or ""
-          end,
-          highlights = {
-            diagnostics = {
-              error = {
-                focused = { default = "TablineFocusedDiagError", modified = "TablineFocusedDiagModifiedError" },
-                visible = { default = "TablineVisibleDiagError", modified = "TablineVisibleDiagModifiedError" },
-              },
-            },
-          },
-        },
-        { static = " " },
-        {
-          text = function(info)
-            return info.diagnostics[vim.diagnostic.severity.WARN]
-                and info.diagnostics[vim.diagnostic.severity.WARN] .. " W"
-              or ""
-          end,
-          highlights = {
-            diagnostics = {
-              warn = {
-                focused = { default = "TablineFocusedDiagWarn", modified = "TablineFocusedDiagModifiedWarn" },
-                visible = { default = "TablineVisibleDiagWarn", modified = "TablineVisibleDiagModifiedWarn" },
-              },
-            },
-          },
-        },
-        { static = " " },
+        -- {
+        --   text = function(info)
+        --     return info.diagnostics[vim.diagnostic.severity.ERROR]
+        --         and info.diagnostics[vim.diagnostic.severity.ERROR] .. " E"
+        --       or ""
+        --   end,
+        --   highlights = {
+        --     diagnostics = {
+        --       error = {
+        --         focused = { default = "TablineFocusedDiagError", modified = "TablineFocusedDiagModifiedError" },
+        --         visible = { default = "TablineVisibleDiagError", modified = "TablineVisibleDiagModifiedError" },
+        --       },
+        --     },
+        --   },
+        -- },
+        -- { static = " " },
+        -- {
+        --   text = function(info)
+        --     return info.diagnostics[vim.diagnostic.severity.WARN]
+        --         and info.diagnostics[vim.diagnostic.severity.WARN] .. " W"
+        --       or ""
+        --   end,
+        --   highlights = {
+        --     diagnostics = {
+        --       warn = {
+        --         focused = { default = "TablineFocusedDiagWarn", modified = "TablineFocusedDiagModifiedWarn" },
+        --         visible = { default = "TablineVisibleDiagWarn", modified = "TablineVisibleDiagModifiedWarn" },
+        --       },
+        --     },
+        --   },
+        -- },
+        -- { static = " " },
         {
           text = function()
             return "󰅖"
@@ -749,8 +756,8 @@ vim.api.nvim_create_autocmd("VimEnter", {
       tabline.close_tab(0, false)
     end, { silent = true, nowait = true })
     map("n", "<c-s-w>", function()
-      -- tabline.close_tab_left(false)
-      tabline.close_tab_right(false)
+      tabline.close_tab_left(false)
+      -- tabline.close_tab_right(false)
       -- tabline.close_all_tab_left(false)
     end, { silent = true, nowait = true })
     map("n", "<c-x>", function()

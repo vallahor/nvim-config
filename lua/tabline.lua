@@ -48,15 +48,14 @@ local config = {
   indicator_left = " …",
   indicator_right = "… ",
 
-  indicator_start = "*",
-  indicator_end = "*",
+  indicator_start = "-*",
+  indicator_end = "*-",
 
   no_diagnostic = false,
   no_modified = false,
 
   icons = {
     enabled = true,
-    no_hl = false,
     provider = "mini.icons", -- "mini.icons"|"nvim-web-devicons" default: "mini.icons"
   },
 
@@ -346,9 +345,7 @@ end
 
 local get_icon_fn = {
   ["mini.icons"] = function(ext)
-    local icon, hl = M.icons.provider.get("extension", ext)
-    -- @check: get_hex should be removed
-    return icon, get_hex(hl, "fg")
+    return M.icons.provider.get("extension", ext)
   end,
   ["nvim-web-devicons"] = function(ext)
     return M.icons.provider.get_icon_color(nil, ext, { default = true })
@@ -452,7 +449,6 @@ local function build_tab(buf, dir, tail, ext)
     tail = tail,
     unique_prefix = unique_prefix,
     ext = ext,
-    display = "",
     str = "",
     icon = tab_icon,
     modified = 0,
@@ -532,15 +528,6 @@ local function build_tab(buf, dir, tail, ext)
       return result
     end,
   })
-
-  local visible_ = tab.rendered[STATES.VISIBLE]
-  local focused_ = tab.rendered[STATES.FOCUSED]
-
-  tab.rendered_visible = visible_.display
-  tab.rendered_focused = focused_.display
-
-  local new_width = math.max(visible_.width, focused_.width)
-  tab.width = new_width
 
   tab.update = function()
     local flags = tab.modified + tab.severity
@@ -678,6 +665,7 @@ local function resolve_update_tab(buf)
     repeated_names_insert(buf, new_tail)
   end
   local tab = build_tab(buf, dir, new_tail, ext)
+  tab.update()
   tabs_cache[index] = tab
   update_buf_index()
 end
@@ -686,6 +674,7 @@ local function insert_buf_into_tabline(buf)
   local dir, tail, ext = resolve_buf_name(buf)
   repeated_names_insert(buf, tail)
   local tab = build_tab(buf, dir, tail, ext)
+  tab.update()
   table.insert(buf_cache, buf)
   table.insert(tabs_cache, tab)
   viewport.buf = buf
@@ -713,7 +702,7 @@ local function remove_buf_from_tabline(bufnr)
   click_tab_handlers[bufnr] = nil
   click_components_handlers[bufnr] = nil
 
-  ------@type integer?
+  ---@type integer?
   local replacement = buf_cache[index] or buf_cache[index - 1]
   if not replacement then
     replacement = api.nvim_create_buf(true, false)
@@ -1167,14 +1156,18 @@ function M.tabline_make()
     if sidebar.right then
       local pad = ""
       if not tab_shrink then
-        if viewport.lo == 1 then
-          indicators = viewport.indicator_start_width + compute_right_indicator()
-        elseif viewport.hi == #tabs_cache then
-          indicators = viewport.indicator_left_width + compute_left_indicator()
+        if viewport.total_tabs_width > width then
+          if viewport.lo == 1 then
+            indicators = viewport.indicator_start_width + compute_right_indicator()
+          elseif viewport.hi == #tabs_cache then
+            indicators = compute_left_indicator() + viewport.indicator_end_width
+          else
+            indicators = compute_both_indicators()
+          end
         else
-          indicators = compute_both_indicators()
+          indicators = viewport.indicator_start_width
         end
-        local remaining = viewport.width - sidebar.width - prefix_size - postfix_size - filled_spaces - indicators
+        local remaining = math.max(0, width - prefix_size - postfix_size - filled_spaces - indicators)
         pad = make_spaces(cached_pad_tab, sidebar_spaces_tab, remaining)
       end
 
@@ -1447,14 +1440,6 @@ local function setup_tabline_hl()
   hl(0, "TablineVisibleDiagModifiedWarn", { fg = warning_fg, bg = visible_bg, italic = true })
 end
 
----@return string
-M.get_icon_hl = function(color, hl_group)
-  if M.icons.no_hl then
-    return hl_group
-  end
-  return M.derive_hl(hl_group, { fg = color })
-end
-
 local ignore_buftypes = {
   ["quickfix"] = true,
   ["nofile"] = true,
@@ -1657,7 +1642,6 @@ function M.setup(opts)
 
   if config.icons.enabled then
     M.icons = {}
-    M.icons.no_hl = config.icons.no_hl
 
     local provider = config.icons.provider
     M.icons.provider = require(provider)

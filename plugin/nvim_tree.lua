@@ -127,9 +127,9 @@ end
 
 require("nvim-tree").setup({
   on_attach = on_attach,
-  -- view = {
-  --   side = "right",
-  -- },
+  view = {
+    side = "right",
+  },
   actions = {
     remove_file = {
       close_window = false,
