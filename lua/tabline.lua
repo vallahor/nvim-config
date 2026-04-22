@@ -70,6 +70,17 @@ local config = {
       sep = "TablineVisible",
     },
   },
+  ignore = {
+    bufnames = { "cmd.exe" },
+    buftypes = {
+      "nofile",
+      "terminal",
+      "prompt",
+    },
+    filetypes = {
+      "qf",
+    },
+  },
 }
 
 M.update_cursor_line_hl = function(_, _) end
@@ -1434,17 +1445,6 @@ function M.close_all_tab_right(force)
   end
 end
 
-local ignore_buftypes = {
-  ["quickfix"] = true,
-  ["nofile"] = true,
-  ["terminal"] = true,
-  ["prompt"] = true,
-}
-
-local ignore_filetypes = {
-  ["qf"] = true,
-}
-
 local function setup_autocmds()
   api.nvim_create_autocmd("BufWinEnter", {
     callback = function(ev)
@@ -1452,8 +1452,9 @@ local function setup_autocmds()
       if
         not api.nvim_buf_is_valid(buf)
         or not bo[buf].buflisted
-        or ignore_buftypes[bo[buf].buftype]
-        or ignore_filetypes[bo[buf].filetype]
+        or M.ignore.buftypes[bo[buf].buftype]
+        or M.ignore.filetypes[bo[buf].filetype]
+        -- or M.ignore.bufnames[api.nvim_buf_get_name(buf)]
       then
         return
       end
@@ -1626,6 +1627,20 @@ function M.setup(opts)
 
   M.tabs = config.tabs
   M.base_highlights = config.base_highlights
+
+  M.ignore = { buftypes = {}, filetypes = {}, bufnames = {} }
+
+  for _, buftype in ipairs(config.ignore.buftypes) do
+    M.ignore.buftypes[buftype] = true
+  end
+
+  for _, filetype in ipairs(config.ignore.filetypes) do
+    M.ignore.filetypes[filetype] = true
+  end
+
+  for _, bufname in ipairs(config.ignore.bufnames) do
+    M.ignore.bufnames[bufname] = true
+  end
 
   if config.icons.enabled then
     M.icons = {}
