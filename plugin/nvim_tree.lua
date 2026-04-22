@@ -28,7 +28,6 @@ api.events.subscribe(api.events.Event.FileRemoved, function(data)
     return
   end
 
-  -- Build ordered list of real buffers (no NvimTree)
   local buffers = vim.fn.getbufinfo({ buflisted = 1 })
   local buf_order = {}
   local idx = nil
@@ -49,21 +48,17 @@ api.events.subscribe(api.events.Event.FileRemoved, function(data)
   local replacement = nil
   local last_buffer = false
 
-  -- Try next buffer first, then previous
   replacement = buf_order[idx + 1] or buf_order[idx - 1]
 
-  -- If no other buffer, create scratch buffer
   if not replacement then
     replacement = vim.api.nvim_create_buf(true, false)
     last_buffer = true
   end
 
-  -- Replace the deleted buffer in all its windows
   for _, win in ipairs(vim.fn.win_findbuf(bufnr)) do
     vim.api.nvim_win_set_buf(win, replacement)
   end
 
-  -- Only focus tree if we just created a scratch buffer
   if last_buffer then
     vim.schedule(function()
       api.tree.focus()

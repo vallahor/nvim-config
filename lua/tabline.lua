@@ -1103,9 +1103,9 @@ function M.tabline_make()
     or viewport.buf_deleted
     or viewport.is_in_small_size
   then
-    if api.nvim_get_current_win() ~= sidebar.winnr and sidebar.focus then
-      sidebar.focus = false
-      viewport.buf = buf_cache[viewport.index]
+    if sidebar.winnr and api.nvim_get_current_win() == sidebar.winnr then
+      sidebar.focus = true
+      viewport.buf = -1
     end
 
     local width = viewport.width - viewport.sidebar_width
@@ -1480,8 +1480,7 @@ local function setup_autocmds()
         return
       end
       if sidebar.enabled and sidebar_filetypes[bo[ev.buf].filetype] then
-        local winnr = api.nvim_get_current_win()
-        sidebar.winnr = winnr
+        sidebar.winnr = api.nvim_get_current_win()
         sidebar.focus = true
         viewport.buf = -1
       else
