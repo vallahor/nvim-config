@@ -680,7 +680,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
         },
       },
       icons = {
-        enabled = false,
+        enabled = true,
       },
       -- dynamic = { diagnostics = true, focused = { diagnostics = false }, visible = { diagnostics = true } },
       -- dynamic = { diagnostics = true },
@@ -693,13 +693,18 @@ vim.api.nvim_create_autocmd("VimEnter", {
             focused = { default = focused_separator, modified = focused_separator },
           },
         },
-        -- {
-        --   icon = function(icon, _tab)
-        --     return "" .. icon .. " "
-        --   end,
-        -- },
+        {
+          icon = function(icon, _tab)
+            return "" .. icon .. " "
+          end,
+          -- highlights = {
+          --   focused = { default = focused_diag_error, modified = focused_diag_mod_error },
+          --   visible = { default = visible_diag_error, modified = visible_diag_mod_error },
+          -- },
+        },
         {
           text = function(tab)
+            -- tab.unique_prefix:gsub("/", "\\") -- windows way
             return tab.unique_prefix .. tab.name
           end,
           highlights = {
@@ -715,47 +720,47 @@ vim.api.nvim_create_autocmd("VimEnter", {
             },
           },
         },
-        -- { static = " " },
-        -- {
-        --   text = function(info)
-        --     return info.diagnostics[vim.diagnostic.severity.ERROR]
-        --         and info.diagnostics[vim.diagnostic.severity.ERROR] .. " E"
-        --       or ""
-        --   end,
-        --   highlights = {
-        --     diagnostics = {
-        --       error = {
-        --         focused = { default = "TablineFocusedDiagError", modified = "TablineFocusedDiagModifiedError" },
-        --         visible = { default = "TablineVisibleDiagError", modified = "TablineVisibleDiagModifiedError" },
-        --       },
-        --     },
-        --   },
-        -- },
-        -- { static = " " },
-        -- {
-        --   text = function(info)
-        --     return info.diagnostics[vim.diagnostic.severity.WARN]
-        --         and info.diagnostics[vim.diagnostic.severity.WARN] .. " W"
-        --       or ""
-        --   end,
-        --   highlights = {
-        --     diagnostics = {
-        --       warn = {
-        --         focused = { default = "TablineFocusedDiagWarn", modified = "TablineFocusedDiagModifiedWarn" },
-        --         visible = { default = "TablineVisibleDiagWarn", modified = "TablineVisibleDiagModifiedWarn" },
-        --       },
-        --     },
-        --   },
-        -- },
-        -- { static = " " },
-        -- {
-        --   text = function()
-        --     return "󰅖"
-        --   end,
-        --   on_click = function(bufnr, clicks, button, mods)
-        --     tabline.close_tab(bufnr, false)
-        --   end,
-        -- },
+        { static = " " },
+        {
+          text = function(info)
+            return info.diagnostics[vim.diagnostic.severity.ERROR]
+                and info.diagnostics[vim.diagnostic.severity.ERROR] .. " E"
+              or ""
+          end,
+          highlights = {
+            diagnostics = {
+              error = {
+                focused = { default = focused_diag_error, modified = focused_diag_mod_error },
+                visible = { default = visible_diag_error, modified = visible_diag_mod_error },
+              },
+            },
+          },
+        },
+        { static = " " },
+        {
+          text = function(info)
+            return info.diagnostics[vim.diagnostic.severity.WARN]
+                and info.diagnostics[vim.diagnostic.severity.WARN] .. " W"
+              or ""
+          end,
+          highlights = {
+            diagnostics = {
+              warn = {
+                focused = { default = focused_diag_warn, modified = focused_diag_mod_warn },
+                visible = { default = visible_diag_warn, modified = visible_diag_mod_warn },
+              },
+            },
+          },
+        },
+        { static = " " },
+        {
+          text = function()
+            return "󰅖"
+          end,
+          on_click = function(bufnr, clicks, button, mods)
+            tabline.close_tab(bufnr, false)
+          end,
+        },
         {
           static = " ",
           -- static = " ",

@@ -4,6 +4,8 @@ local band, bor, lshift, rshift = bit.band, bit.bor, bit.lshift, bit.rshift
 local api, fn, bo = vim.api, vim.fn, vim.bo
 local strwidth, fnamemodify = fn.strwidth, fn.fnamemodify
 
+local IS_WINDOWS = fn.has("win32") == 1
+
 local STATES = {
   VISIBLE = lshift(1, 0), -- 1
   FOCUSED = lshift(1, 1), -- 2
@@ -14,7 +16,8 @@ local STATES = {
   INFO = lshift(1, 6), -- 64
 }
 
-local M = {}
+local Galfo = {}
+local I = {}
 
 local config = {
   focus_on_click = true,
@@ -23,6 +26,8 @@ local config = {
     visible = { default = "TablineVisible", modified = "" },
     focused = { default = "TablineFocused", modified = "" },
   },
+
+  force_unix_path_sep = true,
 
   tab = {
     on_click = function(tab, _clicks, button, _mods)
@@ -106,9 +111,8 @@ local config = {
       "qf",
     },
   },
+  update_cursor_line_hl = function(_, _) end,
 }
-
-M.update_cursor_line_hl = function(_, _) end
 
 ---@class Viewport
 ---@field str string
@@ -120,7 +124,7 @@ M.update_cursor_line_hl = function(_, _) end
 ---@field should_not_focus boolean
 ---@field buf_deleted_partial boolean
 ---@field tab_width_changed boolean
----@field diag_or_input_changed boolean
+---@field simple_redraw boolean
 ---@field lo integer
 ---@field hi integer
 ---@field buf integer
@@ -147,7 +151,7 @@ local viewport = {
   should_not_focus = false,
   buf_deleted_partial = false,
   tab_width_changed = false,
-  diag_or_input_changed = true,
+  simple_redraw = true,
   is_in_small_size = true,
   lo = 1,
   hi = 1,
@@ -204,29 +208,47 @@ local diag_cache = {}
 
 local hl_cache = {}
 
----@class Icon
----@field str string
+---@class Components
+---@field text string
+---@field text_width integer
+---@field hl string
+---@field on_click string?
+---
+---@class Rendered
+---@field components Components[]
+---@field display string
 ---@field width integer
----@field get function
+
+---@class TabIcon
+---@field str string
+---@field color string
+---@field width integer
 
 ---@class Tab
 ---@field str string
 ---@field tail string
 ---@field ext string
+---@field unique_prefix string
 ---@field width integer
+---@field severity integer
 ---@field modified integer
----@field icon Icon?
----@field rendered_visible string?
----@field rendered_focused string?
----@field update function
+---@field icon TabIcon?
+---@field rendered table<integer, Rendered>
+---@field rendered_visible string
+---@field rendered_focused string
+---@field update fun()
+---@field update_unique_prefix fun()
+---@field resolve_string fun(state: integer): Rendered
+---@field partial_left fun(width: integer): string
+---@field partial_right fun(width: integer): string
 
----@type {[integer]: Tab}
+-- @type {[integer]: Tab}
 local tabs_cache = {}
 
+---@type {[string]: {count: integer, icon: string, color: string}?}
 local icons_ext_cache = {}
-local icons_hl_cache = {}
 
----@type table<string, {count: integer, bufs: table<integer, boolean?>}>
+---@type {[string]: {count: integer, bufs: table<integer, boolean?>}?}
 local tabs_repeated_names_buf_cache = {}
 
 local prefix_size = 0
@@ -244,7 +266,7 @@ local function schedule_redraw()
   end
 end
 
-M.dynamic = {
+I.dynamic = {
   diagnostics = {},
 }
 
@@ -257,8 +279,8 @@ local function init_dynamic(dynamic)
 
   local function mark_diags(flag)
     for _, severity in ipairs(severity_states) do
-      M.dynamic.diagnostics[flag + severity] = true
-      M.dynamic.diagnostics[flag + STATES.MODIFIED + severity] = true
+      I.dynamic.diagnostics[flag + severity] = true
+      I.dynamic.diagnostics[flag + STATES.MODIFIED + severity] = true
     end
   end
 
@@ -282,7 +304,7 @@ local function to_int(color)
   return color
 end
 
-M.derive_hl = function(group, overrides)
+Galfo.derive_hl = function(group, overrides)
   local ok, val = pcall(api.nvim_get_hl, 0, { name = group, link = false })
   if not ok then
     return group
@@ -331,7 +353,7 @@ M.derive_hl = function(group, overrides)
 end
 
 ---@return nil|{fg: string, bg:string}
-M.get_hex = function(group)
+Galfo.get_hex = function(group)
   local ok, val = pcall(api.nvim_get_hl, 0, { name = group, link = false })
   if not ok or not val then
     return nil
@@ -342,11 +364,14 @@ M.get_hex = function(group)
   }
 end
 
+---@type table<integer, table<integer, function>?>
 local click_components_handlers = {}
+
+---@type table<integer, function?>
 local click_tab_handlers = {}
 
 local function tab_on_click(bufnr)
-  if M.focus_on_click then
+  if I.focus_on_click then
     return "%" .. bufnr .. "@v:lua.TabOnClick@"
   end
   return ""
@@ -377,7 +402,14 @@ local function resolve_buf_name(buf)
   local tail = fnamemodify(bufname, ":t")
   local ext = fnamemodify(bufname, ":e")
   local relative = fnamemodify(bufname, ":~:.")
-  local dir = relative:gsub("\\", "/"):match("^(.*/)") or ""
+
+  if IS_WINDOWS and I.tab.force_unix_path_sep then
+    relative = relative:gsub("\\", "/")
+  end
+
+  local sep = (IS_WINDOWS and not I.tab.force_unix_path_sep) and "^(.*\\)" or "^(.*/)"
+  local dir = relative:match(sep) or ""
+
   return dir, tail, ext
 end
 
@@ -387,10 +419,12 @@ end
 
 local get_icon_fn = {
   ["mini.icons"] = function(ext)
-    return M.icons.provider.get("extension", ext)
+    local icon, hl = I.icons.provider.get("extension", ext)
+    local color = api.nvim_get_hl(0, { name = hl, link = false })
+    return icon, string.format("#%06x", color.fg)
   end,
   ["nvim-web-devicons"] = function(ext)
-    return M.icons.provider.get_icon_color(nil, ext, { default = true })
+    return I.icons.provider.get_icon_color(nil, ext, { default = true })
   end,
 }
 
@@ -399,7 +433,7 @@ local function icon_cache_insert(ext)
     icons_ext_cache[ext].count = icons_ext_cache[ext].count + 1
     return icons_ext_cache[ext].icon, icons_ext_cache[ext].color
   end
-  local icon, color = M.get_icon(ext)
+  local icon, color = I.get_icon(ext)
   icons_ext_cache[ext] = { icon = icon, color = color, count = 1 }
   return icon, color
 end
@@ -411,8 +445,6 @@ local function icon_cache_remove(ext)
   icons_ext_cache[ext].count = icons_ext_cache[ext].count - 1
   if icons_ext_cache[ext].count == 0 then
     icons_ext_cache[ext] = nil
-    icons_hl_cache["f_" .. ext] = nil
-    icons_hl_cache["v_" .. ext] = nil
   end
 end
 
@@ -443,7 +475,7 @@ local function resolve_severity(diags)
   if not diags then
     return 0
   end
-  for _, diag in ipairs(M.diag_order) do
+  for _, diag in ipairs(I.diag_order) do
     if (diags[diag] or 0) > 0 then
       return diag_to_state[diag]
     end
@@ -470,8 +502,8 @@ local function resolve_hl(hl, state)
     end
   end
 
-  local focused_hl = (hl.focused or M.base_highlights.focused)
-  local visible_hl = (hl.visible or M.base_highlights.visible)
+  local focused_hl = (hl.focused or I.base_highlights.focused)
+  local visible_hl = (hl.visible or I.base_highlights.visible)
   local bucket = focused and focused_hl or visible_hl
   if not bucket then
     return ""
@@ -482,6 +514,11 @@ local function resolve_hl(hl, state)
   return bucket.default or ""
 end
 
+---@param buf integer
+---@param dir string
+---@param tail string
+---@param ext string
+---@return Tab
 local function build_tab(buf, dir, tail, ext)
   local unique_prefix = resolve_buf_repeated_names(tail) and dir or ""
   local tab_icon = make_tab_icon(ext)
@@ -516,17 +553,18 @@ local function build_tab(buf, dir, tail, ext)
       diagnostics = diag_cache[buf] or {},
     }
 
-    click_tab_handlers[buf] = M.tab.on_click
+    click_tab_handlers[buf] = I.tab.on_click
 
     local tab_width = 0
     local display = { tab_on_click(buf) }
     local components = {}
 
-    for i, comp in ipairs(M.tabs) do
+    for i, comp in ipairs(I.tabs) do
       local text
-      local hl = comp.highlights and resolve_hl(comp.highlights, state) or resolve_hl(M.base_highlights, state)
+      local hl = comp.highlights and resolve_hl(comp.highlights, state) or resolve_hl(I.base_highlights, state)
       if comp.icon and tab_icon then
-        hl = comp.highlights and hl or M.derive_hl(hl, { fg = tab_icon.color })
+        hl = comp.highlights and hl or Galfo.derive_hl(hl, { fg = tab_icon.color })
+        print(hl)
         text = comp.icon(tab_icon.str, tab_state)
       elseif comp.static then
         text = comp.static
@@ -750,7 +788,7 @@ local function remove_buf_from_tabline(bufnr)
   local cur_win = api.nvim_get_current_win()
   for _, win in ipairs(fn.win_findbuf(bufnr)) do
     api.nvim_win_set_buf(win, replacement)
-    M.update_cursor_line_hl(cur_win, win)
+    I.update_cursor_line_hl(cur_win, win)
   end
 
   viewport.buf_deleted = true
@@ -813,7 +851,7 @@ local function render_sidebar()
   if sidebar_width ~= sidebar.width then
     sidebar.width = sidebar_width
     local total_pad = math.max(0, sidebar_width - sidebar.label_width)
-    local pad_left, pad_right = M.sidebar_label_position(total_pad)
+    local pad_left, pad_right = I.sidebar_label_position(total_pad)
     local spaces_left = make_spaces(cached_pad_left, sidebar_spaces_left, pad_left)
     local spaces_right = make_spaces(cached_pad_right, sidebar_spaces_right, pad_right)
     local label = spaces_left .. sidebar.label .. spaces_right
@@ -1121,12 +1159,12 @@ local function calc_truncated_tabs(width)
   end
 end
 
-function M.tabline_make()
+function I.tabline_make()
   local start = vim.uv.hrtime()
   if
     viewport.size_changed
     or viewport.changed
-    or viewport.diag_or_input_changed
+    or viewport.simple_redraw
     or viewport.buf_deleted
     or viewport.is_in_small_size
   then
@@ -1149,8 +1187,8 @@ function M.tabline_make()
 
     local current_tab = tabs_cache[viewport.index]
 
-    if viewport.diag_or_input_changed and not viewport.changed then
-      viewport.diag_or_input_changed = false
+    if viewport.simple_redraw and not viewport.changed then
+      viewport.simple_redraw = false
       goto build_viewport_str
     end
 
@@ -1251,7 +1289,7 @@ function M.tabline_make()
   return viewport.str
 end
 
-function M.prev_tab()
+function Galfo.prev_tab()
   if sidebar.focus then
     return
   end
@@ -1262,7 +1300,7 @@ function M.prev_tab()
   end
 end
 
-function M.next_tab()
+function Galfo.next_tab()
   if sidebar.focus then
     return
   end
@@ -1273,7 +1311,7 @@ function M.next_tab()
   end
 end
 
-function M.prev_tab_cycle()
+function Galfo.prev_tab_cycle()
   if sidebar.focus then
     return
   end
@@ -1283,7 +1321,7 @@ function M.prev_tab_cycle()
   viewport.index = i
 end
 
-function M.next_tab_cycle()
+function Galfo.next_tab_cycle()
   if sidebar.focus then
     return
   end
@@ -1293,7 +1331,7 @@ function M.next_tab_cycle()
   viewport.index = i
 end
 
-function M.move_to_begin()
+function Galfo.move_to_begin()
   if sidebar.focus then
     return
   end
@@ -1302,7 +1340,7 @@ function M.move_to_begin()
   viewport.index = buf_index[buf]
 end
 
-function M.move_to_end()
+function Galfo.move_to_end()
   if sidebar.focus then
     return
   end
@@ -1321,7 +1359,7 @@ local function swap(i, j)
   schedule_redraw()
 end
 
-function M.move_tab_left()
+function Galfo.move_tab_left()
   if sidebar.focus then
     return
   end
@@ -1331,7 +1369,7 @@ function M.move_tab_left()
   end
 end
 
-function M.move_tab_right()
+function Galfo.move_tab_right()
   if sidebar.focus then
     return
   end
@@ -1341,7 +1379,7 @@ function M.move_tab_right()
   end
 end
 
-function M.move_tab_left_cycle()
+function Galfo.move_tab_left_cycle()
   if sidebar.focus then
     return
   end
@@ -1349,11 +1387,11 @@ function M.move_tab_left_cycle()
   if i > 1 then
     swap(i, i - 1)
   else
-    M.move_tab_end()
+    Galfo.move_tab_end()
   end
 end
 
-function M.move_tab_right_cycle()
+function Galfo.move_tab_right_cycle()
   if sidebar.focus then
     return
   end
@@ -1361,11 +1399,11 @@ function M.move_tab_right_cycle()
   if i < #buf_cache then
     swap(i, i + 1)
   else
-    M.move_tab_begin()
+    Galfo.move_tab_begin()
   end
 end
 
-function M.move_tab_begin()
+function Galfo.move_tab_begin()
   if sidebar.focus then
     return
   end
@@ -1380,7 +1418,7 @@ function M.move_tab_begin()
   end
 end
 
-function M.move_tab_end()
+function Galfo.move_tab_end()
   if sidebar.focus then
     return
   end
@@ -1395,7 +1433,7 @@ function M.move_tab_end()
   end
 end
 
-function M.close_tab(bufnr, force)
+function Galfo.close_tab(bufnr, force)
   bufnr = bufnr == 0 and api.nvim_get_current_buf() or bufnr
   local idx = buf_index[bufnr]
   if not idx then
@@ -1408,9 +1446,9 @@ function M.close_tab(bufnr, force)
       pcall(api.nvim_buf_call, bufnr, function()
         vim.cmd.write()
       end)
-      M.close_tab(bufnr, true)
+      Galfo.close_tab(bufnr, true)
     elseif choice == 2 then
-      M.close_tab(bufnr, true)
+      Galfo.close_tab(bufnr, true)
     end
     return
   end
@@ -1422,29 +1460,29 @@ function M.close_tab(bufnr, force)
   end
 end
 
-function M.close_tab_left(force)
+function Galfo.close_tab_left(force)
   local bufnr = buf_cache[viewport.index - 1]
   if not bufnr then
     return
   end
 
   viewport.should_not_focus = true
-  M.close_tab(bufnr, force)
+  Galfo.close_tab(bufnr, force)
   viewport.should_not_focus = false
 end
 
-function M.close_tab_right(force)
+function Galfo.close_tab_right(force)
   local bufnr = buf_cache[viewport.index + 1]
   if not bufnr then
     return
   end
 
   viewport.should_not_focus = true
-  M.close_tab(bufnr, force)
+  Galfo.close_tab(bufnr, force)
   viewport.should_not_focus = false
 end
 
-function M.close_all_tab_left(force)
+function Galfo.close_all_tab_left(force)
   for i = viewport.index - 1, 1, -1 do
     local bufnr = buf_cache[i]
     if not bufnr then
@@ -1452,12 +1490,12 @@ function M.close_all_tab_left(force)
     end
 
     viewport.should_not_focus = true
-    M.close_tab(bufnr, force)
+    Galfo.close_tab(bufnr, force)
     viewport.should_not_focus = false
   end
 end
 
-function M.close_all_tab_right(force)
+function Galfo.close_all_tab_right(force)
   for i = #tabs_cache, viewport.index + 1, -1 do
     local bufnr = buf_cache[i]
     if not bufnr then
@@ -1465,7 +1503,7 @@ function M.close_all_tab_right(force)
     end
 
     viewport.should_not_focus = true
-    M.close_tab(bufnr, force)
+    Galfo.close_tab(bufnr, force)
     viewport.should_not_focus = false
   end
 end
@@ -1478,9 +1516,9 @@ local function setup_autocmds()
         not api.nvim_buf_is_valid(buf)
         or not bo[buf].buflisted
         or buf_index[buf]
-        or M.ignore.buftypes[bo[buf].buftype]
-        or M.ignore.filetypes[bo[buf].filetype]
-        or M.ignore.bufnames[api.nvim_buf_get_name(buf)]
+        or I.ignore.buftypes[bo[buf].buftype]
+        or I.ignore.filetypes[bo[buf].filetype]
+        or I.ignore.bufnames[api.nvim_buf_get_name(buf)]
       then
         return
       end
@@ -1489,7 +1527,7 @@ local function setup_autocmds()
     end,
   })
 
-  if M.ignore.terminal then
+  if I.ignore.terminal then
     -- @check: Maybe theres a better way of doing this.
     api.nvim_create_autocmd("TermOpen", {
       callback = function(ev)
@@ -1510,8 +1548,6 @@ local function setup_autocmds()
       end
       if sidebar.enabled and sidebar_filetypes[bo[ev.buf].filetype] then
         sidebar.winnr = api.nvim_get_current_win()
-        sidebar.focus = true
-        viewport.buf = -1
       else
         sidebar.focus = false
         viewport.buf = ev.buf
@@ -1559,7 +1595,7 @@ local function setup_autocmds()
           if tab.width ~= old_width then
             viewport.tab_width_changed = true
           else
-            viewport.diag_or_input_changed = true
+            viewport.simple_redraw = true
           end
           schedule_redraw()
         end
@@ -1575,15 +1611,15 @@ local function setup_autocmds()
           return
         end
 
-        diag_cache[ev.buf] = vim.diagnostic.count(ev.buf, M.diag_filter)
+        diag_cache[ev.buf] = vim.diagnostic.count(ev.buf, I.diag_filter)
         local tab = tabs_cache[index]
         local new_severity = resolve_severity(diag_cache[ev.buf])
         local old_severity = tab.severity
 
         local changed = old_severity ~= new_severity
 
-        if next(M.dynamic.diagnostics) ~= nil then
-          for state in pairs(M.dynamic.diagnostics) do
+        if next(I.dynamic.diagnostics) ~= nil then
+          for state in pairs(I.dynamic.diagnostics) do
             if tab.rendered[state] ~= nil then
               tab.rendered[state] = nil
               changed = true
@@ -1595,11 +1631,12 @@ local function setup_autocmds()
           local old_width = tab.width
           tab.severity = new_severity
           tab.update()
+
           if viewport.lo <= index and index <= viewport.hi then
             if tab.width ~= old_width then
               viewport.tab_width_changed = true
             else
-              viewport.diag_or_input_changed = true
+              viewport.simple_redraw = true
             end
             schedule_redraw()
           end
@@ -1623,7 +1660,7 @@ local function setup_autocmds()
   })
 end
 
-_G.make_tabline = M.tabline_make
+_G.make_tabline = I.tabline_make
 vim.opt.tabline = "%!v:lua.make_tabline()"
 vim.opt.showtabline = 2
 
@@ -1644,7 +1681,7 @@ _G.TabOnClick = function(bufnr, clicks, button, mods)
       viewport.index = buf_index[bufnr]
     end,
     close = function(force)
-      M.close_tab(bufnr, force)
+      Galfo.close_tab(bufnr, force)
     end,
   }
 
@@ -1654,38 +1691,40 @@ _G.TabOnClick = function(bufnr, clicks, button, mods)
   end
 end
 
-function M.setup(opts)
+function Galfo.setup(opts)
   config = vim.tbl_deep_extend("force", vim.deepcopy(config), opts or {})
 
-  M.diag_filter = config.diagnostics.filter
-  M.diag_order = config.diagnostics.order
-  M.tab = {}
-  M.tab.on_click = config.tab.on_click
+  I.diag_filter = config.diagnostics.filter
+  I.diag_order = config.diagnostics.order
+  I.tab = {}
+  I.tab.on_click = config.tab.on_click
 
-  M.tabs = config.tabs
-  M.base_highlights = config.base_highlights
+  I.tab.force_unix_path_sep = config.force_unix_path_sep
 
-  M.ignore = { buftypes = {}, filetypes = {}, bufnames = {} }
-  M.ignore.terminal = config.ignore.terminal
+  I.tabs = config.tabs
+  I.base_highlights = config.base_highlights
+
+  I.ignore = { buftypes = {}, filetypes = {}, bufnames = {} }
+  I.ignore.terminal = config.ignore.terminal
 
   for _, buftype in ipairs(config.ignore.buftypes) do
-    M.ignore.buftypes[buftype] = true
+    I.ignore.buftypes[buftype] = true
   end
 
   for _, filetype in ipairs(config.ignore.filetypes) do
-    M.ignore.filetypes[filetype] = true
+    I.ignore.filetypes[filetype] = true
   end
 
   for _, bufname in ipairs(config.ignore.bufnames) do
-    M.ignore.bufnames[bufname] = true
+    I.ignore.bufnames[bufname] = true
   end
 
   if config.icons.enabled then
-    M.icons = {}
+    I.icons = {}
 
     local provider = config.icons.provider
-    M.icons.provider = require(provider)
-    M.get_icon = get_icon_fn[provider]
+    I.icons.provider = require(provider)
+    I.get_icon = get_icon_fn[provider]
   end
 
   sidebar.separator = config.sidebar.separator
@@ -1698,20 +1737,20 @@ function M.setup(opts)
   end
 
   if config.sidebar.label_position == "start" then
-    M.sidebar_label_position = sidebar_label_start
+    I.sidebar_label_position = sidebar_label_start
   elseif config.sidebar.label_position == "mid" then
-    M.sidebar_label_position = sidebar_label_mid
+    I.sidebar_label_position = sidebar_label_mid
   elseif config.sidebar.label_position == "end" then
-    M.sidebar_label_position = sidebar_label_end
+    I.sidebar_label_position = sidebar_label_end
   else
-    M.sidebar_label_position = sidebar_label_mid
+    I.sidebar_label_position = sidebar_label_mid
   end
 
   sidebar.label = config.sidebar.label
   sidebar.label_width = strwidth(sidebar.label)
 
   if config.focus_on_click then
-    M.focus_on_click = config.focus_on_click
+    I.focus_on_click = config.focus_on_click
   end
 
   viewport.truncate_left = "%#"
@@ -1740,8 +1779,8 @@ function M.setup(opts)
   setup_autocmds()
 
   if opts and type(opts.update_cursor_line_hl) == "function" then
-    M.update_cursor_line_hl = opts.update_cursor_line_hl
+    I.update_cursor_line_hl = opts.update_cursor_line_hl
   end
 end
 
-return M
+return Galfo

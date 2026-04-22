@@ -33,7 +33,7 @@ local get_filename = function()
     return "%t"
   end
   local fname = vim.fn.expand("%:.")
-  return (fname ~= "" and fname .. " " or "") .. "%m%r"
+  return (fname ~= "" and fname:gsub("\\", "/") .. " " or "") .. "%m%r"
 end
 MiniStatusline.setup({
   use_icons = false,
