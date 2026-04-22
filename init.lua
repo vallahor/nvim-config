@@ -640,26 +640,58 @@ vim.api.nvim_create_autocmd("VimEnter", {
   once = true,
   callback = function()
     local tabline = require("tabline")
+    local focused = tabline.get_hex("TablineFocused")
+    local visible = tabline.get_hex("TablineVisible")
+    local fill = tabline.get_hex("TablineFill")
+    local diag_error = tabline.get_hex("DiagnosticError")
+    local diag_warn = tabline.get_hex("DiagnosticWarn")
+
+    local focused_modified = tabline.derive_hl("TablineFocused", { italic = true })
+    local visible_modified = tabline.derive_hl("TablineVisible", { italic = true })
+    local sidebar_focused_label = tabline.derive_hl("TablineFocused", {})
+    local sidebar_visible_label = tabline.derive_hl("TablineVisible", { fg = focused.fg })
+    local sidebar_sep = tabline.derive_hl("WinSeparator", { bg = fill.bg })
+    local indicator_sep = tabline.derive_hl("TablineVisible", { bg = fill.bg })
+    local focused_separator = tabline.derive_hl("TablineFocused", { fg = fill.bg })
+    local visible_separator = tabline.derive_hl("TablineVisible", { fg = fill.bg })
+    local focused_diag_error = tabline.derive_hl("TablineFocused", { fg = diag_error.fg })
+    local visible_diag_error = tabline.derive_hl("TablineVisible", { fg = diag_error.fg })
+    local focused_diag_warn = tabline.derive_hl("TablineFocused", { fg = diag_warn.fg })
+    local visible_diag_warn = tabline.derive_hl("TablineVisible", { fg = diag_warn.fg })
+    local focused_diag_mod_error = tabline.derive_hl("TablineFocused", { fg = diag_error.fg, italic = true })
+    local visible_diag_mod_error = tabline.derive_hl("TablineVisible", { fg = diag_error.fg, italic = true })
+    local focused_diag_mod_warn = tabline.derive_hl("TablineFocused", { fg = diag_warn.fg, italic = true })
+    local visible_diag_mod_warn = tabline.derive_hl("TablineVisible", { fg = diag_warn.fg, italic = true })
+
     tabline.setup({
       base_highlights = {
-        visible = { default = "TablineVisible", modified = "TablineVisibleModified" },
-        focused = { default = "TablineFocused", modified = "TablineFocusedModified" },
+        visible = { default = "TablineVisible", modified = visible_modified },
+        focused = { default = "TablineFocused", modified = focused_modified },
+      },
+      indicators = {
+        first = { text = "", highlight = indicator_sep },
+        last = { text = "", highlight = indicator_sep },
+        truncate_left = { text = "…", highlight = indicator_sep },
+        truncate_right = { text = "…", highlight = indicator_sep },
+      },
+      sidebar = {
+        highlights = {
+          label = { focused = sidebar_focused_label, visible = sidebar_visible_label },
+          sep = sidebar_sep,
+        },
       },
       icons = {
-        enabled = true,
-        provider = "nvim-web-devicons", -- "mini.icons"|"nvim-web-devicons" default: "mini.icons"
-      },
-      tab = {
-        show_index = true,
+        enabled = false,
       },
       -- dynamic = { diagnostics = true, focused = { diagnostics = false }, visible = { diagnostics = true } },
-      dynamic = { diagnostics = true },
+      -- dynamic = { diagnostics = true },
       tabs = {
         {
-          static = " ",
+          -- static = " ",
+          static = " ",
           highlights = {
-            visible = { default = "TablineVisibleSeparator", modified = "TablineVisibleSeparator" },
-            focused = { default = "TablineFocusedSeparator", modified = "TablineFocusedSeparator" },
+            visible = { default = visible_separator, modified = visible_separator },
+            focused = { default = focused_separator, modified = focused_separator },
           },
         },
         {
@@ -674,17 +706,17 @@ vim.api.nvim_create_autocmd("VimEnter", {
           highlights = {
             diagnostics = {
               error = {
-                focused = { default = "TablineFocusedDiagError", modified = "TablineFocusedDiagModifiedError" },
-                visible = { default = "TablineVisibleDiagError", modified = "TablineVisibleDiagModifiedError" },
+                focused = { default = focused_diag_error, modified = focused_diag_mod_error },
+                visible = { default = visible_diag_error, modified = visible_diag_mod_error },
               },
               warn = {
-                focused = { default = "TablineFocusedDiagWarn", modified = "TablineFocusedDiagModifiedWarn" },
-                visible = { default = "TablineVisibleDiagWarn", modified = "TablineVisibleDiagModifiedWarn" },
+                focused = { default = focused_diag_warn, modified = focused_diag_mod_warn },
+                visible = { default = visible_diag_warn, modified = visible_diag_mod_warn },
               },
             },
           },
         },
-        { static = " " },
+        -- { static = " " },
         -- {
         --   text = function(info)
         --     return info.diagnostics[vim.diagnostic.severity.ERROR]
@@ -717,19 +749,20 @@ vim.api.nvim_create_autocmd("VimEnter", {
         --   },
         -- },
         -- { static = " " },
+        -- {
+        --   text = function()
+        --     return "󰅖"
+        --   end,
+        --   on_click = function(bufnr, clicks, button, mods)
+        --     tabline.close_tab(bufnr, false)
+        --   end,
+        -- },
         {
-          text = function()
-            return "󰅖"
-          end,
-          on_click = function(bufnr, clicks, button, mods)
-            tabline.close_tab(bufnr, false)
-          end,
-        },
-        {
-          static = " ",
+          static = " ",
+          -- static = " ",
           highlights = {
-            visible = { default = "TablineVisibleSeparator", modified = "TablineVisibleSeparator" },
-            focused = { default = "TablineFocusedSeparator", modified = "TablineFocusedSeparator" },
+            visible = { default = visible_separator, modified = visible_separator },
+            focused = { default = focused_separator, modified = focused_separator },
           },
         },
       },

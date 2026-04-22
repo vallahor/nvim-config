@@ -1,7 +1,7 @@
 vim.pack.add({
   "https://github.com/tpope/vim-repeat",
   "https://github.com/habamax/vim-godot",
-  "https://github.com/ricardoramirezr/blade-nav.nvim",
+  -- "https://github.com/ricardoramirezr/blade-nav.nvim",
 })
 
 local cow = require("close_other_window")

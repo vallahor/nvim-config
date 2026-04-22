@@ -78,8 +78,8 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter" }, {
 
       -- https://code.visualstudio.com/docs/editing/userdefinedsnippets
       sources = {
-        -- default = { "lsp", "path", "snippets", "buffer" },
-        default = { "lsp", "path", "snippets", "buffer", "blade-nav" },
+        default = { "lsp", "path", "snippets", "buffer" },
+        -- default = { "lsp", "path", "snippets", "buffer", "blade-nav" },
         -- default = { "path", "buffer" },
         providers = {
           lsp = {
@@ -108,12 +108,12 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter" }, {
               end,
             },
           },
-          ["blade-nav"] = {
-            module = "blade-nav.blink",
-            opts = {
-              close_tag_on_complete = true, -- default: true,
-            },
-          },
+          -- ["blade-nav"] = {
+          --   module = "blade-nav.blink",
+          --   opts = {
+          --     close_tag_on_complete = true, -- default: true,
+          --   },
+          -- },
         },
       },
 

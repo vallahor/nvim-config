@@ -44,12 +44,12 @@ local config = {
   },
 
   dynamic = { diagnostics = false },
-
-  indicator_left = " …",
-  indicator_right = "… ",
-
-  indicator_start = "-*",
-  indicator_end = "*-",
+  indicators = {
+    first = { text = "", highlight = "TablineVisible" },
+    last = { text = "", highlight = "TablineVisible" },
+    truncate_left = { text = "…", highlight = "TablineVisible" },
+    truncate_right = { text = "…", highlight = "TablineVisible" },
+  },
 
   no_diagnostic = false,
   no_modified = false,
@@ -65,6 +65,10 @@ local config = {
     label_position = "mid", -- "start"|"mid"|"end"
     separator = "│",
     filetypes = { "NvimTree", "neo-tree" }, -- Default with ["NvimTree", "neo-tree"]
+    highlights = {
+      label = { focused = "TablineFocused", visible = "TablineVisible" },
+      sep = "TablineVisible",
+    },
   },
 }
 
@@ -85,14 +89,14 @@ M.update_cursor_line_hl = function(_, _) end
 ---@field hi integer
 ---@field buf integer
 ---@field index integer
----@field indicator_left string
----@field indicator_right string
----@field indicator_left_width integer
----@field indicator_right_width integer
----@field indicator_start string
----@field indicator_end string
----@field indicator_start_width integer
----@field indicator_end_width integer
+---@field truncate_left string
+---@field truncate_right string
+---@field truncate_left_width integer
+---@field truncate_right_width integer
+---@field indicator_first string
+---@field indicator_last string
+---@field indicator_first_width integer
+---@field indicator_last_width integer
 ---@field prefix string
 ---@field postfix string
 ---@field endfix string
@@ -116,14 +120,14 @@ local viewport = {
   prefix = "",
   postfix = "",
   endfix = "%#TablineFill#",
-  indicator_left = "",
-  indicator_right = "",
-  indicator_left_width = 2,
-  indicator_right_width = 2,
-  indicator_start = "",
-  indicator_end = "",
-  indicator_start_width = 2,
-  indicator_end_width = 2,
+  truncate_left = "",
+  truncate_right = "",
+  truncate_left_width = 2,
+  truncate_right_width = 2,
+  indicator_first = "",
+  indicator_last = "",
+  indicator_first_width = 2,
+  indicator_last_width = 2,
   total_tabs_width = 0,
 }
 
@@ -161,6 +165,8 @@ local buf_index = {}
 
 ---@type {[integer]: table<integer, integer>?}
 local diag_cache = {}
+
+local hl_cache = {}
 
 ---@class Icon
 ---@field str string
@@ -233,8 +239,6 @@ local function init_dynamic(dynamic)
   end
 end
 
-local hl_cache = {}
-
 local function to_int(color)
   if type(color) == "string" then
     return tonumber(color:gsub("^#", ""), 16)
@@ -291,13 +295,24 @@ M.derive_hl = function(group, overrides)
 end
 
 ---@return string?
-local function get_hex(group, attr)
+local function get_hex_attr(group, attr)
   local ok, val = pcall(api.nvim_get_hl, 0, { name = group, link = false })
   if not ok or not val then
     return nil
   end
   local n = attr == "fg" and val.fg or val.bg
   return n and string.format("#%06x", n)
+end
+---@return nil|{fg: string, bg:string}
+M.get_hex = function(group)
+  local ok, val = pcall(api.nvim_get_hl, 0, { name = group, link = false })
+  if not ok or not val then
+    return nil
+  end
+  return {
+    fg = val.fg and string.format("#%06x", val.fg) or "",
+    bg = val.bg and string.format("#%06x", val.bg) or "",
+  }
 end
 
 local click_components_handlers = {}
@@ -464,7 +479,6 @@ local function build_tab(buf, dir, tail, ext)
   end
 
   tab.resolve_string = function(state)
-    local start = vim.uv.hrtime()
     state = bor(state, tab.modified + tab.severity)
 
     local tab_state = {
@@ -512,8 +526,6 @@ local function build_tab(buf, dir, tail, ext)
       ::continue::
     end
 
-    local elapsed = (vim.uv.hrtime() - start) / 1e6 -- milliseconds
-    -- vim.notify(string.format("tab: %.3fms", elapsed))
     return {
       components = components,
       display = table.concat(display),
@@ -787,11 +799,39 @@ local function render_sidebar()
     sidebar.right = api.nvim_win_get_position(sidebar.winnr)[2] ~= 0
 
     if sidebar.right then
-      sidebar.rendered_focused = "%#TablineSidebarSep#" .. sidebar.separator .. "%#TablineSidebarFocusedLabel#" .. label
-      sidebar.rendered_visible = "%#TablineSidebarSep#" .. sidebar.separator .. "%#TablineSidebarVisibleLabel#" .. label
+      sidebar.rendered_focused = "%#"
+        .. config.sidebar.highlights.sep
+        .. "#"
+        .. sidebar.separator
+        .. "%#"
+        .. config.sidebar.highlights.label.focused
+        .. "#"
+        .. label
+      sidebar.rendered_visible = "%#"
+        .. config.sidebar.highlights.sep
+        .. "#"
+        .. sidebar.separator
+        .. "%#"
+        .. config.sidebar.highlights.label.focused
+        .. "#"
+        .. label
     else
-      sidebar.rendered_focused = "%#TablineSidebarFocusedLabel#" .. label .. "%#TablineSidebarSep#" .. sidebar.separator
-      sidebar.rendered_visible = "%#TablineSidebarVisibleLabel#" .. label .. "%#TablineSidebarSep#" .. sidebar.separator
+      sidebar.rendered_focused = "%#"
+        .. config.sidebar.highlights.label.focused
+        .. "#"
+        .. label
+        .. "%#"
+        .. config.sidebar.highlights.sep
+        .. "#"
+        .. sidebar.separator
+      sidebar.rendered_visible = "%#"
+        .. config.sidebar.highlights.label.focused
+        .. "#"
+        .. label
+        .. "%#"
+        .. config.sidebar.highlights.sep
+        .. "#"
+        .. sidebar.separator
     end
   end
   return sidebar_width + sidebar.separator_width
@@ -825,7 +865,7 @@ end
 
 local function make_prefix(left_remaining, indicator)
   if viewport.lo > 1 then
-    viewport.prefix = viewport.indicator_left
+    viewport.prefix = viewport.truncate_left
     if left_remaining > 0 then
       local size = left_remaining - indicator
       if size > 0 then
@@ -837,14 +877,14 @@ local function make_prefix(left_remaining, indicator)
     end
     prefix_size = left_remaining
   else
-    viewport.prefix = viewport.indicator_start
+    viewport.prefix = viewport.indicator_first
     prefix_size = 0
   end
 end
 
 local function make_postfix(right_remaining, indicator)
   if viewport.hi < #tabs_cache then
-    viewport.postfix = viewport.indicator_right
+    viewport.postfix = viewport.truncate_right
     if right_remaining > 0 then
       local size = right_remaining - indicator
       if size > 0 then
@@ -856,17 +896,17 @@ local function make_postfix(right_remaining, indicator)
     end
     postfix_size = right_remaining
   else
-    viewport.postfix = viewport.indicator_end
+    viewport.postfix = viewport.indicator_last
     postfix_size = 0
   end
 end
 
 local function compute_left_indicator()
-  return viewport.lo > 1 and viewport.indicator_left_width or 0
+  return viewport.lo > 1 and viewport.truncate_left_width or 0
 end
 
 local function compute_right_indicator()
-  return viewport.hi < #tabs_cache and viewport.indicator_right_width or 0
+  return viewport.hi < #tabs_cache and viewport.truncate_right_width or 0
 end
 
 local function compute_both_indicators()
@@ -874,16 +914,16 @@ local function compute_both_indicators()
 end
 
 local function compute_left_remain_from_end(width)
-  local indicator_left = viewport.indicator_left_width
-  local indicator_right = viewport.indicator_end_width
+  local indicator_left = viewport.truncate_left_width
+  local indicator_right = viewport.indicator_last_width
   local indicators = indicator_left + indicator_right
   local lo, left_remaining = get_viewport_lo(#tabs_cache, width - indicators)
   return lo, left_remaining + indicator_left
 end
 
 local function compute_right_remain_from_start(width)
-  local indicator_left = viewport.indicator_start_width
-  local indicator_right = viewport.indicator_right_width
+  local indicator_left = viewport.indicator_first_width
+  local indicator_right = viewport.truncate_right_width
   local indicators = indicator_left + indicator_right
   local hi, right_remaining = get_viewport_hi(1, width - indicators)
   return hi, right_remaining + indicator_right
@@ -903,7 +943,7 @@ local function handle_index_before(width)
   if viewport.lo == 1 then
     viewport.hi, right_remaining = compute_right_remain_from_start(width)
   else
-    local indicator = viewport.indicator_left_width + viewport.indicator_right_width
+    local indicator = viewport.truncate_left_width + viewport.truncate_right_width
     viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicator)
     right_remaining = right_remaining + indicator
   end
@@ -918,7 +958,7 @@ local function handle_index_after(width)
   if viewport.hi == #tabs_cache then
     viewport.lo, left_remaining = compute_left_remain_from_end(width)
   else
-    local indicator = viewport.indicator_left_width + viewport.indicator_right_width
+    local indicator = viewport.truncate_left_width + viewport.truncate_right_width
     viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicator)
     left_remaining = left_remaining + indicator
   end
@@ -943,7 +983,7 @@ local function handle_width_change(width)
 
     if viewport.index <= viewport.lo and viewport.lo < viewport.hi then
       if viewport.hi == #tabs_cache then
-        indicators = viewport.indicator_left_width + viewport.indicator_right_width
+        indicators = viewport.truncate_left_width + viewport.truncate_right_width
       end
       viewport.lo = viewport.index
       viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators)
@@ -986,7 +1026,7 @@ local function handle_buf_delete(width)
   elseif viewport.hi == #tabs_cache then
     viewport.lo, left_remaining = compute_left_remain_from_end(width)
   elseif partial_deleted then
-    local indicators = viewport.indicator_left_width + viewport.indicator_right_width
+    local indicators = viewport.truncate_left_width + viewport.truncate_right_width
     viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators)
     if viewport.hi == #tabs_cache then
       viewport.lo, left_remaining = compute_left_remain_from_end(width)
@@ -996,7 +1036,7 @@ local function handle_buf_delete(width)
       left_remaining = indicators
     end
   else
-    local reserved = prefix_size > 0 and prefix_size or (viewport.indicator_left_width + viewport.indicator_right_width)
+    local reserved = prefix_size > 0 and prefix_size or (viewport.truncate_left_width + viewport.truncate_right_width)
     viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - reserved)
     if viewport.hi == #tabs_cache then
       viewport.lo, left_remaining = compute_left_remain_from_end(width)
@@ -1020,7 +1060,7 @@ local function handle_tab_width_change(width)
   elseif viewport.hi == #tabs_cache then
     viewport.lo, left_remaining = compute_left_remain_from_end(width)
   else
-    local indicators = viewport.indicator_left_width + viewport.indicator_right_width
+    local indicators = viewport.truncate_left_width + viewport.truncate_right_width
     if viewport.index == viewport.hi then
       if postfix_size == 0 then
         viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicators)
@@ -1028,7 +1068,7 @@ local function handle_tab_width_change(width)
         return
       end
     end
-    local reserved = prefix_size + viewport.indicator_left_width + viewport.indicator_right_width
+    local reserved = prefix_size + viewport.truncate_left_width + viewport.truncate_right_width
     viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - reserved)
     left_remaining = prefix_size
     make_prefix(prefix_size, 0)
@@ -1073,9 +1113,9 @@ function M.tabline_make()
     local tab_str, tab_shrink = "", false
     local indicators = 0
     if viewport.lo == 1 then
-      indicators = viewport.indicator_start_width + viewport.indicator_right_width
+      indicators = viewport.indicator_first_width + viewport.truncate_right_width
     elseif viewport.hi == #tabs_cache then
-      indicators = viewport.indicator_left_width + viewport.indicator_end_width
+      indicators = viewport.truncate_left_width + viewport.indicator_last_width
     else
       indicators = compute_both_indicators()
     end
@@ -1092,16 +1132,16 @@ function M.tabline_make()
       viewport.lo = viewport.index
       viewport.hi = viewport.index
       if viewport.hi == #tabs_cache then
-        viewport.prefix = viewport.indicator_left
-        viewport.postfix = viewport.indicator_end
-        available = available - viewport.indicator_left_width - viewport.indicator_end_width
+        viewport.prefix = viewport.truncate_left
+        viewport.postfix = viewport.indicator_last
+        available = available - viewport.truncate_left_width - viewport.indicator_last_width
       elseif viewport.lo == 1 then
-        viewport.prefix = viewport.indicator_start
-        viewport.postfix = viewport.indicator_right
-        available = available - viewport.indicator_start_width - viewport.indicator_right_width
+        viewport.prefix = viewport.indicator_first
+        viewport.postfix = viewport.truncate_right
+        available = available - viewport.indicator_first_width - viewport.truncate_right_width
       else
-        viewport.prefix = viewport.indicator_left
-        viewport.postfix = viewport.indicator_right
+        viewport.prefix = viewport.truncate_left
+        viewport.postfix = viewport.truncate_right
         available = width - indicators
       end
 
@@ -1118,7 +1158,7 @@ function M.tabline_make()
     else
       viewport.lo = 1
       viewport.hi = #tabs_cache
-      viewport.prefix = viewport.indicator_start
+      viewport.prefix = viewport.indicator_first
       viewport.postfix = ""
       prefix_size = 0
       postfix_size = 0
@@ -1158,14 +1198,14 @@ function M.tabline_make()
       if not tab_shrink then
         if viewport.total_tabs_width > width then
           if viewport.lo == 1 then
-            indicators = viewport.indicator_start_width + compute_right_indicator()
+            indicators = viewport.indicator_first_width + compute_right_indicator()
           elseif viewport.hi == #tabs_cache then
-            indicators = compute_left_indicator() + viewport.indicator_end_width
+            indicators = compute_left_indicator() + viewport.indicator_last_width
           else
             indicators = compute_both_indicators()
           end
         else
-          indicators = viewport.indicator_start_width
+          indicators = viewport.indicator_first_width
         end
         local remaining = math.max(0, width - prefix_size - postfix_size - filled_spaces - indicators)
         pad = make_spaces(cached_pad_tab, sidebar_spaces_tab, remaining)
@@ -1180,7 +1220,7 @@ function M.tabline_make()
   end
 
   local elapsed = (vim.uv.hrtime() - start) / 1e6 -- milliseconds
-  -- vim.notify(string.format("tabline: %.3fms", elapsed))
+  vim.notify(string.format("tabline: %.3fms", elapsed))
   return viewport.str
 end
 
@@ -1336,11 +1376,6 @@ function M.close_tab(bufnr, force)
   end
 
   if not force and bo[bufnr].modified then
-    -- @check if worth it (delete scratch buffer without asking)
-    -- if bo[bufnr].buftype == "" then
-    --   M.buf_delete(bufnr, true)
-    --   return
-    -- end
     local choice = fn.confirm("Unsaved changes:", "&Save\n&Discard\n&Cancel", 1)
     if choice == 1 then
       pcall(api.nvim_buf_call, bufnr, function()
@@ -1406,38 +1441,6 @@ function M.close_all_tab_right(force)
     M.close_tab(bufnr, force)
     viewport.buf_deleted_from_side = false
   end
-end
-
-local function setup_tabline_hl()
-  local focused_fg = get_hex("TablineFocused", "fg") or get_hex("Normal", "fg")
-  local focused_bg = get_hex("TablineFocused", "bg") or get_hex("CursorLine", "bg") or get_hex("Visual", "bg")
-  local visible_fg = get_hex("TablineVisible", "fg") or get_hex("Comment", "fg")
-  -- local visible_bg = "#1c161c"
-  local visible_bg = get_hex("TablineVisible", "bg") or get_hex("StatusLineNC", "bg") or get_hex("TablineFill", "bg")
-  local win_sep_fg = get_hex("WinSeparator", "fg")
-  local tab_fill_bg = get_hex("TablineFill", "bg")
-  local errors_fg = get_hex("DiagnosticError", "fg")
-  local warning_fg = get_hex("DiagnosticWarn", "fg")
-
-  local hl = api.nvim_set_hl
-  hl(0, "TablineFocused", { fg = focused_fg, bg = focused_bg })
-  hl(0, "TablineVisible", { fg = visible_fg, bg = visible_bg })
-  hl(0, "TablineFocusedModified", { fg = focused_fg, bg = focused_bg, italic = true })
-  hl(0, "TablineVisibleModified", { fg = visible_fg, bg = visible_bg, italic = true })
-  hl(0, "TablineSidebarFocusedLabel", { fg = focused_fg, bg = focused_bg })
-  hl(0, "TablineSidebarVisibleLabel", { fg = focused_fg, bg = visible_bg })
-  hl(0, "TablineSidebarSep", { fg = win_sep_fg, bg = tab_fill_bg })
-  hl(0, "TablineIndicatorSep", { fg = visible_fg, bg = tab_fill_bg })
-  hl(0, "TablineFocusedSeparator", { fg = tab_fill_bg, bg = focused_bg })
-  hl(0, "TablineVisibleSeparator", { fg = tab_fill_bg, bg = visible_bg })
-  hl(0, "TablineFocusedDiagError", { fg = errors_fg, bg = focused_bg })
-  hl(0, "TablineVisibleDiagError", { fg = errors_fg, bg = visible_bg })
-  hl(0, "TablineFocusedDiagWarn", { fg = warning_fg, bg = focused_bg })
-  hl(0, "TablineVisibleDiagWarn", { fg = warning_fg, bg = visible_bg })
-  hl(0, "TablineFocusedDiagModifiedError", { fg = errors_fg, bg = focused_bg, italic = true })
-  hl(0, "TablineVisibleDiagModifiedError", { fg = errors_fg, bg = visible_bg, italic = true })
-  hl(0, "TablineFocusedDiagModifiedWarn", { fg = warning_fg, bg = focused_bg, italic = true })
-  hl(0, "TablineVisibleDiagModifiedWarn", { fg = warning_fg, bg = visible_bg, italic = true })
 end
 
 local ignore_buftypes = {
@@ -1591,11 +1594,6 @@ local function setup_autocmds()
       resolve_update_tab(ev.buf)
     end,
   })
-
-  api.nvim_create_autocmd("ColorScheme", {
-    once = true,
-    callback = setup_tabline_hl,
-  })
 end
 
 _G.make_tabline = M.tabline_make
@@ -1674,17 +1672,23 @@ function M.setup(opts)
     M.focus_on_click = config.focus_on_click
   end
 
-  viewport.indicator_left = "%#TablineIndicatorSep#" .. config.indicator_left
-  viewport.indicator_right = "%#TablineIndicatorSep#" .. config.indicator_right
+  viewport.truncate_left = "%#"
+    .. config.indicators.truncate_left.highlight
+    .. "#"
+    .. config.indicators.truncate_left.text
+  viewport.truncate_right = "%#"
+    .. config.indicators.truncate_right.highlight
+    .. "#"
+    .. config.indicators.truncate_right.text
 
-  viewport.indicator_left_width = api.nvim_strwidth(config.indicator_left)
-  viewport.indicator_right_width = api.nvim_strwidth(config.indicator_right)
+  viewport.truncate_left_width = api.nvim_strwidth(config.indicators.truncate_left.text)
+  viewport.truncate_right_width = api.nvim_strwidth(config.indicators.truncate_right.text)
 
-  viewport.indicator_start = "%#TablineIndicatorSep#" .. config.indicator_start
-  viewport.indicator_end = "%#TablineIndicatorSep#" .. config.indicator_end
+  viewport.indicator_first = "%#" .. config.indicators.first.highlight .. "#" .. config.indicators.first.text
+  viewport.indicator_last = "%#" .. config.indicators.last.highlight .. "#" .. config.indicators.last.text
 
-  viewport.indicator_start_width = api.nvim_strwidth(config.indicator_start)
-  viewport.indicator_end_width = api.nvim_strwidth(config.indicator_end)
+  viewport.indicator_first_width = api.nvim_strwidth(config.indicators.first.text)
+  viewport.indicator_last_width = api.nvim_strwidth(config.indicators.last.text)
 
   viewport.sidebar_width = render_sidebar()
   viewport.width = vim.o.columns
@@ -1692,7 +1696,6 @@ function M.setup(opts)
   init_dynamic(config.dynamic)
   init_bufs()
   setup_autocmds()
-  setup_tabline_hl()
 
   if opts and type(opts.update_cursor_line_hl) == "function" then
     M.update_cursor_line_hl = opts.update_cursor_line_hl
