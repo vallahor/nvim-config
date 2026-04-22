@@ -693,11 +693,11 @@ vim.api.nvim_create_autocmd("VimEnter", {
             focused = { default = focused_separator, modified = focused_separator },
           },
         },
-        {
-          icon = function(icon, _tab)
-            return "" .. icon .. " "
-          end,
-        },
+        -- {
+        --   icon = function(icon, _tab)
+        --     return "" .. icon .. " "
+        --   end,
+        -- },
         {
           text = function(tab)
             return tab.unique_prefix .. tab.name
