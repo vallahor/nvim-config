@@ -29,6 +29,11 @@ local config = {
 
   force_unix_path_sep = true,
   scratch_buffer_name = "[No Name]",
+  -- There are cases where the width of the tabline can't accommodate the icon because the icon
+  -- is the last item drawn in the tabline before the truncate_right, so it will blend with the
+  -- next char or being half displayed if no truncate_right.
+  -- If don't matter that happening set it to true.
+  last_icon_blend = false,
 
   tab = {
     on_click = function(tab, _clicks, button, _mods)
@@ -637,9 +642,9 @@ local function build_tab(buf, dir, tail, ext)
       if w + component.text_width + (component.is_icon and 1 or 0) > width then
         local remaining = width - w
         if remaining > 0 then
-          if component.is_icon and remaining < 2 then
-            -- If not substitute the icon with a space, it blends with the next
-            -- the icon/indicator or overflows.
+          if component.is_icon and remaining == 1 and not I.tab.last_icon_blend then
+            -- If not substitute the icon with one space, it blends with the next
+            -- icon/indicator or got cut in half.
             partial_right[#partial_right + 1] = " "
           else
             local text = component.text
@@ -1715,6 +1720,7 @@ function Galfo.setup(opts)
 
   I.tab.force_unix_path_sep = config.force_unix_path_sep
   I.tab.scratch_buffer_name = config.scratch_buffer_name
+  I.tab.last_icon_blend = config.last_icon_blend
 
   I.tabs = config.tabs
   I.base_highlights = config.base_highlights
