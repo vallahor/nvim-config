@@ -27,8 +27,11 @@ local config = {
     focused = { default = "TablineFocused", modified = "" },
   },
 
-  force_unix_path_sep = true,
   scratch_buffer_name = "[No Name]",
+
+  -- Only useful if on windows.
+  force_unix_path_sep = true,
+
   -- There are cases where the width of the tabline can't accommodate the icon because the icon
   -- is the last item drawn in the tabline before the truncate_right, so it will blend with the
   -- next char or being half displayed if no truncate_right.
@@ -78,6 +81,10 @@ local config = {
   },
 
   dynamic = { diagnostics = false },
+  -- This is for when you want to display some information from diagnostic or react to it
+  -- like showing how many errors or warnings.
+  -- if diagnostics = true so all other will fallback to it otherwise it will only be
+  -- dynamic in the state set.
   -- dynamic = { diagnostics = true, focused = { diagnostics = false }, visible = { diagnostics = true } },
 
   indicators = {
@@ -87,6 +94,7 @@ local config = {
     truncate_right = { text = "…", highlight = "TablineVisible" },
   },
 
+  -- If you don't want to react too diagnostics or modified just set it up.
   no_diagnostic = false,
   no_modified = false,
 
@@ -106,6 +114,7 @@ local config = {
       sep = "TablineVisible",
     },
   },
+
   ignore = {
     terminal = true,
     bufnames = {},
@@ -708,6 +717,7 @@ local function build_tab(buf, dir, tail, ext)
 end
 
 local function refresh_tab(index)
+  ---@type Tab?
   local tab = tabs_cache[index]
   if not tab then
     return
