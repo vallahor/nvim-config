@@ -695,13 +695,14 @@ vim.api.nvim_create_autocmd("VimEnter", {
         },
         {
           icon = function(icon, _tab)
-            return "" .. icon .. " "
+            return "" .. icon .. ""
           end,
           -- highlights = {
           --   focused = { default = focused_diag_error, modified = focused_diag_mod_error },
           --   visible = { default = visible_diag_error, modified = visible_diag_mod_error },
           -- },
         },
+        { static = " " },
         {
           text = function(tab)
             -- tab.unique_prefix:gsub("/", "\\") -- windows way

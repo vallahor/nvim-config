@@ -576,8 +576,12 @@ local function build_tab(buf, dir, tail, ext)
           click_components_handlers[buf] = click_components_handlers[buf] or {}
           click_components_handlers[buf][i] = comp.on_click
           display[#display + 1] = "%#" .. hl .. "#" .. on_click_str
-          components[#components + 1] =
-            { text = text, text_width = text_width, hl = hl, on_click = on_click_str or nil }
+          components[#components + 1] = {
+            text = text,
+            text_width = text_width,
+            hl = hl,
+            on_click = on_click_str or nil,
+          }
           goto continue
         end
       end
@@ -585,7 +589,12 @@ local function build_tab(buf, dir, tail, ext)
         local text_width = api.nvim_strwidth(text)
         tab_width = tab_width + text_width
         display[#display + 1] = "%#" .. hl .. "#" .. text
-        components[#components + 1] = { text = text, text_width = text_width, hl = hl, is_icon = comp.is_icon or false }
+        components[#components + 1] = {
+          text = text,
+          text_width = text_width,
+          hl = hl,
+          is_icon = comp.is_icon or false,
+        }
       end
       ::continue::
     end
@@ -625,18 +634,23 @@ local function build_tab(buf, dir, tail, ext)
     local partial_right = { tab_on_click(buf) }
     local w = 0
     for i, component in ipairs(components) do
-      if w + component.text_width > width then
-        -- The `component.is_icon` adding 1 to remaining is because the icon has 2 bytes.
-        local remaining = width - w + (component.is_icon and 1 or 0)
+      if w + component.text_width + (component.is_icon and 1 or 0) > width then
+        local remaining = width - w
         if remaining > 0 then
-          local text = component.text
-          local part = fn.strcharpart(text, 0, remaining, 1)
-          partial_right[#partial_right + 1] = "%#"
-            .. component.hl
-            .. "#"
-            .. (components.on_click and component_on_click(buf, i, part) or part)
-          w = w + remaining
+          if component.is_icon and remaining < 2 then
+            -- If not substitute the icon with a space, it blends with the next
+            -- the icon/indicator or overflows.
+            partial_right[#partial_right + 1] = " "
+          else
+            local text = component.text
+            local part = fn.strcharpart(text, 0, remaining)
+            partial_right[#partial_right + 1] = "%#"
+              .. component.hl
+              .. "#"
+              .. (components.on_click and component_on_click(buf, i, part) or part)
+          end
         end
+        w = w + remaining
         break
       end
       w = w + component.text_width
