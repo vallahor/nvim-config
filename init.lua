@@ -641,7 +641,6 @@ vim.api.nvim_create_autocmd("VimEnter", {
   callback = function()
     local tabline = require("tabline")
     local focused = tabline.get_hex("TablineFocused")
-    local visible = tabline.get_hex("TablineVisible")
     local fill = tabline.get_hex("TablineFill")
     local diag_error = tabline.get_hex("DiagnosticError")
     local diag_warn = tabline.get_hex("DiagnosticWarn")

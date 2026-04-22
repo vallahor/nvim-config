@@ -812,7 +812,7 @@ local function render_sidebar()
         .. "#"
         .. sidebar.separator
         .. "%#"
-        .. config.sidebar.highlights.label.focused
+        .. config.sidebar.highlights.label.visible
         .. "#"
         .. label
     else
@@ -825,7 +825,7 @@ local function render_sidebar()
         .. "#"
         .. sidebar.separator
       sidebar.rendered_visible = "%#"
-        .. config.sidebar.highlights.label.focused
+        .. config.sidebar.highlights.label.visible
         .. "#"
         .. label
         .. "%#"
