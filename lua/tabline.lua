@@ -133,7 +133,7 @@ local config = {
 ---@field str string
 ---@field width integer
 ---@field sidebar_width integer
----@field changed boolean
+---@field updated boolean
 ---@field size_changed boolean
 ---@field buf_deleted boolean
 ---@field should_not_focus boolean
@@ -160,14 +160,13 @@ local viewport = {
   str = "",
   width = 0,
   sidebar_width = 0,
-  changed = true,
+  updated = true,
   size_changed = true,
   buf_deleted = false,
   should_not_focus = false,
   buf_deleted_partial = false,
   tab_width_changed = false,
   simple_redraw = true,
-  is_in_small_size = true,
   lo = 1,
   hi = 1,
   buf = 1,
@@ -247,13 +246,13 @@ local hl_cache = {}
 ---@field severity integer
 ---@field modified integer
 ---@field icon TabIcon?
----@field rendered table<integer, Rendered>
+---@field rendered table<integer, Rendered?>
 ---@field rendered_visible string
 ---@field rendered_focused string
 ---@field update fun()
 ---@field update_unique_prefix fun()
 ---@field resolve_string fun(state: integer): Rendered
----@field partial_left fun(width: integer): string
+---@field partial_left fun(width: integer, state: integer?): string
 ---@field partial_right fun(width: integer): string
 
 -- @type {[integer]: Tab}
@@ -405,7 +404,7 @@ local function update_buf_index()
   if not sidebar.focus and buf_index[viewport.buf] then
     viewport.index = buf_index[viewport.buf]
   end
-  viewport.changed = true
+  viewport.updated = true
 end
 
 local function resolve_buf_name(buf)
@@ -793,6 +792,7 @@ local function remove_buf_from_tabline(bufnr)
     return
   end
 
+  ---@type Tab
   local tab = tabs_cache[index]
   if tab.icon then
     icon_cache_remove(tab.ext)
@@ -841,9 +841,9 @@ local cached_pad_tab = -1
 local sidebar_spaces_tab = ""
 
 local cached_pad_left = -1
-local cached_pad_right = -1
-
 local sidebar_spaces_left = ""
+
+local cached_pad_right = -1
 local sidebar_spaces_right = ""
 
 local function make_spaces(cached_pad, str, n)
@@ -865,6 +865,7 @@ local function sidebar_label_mid(pad)
   local pad_right = math.floor(pad / 2)
   return pad_left, pad_right
 end
+
 local function sidebar_label_end(pad)
   local pad_left = math.ceil(pad)
   local pad_right = math.floor(0)
@@ -963,6 +964,7 @@ local function make_prefix(left_remaining, indicator)
     if left_remaining > 0 then
       local size = left_remaining - indicator
       if size > 0 then
+        ---@type Tab
         local tab = tabs_cache[viewport.lo - 1]
         viewport.prefix = viewport.prefix .. tab.partial_left(size)
       else
@@ -982,6 +984,7 @@ local function make_postfix(right_remaining, indicator)
     if right_remaining > 0 then
       local size = right_remaining - indicator
       if size > 0 then
+        ---@type Tab
         local tab = tabs_cache[viewport.hi + 1]
         viewport.postfix = tab.partial_right(size) .. viewport.postfix
       elseif size < 0 then
@@ -1190,13 +1193,7 @@ end
 
 function I.tabline_make()
   local start = vim.uv.hrtime()
-  if
-    viewport.size_changed
-    or viewport.changed
-    or viewport.simple_redraw
-    or viewport.buf_deleted
-    or viewport.is_in_small_size
-  then
+  if viewport.size_changed or viewport.updated or viewport.simple_redraw or viewport.buf_deleted then
     if sidebar.winnr and api.nvim_get_current_win() == sidebar.winnr then
       sidebar.focus = true
       viewport.buf = -1
@@ -1214,9 +1211,10 @@ function I.tabline_make()
       indicators = compute_both_indicators()
     end
 
+    ---@type Tab?
     local current_tab = tabs_cache[viewport.index]
 
-    if viewport.simple_redraw and not viewport.changed then
+    if viewport.simple_redraw and not viewport.updated then
       viewport.simple_redraw = false
       goto build_viewport_str
     end
@@ -1276,6 +1274,7 @@ function I.tabline_make()
       tabs[#tabs + 1] = tab_str
     else
       for i = viewport.lo, viewport.hi do
+        ---@type Tab
         local tab = tabs_cache[i]
         local buf = buf_cache[i]
         local focused = buf == viewport.buf
@@ -1310,11 +1309,13 @@ function I.tabline_make()
 
     viewport.str = table.concat(tabs)
 
-    viewport.changed = false
+    viewport.updated = false
   end
 
   local elapsed = (vim.uv.hrtime() - start) / 1e6 -- milliseconds
-  -- vim.notify(string.format("tabline: %.3fms", elapsed))
+  vim.notify(string.format("tabline: %.3fms", elapsed))
+  -- local elapsed = (vim.uv.hrtime() - start) / 1e3 -- microseconds
+  -- vim.notify(string.format("tabline: %.3fµs", elapsed))
   return viewport.str
 end
 
@@ -1384,7 +1385,7 @@ local function swap(i, j)
   buf_index[buf_cache[i]] = i
   buf_index[buf_cache[j]] = j
   viewport.index = buf_index[viewport.buf]
-  viewport.changed = true
+  viewport.updated = true
   schedule_redraw()
 end
 
@@ -1585,7 +1586,7 @@ local function setup_autocmds()
         end
       end
 
-      viewport.changed = true
+      viewport.updated = true
       schedule_redraw()
     end,
   })
@@ -1609,6 +1610,7 @@ local function setup_autocmds()
           return
         end
 
+        ---@type Tab
         local tab = tabs_cache[index]
         local modified = bo[ev.buf].modified and STATES.MODIFIED or 0
 
@@ -1641,6 +1643,8 @@ local function setup_autocmds()
         end
 
         diag_cache[ev.buf] = vim.diagnostic.count(ev.buf, I.diag_filter)
+
+        ---@type Tab
         local tab = tabs_cache[index]
         local new_severity = resolve_severity(diag_cache[ev.buf])
         local old_severity = tab.severity
