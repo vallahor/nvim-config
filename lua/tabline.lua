@@ -377,7 +377,7 @@ local function resolve_buf_name(buf)
   local tail = fnamemodify(bufname, ":t")
   local ext = fnamemodify(bufname, ":e")
   local relative = fnamemodify(bufname, ":~:.")
-  local dir = relative:match("^(.*[/\\])") or ""
+  local dir = relative:gsub("\\", "/"):match("^(.*/)") or ""
   return dir, tail, ext
 end
 
