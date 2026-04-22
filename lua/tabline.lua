@@ -19,6 +19,11 @@ local M = {}
 local config = {
   focus_on_click = true,
 
+  base_highlights = {
+    visible = { default = "TablineVisible", modified = "" },
+    focused = { default = "TablineFocused", modified = "" },
+  },
+
   tab = {
     on_click = function(tab, _clicks, button, _mods)
       if button == "l" then
@@ -30,7 +35,25 @@ local config = {
   },
 
   tabs = {
-    { text = "" },
+    {
+      static = " ",
+      highlights = {
+        visible = { default = "TablineVisible", modified = "TablineVisible" },
+        focused = { default = "TablineFocused", modified = "TablineFocused" },
+      },
+    },
+    {
+      text = function(tab)
+        return tab.unique_prefix .. tab.name
+      end,
+    },
+    {
+      static = " ",
+      highlights = {
+        visible = { default = "TablineVisible", modified = "TablineVisible" },
+        focused = { default = "TablineFocused", modified = "TablineFocused" },
+      },
+    },
   },
 
   diagnostics = {
@@ -44,6 +67,8 @@ local config = {
   },
 
   dynamic = { diagnostics = false },
+  -- dynamic = { diagnostics = true, focused = { diagnostics = false }, visible = { diagnostics = true } },
+
   indicators = {
     first = { text = "", highlight = "TablineVisible" },
     last = { text = "", highlight = "TablineVisible" },

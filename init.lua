@@ -757,7 +757,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
         --   end,
         -- },
         {
-          static = "▕",
+          static = " ",
           -- static = " ",
           -- static = " ",
           highlights = {
