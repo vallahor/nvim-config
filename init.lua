@@ -686,8 +686,8 @@ vim.api.nvim_create_autocmd("VimEnter", {
       -- dynamic = { diagnostics = true },
       tabs = {
         {
-          -- static = " ",
-          static = " ",
+          static = " ",
+          -- static = " ",
           highlights = {
             visible = { default = visible_separator, modified = visible_separator },
             focused = { default = focused_separator, modified = focused_separator },
@@ -762,9 +762,8 @@ vim.api.nvim_create_autocmd("VimEnter", {
           end,
         },
         {
-          static = " ",
           -- static = " ",
-          -- static = " ",
+          static = " ",
           highlights = {
             visible = { default = visible_separator, modified = visible_separator },
             focused = { default = focused_separator, modified = focused_separator },

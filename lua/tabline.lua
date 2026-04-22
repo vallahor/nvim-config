@@ -28,6 +28,7 @@ local config = {
   },
 
   force_unix_path_sep = true,
+  scratch_buffer_name = "[No Name]",
 
   tab = {
     on_click = function(tab, _clicks, button, _mods)
@@ -222,7 +223,6 @@ local hl_cache = {}
 ---@class TabIcon
 ---@field str string
 ---@field color string
----@field width integer
 
 ---@class Tab
 ---@field str string
@@ -397,7 +397,7 @@ end
 local function resolve_buf_name(buf)
   local bufname = api.nvim_buf_get_name(buf)
   if bufname == "" then
-    return "", "[No Name]", ""
+    return "", I.tab.scratch_buffer_name, ""
   end
   local tail = fnamemodify(bufname, ":t")
   local ext = fnamemodify(bufname, ":e")
@@ -459,7 +459,6 @@ local function make_tab_icon(ext)
   end
   return {
     str = icon,
-    width = api.nvim_strwidth(icon),
     color = color,
   }
 end
@@ -564,8 +563,8 @@ local function build_tab(buf, dir, tail, ext)
       local hl = comp.highlights and resolve_hl(comp.highlights, state) or resolve_hl(I.base_highlights, state)
       if comp.icon and tab_icon then
         hl = comp.highlights and hl or Galfo.derive_hl(hl, { fg = tab_icon.color })
-        print(hl)
         text = comp.icon(tab_icon.str, tab_state)
+        comp.is_icon = true
       elseif comp.static then
         text = comp.static
       elseif comp.text then
@@ -586,7 +585,7 @@ local function build_tab(buf, dir, tail, ext)
         local text_width = api.nvim_strwidth(text)
         tab_width = tab_width + text_width
         display[#display + 1] = "%#" .. hl .. "#" .. text
-        components[#components + 1] = { text = text, text_width = text_width, hl = hl }
+        components[#components + 1] = { text = text, text_width = text_width, hl = hl, is_icon = comp.is_icon or false }
       end
       ::continue::
     end
@@ -627,16 +626,17 @@ local function build_tab(buf, dir, tail, ext)
     local w = 0
     for i, component in ipairs(components) do
       if w + component.text_width > width then
-        local remaining = width - w
+        -- The `component.is_icon` adding 1 to remaining is because the icon has 2 bytes.
+        local remaining = width - w + (component.is_icon and 1 or 0)
         if remaining > 0 then
           local text = component.text
-          local part = fn.strcharpart(text, 0, remaining)
+          local part = fn.strcharpart(text, 0, remaining, 1)
           partial_right[#partial_right + 1] = "%#"
             .. component.hl
             .. "#"
             .. (components.on_click and component_on_click(buf, i, part) or part)
+          w = w + remaining
         end
-        w = w + remaining
         break
       end
       w = w + component.text_width
@@ -1700,6 +1700,7 @@ function Galfo.setup(opts)
   I.tab.on_click = config.tab.on_click
 
   I.tab.force_unix_path_sep = config.force_unix_path_sep
+  I.tab.scratch_buffer_name = config.scratch_buffer_name
 
   I.tabs = config.tabs
   I.base_highlights = config.base_highlights
