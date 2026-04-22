@@ -20,7 +20,7 @@ local config = {
   focus_on_click = true,
 
   tab = {
-    on_click = function(tab, clicks, button, mods)
+    on_click = function(tab, _clicks, button, _mods)
       if button == "l" then
         tab.focus()
       elseif button == "m" then
@@ -81,7 +81,7 @@ M.update_cursor_line_hl = function(_, _) end
 ---@field changed boolean
 ---@field size_changed boolean
 ---@field buf_deleted boolean
----@field buf_deleted_from_side boolean
+---@field should_not_focus boolean
 ---@field buf_deleted_partial boolean
 ---@field tab_width_changed boolean
 ---@field diag_or_input_changed boolean
@@ -108,7 +108,7 @@ local viewport = {
   changed = true,
   size_changed = true,
   buf_deleted = false,
-  buf_deleted_from_side = false,
+  should_not_focus = false,
   buf_deleted_partial = false,
   tab_width_changed = false,
   diag_or_input_changed = true,
@@ -294,15 +294,6 @@ M.derive_hl = function(group, overrides)
   return name
 end
 
----@return string?
-local function get_hex_attr(group, attr)
-  local ok, val = pcall(api.nvim_get_hl, 0, { name = group, link = false })
-  if not ok or not val then
-    return nil
-  end
-  local n = attr == "fg" and val.fg or val.bg
-  return n and string.format("#%06x", n)
-end
 ---@return nil|{fg: string, bg:string}
 M.get_hex = function(group)
   local ok, val = pcall(api.nvim_get_hl, 0, { name = group, link = false })
@@ -1401,9 +1392,9 @@ function M.close_tab_left(force)
     return
   end
 
-  viewport.buf_deleted_from_side = true
+  viewport.should_not_focus = true
   M.close_tab(bufnr, force)
-  viewport.buf_deleted_from_side = false
+  viewport.should_not_focus = false
 end
 
 function M.close_tab_right(force)
@@ -1412,9 +1403,9 @@ function M.close_tab_right(force)
     return
   end
 
-  viewport.buf_deleted_from_side = true
+  viewport.should_not_focus = true
   M.close_tab(bufnr, force)
-  viewport.buf_deleted_from_side = false
+  viewport.should_not_focus = false
 end
 
 function M.close_all_tab_left(force)
@@ -1424,9 +1415,9 @@ function M.close_all_tab_left(force)
       return
     end
 
-    viewport.buf_deleted_from_side = true
+    viewport.should_not_focus = true
     M.close_tab(bufnr, force)
-    viewport.buf_deleted_from_side = false
+    viewport.should_not_focus = false
   end
 end
 
@@ -1437,9 +1428,9 @@ function M.close_all_tab_right(force)
       return
     end
 
-    viewport.buf_deleted_from_side = true
+    viewport.should_not_focus = true
     M.close_tab(bufnr, force)
-    viewport.buf_deleted_from_side = false
+    viewport.should_not_focus = false
   end
 end
 
@@ -1476,7 +1467,7 @@ local function setup_autocmds()
 
   api.nvim_create_autocmd({ "BufEnter" }, {
     callback = function(ev)
-      if viewport.buf_deleted_from_side then
+      if viewport.should_not_focus then
         return
       end
       if sidebar.enabled and sidebar_filetypes[bo[ev.buf].filetype] then
@@ -1518,12 +1509,11 @@ local function setup_autocmds()
         local tab = tabs_cache[index]
         local modified = bo[ev.buf].modified and STATES.MODIFIED or 0
 
-        local old_width = tab.width
-
         if tab.modified == modified then
           return
         end
 
+        local old_width = tab.width
         tab.modified = modified
         tab.update()
 
@@ -1700,12 +1690,5 @@ function M.setup(opts)
     M.update_cursor_line_hl = opts.update_cursor_line_hl
   end
 end
-
-local function debug_command()
-  --
-  print(vim.inspect(buf_cache))
-end
-
-api.nvim_create_user_command("Aeho", debug_command, {})
 
 return M
