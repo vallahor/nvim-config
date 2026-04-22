@@ -71,10 +71,10 @@ local config = {
     },
   },
   ignore = {
-    bufnames = { "cmd.exe" },
+    terminal = true,
+    bufnames = {},
     buftypes = {
       "nofile",
-      "terminal",
       "prompt",
     },
     filetypes = {
@@ -1452,19 +1452,31 @@ local function setup_autocmds()
       if
         not api.nvim_buf_is_valid(buf)
         or not bo[buf].buflisted
+        or buf_index[buf]
         or M.ignore.buftypes[bo[buf].buftype]
         or M.ignore.filetypes[bo[buf].filetype]
-        -- or M.ignore.bufnames[api.nvim_buf_get_name(buf)]
+        or M.ignore.bufnames[api.nvim_buf_get_name(buf)]
       then
-        return
-      end
-      if buf_index[buf] then
         return
       end
       insert_buf_into_tabline(buf)
       schedule_redraw()
     end,
   })
+
+  if M.ignore.terminal then
+    -- @check: Maybe theres a better way of doing this.
+    api.nvim_create_autocmd("TermOpen", {
+      callback = function(ev)
+        local buf = ev.buf
+        if not buf_index[buf] then
+          return
+        end
+
+        remove_buf_from_tabline(buf)
+      end,
+    })
+  end
 
   api.nvim_create_autocmd({ "BufEnter" }, {
     callback = function(ev)
@@ -1629,6 +1641,7 @@ function M.setup(opts)
   M.base_highlights = config.base_highlights
 
   M.ignore = { buftypes = {}, filetypes = {}, bufnames = {} }
+  M.ignore.terminal = config.ignore.terminal
 
   for _, buftype in ipairs(config.ignore.buftypes) do
     M.ignore.buftypes[buftype] = true
