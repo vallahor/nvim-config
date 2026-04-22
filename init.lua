@@ -701,7 +701,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
         },
         {
           text = function(tab)
-            return (tab.is_modified and "[MODIFIED] " or "") .. tab.unique_prefix .. tab.name
+            return tab.unique_prefix .. tab.name
           end,
           highlights = {
             diagnostics = {
@@ -758,11 +758,14 @@ vim.api.nvim_create_autocmd("VimEnter", {
         --   end,
         -- },
         {
-          static = " ",
+          static = "▕",
+          -- static = " ",
           -- static = " ",
           highlights = {
             visible = { default = visible_separator, modified = visible_separator },
             focused = { default = focused_separator, modified = focused_separator },
+            -- visible = { default = visible_separator, modified = visible_separator },
+            -- focused = { default = focused_separator, modified = focused_separator },
           },
         },
       },
@@ -788,10 +791,17 @@ vim.api.nvim_create_autocmd("VimEnter", {
     map("n", "<c-w>", function()
       tabline.close_tab(0, false)
     end, { silent = true, nowait = true })
-    map("n", "<c-s-w>", function()
+    map("n", "<s-bs>", function()
       tabline.close_tab_left(false)
-      -- tabline.close_tab_right(false)
-      -- tabline.close_all_tab_left(false)
+    end, { silent = true, nowait = true })
+    map("n", "<s-del>", function()
+      tabline.close_tab_right(false)
+    end, { silent = true, nowait = true })
+    map("n", "<c-s-bs>", function()
+      tabline.close_all_tab_left(false)
+    end, { silent = true, nowait = true })
+    map("n", "<c-s-del>", function()
+      tabline.close_all_tab_right(false)
     end, { silent = true, nowait = true })
     map("n", "<c-x>", function()
       tabline.close_tab(0, true)

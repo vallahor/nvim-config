@@ -1220,7 +1220,7 @@ function M.tabline_make()
   end
 
   local elapsed = (vim.uv.hrtime() - start) / 1e6 -- milliseconds
-  vim.notify(string.format("tabline: %.3fms", elapsed))
+  -- vim.notify(string.format("tabline: %.3fms", elapsed))
   return viewport.str
 end
 
