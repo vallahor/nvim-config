@@ -42,7 +42,7 @@ vim.wo.relativenumber = true
 vim.wo.wrap = false
 
 vim.opt.linespace = 5
-vim.opt.cmdheight = 0
+vim.opt.cmdheight = 1
 vim.opt.showcmdloc = "statusline"
 
 -- work around on python default configs
@@ -872,17 +872,17 @@ vim.api.nvim_create_autocmd("WinLeave", {
   end,
 })
 
-vim.api.nvim_create_autocmd("CmdlineLeave", {
-  callback = function()
-    vim.api.nvim_set_option_value("cmdheight", 0, {})
-  end,
-})
-
-vim.api.nvim_create_autocmd("CmdlineEnter", {
-  callback = function()
-    vim.api.nvim_set_option_value("cmdheight", 1, {})
-  end,
-})
+-- vim.api.nvim_create_autocmd("CmdlineLeave", {
+--   callback = function()
+--     vim.api.nvim_set_option_value("cmdheight", 0, {})
+--   end,
+-- })
+--
+-- vim.api.nvim_create_autocmd("CmdlineEnter", {
+--   callback = function()
+--     vim.api.nvim_set_option_value("cmdheight", 1, {})
+--   end,
+-- })
 
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "help", "text", "man" },

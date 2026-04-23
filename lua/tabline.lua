@@ -786,39 +786,38 @@ local function build_tab(buf, dir, tail, ext)
     ---@type string[]
     local partial_left = {}
     ---@type integer
-    local comp_pos = 0
     local w = 0
+    local total = #components
 
-    for pos = #components, 1, -1 do
-      local component_text_width = components[pos].text_width
-      if w + component_text_width > width then
-        comp_pos = pos
+    for i = total, 1, -1 do
+      local component = components[i]
+      if w + component.text_width + (component.is_icon and 1 or 0) > width then
+        local remaining = width - w
+        ---@cast remaining integer
+        if remaining > 0 then
+          if component.is_icon and remaining == 1 and not I.tab.last_icon_blend then
+            partial_left[#partial_left + 1] = "%#" .. component.hl .. "#" .. " "
+          else
+            local text = component.text
+            local part = strcharpart(text, component.text_width - remaining)
+            partial_left[#partial_left + 1] = "%#"
+              .. component.hl
+              .. "#"
+              .. (component.on_click and component_on_click(buf, i, part) or part)
+          end
+        end
         break
       end
-      w = w + component_text_width
-      comp_pos = pos
-    end
-
-    partial_left[#partial_left + 1] = tab_on_click(buf)
-
-    local remaining = w > 0 and width - w or width
-    if remaining > 0 then
-      local component = components[comp_pos]
-      ---@cast component Components
-      local text = component.text
-      local part = strcharpart(text, component.text_width - remaining)
-      partial_left[#partial_left + 1] = "%#"
-        .. component.hl
-        .. "#"
-        .. (component.on_click and component_on_click(buf, comp_pos, part) or part)
-    end
-
-    for pos = comp_pos + 1, #components do
-      local component = components[pos]
+      w = w + component.text_width
       partial_left[#partial_left + 1] = "%#" .. component.hl .. "#" .. (component.on_click or component.text)
     end
 
-    return table_concat(partial_left)
+    local n = #partial_left
+    for i = 1, math_floor(n / 2) do
+      partial_left[i], partial_left[n - i + 1] = partial_left[n - i + 1], partial_left[i]
+    end
+
+    return tab_on_click(buf) .. table_concat(partial_left)
   end
 
   return tab
@@ -1315,6 +1314,29 @@ function I.GalfoRender()
 
     local width = viewport.width - viewport.sidebar_width
 
+    if viewport_state.simple_redraw and not viewport_state.updated then
+      viewport_state.simple_redraw = false
+      goto build_viewport_str
+    end
+
+    if viewport.total_tabs_width > width then
+      calc_truncated_tabs(width)
+    else
+      viewport.lo = 1
+      viewport.hi = #tabs_cache
+      viewport.prefix = viewport.indicator_first
+      viewport.postfix = ""
+      viewport.left_reserved = 0
+      viewport.right_reserved = 0
+    end
+
+    ::build_viewport_str::
+
+    -- @check: put it in some viewport_state to not calculate it all the time.
+
+    ---@type Tab?
+    local current_tab = tabs_cache[viewport.index]
+
     local tab_str, tab_shrink = "", false
     local indicators = 0
     if viewport.lo == 1 then
@@ -1322,15 +1344,7 @@ function I.GalfoRender()
     elseif viewport.hi == #tabs_cache then
       indicators = viewport.truncate_left_width + viewport.indicator_last_width
     else
-      indicators = compute_both_indicators()
-    end
-
-    ---@type Tab?
-    local current_tab = tabs_cache[viewport.index]
-
-    if viewport_state.simple_redraw and not viewport_state.updated then
-      viewport_state.simple_redraw = false
-      goto build_viewport_str
+      indicators = viewport.truncate_left_width + viewport.truncate_right_width
     end
 
     if current_tab and current_tab.width > width - indicators then
@@ -1351,6 +1365,9 @@ function I.GalfoRender()
         available = width - indicators
       end
 
+      viewport.left_reserved = 0
+      viewport.right_reserved = 0
+
       tab_shrink = true
 
       local buf = buf_cache[viewport.index]
@@ -1359,18 +1376,7 @@ function I.GalfoRender()
 
       local pad = string_rep(" ", math_max(0, available - current_tab.rendered[state].width))
       tab_str = current_tab.partial_left(available, focused) .. pad
-    elseif viewport.total_tabs_width > width then
-      calc_truncated_tabs(width)
-    else
-      viewport.lo = 1
-      viewport.hi = #tabs_cache
-      viewport.prefix = viewport.indicator_first
-      viewport.postfix = ""
-      viewport.left_reserved = 0
-      viewport.right_reserved = 0
     end
-
-    ::build_viewport_str::
 
     local sidebar_str = ""
     if viewport.sidebar_width > 0 then
