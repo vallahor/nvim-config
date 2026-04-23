@@ -8,11 +8,17 @@ local columns = vim.o.columns
 local diagnostic_count = vim.diagnostic.count
 
 local string_rep = string.rep
+local string_gsub = string.gsub
+local string_match = string.match
 local string_format = string.format
 
 local math_max = math.max
 local math_ceil = math.ceil
 local math_floor = math.floor
+
+local table_concat = table.concat
+local table_insert = table.insert
+local table_remove = table.remove
 
 local SEVERITY_ERROR = vim.diagnostic.severity.ERROR
 local SEVERITY_WARN = vim.diagnostic.severity.WARN
@@ -400,7 +406,7 @@ end
 
 local function to_int(color)
   if type(color) == "string" then
-    return tonumber(color:gsub("^#", ""), 16)
+    return tonumber(string_gsub(color, "^#", ""), 16)
   end
   return color
 end
@@ -505,11 +511,11 @@ local function resolve_buf_name(buf)
   local relative = fnamemodify(bufname, ":~:.")
 
   if IS_WINDOWS and I.tab.force_unix_path_sep then
-    relative = relative:gsub("\\", "/")
+    relative = string_gsub(relative, "\\", "/")
   end
 
   local sep = (IS_WINDOWS and not I.tab.force_unix_path_sep) and "^(.*\\)" or "^(.*/)"
-  local dir = relative:match(sep) or ""
+  local dir = string_match(relative, sep) or ""
 
   return dir, tail, ext
 end
@@ -717,7 +723,7 @@ local function build_tab(buf, dir, tail, ext)
 
     return {
       components = components,
-      display = table.concat(display),
+      display = table_concat(display),
       width = tab_width,
     }
   end
@@ -780,7 +786,7 @@ local function build_tab(buf, dir, tail, ext)
     end
     local pad = string_rep(" ", math_max(0, width - w))
     partial_right[#partial_right + 1] = pad
-    return table.concat(partial_right)
+    return table_concat(partial_right)
   end
 
   tab.partial_left = function(width, state)
@@ -822,7 +828,7 @@ local function build_tab(buf, dir, tail, ext)
       partial_left[#partial_left + 1] = "%#" .. component.hl .. "#" .. (component.on_click or component.text)
     end
 
-    return table.concat(partial_left)
+    return table_concat(partial_left)
   end
 
   return tab
@@ -893,8 +899,8 @@ local function insert_buf_into_tabline(buf)
   repeated_names_insert(buf, tail)
   local tab = build_tab(buf, dir, tail, ext)
   tab.update()
-  table.insert(buf_cache, buf)
-  table.insert(tabs_cache, tab)
+  table_insert(buf_cache, buf)
+  table_insert(tabs_cache, tab)
   viewport.buf = buf
   update_buf_index()
 end
@@ -912,8 +918,8 @@ local function remove_buf_from_tabline(bufnr)
   end
   repeated_names_remove(bufnr, tab.tail)
 
-  table.remove(tabs_cache, index)
-  table.remove(buf_cache, index)
+  table_remove(tabs_cache, index)
+  table_remove(buf_cache, index)
 
   diag_cache[bufnr] = nil
   click_tab_handlers[bufnr] = nil
@@ -1424,7 +1430,7 @@ function I.GalfoRender()
     end
 
     viewport_state.updated = false
-    viewport.str = table.concat(tabs)
+    viewport.str = table_concat(tabs)
   end
   return viewport.str
 end
@@ -1560,10 +1566,10 @@ function Galfo.move_tab_begin()
 
   local i = get_current_index()
   if i > 1 then
-    local b = table.remove(buf_cache, i)
-    table.insert(buf_cache, 1, b)
-    local t = table.remove(tabs_cache, i)
-    table.insert(tabs_cache, 1, t)
+    local b = table_remove(buf_cache, i)
+    table_insert(buf_cache, 1, b)
+    local t = table_remove(tabs_cache, i)
+    table_insert(tabs_cache, 1, t)
     update_buf_index()
     redrawtabline()
   end
@@ -1576,9 +1582,9 @@ function Galfo.move_tab_end()
 
   local i = get_current_index()
   if i < #buf_cache then
-    local b = table.remove(buf_cache, i)
+    local b = table_remove(buf_cache, i)
     buf_cache[#buf_cache + 1] = b
-    local t = table.remove(tabs_cache, i)
+    local t = table_remove(tabs_cache, i)
     tabs_cache[#tabs_cache + 1] = t
     update_buf_index()
     redrawtabline()
