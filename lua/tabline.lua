@@ -3,6 +3,8 @@ local band, bor, lshift, rshift = bit.band, bit.bor, bit.lshift, bit.rshift
 
 local api, fn, bo = vim.api, vim.fn, vim.bo
 
+local redrawtabline = vim.cmd.redrawtabline
+
 local strwidth = fn.strwidth
 local fnamemodify = fn.fnamemodify
 local strcharpart = fn.strcharpart
@@ -325,6 +327,7 @@ local hl_cache = {}
 ---@field ext string
 ---@field unique_prefix string
 ---@field width integer
+---@field pinned boolean
 ---@field severity integer
 ---@field modified integer
 ---@field icon TabIcon?
@@ -613,6 +616,7 @@ local function build_tab(buf, dir, tail, ext)
     unique_prefix = unique_prefix,
     ext = ext,
     str = "",
+    pinned = false,
     icon = tab_icon,
     modified = 0,
     width = 0,
@@ -634,6 +638,7 @@ local function build_tab(buf, dir, tail, ext)
       unique_prefix = tab.unique_prefix,
       is_focused = band(state, STATES.FOCUSED) ~= 0,
       is_modified = band(state, STATES.MODIFIED) ~= 0,
+      pinned = tab.pinned,
       diagnostics = diag_cache[buf] or {},
     }
 
@@ -1026,9 +1031,9 @@ local function render_sidebar()
   return sidebar_width + sidebar.separator_width
 end
 
-local function get_viewport_hi(idx, width)
-  local w = tabs_cache[idx].width
-  local hi = idx
+local function get_viewport_hi(index, width)
+  local w = tabs_cache[index].width
+  local hi = index
   for pos = hi + 1, #tabs_cache do
     local tab_width = tabs_cache[pos].width
     if w + tab_width > width then
@@ -1040,9 +1045,9 @@ local function get_viewport_hi(idx, width)
   return hi, width - w
 end
 
-local function get_viewport_lo(idx, width)
-  local w = tabs_cache[idx].width
-  local lo = idx
+local function get_viewport_lo(index, width)
+  local w = tabs_cache[index].width
+  local lo = index
   for pos = lo - 1, 1, -1 do
     local tab_width = tabs_cache[pos].width
     if w + tab_width > width then
@@ -1483,7 +1488,7 @@ local function swap(i, j)
   buf_index[buf_cache[j]] = j
   viewport.index = buf_index[viewport.buf]
   viewport_state.updated = true
-  vim.cmd.redrawtabline()
+  redrawtabline()
 end
 
 function Galfo.move_tab_left()
@@ -1546,7 +1551,7 @@ function Galfo.move_tab_begin()
     local t = table.remove(tabs_cache, i)
     table.insert(tabs_cache, 1, t)
     update_buf_index()
-    vim.cmd.redrawtabline()
+    redrawtabline()
   end
 end
 
@@ -1562,18 +1567,24 @@ function Galfo.move_tab_end()
     local t = table.remove(tabs_cache, i)
     tabs_cache[#tabs_cache + 1] = t
     update_buf_index()
-    vim.cmd.redrawtabline()
+    redrawtabline()
   end
 end
 
 function Galfo.close_tab(bufnr, force)
   bufnr = bufnr == 0 and nvim_get_current_buf() or bufnr
-  local idx = buf_index[bufnr]
-  if not idx then
+  local index = buf_index[bufnr]
+  if not index then
     return
   end
 
-  viewport_state.buf_deleted_partial = idx == viewport.lo - 1
+  ---@type Tab
+  local tab = tabs_cache[index]
+  if tab.pinned then
+    return
+  end
+
+  viewport_state.buf_deleted_partial = index == viewport.lo - 1
 
   if not force and bo[bufnr].modified then
     local choice = fn.confirm("Unsaved changes:", "&Save\n&Discard\n&Cancel", 1)
@@ -1647,7 +1658,30 @@ function Galfo.close_all_tab_right(force)
   end
 end
 
-local count = 1
+function Galfo.toggle_pin(bufnr)
+  bufnr = bufnr == 0 and nvim_get_current_buf() or bufnr
+  local index = buf_index[bufnr]
+  if not index then
+    return
+  end
+
+  local tab = tabs_cache[index]
+  tab.pinned = not tab.pinned
+
+  local old_width = tab.width
+
+  tab.rendered = setmetatable({}, getmetatable(tab.rendered))
+  tab.update()
+
+  if viewport.lo <= index and index <= viewport.hi then
+    if tab.width ~= old_width then
+      viewport_state.tab_width_changed = true
+    else
+      viewport_state.simple_redraw = true
+    end
+    redrawtabline()
+  end
+end
 
 local function setup_autocmds()
   api.nvim_create_autocmd("BufWinEnter", {
@@ -1665,7 +1699,7 @@ local function setup_autocmds()
       end
 
       insert_buf_into_tabline(buf)
-      vim.cmd.redrawtabline()
+      redrawtabline()
     end,
   })
 
@@ -1700,15 +1734,20 @@ local function setup_autocmds()
       end
 
       viewport_state.updated = true
-      vim.cmd.redrawtabline()
+      redrawtabline()
     end,
   })
 
   api.nvim_create_autocmd("BufDelete", {
     callback = function(ev)
       local bufnr = ev.buf
-      local idx = buf_index[bufnr]
-      if not idx then
+      local index = buf_index[bufnr]
+      if not index then
+        return
+      end
+
+      local tab = tabs_cache[index]
+      if tab.pinned then
         return
       end
 
@@ -1742,7 +1781,7 @@ local function setup_autocmds()
           else
             viewport_state.simple_redraw = true
           end
-          vim.cmd.redrawtabline()
+          redrawtabline()
         end
       end,
     })
@@ -1785,7 +1824,7 @@ local function setup_autocmds()
             else
               viewport_state.simple_redraw = true
             end
-            vim.cmd.redrawtabline()
+            redrawtabline()
           end
         end
       end,
@@ -1829,6 +1868,9 @@ _G.TabOnClick = function(bufnr, clicks, button, mods)
     end,
     close = function(force)
       Galfo.close_tab(bufnr, force)
+    end,
+    toggle_pin = function()
+      Galfo.toggle_pin(bufnr)
     end,
   }
 

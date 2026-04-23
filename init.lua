@@ -695,7 +695,8 @@ vim.api.nvim_create_autocmd("VimEnter", {
         },
         {
           icon = function(icon, _tab)
-            return icon
+            return _tab.pinned and "󰐃" or icon
+            -- return icon
           end,
           -- highlights = {
           --   focused = { default = focused_diag_error, modified = focused_diag_mod_error },
@@ -810,6 +811,9 @@ vim.api.nvim_create_autocmd("VimEnter", {
     end, { silent = true, nowait = true })
     map("n", "<c-x>", function()
       tabline.close_tab(0, true)
+    end, { silent = true, nowait = true })
+    map("n", "<c-s-n>", function()
+      tabline.toggle_pin(0)
     end, { silent = true, nowait = true })
   end,
 })
