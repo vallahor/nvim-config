@@ -4,6 +4,13 @@ local band, bor, lshift, rshift = bit.band, bit.bor, bit.lshift, bit.rshift
 local api, fn, bo = vim.api, vim.fn, vim.bo
 
 local redrawtabline = vim.cmd.redrawtabline
+local columns = vim.o.columns
+local diagnostic_count = vim.diagnostic.count
+
+local SEVERITY_ERROR = vim.diagnostic.severity.ERROR
+local SEVERITY_WARN = vim.diagnostic.severity.WARN
+local SEVERITY_INFO = vim.diagnostic.severity.INFO
+local SEVERITY_HINT = vim.diagnostic.severity.HINT
 
 local strwidth = fn.strwidth
 local fnamemodify = fn.fnamemodify
@@ -551,10 +558,10 @@ local function make_tab_icon(ext)
 end
 
 local diag_to_state = {
-  [vim.diagnostic.severity.ERROR] = STATES.ERROR,
-  [vim.diagnostic.severity.WARN] = STATES.WARN,
-  [vim.diagnostic.severity.INFO] = STATES.INFO,
-  [vim.diagnostic.severity.HINT] = STATES.HINT,
+  [SEVERITY_ERROR] = STATES.ERROR,
+  [SEVERITY_WARN] = STATES.WARN,
+  [SEVERITY_INFO] = STATES.INFO,
+  [SEVERITY_HINT] = STATES.HINT,
 }
 
 local function resolve_severity(diags)
@@ -1668,6 +1675,9 @@ function Galfo.toggle_pin(bufnr)
   local tab = tabs_cache[index]
   tab.pinned = not tab.pinned
 
+  -- If not do this when pinning the first Scratch buffer
+  -- the next buffer open, opens in that tab.
+  -- Better than spread the logic across autocmds.
   if bo[bufnr].buftype == "" then
     bo[bufnr].modified = true
   end
@@ -1799,7 +1809,7 @@ local function setup_autocmds()
           return
         end
 
-        diag_cache[ev.buf] = vim.diagnostic.count(ev.buf, I.diag_filter)
+        diag_cache[ev.buf] = diagnostic_count(ev.buf, I.diag_filter)
 
         ---@type Tab
         local tab = tabs_cache[index]
@@ -1838,7 +1848,7 @@ local function setup_autocmds()
   api.nvim_create_autocmd({ "VimResized", "WinResized" }, {
     callback = function()
       viewport.sidebar_width = render_sidebar()
-      viewport.width = vim.o.columns
+      viewport.width = columns
       viewport_state.size_changed = true
     end,
   })
@@ -1967,7 +1977,7 @@ function Galfo.setup(opts)
   viewport.indicator_last_width = nvim_strwidth(config.indicators.last.text)
 
   viewport.sidebar_width = render_sidebar()
-  viewport.width = vim.o.columns
+  viewport.width = columns
 
   init_dynamic(config.dynamic)
   init_bufs()
