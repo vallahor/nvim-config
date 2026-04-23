@@ -1668,6 +1668,10 @@ function Galfo.toggle_pin(bufnr)
   local tab = tabs_cache[index]
   tab.pinned = not tab.pinned
 
+  if bo[bufnr].buftype == "" then
+    bo[bufnr].modified = true
+  end
+
   local old_width = tab.width
 
   tab.rendered = setmetatable({}, getmetatable(tab.rendered))

@@ -698,6 +698,9 @@ vim.api.nvim_create_autocmd("VimEnter", {
             return _tab.pinned and "󰐃" or icon
             -- return icon
           end,
+          on_click = function(buf)
+            tabline.toggle_pin(buf)
+          end,
           -- highlights = {
           --   focused = { default = focused_diag_error, modified = focused_diag_mod_error },
           --   visible = { default = visible_diag_error, modified = visible_diag_mod_error },
