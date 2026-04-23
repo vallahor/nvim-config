@@ -4,7 +4,6 @@ local band, bor, lshift, rshift = bit.band, bit.bor, bit.lshift, bit.rshift
 local api, fn, bo = vim.api, vim.fn, vim.bo
 
 local redrawtabline = vim.cmd.redrawtabline
-local columns = vim.o.columns
 local diagnostic_count = vim.diagnostic.count
 
 local string_rep = string.rep
@@ -25,7 +24,6 @@ local SEVERITY_WARN = vim.diagnostic.severity.WARN
 local SEVERITY_INFO = vim.diagnostic.severity.INFO
 local SEVERITY_HINT = vim.diagnostic.severity.HINT
 
-local strwidth = fn.strwidth
 local fnamemodify = fn.fnamemodify
 local strcharpart = fn.strcharpart
 local win_findbuf = fn.win_findbuf
@@ -1309,6 +1307,7 @@ local function calc_truncated_tabs(width)
 end
 
 function I.GalfoRender()
+  local start = vim.uv.hrtime()
   if
     viewport_state.updated
     or viewport_state.simple_redraw
@@ -1432,6 +1431,8 @@ function I.GalfoRender()
     viewport_state.updated = false
     viewport.str = table_concat(tabs)
   end
+  local elapsed = vim.uv.hrtime() - start
+  print(string_format("%.3f ms", elapsed / 1e6))
   return viewport.str
 end
 
@@ -1859,7 +1860,7 @@ local function setup_autocmds()
   api.nvim_create_autocmd({ "VimResized", "WinResized" }, {
     callback = function()
       viewport.sidebar_width = render_sidebar()
-      viewport.width = columns
+      viewport.width = vim.o.columns
       viewport_state.size_changed = true
     end,
   })
@@ -1944,7 +1945,7 @@ function Galfo.setup(opts)
   end
 
   sidebar.separator = config.sidebar.separator
-  sidebar.separator_width = strwidth(config.sidebar.separator)
+  sidebar.separator_width = nvim_strwidth(config.sidebar.separator)
 
   sidebar.enabled = config.sidebar.enabled
 
@@ -1963,7 +1964,7 @@ function Galfo.setup(opts)
   end
 
   sidebar.label = config.sidebar.label
-  sidebar.label_width = strwidth(sidebar.label)
+  sidebar.label_width = nvim_strwidth(sidebar.label)
 
   if config.focus_on_click then
     I.focus_on_click = config.focus_on_click
@@ -1988,7 +1989,7 @@ function Galfo.setup(opts)
   viewport.indicator_last_width = nvim_strwidth(config.indicators.last.text)
 
   viewport.sidebar_width = render_sidebar()
-  viewport.width = columns
+  viewport.width = vim.o.columns
 
   init_dynamic(config.dynamic)
   init_bufs()
