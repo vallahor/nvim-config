@@ -19,11 +19,6 @@ local table_concat = table.concat
 local table_insert = table.insert
 local table_remove = table.remove
 
-local SEVERITY_ERROR = vim.diagnostic.severity.ERROR
-local SEVERITY_WARN = vim.diagnostic.severity.WARN
-local SEVERITY_INFO = vim.diagnostic.severity.INFO
-local SEVERITY_HINT = vim.diagnostic.severity.HINT
-
 local fnamemodify = fn.fnamemodify
 local strcharpart = fn.strcharpart
 local win_findbuf = fn.win_findbuf
@@ -261,6 +256,8 @@ local viewport_state = {
 ---@field indicator_last_width integer
 ---@field prefix string
 ---@field postfix string
+---@field viewport.left_reserved integer
+---@field viewport.right_reserved integer
 ---@field endfix string
 ---@field total_tabs_width integer
 local viewport = {
@@ -283,6 +280,8 @@ local viewport = {
   indicator_first_width = 2,
   indicator_last_width = 2,
   total_tabs_width = 0,
+  left_reserved = 0,
+  right_reserved = 0,
 }
 
 ---@class Sidebar
@@ -366,13 +365,6 @@ local icons_ext_cache = {}
 
 ---@type {[string]: {count: integer, bufs: table<integer, boolean?>}?}
 local tabs_repeated_names_buf_cache = {}
-
-local prefix_size = 0
-local postfix_size = 0
-
-I.dynamic = {
-  diagnostics = {},
-}
 
 local function init_dynamic(dynamic)
   if not dynamic then
@@ -569,10 +561,10 @@ local function make_tab_icon(ext)
 end
 
 local diag_to_state = {
-  [SEVERITY_ERROR] = STATES.ERROR,
-  [SEVERITY_WARN] = STATES.WARN,
-  [SEVERITY_INFO] = STATES.INFO,
-  [SEVERITY_HINT] = STATES.HINT,
+  [vim.diagnostic.severity.ERROR] = STATES.ERROR,
+  [vim.diagnostic.severity.WARN] = STATES.WARN,
+  [vim.diagnostic.severity.INFO] = STATES.INFO,
+  [vim.diagnostic.severity.HINT] = STATES.HINT,
 }
 
 local function resolve_severity(diags)
@@ -1088,10 +1080,10 @@ local function make_prefix(left_remaining, indicator)
         viewport.prefix = viewport.prefix .. string_rep(" ", size)
       end
     end
-    prefix_size = left_remaining
+    viewport.left_reserved = left_remaining
   else
     viewport.prefix = viewport.indicator_first
-    prefix_size = 0
+    viewport.left_reserved = 0
   end
 end
 
@@ -1106,10 +1098,10 @@ local function make_postfix(right_remaining, indicator)
         viewport.postfix = "%#TablineFill#" .. string_rep(" ", right_remaining) .. viewport.postfix
       end
     end
-    postfix_size = right_remaining
+    viewport.right_reserved = right_remaining
   else
     viewport.postfix = viewport.indicator_last
-    postfix_size = 0
+    viewport.right_reserved = 0
   end
 end
 
@@ -1248,7 +1240,8 @@ local function handle_buf_delete(width)
       left_remaining = indicators
     end
   else
-    local reserved = prefix_size > 0 and prefix_size or (viewport.truncate_left_width + viewport.truncate_right_width)
+    local reserved = viewport.left_reserved > 0 and viewport.left_reserved
+      or (viewport.truncate_left_width + viewport.truncate_right_width)
     viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - reserved)
     if viewport.hi == #tabs_cache then
       viewport.lo, left_remaining = compute_left_remain_from_end(width)
@@ -1274,16 +1267,16 @@ local function handle_tab_width_change(width)
   else
     local indicators = viewport.truncate_left_width + viewport.truncate_right_width
     if viewport.index == viewport.hi then
-      if postfix_size == 0 then
+      if viewport.right_reserved == 0 then
         viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicators)
         make_prefix(left_remaining, 0)
         return
       end
     end
-    local reserved = prefix_size + viewport.truncate_left_width + viewport.truncate_right_width
+    local reserved = viewport.left_reserved + viewport.truncate_left_width + viewport.truncate_right_width
     viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - reserved)
-    left_remaining = prefix_size
-    make_prefix(prefix_size, 0)
+    left_remaining = viewport.left_reserved
+    make_prefix(viewport.left_reserved, 0)
     make_postfix(right_remaining, 0)
     return
   end
@@ -1373,8 +1366,8 @@ function I.GalfoRender()
       viewport.hi = #tabs_cache
       viewport.prefix = viewport.indicator_first
       viewport.postfix = ""
-      prefix_size = 0
-      postfix_size = 0
+      viewport.left_reserved = 0
+      viewport.right_reserved = 0
     end
 
     ::build_viewport_str::
@@ -1421,7 +1414,8 @@ function I.GalfoRender()
         else
           indicators = viewport.indicator_first_width
         end
-        local remaining = math_max(0, width - prefix_size - postfix_size - filled_spaces - indicators)
+        local remaining =
+          math_max(0, width - viewport.left_reserved - viewport.right_reserved - filled_spaces - indicators)
         pad = make_spaces(cached_pad_tab, sidebar_spaces_tab, remaining)
       end
 
@@ -1431,8 +1425,8 @@ function I.GalfoRender()
     viewport_state.updated = false
     viewport.str = table_concat(tabs)
   end
-  local elapsed = vim.uv.hrtime() - start
-  print(string_format("%.3f ms", elapsed / 1e6))
+  local elapsed = (vim.uv.hrtime() - start) / 1e6
+  print(string_format("elapsed: %.3fms", elapsed))
   return viewport.str
 end
 
@@ -1727,7 +1721,6 @@ local function setup_autocmds()
       end
 
       insert_buf_into_tabline(buf)
-      redrawtabline()
     end,
   })
 
@@ -1990,6 +1983,10 @@ function Galfo.setup(opts)
 
   viewport.sidebar_width = render_sidebar()
   viewport.width = vim.o.columns
+
+  I.dynamic = {
+    diagnostics = {},
+  }
 
   init_dynamic(config.dynamic)
   init_bufs()
