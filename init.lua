@@ -695,7 +695,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
         },
         {
           icon = function(icon, _tab)
-            return "" .. icon .. ""
+            return icon
           end,
           -- highlights = {
           --   focused = { default = focused_diag_error, modified = focused_diag_mod_error },
@@ -722,38 +722,38 @@ vim.api.nvim_create_autocmd("VimEnter", {
           },
         },
         { static = " " },
-        {
-          text = function(info)
-            return info.diagnostics[vim.diagnostic.severity.ERROR]
-                and info.diagnostics[vim.diagnostic.severity.ERROR] .. " E"
-              or ""
-          end,
-          highlights = {
-            diagnostics = {
-              error = {
-                focused = { default = focused_diag_error, modified = focused_diag_mod_error },
-                visible = { default = visible_diag_error, modified = visible_diag_mod_error },
-              },
-            },
-          },
-        },
-        { static = " " },
-        {
-          text = function(info)
-            return info.diagnostics[vim.diagnostic.severity.WARN]
-                and info.diagnostics[vim.diagnostic.severity.WARN] .. " W"
-              or ""
-          end,
-          highlights = {
-            diagnostics = {
-              warn = {
-                focused = { default = focused_diag_warn, modified = focused_diag_mod_warn },
-                visible = { default = visible_diag_warn, modified = visible_diag_mod_warn },
-              },
-            },
-          },
-        },
-        { static = " " },
+        -- {
+        --   text = function(info)
+        --     return info.diagnostics[vim.diagnostic.severity.ERROR]
+        --         and info.diagnostics[vim.diagnostic.severity.ERROR] .. " E"
+        --       or ""
+        --   end,
+        --   highlights = {
+        --     diagnostics = {
+        --       error = {
+        --         focused = { default = focused_diag_error, modified = focused_diag_mod_error },
+        --         visible = { default = visible_diag_error, modified = visible_diag_mod_error },
+        --       },
+        --     },
+        --   },
+        -- },
+        -- { static = " " },
+        -- {
+        --   text = function(info)
+        --     return info.diagnostics[vim.diagnostic.severity.WARN]
+        --         and info.diagnostics[vim.diagnostic.severity.WARN] .. " W"
+        --       or ""
+        --   end,
+        --   highlights = {
+        --     diagnostics = {
+        --       warn = {
+        --         focused = { default = focused_diag_warn, modified = focused_diag_mod_warn },
+        --         visible = { default = visible_diag_warn, modified = visible_diag_mod_warn },
+        --       },
+        --     },
+        --   },
+        -- },
+        -- { static = " " },
         {
           text = function()
             return "󰅖"
@@ -773,7 +773,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
           },
         },
       },
-      update_cursor_line_hl = function(cur_win, win)
+      on_buf_replaced = function(cur_win, win)
         local hl = cur_win == win and cursor_line_active or cursor_line_inactive
         vim.api.nvim_set_option_value("winhighlight", hl, { win = win })
       end,

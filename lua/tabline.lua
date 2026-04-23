@@ -32,12 +32,18 @@ local config = {
   -- Only useful if on windows.
   force_unix_path_sep = true,
 
-  -- There are cases where the width of the tabline can't accommodate the icon because the icon
-  -- is the last item drawn in the tabline before the truncate_right, so it will blend with the
+  -- There are cases where the width of the tabline can't accommodate the last icon
+  -- before the truncate_right, so it will blend with the
   -- next char or being half displayed if no truncate_right.
   -- If don't matter that happening set it to true.
   last_icon_blend = false,
 
+  -- the `on_click` applies to the entire tab without `on_click`
+  -- parameters the default on_click parameters and tab.
+  -- `tab`
+  -- bufnr: integer
+  -- focus()
+  -- close() -- receive the force (boolean) parameter to force delete the buffer
   tab = {
     on_click = function(tab, _clicks, button, _mods)
       if button == "l" then
@@ -47,6 +53,40 @@ local config = {
       end
     end,
   },
+
+  -- Each tab could be text, static or icon
+  -- `text`: fuction(tab) end
+  -- `static`: "" -- just a string
+  -- `icon`: function(icon, tab) end -- icon is the filetype string. must return just 1 icon.
+  -- `on_click`: function(bufnr, clicks, button, mods) end
+  -- And if the highlights in this case are no passed it applies the provider filetype color.
+  -- If using some custom icon you should provide the highlight group
+  -- the `tab` parameter is:
+  -- name: string
+  -- unique_prefix: string -- with a path if a file with the same name appears.
+  -- is_focused: boolean
+  -- is_modified: boolean
+  -- diagnostics: {[vim.diagnostic.severity]: integer} -- Eg.: ab.diagnostics[vim.diagnostic.severity.ERROR]
+  --
+  -- `highlights`: It receives the highlight group.
+  -- You can customize existing colors using:
+  -- `Galfo.derive_hl` (returns new group)
+  -- `Galfo.get_hex` (return { fg: string, bf: string })
+  -- Diagnostics overrides the default and is applied using `diagnostic.filter`
+  -- highlights = {
+  --   visible = { default = "", modified = "" },
+  --   focused = { default = "", modified = "" },
+  --   diagnostics = {
+  --     error = {
+  --       focused = { default = "", modified = "" },
+  --       visible = { default = "", modified = "" },
+  --     },
+  --     warn = {
+  --       focused = { default = "", modified = "" },
+  --       visible = { default = "", modified = "" },
+  --     },
+  --   },
+  -- },
 
   tabs = {
     {
@@ -80,13 +120,17 @@ local config = {
     },
   },
 
-  dynamic = { diagnostics = false },
   -- This is for when you want to display some information from diagnostic or react to it
   -- like showing how many errors or warnings.
   -- if diagnostics = true so all other will fallback to it otherwise it will only be
   -- dynamic in the state set.
   -- dynamic = { diagnostics = true, focused = { diagnostics = false }, visible = { diagnostics = true } },
+  dynamic = { diagnostics = false },
 
+  -- `first`: appears for the first tab.
+  -- `last`: appears for the last tab if tab is fullfilled.
+  -- `truncate_left`: appears when theres more tabs left.
+  -- `truncate_right`: appears when theres more tabs right.
   indicators = {
     first = { text = "", highlight = "TablineVisible" },
     last = { text = "", highlight = "TablineVisible" },
@@ -126,7 +170,18 @@ local config = {
       "qf",
     },
   },
-  update_cursor_line_hl = function(_, _) end,
+
+  -- Used when a buffer is deleted/replaced in a window.
+  -- That's is for my use case. hehe
+  -- I have a bright cursor line in the "current buffer" and a dimmed version in
+  -- all other windows, so it has to run in other windows to preserve this behavior.
+  -- If you don't have that kind of usage, just ignore.
+  -- Check my usage. That code is from my `Galfo.setup({})`
+  -- on_buf_replaced = function(cur_win, win)
+  --   local hl = cur_win == win and cursor_line_active or cursor_line_inactive
+  --   vim.api.nvim_set_option_value("winhighlight", hl, { win = win })
+  -- end,
+  on_buf_replaced = function(_, _) end,
 }
 
 ---@class Viewport
@@ -227,6 +282,7 @@ local hl_cache = {}
 ---@field text_width integer
 ---@field hl string
 ---@field on_click string?
+---@field is_icon boolean
 ---
 ---@class Rendered
 ---@field components Components[]
@@ -255,7 +311,7 @@ local hl_cache = {}
 ---@field partial_left fun(width: integer, state: integer?): string
 ---@field partial_right fun(width: integer): string
 
--- @type {[integer]: Tab}
+---@type {[integer]: Tab}
 local tabs_cache = {}
 
 ---@type {[string]: {count: integer, icon: string, color: string}?}
@@ -572,8 +628,9 @@ local function build_tab(buf, dir, tail, ext)
     local components = {}
 
     for i, comp in ipairs(I.tabs) do
-      local text
       local hl = comp.highlights and resolve_hl(comp.highlights, state) or resolve_hl(I.base_highlights, state)
+
+      local text
       if comp.icon and tab_icon then
         hl = comp.highlights and hl or Galfo.derive_hl(hl, { fg = tab_icon.color })
         text = comp.icon(tab_icon.str, tab_state)
@@ -582,25 +639,31 @@ local function build_tab(buf, dir, tail, ext)
         text = comp.static
       elseif comp.text then
         text = comp.text(tab_state)
-        if comp.on_click then
-          local on_click_str = component_on_click(buf, i, text)
-          local text_width = api.nvim_strwidth(text)
-          tab_width = tab_width + text_width
-          click_components_handlers[buf] = click_components_handlers[buf] or {}
-          click_components_handlers[buf][i] = comp.on_click
-          display[#display + 1] = "%#" .. hl .. "#" .. on_click_str
-          components[#components + 1] = {
-            text = text,
-            text_width = text_width,
-            hl = hl,
-            on_click = on_click_str or nil,
-          }
-          goto continue
-        end
       end
+
+      if not text then
+        goto continue
+      end
+
+      local text_width = api.nvim_strwidth(text)
+      tab_width = tab_width + text_width
+
+      if comp.on_click then
+        local on_click_str = component_on_click(buf, i, text)
+        click_components_handlers[buf] = click_components_handlers[buf] or {}
+        click_components_handlers[buf][i] = comp.on_click
+        display[#display + 1] = "%#" .. hl .. "#" .. on_click_str
+        components[#components + 1] = {
+          text = text,
+          text_width = text_width,
+          hl = hl,
+          is_icon = comp.is_icon or false,
+          on_click = on_click_str,
+        }
+        goto continue
+      end
+
       if text then
-        local text_width = api.nvim_strwidth(text)
-        tab_width = tab_width + text_width
         display[#display + 1] = "%#" .. hl .. "#" .. text
         components[#components + 1] = {
           text = text,
@@ -609,6 +672,7 @@ local function build_tab(buf, dir, tail, ext)
           is_icon = comp.is_icon or false,
         }
       end
+
       ::continue::
     end
 
@@ -643,12 +707,17 @@ local function build_tab(buf, dir, tail, ext)
   end
 
   tab.partial_right = function(width)
+    ---@type Components[]
     local components = tab.rendered[STATES.VISIBLE + tab.modified + tab.severity].components
+    ---@type string[]
     local partial_right = { tab_on_click(buf) }
+    ---@type integer
     local w = 0
     for i, component in ipairs(components) do
+      ---@cast component Components
       if w + component.text_width + (component.is_icon and 1 or 0) > width then
         local remaining = width - w
+        ---@cast remaining integer
         if remaining > 0 then
           if component.is_icon and remaining == 1 and not I.tab.last_icon_blend then
             -- If not substitute the icon with one space, it blends with the next
@@ -660,7 +729,7 @@ local function build_tab(buf, dir, tail, ext)
             partial_right[#partial_right + 1] = "%#"
               .. component.hl
               .. "#"
-              .. (components.on_click and component_on_click(buf, i, part) or part)
+              .. (component.on_click and component_on_click(buf, i, part) or part)
           end
         end
         w = w + remaining
@@ -676,8 +745,11 @@ local function build_tab(buf, dir, tail, ext)
 
   tab.partial_left = function(width, state)
     state = state or STATES.VISIBLE
+    ---@type Components[]
     local components = tab.rendered[bor(state, tab.modified + tab.severity)].components
+    ---@type string[]
     local partial_left = {}
+    ---@type integer
     local comp_pos = 0
     local w = 0
 
@@ -694,12 +766,14 @@ local function build_tab(buf, dir, tail, ext)
 
     local remaining = w > 0 and width - w or width
     if remaining > 0 then
-      local text = components[comp_pos].text
-      local part = fn.strcharpart(text, components[comp_pos].text_width - remaining)
+      local component = components[comp_pos]
+      ---@cast component Components
+      local text = component.text
+      local part = fn.strcharpart(text, component.text_width - remaining)
       partial_left[#partial_left + 1] = "%#"
-        .. components[comp_pos].hl
+        .. component.hl
         .. "#"
-        .. (components[comp_pos].on_click and component_on_click(buf, comp_pos, part) or part)
+        .. (component.on_click and component_on_click(buf, comp_pos, part) or part)
     end
 
     for pos = comp_pos + 1, #components do
@@ -817,7 +891,7 @@ local function remove_buf_from_tabline(bufnr)
   local cur_win = api.nvim_get_current_win()
   for _, win in ipairs(fn.win_findbuf(bufnr)) do
     api.nvim_win_set_buf(win, replacement)
-    I.update_cursor_line_hl(cur_win, win)
+    I.on_buf_replaced(cur_win, win)
   end
 
   viewport.buf_deleted = true
@@ -1813,8 +1887,8 @@ function Galfo.setup(opts)
   init_bufs()
   setup_autocmds()
 
-  if opts and type(opts.update_cursor_line_hl) == "function" then
-    I.update_cursor_line_hl = opts.update_cursor_line_hl
+  if opts and type(opts.on_buf_replaced) == "function" then
+    I.on_buf_replaced = opts.on_buf_replaced
   end
 end
 
