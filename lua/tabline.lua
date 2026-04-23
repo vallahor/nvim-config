@@ -347,7 +347,6 @@ local hl_cache = {}
 ---@field ext string
 ---@field unique_prefix string
 ---@field width integer
----@field pinned boolean
 ---@field severity integer
 ---@field modified integer
 ---@field icon TabIcon?
@@ -362,6 +361,9 @@ local hl_cache = {}
 
 ---@type {[integer]: Tab}
 local tabs_cache = {}
+
+---@type {[integer]: boolean?}
+local tabs_pin_cache = {}
 
 ---@type {[string]: {count: integer, icon: string, color: string}?}
 local icons_ext_cache = {}
@@ -629,7 +631,6 @@ local function build_tab(buf, dir, tail, ext)
     unique_prefix = unique_prefix,
     ext = ext,
     str = "",
-    pinned = false,
     icon = tab_icon,
     modified = 0,
     width = 0,
@@ -651,7 +652,7 @@ local function build_tab(buf, dir, tail, ext)
       unique_prefix = tab.unique_prefix,
       is_focused = band(state, STATES.FOCUSED) ~= 0,
       is_modified = band(state, STATES.MODIFIED) ~= 0,
-      pinned = tab.pinned,
+      pinned = tabs_pin_cache[buf] ~= nil,
       diagnostics = diag_cache[buf] or {},
     }
 
@@ -1592,13 +1593,7 @@ end
 function Galfo.close_tab(bufnr, force)
   bufnr = bufnr == 0 and nvim_get_current_buf() or bufnr
   local index = buf_index[bufnr]
-  if not index then
-    return
-  end
-
-  ---@type Tab
-  local tab = tabs_cache[index]
-  if tab.pinned then
+  if not index or tabs_pin_cache[bufnr] then
     return
   end
 
@@ -1683,16 +1678,17 @@ function Galfo.toggle_pin(bufnr)
     return
   end
 
-  local tab = tabs_cache[index]
-  tab.pinned = not tab.pinned
+  tabs_pin_cache[bufnr] = not tabs_pin_cache[bufnr] and true or nil
+  print(bo[bufnr].bufhidden)
 
   -- If not do this when pinning the first Scratch buffer
   -- the next buffer open, opens in that tab.
   -- Better than spread the logic across autocmds.
-  if bo[bufnr].buftype == "" then
+  if bo[bufnr].filetype == "" then
     bo[bufnr].modified = true
   end
 
+  local tab = tabs_cache[index]
   local old_width = tab.width
 
   tab.rendered = setmetatable({}, getmetatable(tab.rendered))
@@ -1766,12 +1762,7 @@ local function setup_autocmds()
     callback = function(ev)
       local bufnr = ev.buf
       local index = buf_index[bufnr]
-      if not index then
-        return
-      end
-
-      local tab = tabs_cache[index]
-      if tab.pinned then
+      if not index or tabs_pin_cache[bufnr] then
         return
       end
 
