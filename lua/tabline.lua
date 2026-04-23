@@ -2,7 +2,7 @@ local bit = require("bit")
 local band, bor, lshift, rshift = bit.band, bit.bor, bit.lshift, bit.rshift
 
 local api, fn, bo = vim.api, vim.fn, vim.bo
-local strwidth, fnamemodify = fn.strwidth, fn.fnamemodify
+local strwidth, fnamemodify, strcharpart, win_findbuf = fn.strwidth, fn.fnamemodify, fn.strcharpart, fn.win_findbuf
 
 local IS_WINDOWS = fn.has("win32") == 1
 
@@ -185,10 +185,7 @@ local config = {
   on_buf_replaced = function(_, _) end,
 }
 
----@class Viewport
----@field str string
----@field width integer
----@field sidebar_width integer
+---@class ViewportState
 ---@field updated boolean
 ---@field size_changed boolean
 ---@field buf_deleted boolean
@@ -196,6 +193,19 @@ local config = {
 ---@field buf_deleted_partial boolean
 ---@field tab_width_changed boolean
 ---@field simple_redraw boolean
+local viewport_state = {
+  updated = true,
+  size_changed = true,
+  buf_deleted = false,
+  should_not_focus = false,
+  buf_deleted_partial = false,
+  tab_width_changed = false,
+  simple_redraw = true,
+}
+
+---@class Viewport
+---@field str string
+---@field width integer
 ---@field lo integer
 ---@field hi integer
 ---@field buf integer
@@ -216,13 +226,6 @@ local viewport = {
   str = "",
   width = 0,
   sidebar_width = 0,
-  updated = true,
-  size_changed = true,
-  buf_deleted = false,
-  should_not_focus = false,
-  buf_deleted_partial = false,
-  tab_width_changed = false,
-  simple_redraw = true,
   lo = 1,
   hi = 1,
   buf = 1,
@@ -462,7 +465,7 @@ local function update_buf_index()
   if not sidebar.focus and buf_index[viewport.buf] then
     viewport.index = buf_index[viewport.buf]
   end
-  viewport.updated = true
+  viewport_state.updated = true
 end
 
 local function resolve_buf_name(buf)
@@ -733,7 +736,7 @@ local function build_tab(buf, dir, tail, ext)
             partial_right[#partial_right + 1] = " "
           else
             local text = component.text
-            local part = fn.strcharpart(text, 0, remaining)
+            local part = strcharpart(text, 0, remaining)
             partial_right[#partial_right + 1] = "%#"
               .. component.hl
               .. "#"
@@ -778,7 +781,7 @@ local function build_tab(buf, dir, tail, ext)
       ---@type Components
       local component = components[comp_pos]
       local text = component.text
-      local part = fn.strcharpart(text, component.text_width - remaining)
+      local part = strcharpart(text, component.text_width - remaining)
       partial_left[#partial_left + 1] = "%#"
         .. component.hl
         .. "#"
@@ -880,7 +883,7 @@ local function remove_buf_from_tabline(bufnr)
   end
   repeated_names_remove(bufnr, tab.tail)
 
-  viewport.buf_deleted_partial = index == viewport.lo - 1
+  viewport_state.buf_deleted_partial = index == viewport.lo - 1
 
   table.remove(tabs_cache, index)
   table.remove(buf_cache, index)
@@ -896,14 +899,14 @@ local function remove_buf_from_tabline(bufnr)
   end
 
   local cur_win = api.nvim_get_current_win()
-  local wins = fn.win_findbuf(bufnr)
+  local wins = win_findbuf(bufnr)
   for i = 1, #wins do
     local win = wins[i]
     api.nvim_win_set_buf(win, replacement)
     I.on_buf_replaced(cur_win, win)
   end
 
-  viewport.buf_deleted = true
+  viewport_state.buf_deleted = true
   update_buf_index()
 end
 
@@ -971,7 +974,7 @@ local function render_sidebar()
     local label_width = sidebar.label_width + pad_left + pad_right
 
     if label_width > sidebar_width then
-      label = fn.strcharpart(label, 0, sidebar_width)
+      label = strcharpart(label, 0, sidebar_width)
     end
 
     sidebar.right = api.nvim_win_get_position(sidebar.winnr)[2] ~= 0
@@ -1145,7 +1148,7 @@ local function handle_index_after(width)
 end
 
 local function handle_width_change(width)
-  viewport.size_changed = false
+  viewport_state.size_changed = false
   local left_remaining = 0
   local right_remaining = 0
   if viewport.lo == 1 then
@@ -1191,11 +1194,11 @@ end
 local function handle_buf_delete(width)
   local left_remaining = 0
   local right_remaining = 0
-  local partial_deleted = viewport.buf_deleted_partial
-  viewport.buf_deleted = false
+  local partial_deleted = viewport_state.buf_deleted_partial
+  viewport_state.buf_deleted = false
 
   if partial_deleted then
-    viewport.buf_deleted_partial = false
+    viewport_state.buf_deleted_partial = false
     viewport.lo = viewport.lo - 1
   end
 
@@ -1231,7 +1234,7 @@ end
 local function handle_tab_width_change(width)
   local left_remaining = 0
   local right_remaining = 0
-  viewport.tab_width_changed = false
+  viewport_state.tab_width_changed = false
 
   if viewport.lo == 1 then
     viewport.hi, right_remaining = compute_right_remain_from_start(width)
@@ -1259,21 +1262,27 @@ end
 
 ---@param width integer
 local function calc_truncated_tabs(width)
-  if viewport.buf_deleted then
+  if viewport_state.buf_deleted then
     handle_buf_delete(width)
   elseif viewport.index > viewport.hi then
     handle_index_after(width)
   elseif viewport.index < viewport.lo then
     handle_index_before(width)
-  elseif viewport.size_changed then
+  elseif viewport_state.size_changed then
     handle_width_change(width)
-  elseif viewport.tab_width_changed then
+  elseif viewport_state.tab_width_changed then
     handle_tab_width_change(width)
   end
 end
 
 function I.tabline_make()
-  if viewport.size_changed or viewport.updated or viewport.simple_redraw or viewport.buf_deleted then
+  if
+    viewport_state.updated
+    or viewport_state.simple_redraw
+    or viewport_state.size_changed
+    or viewport_state.buf_deleted
+    or viewport_state.tab_width_changed
+  then
     if sidebar.winnr and api.nvim_get_current_win() == sidebar.winnr then
       sidebar.focus = true
       viewport.buf = -1
@@ -1294,8 +1303,8 @@ function I.tabline_make()
     ---@type Tab?
     local current_tab = tabs_cache[viewport.index]
 
-    if viewport.simple_redraw and not viewport.updated then
-      viewport.simple_redraw = false
+    if viewport_state.simple_redraw and not viewport_state.updated then
+      viewport_state.simple_redraw = false
       goto build_viewport_str
     end
 
@@ -1389,7 +1398,7 @@ function I.tabline_make()
 
     viewport.str = table.concat(tabs)
 
-    viewport.updated = false
+    viewport_state.updated = false
   end
   return viewport.str
 end
@@ -1460,7 +1469,7 @@ local function swap(i, j)
   buf_index[buf_cache[i]] = i
   buf_index[buf_cache[j]] = j
   viewport.index = buf_index[viewport.buf]
-  viewport.updated = true
+  viewport_state.updated = true
   schedule_redraw()
 end
 
@@ -1573,9 +1582,9 @@ function Galfo.close_tab_left(force)
     return
   end
 
-  viewport.should_not_focus = true
+  viewport_state.should_not_focus = true
   Galfo.close_tab(bufnr, force)
-  viewport.should_not_focus = false
+  viewport_state.should_not_focus = false
 end
 
 function Galfo.close_tab_right(force)
@@ -1584,9 +1593,9 @@ function Galfo.close_tab_right(force)
     return
   end
 
-  viewport.should_not_focus = true
+  viewport_state.should_not_focus = true
   Galfo.close_tab(bufnr, force)
-  viewport.should_not_focus = false
+  viewport_state.should_not_focus = false
 end
 
 function Galfo.close_all_tab_left(force)
@@ -1596,9 +1605,9 @@ function Galfo.close_all_tab_left(force)
       return
     end
 
-    viewport.should_not_focus = true
+    viewport_state.should_not_focus = true
     Galfo.close_tab(bufnr, force)
-    viewport.should_not_focus = false
+    viewport_state.should_not_focus = false
   end
 end
 
@@ -1609,9 +1618,9 @@ function Galfo.close_all_tab_right(force)
       return
     end
 
-    viewport.should_not_focus = true
+    viewport_state.should_not_focus = true
     Galfo.close_tab(bufnr, force)
-    viewport.should_not_focus = false
+    viewport_state.should_not_focus = false
   end
 end
 
@@ -1651,7 +1660,7 @@ local function setup_autocmds()
 
   api.nvim_create_autocmd({ "BufEnter" }, {
     callback = function(ev)
-      if viewport.should_not_focus then
+      if viewport_state.should_not_focus then
         return
       end
 
@@ -1665,7 +1674,7 @@ local function setup_autocmds()
         end
       end
 
-      viewport.updated = true
+      viewport_state.updated = true
       schedule_redraw()
     end,
   })
@@ -1704,9 +1713,9 @@ local function setup_autocmds()
 
         if viewport.lo <= index and index <= viewport.hi then
           if tab.width ~= old_width then
-            viewport.tab_width_changed = true
+            viewport_state.tab_width_changed = true
           else
-            viewport.simple_redraw = true
+            viewport_state.simple_redraw = true
           end
           schedule_redraw()
         end
@@ -1747,9 +1756,9 @@ local function setup_autocmds()
 
           if viewport.lo <= index and index <= viewport.hi then
             if tab.width ~= old_width then
-              viewport.tab_width_changed = true
+              viewport_state.tab_width_changed = true
             else
-              viewport.simple_redraw = true
+              viewport_state.simple_redraw = true
             end
             schedule_redraw()
           end
@@ -1762,7 +1771,7 @@ local function setup_autocmds()
     callback = function()
       viewport.sidebar_width = render_sidebar()
       viewport.width = vim.o.columns
-      viewport.size_changed = true
+      viewport_state.size_changed = true
     end,
   })
 

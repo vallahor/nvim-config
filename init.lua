@@ -695,7 +695,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
         },
         {
           icon = function(icon, _tab)
-            return icon
+            return _tab.is_modified and icon or ""
           end,
           -- highlights = {
           --   focused = { default = focused_diag_error, modified = focused_diag_mod_error },
