@@ -58,9 +58,10 @@ local config = {
   -- `text`: fuction(tab) end
   -- `static`: "" -- just a string
   -- `icon`: function(icon, tab) end -- icon is the filetype string. must return just 1 icon.
-  -- `on_click`: function(bufnr, clicks, button, mods) end
   -- And if the highlights in this case are no passed it applies the provider filetype color.
   -- If using some custom icon you should provide the highlight group
+  -- Or just `highlights = {}` to use the defaults.
+  -- `on_click`: function(bufnr, clicks, button, mods) end
   -- the `tab` parameter is:
   -- name: string
   -- unique_prefix: string -- with a path if a file with the same name appears.
@@ -347,7 +348,8 @@ local function init_dynamic(dynamic)
   local severity_states = { STATES.ERROR, STATES.WARN, STATES.HINT, STATES.INFO }
 
   local function mark_diags(flag)
-    for _, severity in ipairs(severity_states) do
+    for i = 1, #severity_states do
+      local severity = severity_states[i]
       I.dynamic.diagnostics[flag + severity] = true
       I.dynamic.diagnostics[flag + STATES.MODIFIED + severity] = true
     end
@@ -453,8 +455,8 @@ end
 local function update_buf_index()
   buf_index = {}
   viewport.total_tabs_width = 0
-  for i, b in ipairs(buf_cache) do
-    buf_index[b] = i
+  for i = 1, #buf_cache do
+    buf_index[buf_cache[i]] = i
     viewport.total_tabs_width = viewport.total_tabs_width + tabs_cache[i].width
   end
   if not sidebar.focus and buf_index[viewport.buf] then
@@ -543,7 +545,8 @@ local function resolve_severity(diags)
   if not diags then
     return 0
   end
-  for _, diag in ipairs(I.diag_order) do
+  for i = 1, #I.diag_order do
+    local diag = I.diag_order[i]
     if (diags[diag] or 0) > 0 then
       return diag_to_state[diag]
     end
@@ -621,13 +624,17 @@ local function build_tab(buf, dir, tail, ext)
       diagnostics = diag_cache[buf] or {},
     }
 
+    -- register in the handlers the `tab.on_click` with the current buf
     click_tab_handlers[buf] = I.tab.on_click
 
-    local tab_width = 0
+    -- init the tab with `tab.on_click`
     local display = { tab_on_click(buf) }
+
+    local tab_width = 0
     local components = {}
 
-    for i, comp in ipairs(I.tabs) do
+    for i = 1, #I.tabs do
+      local comp = I.tabs[i]
       local hl = comp.highlights and resolve_hl(comp.highlights, state) or resolve_hl(I.base_highlights, state)
 
       local text
@@ -713,8 +720,9 @@ local function build_tab(buf, dir, tail, ext)
     local partial_right = { tab_on_click(buf) }
     ---@type integer
     local w = 0
-    for i, component in ipairs(components) do
-      ---@cast component Components
+    for i = 1, #components do
+      ---@type Components
+      local component = components[i]
       if w + component.text_width + (component.is_icon and 1 or 0) > width then
         local remaining = width - w
         ---@cast remaining integer
@@ -754,11 +762,12 @@ local function build_tab(buf, dir, tail, ext)
     local w = 0
 
     for pos = #components, 1, -1 do
-      if w + components[pos].text_width > width then
+      local component_text_width = components[pos].text_width
+      if w + component_text_width > width then
         comp_pos = pos
         break
       end
-      w = w + components[pos].text_width
+      w = w + component_text_width
       comp_pos = pos
     end
 
@@ -766,8 +775,8 @@ local function build_tab(buf, dir, tail, ext)
 
     local remaining = w > 0 and width - w or width
     if remaining > 0 then
+      ---@type Components
       local component = components[comp_pos]
-      ---@cast component Components
       local text = component.text
       local part = fn.strcharpart(text, component.text_width - remaining)
       partial_left[#partial_left + 1] = "%#"
@@ -777,10 +786,8 @@ local function build_tab(buf, dir, tail, ext)
     end
 
     for pos = comp_pos + 1, #components do
-      partial_left[#partial_left + 1] = "%#"
-        .. components[pos].hl
-        .. "#"
-        .. (components[pos].on_click or components[pos].text)
+      local component = components[pos]
+      partial_left[#partial_left + 1] = "%#" .. component.hl .. "#" .. (component.on_click or component.text)
     end
 
     return table.concat(partial_left)
@@ -889,7 +896,9 @@ local function remove_buf_from_tabline(bufnr)
   end
 
   local cur_win = api.nvim_get_current_win()
-  for _, win in ipairs(fn.win_findbuf(bufnr)) do
+  local wins = fn.win_findbuf(bufnr)
+  for i = 1, #wins do
+    local win = wins[i]
     api.nvim_win_set_buf(win, replacement)
     I.on_buf_replaced(cur_win, win)
   end
@@ -1010,10 +1019,11 @@ local function get_viewport_hi(idx, width)
   local w = tabs_cache[idx].width
   local hi = idx
   for pos = hi + 1, #tabs_cache do
-    if w + tabs_cache[pos].width > width then
+    local tab_width = tabs_cache[pos].width
+    if w + tab_width > width then
       break
     end
-    w = w + tabs_cache[pos].width
+    w = w + tab_width
     hi = pos
   end
   return hi, width - w
@@ -1023,10 +1033,11 @@ local function get_viewport_lo(idx, width)
   local w = tabs_cache[idx].width
   local lo = idx
   for pos = lo - 1, 1, -1 do
-    if w + tabs_cache[pos].width > width then
+    local tab_width = tabs_cache[pos].width
+    if w + tab_width > width then
       break
     end
-    w = w + tabs_cache[pos].width
+    w = w + tab_width
     lo = pos
   end
   return lo, width - w
@@ -1038,9 +1049,7 @@ local function make_prefix(left_remaining, indicator)
     if left_remaining > 0 then
       local size = left_remaining - indicator
       if size > 0 then
-        ---@type Tab
-        local tab = tabs_cache[viewport.lo - 1]
-        viewport.prefix = viewport.prefix .. tab.partial_left(size)
+        viewport.prefix = viewport.prefix .. tabs_cache[viewport.lo - 1].partial_left(size)
       else
         viewport.prefix = viewport.prefix .. string.rep(" ", size)
       end
@@ -1058,9 +1067,7 @@ local function make_postfix(right_remaining, indicator)
     if right_remaining > 0 then
       local size = right_remaining - indicator
       if size > 0 then
-        ---@type Tab
-        local tab = tabs_cache[viewport.hi + 1]
-        viewport.postfix = tab.partial_right(size) .. viewport.postfix
+        viewport.postfix = tabs_cache[viewport.hi + 1].partial_right(size) .. viewport.postfix
       elseif size < 0 then
         viewport.postfix = "%#TablineFill#" .. string.rep(" ", right_remaining) .. viewport.postfix
       end
@@ -1266,7 +1273,6 @@ local function calc_truncated_tabs(width)
 end
 
 function I.tabline_make()
-  local start = vim.uv.hrtime()
   if viewport.size_changed or viewport.updated or viewport.simple_redraw or viewport.buf_deleted then
     if sidebar.winnr and api.nvim_get_current_win() == sidebar.winnr then
       sidebar.focus = true
@@ -1385,11 +1391,6 @@ function I.tabline_make()
 
     viewport.updated = false
   end
-
-  local elapsed = (vim.uv.hrtime() - start) / 1e6 -- milliseconds
-  vim.notify(string.format("tabline: %.3fms", elapsed))
-  -- local elapsed = (vim.uv.hrtime() - start) / 1e3 -- microseconds
-  -- vim.notify(string.format("tabline: %.3fµs", elapsed))
   return viewport.str
 end
 
@@ -1511,6 +1512,7 @@ function Galfo.move_tab_begin()
   if sidebar.focus then
     return
   end
+
   local i = get_current_index()
   if i > 1 then
     local b = table.remove(buf_cache, i)
@@ -1526,6 +1528,7 @@ function Galfo.move_tab_end()
   if sidebar.focus then
     return
   end
+
   local i = get_current_index()
   if i < #buf_cache then
     local b = table.remove(buf_cache, i)
@@ -1626,6 +1629,7 @@ local function setup_autocmds()
       then
         return
       end
+
       insert_buf_into_tabline(buf)
       schedule_redraw()
     end,
@@ -1650,6 +1654,7 @@ local function setup_autocmds()
       if viewport.should_not_focus then
         return
       end
+
       if sidebar.enabled and sidebar_filetypes[bo[ev.buf].filetype] then
         sidebar.winnr = api.nvim_get_current_win()
       else
@@ -1672,6 +1677,7 @@ local function setup_autocmds()
       if not idx then
         return
       end
+
       remove_buf_from_tabline(bufnr)
     end,
   })
