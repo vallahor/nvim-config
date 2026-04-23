@@ -1679,7 +1679,6 @@ function Galfo.toggle_pin(bufnr)
   end
 
   tabs_pin_cache[bufnr] = not tabs_pin_cache[bufnr] and true or nil
-  print(bo[bufnr].bufhidden)
 
   -- If not do this when pinning the first Scratch buffer
   -- the next buffer open, opens in that tab.
