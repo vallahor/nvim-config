@@ -229,6 +229,7 @@ local config = {
 ---@field buf_deleted_partial boolean
 ---@field tab_width_changed boolean
 ---@field simple_redraw boolean
+---@field tab_shrink boolean
 local viewport_state = {
   updated = true,
   size_changed = true,
@@ -237,6 +238,7 @@ local viewport_state = {
   buf_deleted_partial = false,
   tab_width_changed = false,
   simple_redraw = true,
+  tab_shrink = false,
 }
 
 ---@class Viewport
@@ -262,6 +264,7 @@ local viewport_state = {
 ---@field total_tabs_width integer
 local viewport = {
   str = "",
+  tab_shrink_str = "",
   width = 0,
   sidebar_width = 0,
   lo = 1,
@@ -1312,9 +1315,13 @@ function I.GalfoRender()
       viewport.buf = -1
     end
 
+    ---@type Tab?
+    local current_tab = tabs_cache[viewport.index]
+    local indicators = 0
+
     local width = viewport.width - viewport.sidebar_width
 
-    if viewport_state.simple_redraw and not viewport_state.updated then
+    if viewport_state.simple_redraw and not viewport_state.updated and not viewport_state.tab_shrink then
       viewport_state.simple_redraw = false
       goto build_viewport_str
     end
@@ -1330,15 +1337,6 @@ function I.GalfoRender()
       viewport.right_reserved = 0
     end
 
-    ::build_viewport_str::
-
-    -- @check: put it in some viewport_state to not calculate it all the time.
-
-    ---@type Tab?
-    local current_tab = tabs_cache[viewport.index]
-
-    local tab_str, tab_shrink = "", false
-    local indicators = 0
     if viewport.lo == 1 then
       indicators = viewport.indicator_first_width + viewport.truncate_right_width
     elseif viewport.hi == #tabs_cache then
@@ -1347,7 +1345,9 @@ function I.GalfoRender()
       indicators = viewport.truncate_left_width + viewport.truncate_right_width
     end
 
-    if current_tab and current_tab.width > width - indicators then
+    viewport_state.tab_shrink = current_tab and current_tab.width > width - indicators
+
+    if viewport_state.tab_shrink then
       local available = width
       viewport.lo = viewport.index
       viewport.hi = viewport.index
@@ -1365,18 +1365,15 @@ function I.GalfoRender()
         available = width - indicators
       end
 
-      viewport.left_reserved = 0
-      viewport.right_reserved = 0
-
-      tab_shrink = true
-
       local buf = buf_cache[viewport.index]
       local focused = buf == viewport.buf and STATES.FOCUSED or STATES.VISIBLE
       local state = bor(focused, current_tab.modified + current_tab.severity)
 
       local pad = string_rep(" ", math_max(0, available - current_tab.rendered[state].width))
-      tab_str = current_tab.partial_left(available, focused) .. pad
+      viewport.tab_shrink_str = current_tab.partial_left(available, focused) .. pad
     end
+
+    ::build_viewport_str::
 
     local sidebar_str = ""
     if viewport.sidebar_width > 0 then
@@ -1390,8 +1387,8 @@ function I.GalfoRender()
     tabs[#tabs + 1] = viewport.prefix
 
     local filled_spaces = 0
-    if tab_shrink then
-      tabs[#tabs + 1] = tab_str
+    if viewport_state.tab_shrink then
+      tabs[#tabs + 1] = viewport.tab_shrink_str
     else
       for i = viewport.lo, viewport.hi do
         ---@type Tab
@@ -1408,7 +1405,7 @@ function I.GalfoRender()
 
     if sidebar.right then
       local pad = ""
-      if not tab_shrink then
+      if not viewport_state.tab_shrink then
         if viewport.total_tabs_width > width then
           if viewport.lo == 1 then
             indicators = viewport.indicator_first_width + compute_right_indicator()
@@ -1727,6 +1724,7 @@ local function setup_autocmds()
       end
 
       insert_buf_into_tabline(buf)
+      redrawtabline()
     end,
   })
 
