@@ -2,7 +2,28 @@ local bit = require("bit")
 local band, bor, lshift, rshift = bit.band, bit.bor, bit.lshift, bit.rshift
 
 local api, fn, bo = vim.api, vim.fn, vim.bo
-local strwidth, fnamemodify, strcharpart, win_findbuf = fn.strwidth, fn.fnamemodify, fn.strcharpart, fn.win_findbuf
+
+local strwidth = fn.strwidth
+local fnamemodify = fn.fnamemodify
+local strcharpart = fn.strcharpart
+local win_findbuf = fn.win_findbuf
+
+local nvim_strwidth = api.nvim_strwidth
+local nvim_buf_get_name = api.nvim_buf_get_name
+local nvim_create_buf = api.nvim_create_buf
+local nvim_get_current_win = api.nvim_get_current_win
+local nvim_win_set_buf = api.nvim_win_set_buf
+local nvim_win_is_valid = api.nvim_win_is_valid
+local nvim_win_get_width = api.nvim_win_get_width
+local nvim_set_current_buf = api.nvim_set_current_buf
+local nvim_get_current_buf = api.nvim_get_current_buf
+local nvim_buf_call = api.nvim_buf_call
+local nvim_buf_is_valid = api.nvim_buf_is_valid
+local nvim_buf_delete = api.nvim_buf_delete
+local nvim_get_hl = api.nvim_get_hl
+local nvim_set_hl = api.nvim_set_hl
+local nvim_list_bufs = api.nvim_list_bufs
+local nvim_win_get_position = api.nvim_win_get_position
 
 local IS_WINDOWS = fn.has("win32") == 1
 
@@ -279,6 +300,7 @@ local buf_index = {}
 ---@type {[integer]: table<integer, integer>?}
 local diag_cache = {}
 
+---@type {[string], string?}
 local hl_cache = {}
 
 ---@class Components
@@ -327,18 +349,6 @@ local tabs_repeated_names_buf_cache = {}
 local prefix_size = 0
 local postfix_size = 0
 
-local redraw_scheduled = false
-
-local function schedule_redraw()
-  if not redraw_scheduled then
-    redraw_scheduled = true
-    vim.schedule(function()
-      redraw_scheduled = false
-      vim.cmd.redrawtabline()
-    end)
-  end
-end
-
 I.dynamic = {
   diagnostics = {},
 }
@@ -379,7 +389,7 @@ local function to_int(color)
 end
 
 Galfo.derive_hl = function(group, overrides)
-  local ok, val = pcall(api.nvim_get_hl, 0, { name = group, link = false })
+  local ok, val = pcall(nvim_get_hl, 0, { name = group, link = false })
   if not ok then
     return group
   end
@@ -421,14 +431,14 @@ Galfo.derive_hl = function(group, overrides)
     .. (attrs.undercurl and "c" or "")
     .. (attrs.strikethrough and "s" or "")
 
-  api.nvim_set_hl(0, name, attrs)
+  nvim_set_hl(0, name, attrs)
   hl_cache[key] = name
   return name
 end
 
 ---@return nil|{fg: string, bg:string}
 Galfo.get_hex = function(group)
-  local ok, val = pcall(api.nvim_get_hl, 0, { name = group, link = false })
+  local ok, val = pcall(nvim_get_hl, 0, { name = group, link = false })
   if not ok or not val then
     return nil
   end
@@ -469,7 +479,7 @@ local function update_buf_index()
 end
 
 local function resolve_buf_name(buf)
-  local bufname = api.nvim_buf_get_name(buf)
+  local bufname = nvim_buf_get_name(buf)
   if bufname == "" then
     return "", I.tab.scratch_buffer_name, ""
   end
@@ -494,7 +504,7 @@ end
 local get_icon_fn = {
   ["mini.icons"] = function(ext)
     local icon, hl = I.icons.provider.get("extension", ext)
-    local color = api.nvim_get_hl(0, { name = hl, link = false })
+    local color = nvim_get_hl(0, { name = hl, link = false })
     return icon, string.format("#%06x", color.fg)
   end,
   ["nvim-web-devicons"] = function(ext)
@@ -655,7 +665,7 @@ local function build_tab(buf, dir, tail, ext)
         goto continue
       end
 
-      local text_width = api.nvim_strwidth(text)
+      local text_width = nvim_strwidth(text)
       tab_width = tab_width + text_width
 
       if comp.on_click then
@@ -778,8 +788,8 @@ local function build_tab(buf, dir, tail, ext)
 
     local remaining = w > 0 and width - w or width
     if remaining > 0 then
-      ---@type Components
       local component = components[comp_pos]
+      ---@cast component Components
       local text = component.text
       local part = strcharpart(text, component.text_width - remaining)
       partial_left[#partial_left + 1] = "%#"
@@ -883,8 +893,6 @@ local function remove_buf_from_tabline(bufnr)
   end
   repeated_names_remove(bufnr, tab.tail)
 
-  viewport_state.buf_deleted_partial = index == viewport.lo - 1
-
   table.remove(tabs_cache, index)
   table.remove(buf_cache, index)
 
@@ -895,14 +903,14 @@ local function remove_buf_from_tabline(bufnr)
   ---@type integer?
   local replacement = buf_cache[index] or buf_cache[index - 1]
   if not replacement then
-    replacement = api.nvim_create_buf(true, false)
+    replacement = nvim_create_buf(true, false)
   end
 
-  local cur_win = api.nvim_get_current_win()
+  local cur_win = nvim_get_current_win()
   local wins = win_findbuf(bufnr)
   for i = 1, #wins do
     local win = wins[i]
-    api.nvim_win_set_buf(win, replacement)
+    nvim_win_set_buf(win, replacement)
     I.on_buf_replaced(cur_win, win)
   end
 
@@ -911,7 +919,7 @@ local function remove_buf_from_tabline(bufnr)
 end
 
 local function init_bufs()
-  for _, b in ipairs(api.nvim_list_bufs()) do
+  for _, b in ipairs(nvim_list_bufs()) do
     if bo[b].buflisted then
       insert_buf_into_tabline(b)
     end
@@ -960,10 +968,10 @@ end
 
 ---@return integer
 local function render_sidebar()
-  if not sidebar.enabled or not sidebar.winnr or not api.nvim_win_is_valid(sidebar.winnr) then
+  if not sidebar.enabled or not sidebar.winnr or not nvim_win_is_valid(sidebar.winnr) then
     return 0
   end
-  local sidebar_width = api.nvim_win_get_width(sidebar.winnr)
+  local sidebar_width = nvim_win_get_width(sidebar.winnr)
   if sidebar_width ~= sidebar.width then
     sidebar.width = sidebar_width
     local total_pad = math.max(0, sidebar_width - sidebar.label_width)
@@ -977,7 +985,7 @@ local function render_sidebar()
       label = strcharpart(label, 0, sidebar_width)
     end
 
-    sidebar.right = api.nvim_win_get_position(sidebar.winnr)[2] ~= 0
+    sidebar.right = nvim_win_get_position(sidebar.winnr)[2] ~= 0
 
     if sidebar.right then
       sidebar.rendered_focused = "%#"
@@ -1199,7 +1207,7 @@ local function handle_buf_delete(width)
 
   if partial_deleted then
     viewport_state.buf_deleted_partial = false
-    viewport.lo = viewport.lo - 1
+    viewport.lo = math.max(1, viewport.lo - 1)
   end
 
   if viewport.lo == 1 then
@@ -1275,7 +1283,7 @@ local function calc_truncated_tabs(width)
   end
 end
 
-function I.tabline_make()
+function I.GalfoRender()
   if
     viewport_state.updated
     or viewport_state.simple_redraw
@@ -1283,7 +1291,7 @@ function I.tabline_make()
     or viewport_state.buf_deleted
     or viewport_state.tab_width_changed
   then
-    if sidebar.winnr and api.nvim_get_current_win() == sidebar.winnr then
+    if sidebar.winnr and nvim_get_current_win() == sidebar.winnr then
       sidebar.focus = true
       viewport.buf = -1
     end
@@ -1396,9 +1404,8 @@ function I.tabline_make()
       tabs[#tabs + 1] = pad .. sidebar_str
     end
 
-    viewport.str = table.concat(tabs)
-
     viewport_state.updated = false
+    viewport.str = table.concat(tabs)
   end
   return viewport.str
 end
@@ -1407,9 +1414,10 @@ function Galfo.prev_tab()
   if sidebar.focus then
     return
   end
+
   local i = get_current_index()
   if i > 1 then
-    api.nvim_set_current_buf(buf_cache[i - 1])
+    nvim_set_current_buf(buf_cache[i - 1])
     viewport.index = i - 1
   end
 end
@@ -1418,9 +1426,10 @@ function Galfo.next_tab()
   if sidebar.focus then
     return
   end
+
   local i = get_current_index()
   if i < #buf_cache then
-    api.nvim_set_current_buf(buf_cache[i + 1])
+    nvim_set_current_buf(buf_cache[i + 1])
     viewport.index = i + 1
   end
 end
@@ -1429,9 +1438,10 @@ function Galfo.prev_tab_cycle()
   if sidebar.focus then
     return
   end
+
   local n = #tabs_cache
   local i = ((get_current_index() - 2) % n) + 1
-  api.nvim_set_current_buf(buf_cache[i])
+  nvim_set_current_buf(buf_cache[i])
   viewport.index = i
 end
 
@@ -1439,9 +1449,10 @@ function Galfo.next_tab_cycle()
   if sidebar.focus then
     return
   end
+
   local n = #tabs_cache
   local i = (get_current_index() % n) + 1
-  api.nvim_set_current_buf(buf_cache[i])
+  nvim_set_current_buf(buf_cache[i])
   viewport.index = i
 end
 
@@ -1449,8 +1460,9 @@ function Galfo.move_to_begin()
   if sidebar.focus then
     return
   end
+
   local buf = buf_cache[1]
-  api.nvim_set_current_buf(buf)
+  nvim_set_current_buf(buf)
   viewport.index = buf_index[buf]
 end
 
@@ -1458,8 +1470,9 @@ function Galfo.move_to_end()
   if sidebar.focus then
     return
   end
+
   local buf = buf_cache[#buf_cache]
-  api.nvim_set_current_buf(buf)
+  nvim_set_current_buf(buf)
   viewport.index = buf_index[buf]
 end
 
@@ -1470,13 +1483,14 @@ local function swap(i, j)
   buf_index[buf_cache[j]] = j
   viewport.index = buf_index[viewport.buf]
   viewport_state.updated = true
-  schedule_redraw()
+  vim.cmd.redrawtabline()
 end
 
 function Galfo.move_tab_left()
   if sidebar.focus then
     return
   end
+
   local i = get_current_index()
   if i > 1 then
     swap(i, i - 1)
@@ -1487,6 +1501,7 @@ function Galfo.move_tab_right()
   if sidebar.focus then
     return
   end
+
   local i = get_current_index()
   if i < #buf_cache then
     swap(i, i + 1)
@@ -1497,6 +1512,7 @@ function Galfo.move_tab_left_cycle()
   if sidebar.focus then
     return
   end
+
   local i = get_current_index()
   if i > 1 then
     swap(i, i - 1)
@@ -1509,6 +1525,7 @@ function Galfo.move_tab_right_cycle()
   if sidebar.focus then
     return
   end
+
   local i = get_current_index()
   if i < #buf_cache then
     swap(i, i + 1)
@@ -1529,7 +1546,7 @@ function Galfo.move_tab_begin()
     local t = table.remove(tabs_cache, i)
     table.insert(tabs_cache, 1, t)
     update_buf_index()
-    schedule_redraw()
+    vim.cmd.redrawtabline()
   end
 end
 
@@ -1545,21 +1562,23 @@ function Galfo.move_tab_end()
     local t = table.remove(tabs_cache, i)
     tabs_cache[#tabs_cache + 1] = t
     update_buf_index()
-    schedule_redraw()
+    vim.cmd.redrawtabline()
   end
 end
 
 function Galfo.close_tab(bufnr, force)
-  bufnr = bufnr == 0 and api.nvim_get_current_buf() or bufnr
+  bufnr = bufnr == 0 and nvim_get_current_buf() or bufnr
   local idx = buf_index[bufnr]
   if not idx then
     return
   end
 
+  viewport_state.buf_deleted_partial = idx == viewport.lo - 1
+
   if not force and bo[bufnr].modified then
     local choice = fn.confirm("Unsaved changes:", "&Save\n&Discard\n&Cancel", 1)
     if choice == 1 then
-      pcall(api.nvim_buf_call, bufnr, function()
+      pcall(nvim_buf_call, bufnr, function()
         vim.cmd.write()
       end)
       Galfo.close_tab(bufnr, true)
@@ -1571,8 +1590,8 @@ function Galfo.close_tab(bufnr, force)
 
   remove_buf_from_tabline(bufnr)
 
-  if api.nvim_buf_is_valid(bufnr) then
-    api.nvim_buf_delete(bufnr, { force = true })
+  if nvim_buf_is_valid(bufnr) then
+    nvim_buf_delete(bufnr, { force = true })
   end
 end
 
@@ -1608,6 +1627,8 @@ function Galfo.close_all_tab_left(force)
     viewport_state.should_not_focus = true
     Galfo.close_tab(bufnr, force)
     viewport_state.should_not_focus = false
+
+    viewport.lo = viewport.index
   end
 end
 
@@ -1621,26 +1642,30 @@ function Galfo.close_all_tab_right(force)
     viewport_state.should_not_focus = true
     Galfo.close_tab(bufnr, force)
     viewport_state.should_not_focus = false
+
+    viewport.hi = viewport.index
   end
 end
+
+local count = 1
 
 local function setup_autocmds()
   api.nvim_create_autocmd("BufWinEnter", {
     callback = function(ev)
       local buf = ev.buf
       if
-        not api.nvim_buf_is_valid(buf)
+        not nvim_buf_is_valid(buf)
         or not bo[buf].buflisted
         or buf_index[buf]
         or I.ignore.buftypes[bo[buf].buftype]
         or I.ignore.filetypes[bo[buf].filetype]
-        or I.ignore.bufnames[api.nvim_buf_get_name(buf)]
+        or I.ignore.bufnames[nvim_buf_get_name(buf)]
       then
         return
       end
 
       insert_buf_into_tabline(buf)
-      schedule_redraw()
+      vim.cmd.redrawtabline()
     end,
   })
 
@@ -1665,17 +1690,17 @@ local function setup_autocmds()
       end
 
       if sidebar.enabled and sidebar_filetypes[bo[ev.buf].filetype] then
-        sidebar.winnr = api.nvim_get_current_win()
+        sidebar.winnr = nvim_get_current_win()
       else
         sidebar.focus = false
         viewport.buf = ev.buf
-        if not sidebar.focus and buf_index[viewport.buf] then
+        if buf_index[viewport.buf] then
           viewport.index = buf_index[viewport.buf]
         end
       end
 
       viewport_state.updated = true
-      schedule_redraw()
+      vim.cmd.redrawtabline()
     end,
   })
 
@@ -1717,7 +1742,7 @@ local function setup_autocmds()
           else
             viewport_state.simple_redraw = true
           end
-          schedule_redraw()
+          vim.cmd.redrawtabline()
         end
       end,
     })
@@ -1760,7 +1785,7 @@ local function setup_autocmds()
             else
               viewport_state.simple_redraw = true
             end
-            schedule_redraw()
+            vim.cmd.redrawtabline()
           end
         end
       end,
@@ -1782,8 +1807,8 @@ local function setup_autocmds()
   })
 end
 
-_G.make_tabline = I.tabline_make
-vim.opt.tabline = "%!v:lua.make_tabline()"
+_G.GalfoRender = I.GalfoRender
+vim.opt.tabline = "%!v:lua.GalfoRender()"
 vim.opt.showtabline = 2
 
 _G.ComponentOnClick = function(id, clicks, button, mods)
@@ -1799,7 +1824,7 @@ _G.TabOnClick = function(bufnr, clicks, button, mods)
   local tab = {
     bufnr = bufnr,
     focus = function()
-      api.nvim_set_current_buf(bufnr)
+      nvim_set_current_buf(bufnr)
       viewport.index = buf_index[bufnr]
     end,
     close = function(force)
@@ -1886,14 +1911,14 @@ function Galfo.setup(opts)
     .. "#"
     .. config.indicators.truncate_right.text
 
-  viewport.truncate_left_width = api.nvim_strwidth(config.indicators.truncate_left.text)
-  viewport.truncate_right_width = api.nvim_strwidth(config.indicators.truncate_right.text)
+  viewport.truncate_left_width = nvim_strwidth(config.indicators.truncate_left.text)
+  viewport.truncate_right_width = nvim_strwidth(config.indicators.truncate_right.text)
 
   viewport.indicator_first = "%#" .. config.indicators.first.highlight .. "#" .. config.indicators.first.text
   viewport.indicator_last = "%#" .. config.indicators.last.highlight .. "#" .. config.indicators.last.text
 
-  viewport.indicator_first_width = api.nvim_strwidth(config.indicators.first.text)
-  viewport.indicator_last_width = api.nvim_strwidth(config.indicators.last.text)
+  viewport.indicator_first_width = nvim_strwidth(config.indicators.first.text)
+  viewport.indicator_last_width = nvim_strwidth(config.indicators.last.text)
 
   viewport.sidebar_width = render_sidebar()
   viewport.width = vim.o.columns
