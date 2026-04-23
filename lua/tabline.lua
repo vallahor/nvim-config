@@ -7,6 +7,13 @@ local redrawtabline = vim.cmd.redrawtabline
 local columns = vim.o.columns
 local diagnostic_count = vim.diagnostic.count
 
+local string_rep = string.rep
+local string_format = string.format
+
+local math_max = math.max
+local math_ceil = math.ceil
+local math_floor = math.floor
+
 local SEVERITY_ERROR = vim.diagnostic.severity.ERROR
 local SEVERITY_WARN = vim.diagnostic.severity.WARN
 local SEVERITY_INFO = vim.diagnostic.severity.INFO
@@ -453,8 +460,8 @@ Galfo.get_hex = function(group)
     return nil
   end
   return {
-    fg = val.fg and string.format("#%06x", val.fg) or "",
-    bg = val.bg and string.format("#%06x", val.bg) or "",
+    fg = val.fg and string_format("#%06x", val.fg) or "",
+    bg = val.bg and string_format("#%06x", val.bg) or "",
   }
 end
 
@@ -515,7 +522,7 @@ local get_icon_fn = {
   ["mini.icons"] = function(ext)
     local icon, hl = I.icons.provider.get("extension", ext)
     local color = nvim_get_hl(0, { name = hl, link = false })
-    return icon, string.format("#%06x", color.fg)
+    return icon, string_format("#%06x", color.fg)
   end,
   ["nvim-web-devicons"] = function(ext)
     return I.icons.provider.get_icon_color(nil, ext, { default = true })
@@ -731,7 +738,7 @@ local function build_tab(buf, dir, tail, ext)
     tab.rendered_visible = visible.display
     tab.rendered_focused = focused.display
 
-    local new_width = math.max(visible.width, focused.width)
+    local new_width = math_max(visible.width, focused.width)
     if new_width ~= tab.width then
       viewport.total_tabs_width = viewport.total_tabs_width - tab.width + new_width
       tab.width = new_width
@@ -771,7 +778,7 @@ local function build_tab(buf, dir, tail, ext)
       w = w + component.text_width
       partial_right[#partial_right + 1] = "%#" .. component.hl .. "#" .. (component.on_click or component.text)
     end
-    local pad = string.rep(" ", math.max(0, width - w))
+    local pad = string_rep(" ", math_max(0, width - w))
     partial_right[#partial_right + 1] = pad
     return table.concat(partial_right)
   end
@@ -955,26 +962,26 @@ local sidebar_spaces_right = ""
 local function make_spaces(cached_pad, str, n)
   if cached_pad ~= n then
     cached_pad = n
-    str = string.rep(" ", n)
+    str = string_rep(" ", n)
   end
   return str
 end
 
 local function sidebar_label_start(pad)
-  local pad_left = math.ceil(0)
-  local pad_right = math.floor(pad)
+  local pad_left = math_ceil(0)
+  local pad_right = math_floor(pad)
   return pad_left, pad_right
 end
 
 local function sidebar_label_mid(pad)
-  local pad_left = math.ceil(pad / 2)
-  local pad_right = math.floor(pad / 2)
+  local pad_left = math_ceil(pad / 2)
+  local pad_right = math_floor(pad / 2)
   return pad_left, pad_right
 end
 
 local function sidebar_label_end(pad)
-  local pad_left = math.ceil(pad)
-  local pad_right = math.floor(0)
+  local pad_left = math_ceil(pad)
+  local pad_right = math_floor(0)
   return pad_left, pad_right
 end
 
@@ -986,7 +993,7 @@ local function render_sidebar()
   local sidebar_width = nvim_win_get_width(sidebar.winnr)
   if sidebar_width ~= sidebar.width then
     sidebar.width = sidebar_width
-    local total_pad = math.max(0, sidebar_width - sidebar.label_width)
+    local total_pad = math_max(0, sidebar_width - sidebar.label_width)
     local pad_left, pad_right = I.sidebar_label_position(total_pad)
     local spaces_left = make_spaces(cached_pad_left, sidebar_spaces_left, pad_left)
     local spaces_right = make_spaces(cached_pad_right, sidebar_spaces_right, pad_right)
@@ -1074,7 +1081,7 @@ local function make_prefix(left_remaining, indicator)
       if size > 0 then
         viewport.prefix = viewport.prefix .. tabs_cache[viewport.lo - 1].partial_left(size)
       else
-        viewport.prefix = viewport.prefix .. string.rep(" ", size)
+        viewport.prefix = viewport.prefix .. string_rep(" ", size)
       end
     end
     prefix_size = left_remaining
@@ -1092,7 +1099,7 @@ local function make_postfix(right_remaining, indicator)
       if size > 0 then
         viewport.postfix = tabs_cache[viewport.hi + 1].partial_right(size) .. viewport.postfix
       elseif size < 0 then
-        viewport.postfix = "%#TablineFill#" .. string.rep(" ", right_remaining) .. viewport.postfix
+        viewport.postfix = "%#TablineFill#" .. string_rep(" ", right_remaining) .. viewport.postfix
       end
     end
     postfix_size = right_remaining
@@ -1219,7 +1226,7 @@ local function handle_buf_delete(width)
 
   if partial_deleted then
     viewport_state.buf_deleted_partial = false
-    viewport.lo = math.max(1, viewport.lo - 1)
+    viewport.lo = math_max(1, viewport.lo - 1)
   end
 
   if viewport.lo == 1 then
@@ -1352,7 +1359,7 @@ function I.GalfoRender()
       local focused = buf == viewport.buf and STATES.FOCUSED or STATES.VISIBLE
       local state = bor(focused, current_tab.modified + current_tab.severity)
 
-      local pad = string.rep(" ", math.max(0, available - current_tab.rendered[state].width))
+      local pad = string_rep(" ", math_max(0, available - current_tab.rendered[state].width))
       tab_str = current_tab.partial_left(available, focused) .. pad
     elseif viewport.total_tabs_width > width then
       calc_truncated_tabs(width)
@@ -1409,7 +1416,7 @@ function I.GalfoRender()
         else
           indicators = viewport.indicator_first_width
         end
-        local remaining = math.max(0, width - prefix_size - postfix_size - filled_spaces - indicators)
+        local remaining = math_max(0, width - prefix_size - postfix_size - filled_spaces - indicators)
         pad = make_spaces(cached_pad_tab, sidebar_spaces_tab, remaining)
       end
 
@@ -1748,7 +1755,6 @@ local function setup_autocmds()
       end
 
       viewport_state.updated = true
-      redrawtabline()
     end,
   })
 
@@ -1838,7 +1844,6 @@ local function setup_autocmds()
             else
               viewport_state.simple_redraw = true
             end
-            redrawtabline()
           end
         end
       end,
