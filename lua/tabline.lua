@@ -162,7 +162,7 @@ local config = {
   -- if diagnostics = true so all other will fallback to it otherwise it will only be
   -- dynamic in the state set.
   -- dynamic = { diagnostics = true, focused = { diagnostics = false }, visible = { diagnostics = true } },
-  dynamic = { diagnostics = false },
+  dynamic = { index = true, diagnostics = true },
 
   -- `first`: appears for the first tab.
   -- `last`: appears for the last tab if tab is fullfilled.
@@ -354,6 +354,7 @@ local hl_cache = {}
 ---@field rendered_visible string
 ---@field rendered_focused string
 ---@field update fun()
+---@field rerender fun(): boolean
 ---@field update_unique_prefix fun()
 ---@field resolve_string fun(state: integer): Rendered
 ---@field partial_left fun(width: integer, state: integer?): string
@@ -375,6 +376,8 @@ local function init_dynamic(dynamic)
   if not dynamic then
     return
   end
+
+  I.dynamic.index = dynamic.index or false
 
   local severity_states = { STATES.ERROR, STATES.WARN, STATES.HINT, STATES.INFO }
 
@@ -649,6 +652,7 @@ local function build_tab(buf, dir, tail, ext)
 
     local tab_state = {
       name = tail,
+      index = buf_index[buf] or #tabs_cache + 1,
       unique_prefix = tab.unique_prefix,
       is_focused = band(state, STATES.FOCUSED) ~= 0,
       is_modified = band(state, STATES.MODIFIED) ~= 0,
@@ -824,6 +828,15 @@ local function build_tab(buf, dir, tail, ext)
     return tab_on_click(buf) .. table_concat(partial_left)
   end
 
+  tab.rerender = function()
+    local old_width = tab.width
+
+    tab.rendered = setmetatable({}, getmetatable(tab.rendered))
+    tab.update()
+
+    return tab.width ~= old_width
+  end
+
   return tab
 end
 
@@ -934,6 +947,12 @@ local function remove_buf_from_tabline(bufnr)
 
   viewport_state.buf_deleted = true
   update_buf_index()
+
+  if I.dynamic.index then
+    for i = index, #tabs_cache do
+      tabs_cache[i].rerender()
+    end
+  end
 end
 
 local function init_bufs()
@@ -1430,7 +1449,7 @@ function I.GalfoRender()
     viewport.str = table_concat(tabs)
   end
   local elapsed = (vim.uv.hrtime() - start) / 1e6
-  print(string_format("elapsed: %.3fms", elapsed))
+  -- print(string_format("elapsed: %.3fms", elapsed))
   return viewport.str
 end
 
@@ -1442,7 +1461,6 @@ function Galfo.prev_tab()
   local i = get_current_index()
   if i > 1 then
     nvim_set_current_buf(buf_cache[i - 1])
-    viewport.index = i - 1
   end
 end
 
@@ -1454,7 +1472,6 @@ function Galfo.next_tab()
   local i = get_current_index()
   if i < #buf_cache then
     nvim_set_current_buf(buf_cache[i + 1])
-    viewport.index = i + 1
   end
 end
 
@@ -1466,7 +1483,6 @@ function Galfo.prev_tab_cycle()
   local n = #tabs_cache
   local i = ((get_current_index() - 2) % n) + 1
   nvim_set_current_buf(buf_cache[i])
-  viewport.index = i
 end
 
 function Galfo.next_tab_cycle()
@@ -1477,7 +1493,6 @@ function Galfo.next_tab_cycle()
   local n = #tabs_cache
   local i = (get_current_index() % n) + 1
   nvim_set_current_buf(buf_cache[i])
-  viewport.index = i
 end
 
 function Galfo.move_to_begin()
@@ -1487,7 +1502,6 @@ function Galfo.move_to_begin()
 
   local buf = buf_cache[1]
   nvim_set_current_buf(buf)
-  viewport.index = buf_index[buf]
 end
 
 function Galfo.move_to_end()
@@ -1497,7 +1511,6 @@ function Galfo.move_to_end()
 
   local buf = buf_cache[#buf_cache]
   nvim_set_current_buf(buf)
-  viewport.index = buf_index[buf]
 end
 
 local function swap(i, j)
@@ -1505,7 +1518,18 @@ local function swap(i, j)
   tabs_cache[i], tabs_cache[j] = tabs_cache[j], tabs_cache[i]
   buf_index[buf_cache[i]] = i
   buf_index[buf_cache[j]] = j
-  viewport.index = buf_index[viewport.buf]
+
+  if I.dynamic.index then
+    local tab_i_changed = tabs_cache[i].rerender()
+    local tab_j_changed = tabs_cache[j].rerender()
+
+    if tab_i_changed or tab_j_changed then
+      viewport_state.tab_width_changed = true
+    else
+      viewport_state.simple_redraw = true
+    end
+  end
+
   viewport_state.updated = true
   redrawtabline()
 end
@@ -1570,6 +1594,14 @@ function Galfo.move_tab_begin()
     local t = table_remove(tabs_cache, i)
     table_insert(tabs_cache, 1, t)
     update_buf_index()
+
+    if I.dynamic.index then
+      for index = i, 1, -1 do
+        tabs_cache[index].rerender()
+      end
+      viewport_state.tab_width_changed = true
+    end
+
     redrawtabline()
   end
 end
@@ -1586,6 +1618,14 @@ function Galfo.move_tab_end()
     local t = table_remove(tabs_cache, i)
     tabs_cache[#tabs_cache + 1] = t
     update_buf_index()
+
+    if I.dynamic.index then
+      for index = i, #tabs_cache do
+        tabs_cache[index].rerender()
+      end
+      viewport_state.tab_width_changed = true
+    end
+
     redrawtabline()
   end
 end
@@ -1703,6 +1743,15 @@ function Galfo.toggle_pin(bufnr)
   end
 end
 
+function Galfo.focus_by_index(index)
+  local buf = buf_cache[index]
+  if buf == nil then
+    return
+  end
+
+  nvim_set_current_buf(buf_cache[index])
+end
+
 local function setup_autocmds()
   api.nvim_create_autocmd("BufWinEnter", {
     callback = function(ev)
@@ -1785,12 +1834,12 @@ local function setup_autocmds()
           return
         end
 
-        local old_width = tab.width
         tab.modified = modified
-        tab.update()
+
+        local width_changed = tab.rerender()
 
         if viewport.lo <= index and index <= viewport.hi then
-          if tab.width ~= old_width then
+          if width_changed then
             viewport_state.tab_width_changed = true
           else
             viewport_state.simple_redraw = true
@@ -1838,6 +1887,8 @@ local function setup_autocmds()
             else
               viewport_state.simple_redraw = true
             end
+
+            redrawtabline()
           end
         end
       end,
@@ -1877,7 +1928,6 @@ _G.TabOnClick = function(bufnr, clicks, button, mods)
     bufnr = bufnr,
     focus = function()
       nvim_set_current_buf(bufnr)
-      viewport.index = buf_index[bufnr]
     end,
     close = function(force)
       Galfo.close_tab(bufnr, force)

@@ -710,7 +710,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
         {
           text = function(tab)
             -- tab.unique_prefix:gsub("/", "\\") -- windows way
-            return tab.unique_prefix .. tab.name
+            return tab.index .. ": " .. tab.unique_prefix .. tab.name
           end,
           highlights = {
             diagnostics = {
@@ -726,38 +726,38 @@ vim.api.nvim_create_autocmd("VimEnter", {
           },
         },
         { static = " " },
-        -- {
-        --   text = function(info)
-        --     return info.diagnostics[vim.diagnostic.severity.ERROR]
-        --         and info.diagnostics[vim.diagnostic.severity.ERROR] .. " E"
-        --       or ""
-        --   end,
-        --   highlights = {
-        --     diagnostics = {
-        --       error = {
-        --         focused = { default = focused_diag_error, modified = focused_diag_mod_error },
-        --         visible = { default = visible_diag_error, modified = visible_diag_mod_error },
-        --       },
-        --     },
-        --   },
-        -- },
-        -- { static = " " },
-        -- {
-        --   text = function(info)
-        --     return info.diagnostics[vim.diagnostic.severity.WARN]
-        --         and info.diagnostics[vim.diagnostic.severity.WARN] .. " W"
-        --       or ""
-        --   end,
-        --   highlights = {
-        --     diagnostics = {
-        --       warn = {
-        --         focused = { default = focused_diag_warn, modified = focused_diag_mod_warn },
-        --         visible = { default = visible_diag_warn, modified = visible_diag_mod_warn },
-        --       },
-        --     },
-        --   },
-        -- },
-        -- { static = " " },
+        {
+          text = function(info)
+            return info.diagnostics[vim.diagnostic.severity.ERROR]
+                and info.diagnostics[vim.diagnostic.severity.ERROR] .. " E"
+              or ""
+          end,
+          highlights = {
+            diagnostics = {
+              error = {
+                focused = { default = focused_diag_error, modified = focused_diag_mod_error },
+                visible = { default = visible_diag_error, modified = visible_diag_mod_error },
+              },
+            },
+          },
+        },
+        { static = " " },
+        {
+          text = function(info)
+            return info.diagnostics[vim.diagnostic.severity.WARN]
+                and info.diagnostics[vim.diagnostic.severity.WARN] .. " W"
+              or ""
+          end,
+          highlights = {
+            diagnostics = {
+              warn = {
+                focused = { default = focused_diag_warn, modified = focused_diag_mod_warn },
+                visible = { default = visible_diag_warn, modified = visible_diag_mod_warn },
+              },
+            },
+          },
+        },
+        { static = " " },
         {
           icon = function()
             return "󰅖"
@@ -817,6 +817,15 @@ vim.api.nvim_create_autocmd("VimEnter", {
     end, { silent = true, nowait = true })
     map("n", "<c-s-n>", function()
       tabline.toggle_pin(0)
+    end, { silent = true, nowait = true })
+    map("n", "<c-1>", function()
+      tabline.focus_by_index(1)
+    end, { silent = true, nowait = true })
+    map("n", "<c-2>", function()
+      tabline.focus_by_index(2)
+    end, { silent = true, nowait = true })
+    map("n", "<c-3>", function()
+      tabline.focus_by_index(3)
     end, { silent = true, nowait = true })
   end,
 })
