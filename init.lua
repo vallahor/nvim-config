@@ -710,7 +710,8 @@ vim.api.nvim_create_autocmd("VimEnter", {
         {
           text = function(tab)
             -- tab.unique_prefix:gsub("/", "\\") -- windows way
-            return tab.index .. ": " .. tab.unique_prefix .. tab.name
+            -- return tab.index .. ": " .. tab.unique_prefix .. tab.name
+            return tab.unique_prefix .. tab.name
           end,
           highlights = {
             diagnostics = {
@@ -726,38 +727,38 @@ vim.api.nvim_create_autocmd("VimEnter", {
           },
         },
         { static = " " },
-        {
-          text = function(info)
-            return info.diagnostics[vim.diagnostic.severity.ERROR]
-                and info.diagnostics[vim.diagnostic.severity.ERROR] .. " E"
-              or ""
-          end,
-          highlights = {
-            diagnostics = {
-              error = {
-                focused = { default = focused_diag_error, modified = focused_diag_mod_error },
-                visible = { default = visible_diag_error, modified = visible_diag_mod_error },
-              },
-            },
-          },
-        },
-        { static = " " },
-        {
-          text = function(info)
-            return info.diagnostics[vim.diagnostic.severity.WARN]
-                and info.diagnostics[vim.diagnostic.severity.WARN] .. " W"
-              or ""
-          end,
-          highlights = {
-            diagnostics = {
-              warn = {
-                focused = { default = focused_diag_warn, modified = focused_diag_mod_warn },
-                visible = { default = visible_diag_warn, modified = visible_diag_mod_warn },
-              },
-            },
-          },
-        },
-        { static = " " },
+        -- {
+        --   text = function(info)
+        --     return info.diagnostics[vim.diagnostic.severity.ERROR]
+        --         and info.diagnostics[vim.diagnostic.severity.ERROR] .. " E"
+        --       or ""
+        --   end,
+        --   highlights = {
+        --     diagnostics = {
+        --       error = {
+        --         focused = { default = focused_diag_error, modified = focused_diag_mod_error },
+        --         visible = { default = visible_diag_error, modified = visible_diag_mod_error },
+        --       },
+        --     },
+        --   },
+        -- },
+        -- { static = " " },
+        -- {
+        --   text = function(info)
+        --     return info.diagnostics[vim.diagnostic.severity.WARN]
+        --         and info.diagnostics[vim.diagnostic.severity.WARN] .. " W"
+        --       or ""
+        --   end,
+        --   highlights = {
+        --     diagnostics = {
+        --       warn = {
+        --         focused = { default = focused_diag_warn, modified = focused_diag_mod_warn },
+        --         visible = { default = visible_diag_warn, modified = visible_diag_mod_warn },
+        --       },
+        --     },
+        --   },
+        -- },
+        -- { static = " " },
         {
           icon = function()
             return "󰅖"

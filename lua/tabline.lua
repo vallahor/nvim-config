@@ -803,16 +803,11 @@ local function build_tab(buf, dir, tail, ext)
         local remaining = width - w
         ---@cast remaining integer
         if remaining > 0 then
-          if component.is_icon and remaining == 1 and not I.tab.last_icon_blend then
-            partial_left[#partial_left + 1] = "%#" .. component.hl .. "#" .. " "
-          else
-            local text = component.text
-            local part = strcharpart(text, component.text_width - remaining)
-            partial_left[#partial_left + 1] = "%#"
-              .. component.hl
-              .. "#"
-              .. (component.on_click and component_on_click(buf, i, part) or part)
-          end
+          local part = strcharpart(component.text, component.text_width - remaining)
+          partial_left[#partial_left + 1] = "%#"
+            .. component.hl
+            .. "#"
+            .. (component.on_click and component_on_click(buf, i, part) or part)
         end
         break
       end
@@ -1322,7 +1317,6 @@ local function calc_truncated_tabs(width)
 end
 
 function I.GalfoRender()
-  local start = vim.uv.hrtime()
   if
     viewport_state.updated
     or viewport_state.simple_redraw
@@ -1448,8 +1442,6 @@ function I.GalfoRender()
     viewport_state.updated = false
     viewport.str = table_concat(tabs)
   end
-  local elapsed = (vim.uv.hrtime() - start) / 1e6
-  -- print(string_format("elapsed: %.3fms", elapsed))
   return viewport.str
 end
 
