@@ -1272,7 +1272,8 @@ local function handle_buf_delete(width)
       viewport.lo, left_remaining = compute_left_remain_from_end(width)
       right_remaining = 0
     else
-      make_postfix(right_remaining, 0)
+      local indicators = viewport.left_reserved > 0 and compute_both_indicators() or 0
+      make_postfix(right_remaining, indicators)
       return
     end
   end
