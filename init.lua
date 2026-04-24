@@ -695,7 +695,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
         },
         {
           icon = function(icon, _tab)
-            return _tab.pinned and "󰐃" or icon
+            return _tab.is_pinned and "󰐃" or icon
             -- return icon
           end,
           on_click = function(buf)

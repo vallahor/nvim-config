@@ -655,8 +655,6 @@ local function build_tab(buf, dir, tail, ext)
   end
 
   tab.resolve_string = function(state)
-    state = bor(state, tab.modified + tab.severity)
-
     local tab_state = {
       name = tail,
       index = buf_index[buf] or #tabs_cache + 1,
@@ -742,9 +740,9 @@ local function build_tab(buf, dir, tail, ext)
   })
 
   tab.update = function()
-    local flags = tab.visibility + tab.modified + tab.severity
-    local _ = tab.rendered[flags]
-    local _ = tab.rendered[flags]
+    local flags = tab.modified + tab.severity
+    local _ = tab.rendered[STATES.VISIBLE + flags]
+    local _ = tab.rendered[STATES.FOCUSED + flags]
   end
 
   tab.rerender = function()
@@ -754,9 +752,8 @@ local function build_tab(buf, dir, tail, ext)
 
   tab.set_new_display = function()
     local old_width = tab.width
-    local flags = tab.visibility + tab.modified + tab.severity
-    -- local flags = bor(state, tab.modified + tab.severity)
-    local rendered = tab.rendered[flags]
+    local flags = tab.modified + tab.severity
+    local rendered = tab.rendered[tab.visibility + flags]
     ---@cast rendered Rendered
 
     tab.display = rendered.display
@@ -1346,7 +1343,9 @@ function I.GalfoRender()
     ---@cast current_tab Tab
     -- if viewport.index ~= viewport.last_index and current_tab.set_new_display(STATES.FOCUSED) then
     if current_tab.visibility ~= STATES.FOCUSED then
-      current_tab.visibility = STATES.FOCUSED
+      if not sidebar.focus then
+        current_tab.visibility = STATES.FOCUSED
+      end
       viewport.last_index = viewport.index
       if current_tab.set_new_display() then
         viewport_state.tab_width_changed = true
@@ -1746,14 +1745,11 @@ function Galfo.toggle_pin(bufnr)
   end
 
   local tab = tabs_cache[index]
-  local old_width = tab.width
+  tab.rerender()
+  local width_changed = tab.set_new_display()
 
-  tab.rendered = setmetatable({}, getmetatable(tab.rendered))
-  tab.update()
-
-  -- @set_display
   if viewport.lo <= index and index <= viewport.hi then
-    if tab.width ~= old_width then
+    if width_changed then
       viewport_state.tab_width_changed = true
     else
       viewport_state.simple_redraw = true
@@ -1885,9 +1881,10 @@ local function setup_autocmds()
         tab.modified = modified
 
         tab.rerender()
+        local width_changed = tab.set_new_display()
 
         if viewport.lo <= index and index <= viewport.hi then
-          if tab.set_new_display() then
+          if width_changed then
             viewport_state.tab_width_changed = true
           else
             viewport_state.simple_redraw = true
@@ -1919,18 +1916,19 @@ local function setup_autocmds()
           for state in pairs(I.dynamic.diagnostics) do
             if tab.rendered[state] ~= nil then
               tab.rendered[state] = nil
-              changed = true
             end
           end
         end
 
+        print(changed)
         if changed then
           tab.severity = new_severity
           tab.update()
+          local width_changed = tab.set_new_display()
 
           -- @check: update partial tabs too
           if viewport.lo <= index and index <= viewport.hi then
-            if tab.set_new_display() then
+            if width_changed then
               viewport_state.tab_width_changed = true
             else
               viewport_state.simple_redraw = true
