@@ -847,9 +847,8 @@ local function refresh_tab(index)
     return
   end
   tab.update_unique_prefix()
-  --@check change to rerender()
-  tab.rendered = setmetatable({}, getmetatable(tab.rendered))
-  tab.update()
+  tab.rerender()
+  tab.set_new_display()
 end
 
 local function repeated_names_remove(buf, tail)
@@ -951,7 +950,6 @@ local function remove_buf_from_tabline(bufnr)
   viewport_state.buf_deleted = true
   update_buf_index()
 
-  -- @check: if the correct is the index
   if I.dynamic.index then
     for i = index, #tabs_cache do
       tabs_cache[i].rerender()
@@ -1920,19 +1918,32 @@ local function setup_autocmds()
           end
         end
 
-        print(changed)
         if changed then
           tab.severity = new_severity
           tab.update()
           local width_changed = tab.set_new_display()
 
-          -- @check: update partial tabs too
           if viewport.lo <= index and index <= viewport.hi then
             if width_changed then
               viewport_state.tab_width_changed = true
             else
               viewport_state.simple_redraw = true
             end
+            redrawtabline()
+          elseif viewport.lo - 1 == index or viewport.hi + 1 == index then
+            local indicators = 0
+            if viewport.lo == 1 then
+              indicators = viewport.indicator_first_width + viewport.truncate_right_width
+            elseif viewport.hi == #tabs_cache then
+              indicators = viewport.truncate_left_width + viewport.indicator_last_width
+            else
+              indicators = viewport.truncate_left_width + viewport.truncate_right_width
+            end
+
+            make_prefix(viewport.left_reserved, indicators)
+            make_postfix(viewport.right_reserved, indicators)
+
+            viewport_state.simple_redraw = true
             redrawtabline()
           end
         end

@@ -36,6 +36,7 @@ vim.opt.wrap = false
 vim.opt.history = 20
 -- vim.opt.timeout = false
 vim.opt.timeoutlen = 200
+vim.opt.autoread = true
 
 vim.wo.signcolumn = "no"
 vim.wo.relativenumber = true
@@ -710,8 +711,13 @@ vim.api.nvim_create_autocmd("VimEnter", {
         {
           text = function(tab)
             -- tab.unique_prefix:gsub("/", "\\") -- windows way
-            return tab.index .. ": " .. tab.unique_prefix .. tab.name
-            -- return tab.unique_prefix .. tab.name .. (not tab.is_focused and "               " or "")
+            return tab.index
+              .. ": "
+              .. tab.unique_prefix
+              .. tab.name
+              .. (tab.is_focused and string.rep(" ", #tab.name) or "")
+            -- .. (not tab.is_focused and "               " or "")
+            -- return tab.unique_prefix .. tab.name
           end,
           highlights = {
             diagnostics = {
@@ -786,16 +792,16 @@ vim.api.nvim_create_autocmd("VimEnter", {
     })
 
     local map = vim.keymap.set
-    map("n", "<home>", tabline.prev_tab_cycle, { silent = true })
-    map("n", "<end>", tabline.next_tab_cycle, { silent = true })
-    -- map("n", "<home>", tabline.prev_tab, { silent = true })
-    -- map("n", "<end>", tabline.next_tab, { silent = true })
+    -- map("n", "<home>", tabline.prev_tab_cycle, { silent = true })
+    -- map("n", "<end>", tabline.next_tab_cycle, { silent = true })
+    map("n", "<home>", tabline.prev_tab, { silent = true })
+    map("n", "<end>", tabline.next_tab, { silent = true })
     map("n", "<s-home>", tabline.move_to_begin, { silent = true })
     map("n", "<s-end>", tabline.move_to_end, { silent = true })
-    map("n", "<c-home>", tabline.move_tab_left_cycle, { silent = true })
-    map("n", "<c-end>", tabline.move_tab_right_cycle, { silent = true })
-    -- map("n", "<c-home>", tabline.move_tab_left, { silent = true })
-    -- map("n", "<c-end>", tabline.move_tab_right, { silent = true })
+    -- map("n", "<c-home>", tabline.move_tab_left_cycle, { silent = true })
+    -- map("n", "<c-end>", tabline.move_tab_right_cycle, { silent = true })
+    map("n", "<c-home>", tabline.move_tab_left, { silent = true })
+    map("n", "<c-end>", tabline.move_tab_right, { silent = true })
     map("n", "<c-s-home>", tabline.move_tab_begin, { silent = true })
     map("n", "<c-s-end>", tabline.move_tab_end, { silent = true })
     map("n", "<c-w>", function()
