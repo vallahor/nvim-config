@@ -80,6 +80,7 @@ local config = {
   -- bufnr: integer
   -- focus()
   -- close() -- receive the force (boolean) parameter to force delete the buffer
+  -- toggle_pin() -- receive the force (boolean) parameter to force delete the buffer
   tab = {
     on_click = function(tab, _clicks, button, _mods)
       if button == "l" then
@@ -101,8 +102,10 @@ local config = {
   -- the `tab` parameter is:
   -- name: string
   -- unique_prefix: string -- with a path if a file with the same name appears.
+  -- index: integer
   -- is_focused: boolean
   -- is_modified: boolean
+  -- is_pinned: boolean
   -- diagnostics: {[vim.diagnostic.severity]: integer} -- Eg.: ab.diagnostics[vim.diagnostic.severity.ERROR]
   --
   -- `highlights`: It receives the highlight group.
@@ -161,7 +164,9 @@ local config = {
   -- like showing how many errors or warnings.
   -- if diagnostics = true so all other will fallback to it otherwise it will only be
   -- dynamic in the state set.
-  -- dynamic = { diagnostics = true, focused = { diagnostics = false }, visible = { diagnostics = true } },
+  -- The index is if you want to display the tab index position.
+  -- So it will update whenever that position changes.
+  -- dynamic = { index = false, diagnostics = true, focused = { diagnostics = false }, visible = { diagnostics = true } },
   dynamic = { index = true, diagnostics = true },
 
   -- `first`: appears for the first tab.
@@ -248,6 +253,7 @@ local viewport_state = {
 ---@field hi integer
 ---@field buf integer
 ---@field index integer
+---@field last_index integer
 ---@field truncate_left string
 ---@field truncate_right string
 ---@field truncate_left_width integer
@@ -271,6 +277,7 @@ local viewport = {
   hi = 1,
   buf = 1,
   index = 1,
+  last_index = 0,
   prefix = "",
   postfix = "",
   endfix = "%#TablineFill#",
@@ -355,6 +362,7 @@ local hl_cache = {}
 ---@field rendered_focused string
 ---@field update fun()
 ---@field rerender fun(): boolean
+---@field set_new_display fun(state: integer): boolean
 ---@field update_unique_prefix fun()
 ---@field resolve_string fun(state: integer): Rendered
 ---@field partial_left fun(width: integer, state: integer?): string
@@ -493,8 +501,13 @@ local function update_buf_index()
     buf_index[buf_cache[i]] = i
     viewport.total_tabs_width = viewport.total_tabs_width + tabs_cache[i].width
   end
-  if not sidebar.focus and buf_index[viewport.buf] then
-    viewport.index = buf_index[viewport.buf]
+  local index = buf_index[viewport.buf]
+  if not sidebar.focus and index then
+    viewport.index = index
+    -- local tab = tabs_cache[index]
+    -- if tab.set_new_display(STATES.FOCUSED) then
+    --   viewport_state.tab_width_changed = true
+    -- end
   end
   viewport_state.updated = true
 end
@@ -656,7 +669,7 @@ local function build_tab(buf, dir, tail, ext)
       unique_prefix = tab.unique_prefix,
       is_focused = band(state, STATES.FOCUSED) ~= 0,
       is_modified = band(state, STATES.MODIFIED) ~= 0,
-      pinned = tabs_pin_cache[buf] ~= nil,
+      is_pinned = tabs_pin_cache[buf] ~= nil,
       diagnostics = diag_cache[buf] or {},
     }
 
@@ -736,17 +749,18 @@ local function build_tab(buf, dir, tail, ext)
 
   tab.update = function()
     local flags = tab.modified + tab.severity
-    local visible = tab.rendered[STATES.VISIBLE + flags]
-    local focused = tab.rendered[STATES.FOCUSED + flags]
+    local _ = tab.rendered[STATES.VISIBLE + flags]
+    local _ = tab.rendered[STATES.FOCUSED + flags]
+  end
 
-    tab.rendered_visible = visible.display
-    tab.rendered_focused = focused.display
-
-    local new_width = math_max(visible.width, focused.width)
-    if new_width ~= tab.width then
-      viewport.total_tabs_width = viewport.total_tabs_width - tab.width + new_width
-      tab.width = new_width
-    end
+  tab.set_new_display = function(state)
+    local old_width = tab.width
+    local flags = bor(state, tab.modified + tab.severity)
+    local rendered = tab.rendered[flags]
+    tab.str = rendered.display
+    tab.width = rendered.width
+    viewport.total_tabs_width = viewport.total_tabs_width - tab.width + old_width
+    return tab.width ~= old_width
   end
 
   tab.partial_right = function(width)
@@ -824,12 +838,8 @@ local function build_tab(buf, dir, tail, ext)
   end
 
   tab.rerender = function()
-    local old_width = tab.width
-
     tab.rendered = setmetatable({}, getmetatable(tab.rendered))
     tab.update()
-
-    return tab.width ~= old_width
   end
 
   return tab
@@ -842,6 +852,7 @@ local function refresh_tab(index)
     return
   end
   tab.update_unique_prefix()
+  --@check change to rerender()
   tab.rendered = setmetatable({}, getmetatable(tab.rendered))
   tab.update()
 end
@@ -1329,8 +1340,13 @@ function I.GalfoRender()
       viewport.buf = -1
     end
 
-    ---@type Tab?
     local current_tab = tabs_cache[viewport.index]
+    ---@cast current_tab Tab
+    if viewport.index ~= viewport.last_index and current_tab.set_new_display(STATES.FOCUSED) then
+      viewport.last_index = viewport.index
+      viewport_state.tab_width_changed = true
+    end
+
     local indicators = 0
 
     local width = viewport.width - viewport.sidebar_width
@@ -1407,9 +1423,7 @@ function I.GalfoRender()
       for i = viewport.lo, viewport.hi do
         ---@type Tab
         local tab = tabs_cache[i]
-        local buf = buf_cache[i]
-        local focused = buf == viewport.buf
-        tabs[#tabs + 1] = focused and tab.rendered_focused or tab.rendered_visible
+        tabs[#tabs + 1] = tab.str
         filled_spaces = filled_spaces + tab.width
       end
     end
@@ -1512,14 +1526,15 @@ local function swap(i, j)
   buf_index[buf_cache[j]] = j
 
   if I.dynamic.index then
-    local tab_i_changed = tabs_cache[i].rerender()
-    local tab_j_changed = tabs_cache[j].rerender()
+    tabs_cache[i].rerender()
+    tabs_cache[j].rerender()
 
-    if tab_i_changed or tab_j_changed then
-      viewport_state.tab_width_changed = true
-    else
-      viewport_state.simple_redraw = true
-    end
+    --@check
+    -- if tab_i_changed or tab_j_changed then
+    --   viewport_state.tab_width_changed = true
+    -- else
+    --   viewport_state.simple_redraw = true
+    -- end
   end
 
   viewport_state.updated = true
@@ -1725,6 +1740,7 @@ function Galfo.toggle_pin(bufnr)
   tab.rendered = setmetatable({}, getmetatable(tab.rendered))
   tab.update()
 
+  -- @set_display
   if viewport.lo <= index and index <= viewport.hi then
     if tab.width ~= old_width then
       viewport_state.tab_width_changed = true
@@ -1788,13 +1804,40 @@ local function setup_autocmds()
         sidebar.winnr = nvim_get_current_win()
       else
         sidebar.focus = false
-        viewport.buf = ev.buf
-        if buf_index[viewport.buf] then
-          viewport.index = buf_index[viewport.buf]
+        local index = buf_index[ev.buf]
+        if not index then
+          return
         end
+
+        viewport.buf = ev.buf
+        viewport.index = index
       end
 
       viewport_state.updated = true
+    end,
+  })
+
+  api.nvim_create_autocmd({ "BufLeave" }, {
+    callback = function(ev)
+      if viewport_state.should_not_focus then
+        return
+      end
+
+      local index = buf_index[ev.buf]
+      if not index then
+        return
+      end
+
+      local tab = tabs_cache[index]
+      if not tab then
+        return
+      end
+
+      if tab.set_new_display(STATES.VISIBLE) then
+        if viewport.lo <= index and index <= viewport.hi then
+          viewport_state.tab_width_changed = true
+        end
+      end
     end,
   })
 
@@ -1828,10 +1871,11 @@ local function setup_autocmds()
 
         tab.modified = modified
 
-        local width_changed = tab.rerender()
+        tab.rerender()
 
         if viewport.lo <= index and index <= viewport.hi then
-          if width_changed then
+          local state = ev.buf == viewport.buf and STATES.FOCUSED or STATES.VISIBLE
+          if tab.set_new_display(state) then
             viewport_state.tab_width_changed = true
           else
             viewport_state.simple_redraw = true
@@ -1869,12 +1913,12 @@ local function setup_autocmds()
         end
 
         if changed then
-          local old_width = tab.width
           tab.severity = new_severity
           tab.update()
 
           if viewport.lo <= index and index <= viewport.hi then
-            if tab.width ~= old_width then
+            local state = ev.buf == viewport.buf and STATES.FOCUSED or STATES.VISIBLE
+            if tab.set_new_display(state) then
               viewport_state.tab_width_changed = true
             else
               viewport_state.simple_redraw = true

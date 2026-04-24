@@ -711,7 +711,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
           text = function(tab)
             -- tab.unique_prefix:gsub("/", "\\") -- windows way
             -- return tab.index .. ": " .. tab.unique_prefix .. tab.name
-            return tab.unique_prefix .. tab.name
+            return tab.unique_prefix .. tab.name .. (not tab.is_focused and "               " or "")
           end,
           highlights = {
             diagnostics = {
