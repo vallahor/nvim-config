@@ -247,7 +247,7 @@ local viewport_state = {
 }
 
 ---@class Viewport
----@field str string
+---@field display string
 ---@field width integer
 ---@field lo integer
 ---@field hi integer
@@ -269,7 +269,7 @@ local viewport_state = {
 ---@field endfix string
 ---@field total_tabs_width integer
 local viewport = {
-  str = "",
+  display = "",
   tab_shrink_str = "",
   width = 0,
   sidebar_width = 0,
@@ -349,7 +349,7 @@ local hl_cache = {}
 ---@field color string
 
 ---@class Tab
----@field str string
+---@field display string
 ---@field tail string
 ---@field ext string
 ---@field unique_prefix string
@@ -358,8 +358,6 @@ local hl_cache = {}
 ---@field modified integer
 ---@field icon TabIcon?
 ---@field rendered table<integer, Rendered?>
----@field rendered_visible string
----@field rendered_focused string
 ---@field update fun()
 ---@field rerender fun(): boolean
 ---@field set_new_display fun(state: integer): boolean
@@ -652,8 +650,6 @@ local function build_tab(buf, dir, tail, ext)
     width = 0,
     rendered = {},
     severity = 0,
-    rendered_visible = "",
-    rendered_focused = "",
   }
 
   tab.update_unique_prefix = function()
@@ -753,11 +749,18 @@ local function build_tab(buf, dir, tail, ext)
     local _ = tab.rendered[STATES.FOCUSED + flags]
   end
 
+  tab.rerender = function()
+    tab.rendered = setmetatable({}, getmetatable(tab.rendered))
+    tab.update()
+  end
+
   tab.set_new_display = function(state)
     local old_width = tab.width
     local flags = bor(state, tab.modified + tab.severity)
     local rendered = tab.rendered[flags]
-    tab.str = rendered.display
+    ---@cast rendered Rendered
+
+    tab.display = rendered.display
     tab.width = rendered.width
     viewport.total_tabs_width = viewport.total_tabs_width - tab.width + old_width
     return tab.width ~= old_width
@@ -835,11 +838,6 @@ local function build_tab(buf, dir, tail, ext)
     end
 
     return tab_on_click(buf) .. table_concat(partial_left)
-  end
-
-  tab.rerender = function()
-    tab.rendered = setmetatable({}, getmetatable(tab.rendered))
-    tab.update()
   end
 
   return tab
@@ -1423,7 +1421,7 @@ function I.GalfoRender()
       for i = viewport.lo, viewport.hi do
         ---@type Tab
         local tab = tabs_cache[i]
-        tabs[#tabs + 1] = tab.str
+        tabs[#tabs + 1] = tab.display
         filled_spaces = filled_spaces + tab.width
       end
     end
@@ -1454,9 +1452,9 @@ function I.GalfoRender()
     end
 
     viewport_state.updated = false
-    viewport.str = table_concat(tabs)
+    viewport.display = table_concat(tabs)
   end
-  return viewport.str
+  return viewport.display
 end
 
 function Galfo.prev_tab()
@@ -1529,14 +1527,17 @@ local function swap(i, j)
     tabs_cache[i].rerender()
     tabs_cache[j].rerender()
 
-    --@check
-    -- if tab_i_changed or tab_j_changed then
-    --   viewport_state.tab_width_changed = true
-    -- else
-    --   viewport_state.simple_redraw = true
-    -- end
+    local tab_i_changed = tabs_cache[i].set_new_display(STATES.VISIBLE)
+    local tab_j_changed = tabs_cache[j].set_new_display(STATES.FOCUSED)
+
+    if tab_i_changed or tab_j_changed then
+      viewport_state.tab_width_changed = true
+    else
+      viewport_state.simple_redraw = true
+    end
   end
 
+  viewport.index = j
   viewport_state.updated = true
   redrawtabline()
 end
@@ -1916,6 +1917,7 @@ local function setup_autocmds()
           tab.severity = new_severity
           tab.update()
 
+          -- @check: update partial tabs too
           if viewport.lo <= index and index <= viewport.hi then
             local state = ev.buf == viewport.buf and STATES.FOCUSED or STATES.VISIBLE
             if tab.set_new_display(state) then
@@ -1923,7 +1925,6 @@ local function setup_autocmds()
             else
               viewport_state.simple_redraw = true
             end
-
             redrawtabline()
           end
         end
