@@ -1257,8 +1257,6 @@ local function handle_tab_width_change(width)
   local right_remaining = 0
   viewport_state.tab_width_changed = false
 
-  print(width)
-
   if viewport.index == 1 then
     viewport.lo = viewport.index
     viewport.hi, right_remaining = compute_right_remain_from_start(width)
@@ -1303,15 +1301,19 @@ local function handle_buf_delete(width)
     viewport.lo = math_max(1, viewport.lo - 1)
   end
 
-  if viewport.lo == 1 then
+  if viewport.index == 1 then
+    viewport.lo = viewport.index
     viewport.hi, right_remaining = compute_right_remain_from_start(width)
+  elseif viewport.index == #tabs_cache then
+    viewport.hi = viewport.index
+    viewport.lo, left_remaining = compute_left_remain_from_end(width)
   else
-    local indicators = compute_both_indicators()
-    viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators)
-    if viewport.hi == #tabs_cache then
+    if viewport.lo == 1 then
+      viewport.hi, right_remaining = compute_right_remain_from_start(width)
+    elseif viewport.hi == #tabs_cache then
       viewport.lo, left_remaining = compute_left_remain_from_end(width)
     elseif partial_deleted then
-      indicators = viewport.truncate_left_width + viewport.truncate_right_width
+      local indicators = viewport.truncate_left_width + viewport.truncate_right_width
       viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators)
       if viewport.hi == #tabs_cache then
         viewport.lo, left_remaining = compute_left_remain_from_end(width)
@@ -1322,20 +1324,21 @@ local function handle_buf_delete(width)
         viewport.left_reserved = 0
       end
     else
-      indicators = viewport.truncate_left_width + viewport.truncate_right_width
+      local indicators = viewport.truncate_left_width + viewport.truncate_right_width
       if viewport.index == viewport.hi then
         if viewport.right_reserved == 0 then
           viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicators)
           make_prefix(left_remaining, 0)
           return
         end
-      else
-        local reserved = viewport.left_reserved + indicators
-        viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - reserved)
-        make_prefix(viewport.left_reserved, 0)
-        make_postfix(right_remaining, 0)
-        return
       end
+      -- @check: sometimes missing by 2 on the leftside
+      -- like it padding 2 spaces
+      local reserved = viewport.left_reserved + indicators
+      viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - reserved)
+      make_prefix(viewport.left_reserved, 0)
+      make_postfix(right_remaining, 0)
+      return
     end
   end
 
