@@ -1,8 +1,6 @@
 local bit = require("bit")
 local band, bor, lshift, rshift = bit.band, bit.bor, bit.lshift, bit.rshift
 
-local should_print = false
-
 local api, fn, bo = vim.api, vim.fn, vim.bo
 
 local redrawtabline = vim.cmd.redrawtabline
@@ -1289,41 +1287,43 @@ local function handle_buf_delete(width)
     viewport.lo = math_max(1, viewport.lo - 1)
   end
 
-  print(viewport.lo, viewport.hi, viewport.index)
-
   if viewport.lo == 1 then
     viewport.hi, right_remaining = compute_right_remain_from_start(width)
-  elseif viewport.hi == #tabs_cache then
-    viewport.lo, left_remaining = compute_left_remain_from_end(width)
-  elseif partial_deleted then
-    local indicators = viewport.truncate_left_width + viewport.truncate_right_width
+  else
+    local indicators = compute_both_indicators()
     viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators)
     if viewport.hi == #tabs_cache then
       viewport.lo, left_remaining = compute_left_remain_from_end(width)
-      right_remaining = 0
-    else
-      right_remaining = right_remaining + indicators
-      left_remaining = indicators
-    end
-  else
-    local indicators = viewport.truncate_left_width + viewport.truncate_right_width
-    if viewport.index == viewport.hi then
-      if viewport.right_reserved == 0 then
-        viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicators)
-        make_prefix(left_remaining, 0)
-        return
+    elseif partial_deleted then
+      indicators = viewport.truncate_left_width + viewport.truncate_right_width
+      viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators)
+      if viewport.hi == #tabs_cache then
+        viewport.lo, left_remaining = compute_left_remain_from_end(width)
+        right_remaining = 0
+      else
+        right_remaining = right_remaining + indicators
+        left_remaining = indicators
       end
-    elseif viewport.index > viewport.hi then
-      viewport.hi = viewport.index
-      viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - viewport.truncate_left_width)
-      viewport.right_reserved = 0
+    else
+      indicators = viewport.truncate_left_width + viewport.truncate_right_width
+      if viewport.index == viewport.hi then
+        if viewport.right_reserved == 0 then
+          viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicators)
+          make_prefix(left_remaining, 0)
+          return
+        end
+      elseif viewport.index > viewport.hi then
+        viewport.hi = viewport.index
+        viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - viewport.truncate_left_width)
+        viewport.right_reserved = 0
+      end
+      local reserved = viewport.left_reserved + viewport.truncate_left_width + viewport.truncate_right_width
+      viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - reserved)
+      left_remaining = viewport.left_reserved
+      make_prefix(viewport.left_reserved, 0)
+      make_postfix(right_remaining, 0)
+      return
     end
-    local reserved = viewport.left_reserved + viewport.truncate_left_width + viewport.truncate_right_width
-    viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - reserved)
-    left_remaining = viewport.left_reserved
-    make_prefix(viewport.left_reserved, 0)
-    make_postfix(right_remaining, 0)
-    return
   end
 
   gen_prefix_postfix(left_remaining, right_remaining)
@@ -1369,21 +1369,11 @@ function I.GalfoRender()
     ---@cast current_tab Tab
     ---
 
-    if should_print then
-      print(current_tab.visibility)
-      print(current_tab.display)
-    end
-
     if not sidebar.focus and current_tab.visibility ~= STATES.FOCUSED then
       current_tab.visibility = STATES.FOCUSED
       if current_tab.set_new_display() then
         viewport_state.tab_width_changed = true
       end
-    end
-
-    if should_print then
-      print(current_tab.visibility)
-      print(current_tab.display)
     end
 
     local indicators = 0
@@ -1689,7 +1679,6 @@ function Galfo.close_tab(bufnr, force)
   end
 
   viewport_state.buf_deleted_partial = index == viewport.lo - 1
-  print(viewport_state.buf_deleted_partial)
 
   if not force and bo[bufnr].modified then
     local choice = fn.confirm("Unsaved changes:", "&Save\n&Discard\n&Cancel", 1)
@@ -2126,11 +2115,5 @@ function Galfo.setup(opts)
     I.on_buf_replaced = opts.on_buf_replaced
   end
 end
-
-local function aeho()
-  should_print = not should_print
-end
-
-api.nvim_create_user_command("Aeho", aeho, {})
 
 return Galfo
