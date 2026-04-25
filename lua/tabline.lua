@@ -1145,6 +1145,7 @@ local function compute_both_indicators()
 end
 
 local function compute_left_remain_from_end(width)
+  viewport.right_reserved = 0
   local indicator_left = viewport.truncate_left_width
   local indicator_right = viewport.indicator_last_width
   local indicators = indicator_left + indicator_right
@@ -1153,6 +1154,7 @@ local function compute_left_remain_from_end(width)
 end
 
 local function compute_right_remain_from_start(width)
+  viewport.left_reserved = 0
   local indicator_left = viewport.indicator_first_width
   local indicator_right = viewport.truncate_right_width
   local indicators = indicator_left + indicator_right
@@ -1178,6 +1180,7 @@ local function handle_index_before(width)
     viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicator)
     right_remaining = right_remaining + indicator
   end
+  viewport.left_reserved = 0
 
   gen_prefix_postfix(left_remaining, right_remaining)
 end
@@ -1193,6 +1196,7 @@ local function handle_index_after(width)
     viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicator)
     left_remaining = left_remaining + indicator
   end
+  viewport.right_reserved = 0
 
   gen_prefix_postfix(left_remaining, right_remaining)
 end
@@ -1223,6 +1227,7 @@ local function handle_width_change(width)
       else
         left_remaining = indicators
         right_remaining = right_remaining + indicators
+        viewport.left_reserved = 0
       end
     elseif viewport.hi < #tabs_cache then
       if viewport.index > viewport.hi then
@@ -1234,6 +1239,7 @@ local function handle_width_change(width)
       else
         left_remaining = left_remaining + indicators
         right_remaining = indicators
+        viewport.right_reserved = 0
       end
     end
   end
@@ -1260,14 +1266,11 @@ local function handle_tab_width_change(width)
         make_prefix(left_remaining, 0)
         return
       end
-    elseif viewport.index > viewport.hi then
-      viewport.hi = viewport.index
-      viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - viewport.truncate_left_width)
-      viewport.right_reserved = 0
     end
-    local reserved = viewport.left_reserved + viewport.truncate_left_width + viewport.truncate_right_width
+    -- @check: sometimes missing by 2 on the leftside
+    -- like it padding 2 spaces
+    local reserved = viewport.left_reserved + indicators
     viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - reserved)
-    left_remaining = viewport.left_reserved
     make_prefix(viewport.left_reserved, 0)
     make_postfix(right_remaining, 0)
     return
@@ -1303,6 +1306,7 @@ local function handle_buf_delete(width)
       else
         right_remaining = right_remaining + indicators
         left_remaining = indicators
+        viewport.left_reserved = 0
       end
     else
       indicators = viewport.truncate_left_width + viewport.truncate_right_width
@@ -1312,17 +1316,13 @@ local function handle_buf_delete(width)
           make_prefix(left_remaining, 0)
           return
         end
-      elseif viewport.index > viewport.hi then
-        viewport.hi = viewport.index
-        viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - viewport.truncate_left_width)
-        viewport.right_reserved = 0
+      else
+        local reserved = viewport.left_reserved + indicators
+        viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - reserved)
+        make_prefix(viewport.left_reserved, 0)
+        make_postfix(right_remaining, 0)
+        return
       end
-      local reserved = viewport.left_reserved + viewport.truncate_left_width + viewport.truncate_right_width
-      viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - reserved)
-      left_remaining = viewport.left_reserved
-      make_prefix(viewport.left_reserved, 0)
-      make_postfix(right_remaining, 0)
-      return
     end
   end
 
@@ -1956,11 +1956,11 @@ local function setup_autocmds()
               viewport_state.simple_redraw = true
             end
             redrawtabline()
-          elseif viewport.lo - 1 == index then
+          elseif viewport.lo - 1 == index and viewport.left_reserved > 0 then
             viewport_state.partial_left_redraw = true
             viewport_state.updated = true
             redrawtabline()
-          elseif viewport.hi + 1 == index then
+          elseif viewport.hi + 1 == index and viewport.right_reserved > 0 then
             viewport_state.partial_right_redraw = true
             viewport_state.updated = true
             redrawtabline()
