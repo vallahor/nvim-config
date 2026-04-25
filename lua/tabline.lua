@@ -229,7 +229,6 @@ local config = {
 ---@class ViewportState
 ---@field updated boolean
 ---@field size_changed boolean
----@field buf_deleted boolean
 ---@field should_not_focus boolean
 ---@field buf_deleted_partial boolean
 ---@field tab_width_changed boolean
@@ -240,7 +239,6 @@ local config = {
 local viewport_state = {
   updated = true,
   size_changed = true,
-  buf_deleted = false,
   should_not_focus = false,
   buf_deleted_partial = false,
   tab_width_changed = false,
@@ -935,7 +933,8 @@ local function remove_buf_from_tabline(bufnr)
   click_tab_handlers[bufnr] = nil
   click_components_handlers[bufnr] = nil
 
-  viewport_state.buf_deleted = true
+  viewport_state.tab_width_changed = true
+  viewport_state.buf_deleted_partial = index == viewport.lo - 1
 
   ---@type integer?
   local replacement = buf_cache[index] or buf_cache[index - 1]
@@ -1107,7 +1106,6 @@ local function make_prefix(left_remaining, indicator)
         --   viewport.prefix = viewport.prefix .. string_rep(" ", left_remaining)
       end
     end
-    print("prefix: ", left_remaining)
     viewport.left_reserved = left_remaining
   else
     viewport.prefix = viewport.indicator_first
@@ -1120,7 +1118,6 @@ local function make_postfix(right_remaining, indicator)
     viewport.postfix = viewport.truncate_right
     if right_remaining > 0 then
       local size = right_remaining - indicator
-      print(size)
       if size > 0 then
         viewport.postfix = tabs_cache[viewport.hi + 1].partial_right(size) .. viewport.postfix
       elseif size < 0 then
@@ -1254,43 +1251,7 @@ local function handle_tab_width_change(width)
   local right_remaining = 0
   viewport_state.tab_width_changed = false
 
-  if viewport.index == 1 then
-    viewport.lo = viewport.index
-    viewport.hi, right_remaining = compute_right_remain_from_start(width)
-  elseif viewport.index == #tabs_cache then
-    viewport.hi = viewport.index
-    viewport.lo, left_remaining = compute_left_remain_from_end(width)
-  else
-    if viewport.lo == 1 then
-      viewport.hi, right_remaining = compute_right_remain_from_start(width)
-    elseif viewport.hi == #tabs_cache then
-      viewport.lo, left_remaining = compute_left_remain_from_end(width)
-    else
-      local indicators = viewport.truncate_left_width + viewport.truncate_right_width
-      if viewport.index == viewport.hi then
-        if viewport.right_reserved == 0 then
-          viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicators)
-          make_prefix(left_remaining, 0)
-          return
-        end
-      end
-      local reserved = viewport.left_reserved > 0 and viewport.left_reserved or indicators
-      viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - reserved)
-      make_prefix(viewport.left_reserved, indicators)
-      make_postfix(right_remaining, 0)
-      return
-    end
-  end
-
-  gen_prefix_postfix(left_remaining, right_remaining)
-end
-
-local function handle_buf_delete(width)
-  local left_remaining = 0
-  local right_remaining = 0
   local partial_deleted = viewport_state.buf_deleted_partial
-  viewport_state.buf_deleted = false
-
   if partial_deleted then
     viewport_state.buf_deleted_partial = false
     viewport.lo = math_max(1, viewport.lo - 1)
@@ -1327,7 +1288,8 @@ local function handle_buf_delete(width)
           return
         end
       end
-      viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - viewport.left_reserved)
+      local reserved = viewport.left_reserved > 0 and viewport.left_reserved or indicators
+      viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - reserved)
       make_prefix(viewport.left_reserved, indicators)
       make_postfix(right_remaining, 0)
       return
@@ -1339,9 +1301,7 @@ end
 
 ---@param width integer
 local function calc_truncated_tabs(width)
-  if viewport_state.buf_deleted then
-    handle_buf_delete(width)
-  elseif viewport.index > viewport.hi then
+  if viewport.index > viewport.hi then
     handle_index_after(width)
   elseif viewport.index < viewport.lo then
     handle_index_before(width)
@@ -1685,8 +1645,6 @@ function Galfo.close_tab(bufnr, force)
   if not index or tabs_pin_cache[bufnr] then
     return
   end
-
-  viewport_state.buf_deleted_partial = index == viewport.lo - 1
 
   if not force and bo[bufnr].modified then
     local choice = fn.confirm("Unsaved changes:", "&Save\n&Discard\n&Cancel", 1)
