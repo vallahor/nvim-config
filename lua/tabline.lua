@@ -235,6 +235,8 @@ local config = {
 ---@field tab_width_changed boolean
 ---@field simple_redraw boolean
 ---@field tab_shrink boolean
+---@field partial_left_redraw boolean
+---@field partial_right_redraw boolean
 local viewport_state = {
   updated = true,
   size_changed = true,
@@ -244,6 +246,8 @@ local viewport_state = {
   tab_width_changed = false,
   simple_redraw = true,
   tab_shrink = false,
+  partial_left_redraw = false,
+  partial_right_redraw = false,
 }
 
 ---@class Viewport
@@ -1272,7 +1276,9 @@ local function handle_buf_delete(width)
       viewport.lo, left_remaining = compute_left_remain_from_end(width)
       right_remaining = 0
     else
-      local indicators = viewport.left_reserved > 0 and compute_both_indicators() or 0
+      --@check: possible miss behavior with sidebar
+      local indicators = viewport.left_reserved > 0 and viewport.truncate_left_width + viewport.truncate_right_width
+        or 0
       make_postfix(right_remaining, indicators)
       return
     end
@@ -1322,6 +1328,24 @@ local function calc_truncated_tabs(width)
     handle_width_change(width)
   elseif viewport_state.tab_width_changed then
     handle_tab_width_change(width)
+  else
+    local indicators = 0
+    if viewport.lo == 1 then
+      indicators = viewport.indicator_first_width + viewport.truncate_right_width
+    elseif viewport.hi == #tabs_cache then
+      indicators = viewport.truncate_left_width + viewport.indicator_last_width
+    else
+      indicators = viewport.truncate_left_width + viewport.truncate_right_width
+    end
+
+    if viewport_state.partial_left_redraw then
+      make_prefix(viewport.left_reserved, 0)
+      viewport_state.partial_left_redraw = false
+    end
+    if viewport_state.partial_right_redraw then
+      make_postfix(viewport.right_reserved, 0)
+      viewport_state.partial_right_redraw = false
+    end
   end
 end
 
@@ -1931,20 +1955,13 @@ local function setup_autocmds()
               viewport_state.simple_redraw = true
             end
             redrawtabline()
-          elseif viewport.lo - 1 == index or viewport.hi + 1 == index then
-            local indicators = 0
-            if viewport.lo == 1 then
-              indicators = viewport.indicator_first_width + viewport.truncate_right_width
-            elseif viewport.hi == #tabs_cache then
-              indicators = viewport.truncate_left_width + viewport.indicator_last_width
-            else
-              indicators = viewport.truncate_left_width + viewport.truncate_right_width
-            end
-
-            make_prefix(viewport.left_reserved, indicators)
-            make_postfix(viewport.right_reserved, indicators)
-
-            viewport_state.simple_redraw = true
+          elseif viewport.lo - 1 == index then
+            viewport_state.partial_left_redraw = true
+            viewport_state.updated = true
+            redrawtabline()
+          elseif viewport.hi + 1 == index then
+            viewport_state.partial_right_redraw = true
+            viewport_state.updated = true
             redrawtabline()
           end
         end
