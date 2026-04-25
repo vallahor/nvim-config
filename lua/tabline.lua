@@ -74,9 +74,6 @@ local config = {
   -- If don't matter that happening set it to true.
   last_icon_blend = false,
 
-  -- @check: implement this again
-  first_icon_blend = false,
-
   -- the `on_click` applies to the entire tab without `on_click`
   -- parameters the default on_click parameters and tab.
   -- `tab`
@@ -788,7 +785,6 @@ local function build_tab(buf, dir, tail, ext)
           else
             local text = component.text
             local part = strcharpart(text, 0, remaining, 1)
-            print(remaining, part)
             partial_right[#partial_right + 1] = "%#"
               .. component.hl
               .. "#"
@@ -1107,10 +1103,11 @@ local function make_prefix(left_remaining, indicator)
       local size = left_remaining - indicator
       if size > 0 then
         viewport.prefix = viewport.prefix .. tabs_cache[viewport.lo - 1].partial_left(size)
-      else
-        viewport.prefix = viewport.prefix .. string_rep(" ", size)
+        -- else
+        --   viewport.prefix = viewport.prefix .. string_rep(" ", left_remaining)
       end
     end
+    print("prefix: ", left_remaining)
     viewport.left_reserved = left_remaining
   else
     viewport.prefix = viewport.indicator_first
@@ -1277,11 +1274,9 @@ local function handle_tab_width_change(width)
           return
         end
       end
-      -- @check: sometimes missing by 2 on the leftside
-      -- like it padding 2 spaces
-      local reserved = viewport.left_reserved + indicators
+      local reserved = viewport.left_reserved > 0 and viewport.left_reserved or indicators
       viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - reserved)
-      make_prefix(viewport.left_reserved, 0)
+      make_prefix(viewport.left_reserved, indicators)
       make_postfix(right_remaining, 0)
       return
     end
@@ -1332,11 +1327,8 @@ local function handle_buf_delete(width)
           return
         end
       end
-      -- @check: sometimes missing by 2 on the leftside
-      -- like it padding 2 spaces
-      local reserved = viewport.left_reserved + indicators
-      viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - reserved)
-      make_prefix(viewport.left_reserved, 0)
+      viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - viewport.left_reserved)
+      make_prefix(viewport.left_reserved, indicators)
       make_postfix(right_remaining, 0)
       return
     end
