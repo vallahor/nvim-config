@@ -74,6 +74,9 @@ local config = {
   -- If don't matter that happening set it to true.
   last_icon_blend = false,
 
+  -- @check: implement this again
+  first_icon_blend = false,
+
   -- the `on_click` applies to the entire tab without `on_click`
   -- parameters the default on_click parameters and tab.
   -- `tab`
@@ -784,14 +787,15 @@ local function build_tab(buf, dir, tail, ext)
             partial_right[#partial_right + 1] = " "
           else
             local text = component.text
-            local part = strcharpart(text, 0, remaining)
+            local part = strcharpart(text, 0, remaining, 1)
+            print(remaining, part)
             partial_right[#partial_right + 1] = "%#"
               .. component.hl
               .. "#"
               .. (component.on_click and component_on_click(buf, i, part) or part)
           end
+          w = w + remaining
         end
-        w = w + remaining
         break
       end
       w = w + component.text_width
@@ -1119,6 +1123,7 @@ local function make_postfix(right_remaining, indicator)
     viewport.postfix = viewport.truncate_right
     if right_remaining > 0 then
       local size = right_remaining - indicator
+      print(size)
       if size > 0 then
         viewport.postfix = tabs_cache[viewport.hi + 1].partial_right(size) .. viewport.postfix
       elseif size < 0 then
@@ -1252,6 +1257,8 @@ local function handle_tab_width_change(width)
   local right_remaining = 0
   viewport_state.tab_width_changed = false
 
+  print(width)
+
   if viewport.index == 1 then
     viewport.lo = viewport.index
     viewport.hi, right_remaining = compute_right_remain_from_start(width)
@@ -1259,21 +1266,27 @@ local function handle_tab_width_change(width)
     viewport.hi = viewport.index
     viewport.lo, left_remaining = compute_left_remain_from_end(width)
   else
-    local indicators = viewport.truncate_left_width + viewport.truncate_right_width
-    if viewport.index == viewport.hi then
-      if viewport.right_reserved == 0 then
-        viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicators)
-        make_prefix(left_remaining, 0)
-        return
+    if viewport.lo == 1 then
+      viewport.hi, right_remaining = compute_right_remain_from_start(width)
+    elseif viewport.hi == #tabs_cache then
+      viewport.lo, left_remaining = compute_left_remain_from_end(width)
+    else
+      local indicators = viewport.truncate_left_width + viewport.truncate_right_width
+      if viewport.index == viewport.hi then
+        if viewport.right_reserved == 0 then
+          viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicators)
+          make_prefix(left_remaining, 0)
+          return
+        end
       end
+      -- @check: sometimes missing by 2 on the leftside
+      -- like it padding 2 spaces
+      local reserved = viewport.left_reserved + indicators
+      viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - reserved)
+      make_prefix(viewport.left_reserved, 0)
+      make_postfix(right_remaining, 0)
+      return
     end
-    -- @check: sometimes missing by 2 on the leftside
-    -- like it padding 2 spaces
-    local reserved = viewport.left_reserved + indicators
-    viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - reserved)
-    make_prefix(viewport.left_reserved, 0)
-    make_postfix(right_remaining, 0)
-    return
   end
 
   gen_prefix_postfix(left_remaining, right_remaining)

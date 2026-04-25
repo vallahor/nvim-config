@@ -690,7 +690,8 @@ vim.api.nvim_create_autocmd("VimEnter", {
           static = " ",
           -- static = " ",
           highlights = {
-            visible = { default = visible_separator, modified = visible_separator },
+            visible = { default = focused_diag_warn, modified = focused_diag_warn },
+            -- visible = { default = visible_separator, modified = visible_separator },
             focused = { default = focused_separator, modified = focused_separator },
           },
         },
