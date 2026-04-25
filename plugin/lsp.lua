@@ -76,7 +76,7 @@ vim.lsp.config("emmylua_ls", {
       workspace = {
         library = {
           vim.env.VIMRUNTIME,
-          vim.fn.stdpath("data") .. "/site/pack/core/opt",
+          -- vim.fn.stdpath("data") .. "/site/pack/core/opt",
         },
         checkThirdParty = false,
       },

@@ -1,6 +1,8 @@
 local bit = require("bit")
 local band, bor, lshift, rshift = bit.band, bit.bor, bit.lshift, bit.rshift
 
+local should_print = false
+
 local api, fn, bo = vim.api, vim.fn, vim.bo
 
 local redrawtabline = vim.cmd.redrawtabline
@@ -257,7 +259,6 @@ local viewport_state = {
 ---@field hi integer
 ---@field buf integer
 ---@field index integer
----@field last_index integer
 ---@field truncate_left string
 ---@field truncate_right string
 ---@field truncate_left_width integer
@@ -281,7 +282,6 @@ local viewport = {
   hi = 1,
   buf = 1,
   index = 1,
-  last_index = 0,
   prefix = "",
   postfix = "",
   endfix = "%#TablineFill#",
@@ -756,8 +756,8 @@ local function build_tab(buf, dir, tail, ext)
 
   tab.set_new_display = function()
     local old_width = tab.width
-    local flags = tab.modified + tab.severity
-    local rendered = tab.rendered[tab.visibility + flags]
+    local flags = tab.visibility + tab.modified + tab.severity
+    local rendered = tab.rendered[flags]
     ---@cast rendered Rendered
 
     tab.display = rendered.display
@@ -937,6 +937,8 @@ local function remove_buf_from_tabline(bufnr)
   click_tab_handlers[bufnr] = nil
   click_components_handlers[bufnr] = nil
 
+  viewport_state.buf_deleted = true
+
   ---@type integer?
   local replacement = buf_cache[index] or buf_cache[index - 1]
   if not replacement then
@@ -950,8 +952,6 @@ local function remove_buf_from_tabline(bufnr)
     nvim_win_set_buf(win, replacement)
     I.on_buf_replaced(cur_win, win)
   end
-
-  viewport_state.buf_deleted = true
   update_buf_index()
 
   if I.dynamic.index then
@@ -1243,6 +1243,41 @@ local function handle_width_change(width)
   gen_prefix_postfix(left_remaining, right_remaining)
 end
 
+local function handle_tab_width_change(width)
+  local left_remaining = 0
+  local right_remaining = 0
+  viewport_state.tab_width_changed = false
+
+  if viewport.index == 1 then
+    viewport.lo = viewport.index
+    viewport.hi, right_remaining = compute_right_remain_from_start(width)
+  elseif viewport.index == #tabs_cache then
+    viewport.hi = viewport.index
+    viewport.lo, left_remaining = compute_left_remain_from_end(width)
+  else
+    local indicators = viewport.truncate_left_width + viewport.truncate_right_width
+    if viewport.index == viewport.hi then
+      if viewport.right_reserved == 0 then
+        viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicators)
+        make_prefix(left_remaining, 0)
+        return
+      end
+    elseif viewport.index > viewport.hi then
+      viewport.hi = viewport.index
+      viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - viewport.truncate_left_width)
+      viewport.right_reserved = 0
+    end
+    local reserved = viewport.left_reserved + viewport.truncate_left_width + viewport.truncate_right_width
+    viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - reserved)
+    left_remaining = viewport.left_reserved
+    make_prefix(viewport.left_reserved, 0)
+    make_postfix(right_remaining, 0)
+    return
+  end
+
+  gen_prefix_postfix(left_remaining, right_remaining)
+end
+
 local function handle_buf_delete(width)
   local left_remaining = 0
   local right_remaining = 0
@@ -1253,6 +1288,8 @@ local function handle_buf_delete(width)
     viewport_state.buf_deleted_partial = false
     viewport.lo = math_max(1, viewport.lo - 1)
   end
+
+  print(viewport.lo, viewport.hi, viewport.index)
 
   if viewport.lo == 1 then
     viewport.hi, right_remaining = compute_right_remain_from_start(width)
@@ -1269,34 +1306,6 @@ local function handle_buf_delete(width)
       left_remaining = indicators
     end
   else
-    local reserved = viewport.left_reserved > 0 and viewport.left_reserved
-      or (viewport.truncate_left_width + viewport.truncate_right_width)
-    viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - reserved)
-    if viewport.hi == #tabs_cache then
-      viewport.lo, left_remaining = compute_left_remain_from_end(width)
-      right_remaining = 0
-    else
-      --@check: possible miss behavior with sidebar
-      local indicators = viewport.left_reserved > 0 and viewport.truncate_left_width + viewport.truncate_right_width
-        or 0
-      make_postfix(right_remaining, indicators)
-      return
-    end
-  end
-
-  gen_prefix_postfix(left_remaining, right_remaining)
-end
-
-local function handle_tab_width_change(width)
-  local left_remaining = 0
-  local right_remaining = 0
-  viewport_state.tab_width_changed = false
-
-  if viewport.lo == 1 then
-    viewport.hi, right_remaining = compute_right_remain_from_start(width)
-  elseif viewport.hi == #tabs_cache then
-    viewport.lo, left_remaining = compute_left_remain_from_end(width)
-  else
     local indicators = viewport.truncate_left_width + viewport.truncate_right_width
     if viewport.index == viewport.hi then
       if viewport.right_reserved == 0 then
@@ -1304,6 +1313,10 @@ local function handle_tab_width_change(width)
         make_prefix(left_remaining, 0)
         return
       end
+    elseif viewport.index > viewport.hi then
+      viewport.hi = viewport.index
+      viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - viewport.truncate_left_width)
+      viewport.right_reserved = 0
     end
     local reserved = viewport.left_reserved + viewport.truncate_left_width + viewport.truncate_right_width
     viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - reserved)
@@ -1345,7 +1358,6 @@ function I.GalfoRender()
     viewport_state.updated
     or viewport_state.simple_redraw
     or viewport_state.size_changed
-    or viewport_state.buf_deleted
     or viewport_state.tab_width_changed
   then
     if sidebar.winnr and nvim_get_current_win() == sidebar.winnr then
@@ -1355,15 +1367,23 @@ function I.GalfoRender()
 
     local current_tab = tabs_cache[viewport.index]
     ---@cast current_tab Tab
-    -- if viewport.index ~= viewport.last_index and current_tab.set_new_display(STATES.FOCUSED) then
-    if current_tab.visibility ~= STATES.FOCUSED then
-      if not sidebar.focus then
-        current_tab.visibility = STATES.FOCUSED
-      end
-      viewport.last_index = viewport.index
+    ---
+
+    if should_print then
+      print(current_tab.visibility)
+      print(current_tab.display)
+    end
+
+    if not sidebar.focus and current_tab.visibility ~= STATES.FOCUSED then
+      current_tab.visibility = STATES.FOCUSED
       if current_tab.set_new_display() then
         viewport_state.tab_width_changed = true
       end
+    end
+
+    if should_print then
+      print(current_tab.visibility)
+      print(current_tab.display)
     end
 
     local indicators = 0
@@ -1669,6 +1689,7 @@ function Galfo.close_tab(bufnr, force)
   end
 
   viewport_state.buf_deleted_partial = index == viewport.lo - 1
+  print(viewport_state.buf_deleted_partial)
 
   if not force and bo[bufnr].modified then
     local choice = fn.confirm("Unsaved changes:", "&Save\n&Discard\n&Cancel", 1)
@@ -2105,5 +2126,11 @@ function Galfo.setup(opts)
     I.on_buf_replaced = opts.on_buf_replaced
   end
 end
+
+local function aeho()
+  should_print = not should_print
+end
+
+api.nvim_create_user_command("Aeho", aeho, {})
 
 return Galfo
