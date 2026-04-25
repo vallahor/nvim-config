@@ -1329,15 +1329,6 @@ local function calc_truncated_tabs(width)
   elseif viewport_state.tab_width_changed then
     handle_tab_width_change(width)
   else
-    local indicators = 0
-    if viewport.lo == 1 then
-      indicators = viewport.indicator_first_width + viewport.truncate_right_width
-    elseif viewport.hi == #tabs_cache then
-      indicators = viewport.truncate_left_width + viewport.indicator_last_width
-    else
-      indicators = viewport.truncate_left_width + viewport.truncate_right_width
-    end
-
     if viewport_state.partial_left_redraw then
       make_prefix(viewport.left_reserved, 0)
       viewport_state.partial_left_redraw = false
