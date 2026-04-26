@@ -969,9 +969,11 @@ local function remove_buf_from_tabline(bufnr)
 end
 
 local function init_bufs()
-  for _, b in ipairs(nvim_list_bufs()) do
-    if bo[b].buflisted then
-      insert_buf_into_tabline(b)
+  local bufs = nvim_list_bufs()
+  for i = 1, #bufs do
+    local buf = bufs[i]
+    if bo[buf].buflisted and nvim_buf_is_valid(buf) and not buf_index[buf] then
+      insert_buf_into_tabline(buf)
     end
   end
 end
@@ -1299,9 +1301,14 @@ local function handle_tab_width_change(width)
       end
       local reserved = viewport.left_reserved > 0 and viewport.left_reserved or indicators
       viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - reserved)
-      make_prefix(viewport.left_reserved, indicators)
-      make_postfix(right_remaining, 0)
-      return
+      if viewport.hi == #tabs_cache then
+        viewport.lo, left_remaining = compute_left_remain_from_end(width)
+        right_remaining = 0
+      else
+        make_prefix(viewport.left_reserved, indicators)
+        make_postfix(right_remaining, 0)
+        return
+      end
     end
   end
 
@@ -1681,9 +1688,6 @@ end
 
 function Galfo.close_tab_left(force)
   local bufnr = buf_cache[viewport.index - 1]
-  if not bufnr then
-    return
-  end
 
   viewport_state.should_not_focus = true
   Galfo.close_tab(bufnr, force)
@@ -1692,9 +1696,6 @@ end
 
 function Galfo.close_tab_right(force)
   local bufnr = buf_cache[viewport.index + 1]
-  if not bufnr then
-    return
-  end
 
   viewport_state.should_not_focus = true
   Galfo.close_tab(bufnr, force)
@@ -1703,44 +1704,25 @@ end
 
 function Galfo.close_all_tab_left(force)
   for i = viewport.index - 1, 1, -1 do
-    local bufnr = buf_cache[i]
-    if not bufnr then
-      return
-    end
-
     viewport_state.should_not_focus = true
-    Galfo.close_tab(bufnr, force)
+    Galfo.close_tab(buf_cache[i], force)
     viewport_state.should_not_focus = false
-
-    viewport.lo = viewport.index
   end
 end
 
 function Galfo.close_all_tab_right(force)
-  for i = #tabs_cache, viewport.index + 1, -1 do
-    local bufnr = buf_cache[i]
-    if not bufnr then
-      return
-    end
-
+  for i = #buf_cache, viewport.index + 1, -1 do
     viewport_state.should_not_focus = true
-    Galfo.close_tab(bufnr, force)
+    Galfo.close_tab(buf_cache[i], force)
     viewport_state.should_not_focus = false
 
-    viewport.hi = viewport.index
+    viewport_state.tab_width_changed = true
   end
 end
 
 function Galfo.close_all_tabs(force)
-  for i = #tabs_cache, 1, -1 do
-    local bufnr = buf_cache[i]
-    if not bufnr then
-      return
-    end
-
-    viewport_state.should_not_focus = true
-    Galfo.close_tab(bufnr, force)
-    viewport_state.should_not_focus = false
+  for i = #buf_cache, 1, -1 do
+    Galfo.close_tab(buf_cache[i], force)
   end
 end
 
