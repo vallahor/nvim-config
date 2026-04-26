@@ -1,5 +1,3 @@
-local ns = vim.api.nvim_create_namespace("galfo_namespace")
-
 local bit = require("bit")
 local band, bor, lshift, rshift = bit.band, bit.bor, bit.lshift, bit.rshift
 
@@ -940,7 +938,17 @@ local function remove_buf_from_tabline(bufnr)
   ---@type integer?
   local replacement = buf_cache[index] or buf_cache[index - 1]
   if not replacement then
-    replacement = nvim_create_buf(true, false)
+    local bufs = nvim_list_bufs()
+    for i = 1, #bufs do
+      local buf = bufs[i]
+      if bo[buf].buflisted and nvim_buf_is_valid(buf) and nvim_buf_get_name(buf) == "" then
+        replacement = buf
+        break
+      end
+    end
+    if not replacement then
+      replacement = nvim_create_buf(true, false)
+    end
   end
 
   local cur_win = nvim_get_current_win()
@@ -1335,7 +1343,6 @@ function I.GalfoRender()
     end
 
     local current_tab = tabs_cache[viewport.index]
-    print(viewport.index, viewport.buf)
 
     if current_tab == nil then
       init_bufs()
@@ -1731,7 +1738,9 @@ function Galfo.close_all_tabs(force)
       return
     end
 
+    viewport_state.should_not_focus = true
     Galfo.close_tab(bufnr, force)
+    viewport_state.should_not_focus = false
   end
 end
 
@@ -1774,38 +1783,7 @@ function Galfo.focus_by_index(index)
   nvim_set_current_buf(buf_cache[index])
 end
 
-api.nvim_set_decoration_provider(ns, {
-  on_start = function()
-    if #I.buf_queue == 0 then
-      return
-    end
-    local queue = I.buf_queue
-    I.buf_queue = {}
-    for i = #queue, 1, -1 do
-      ---@type integer
-      local buf = queue[i]
-      if
-        not nvim_buf_is_valid(buf)
-        or not bo[buf].buflisted
-        or buf_index[buf]
-        or I.ignore.buftypes[bo[buf].buftype]
-        or I.ignore.filetypes[bo[buf].filetype]
-        or I.ignore.bufnames[nvim_buf_get_name(buf)]
-      then
-        goto continue
-      end
-      insert_buf_into_tabline(buf)
-      ::continue::
-    end
-  end,
-})
-
 local function setup_autocmds()
-  -- api.nvim_create_autocmd({ "BufAdd" }, {
-  --   callback = function(ev)
-  --     I.buf_queue[#I.buf_queue + 1] = ev.buf
-  --   end,
-  -- })
   api.nvim_create_autocmd({ "BufReadPost" }, {
     callback = function(ev)
       local buf = ev.buf
@@ -1847,7 +1825,7 @@ local function setup_autocmds()
     end,
   })
 
-  api.nvim_create_autocmd({ "BufLeave" }, {
+  api.nvim_create_autocmd({ "BufLeave", "BufWinLeave" }, {
     callback = function(ev)
       if viewport_state.should_not_focus then
         return
