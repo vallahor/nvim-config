@@ -2027,6 +2027,8 @@ function Galfo.load_session()
   viewport.lo = session.viewport.lo
   viewport.hi = session.viewport.hi
 
+  -- @check: wrong size and position (width exploded)
+
   local missing = {}
   local bufs = {}
   local target_buf = nil
@@ -2042,6 +2044,7 @@ function Galfo.load_session()
         target_buf = buf
       end
     else
+      viewport.index = viewport.index + 1
       missing[#missing + 1] = tab.path
     end
   end
