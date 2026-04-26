@@ -968,8 +968,8 @@ local function remove_buf_from_tabline(bufnr)
   end
 end
 
-local function init_bufs()
-  local bufs = nvim_list_bufs()
+local function init_bufs(bufs)
+  bufs = bufs or nvim_list_bufs()
   for i = 1, #bufs do
     local buf = bufs[i]
     if bo[buf].buflisted and nvim_buf_is_valid(buf) and not buf_index[buf] then
@@ -1726,6 +1726,13 @@ function Galfo.close_all_tabs(force)
   end
 end
 
+function Galfo.close_all_tabs_ignore_pinned(force)
+  tabs_pin_cache = {}
+  for i = #buf_cache, 1, -1 do
+    Galfo.close_tab(buf_cache[i], force)
+  end
+end
+
 function Galfo.toggle_pin(bufnr)
   bufnr = bufnr == 0 and nvim_get_current_buf() or bufnr
   local index = buf_index[bufnr]
@@ -1975,6 +1982,65 @@ _G.TabOnClick = function(bufnr, clicks, button, mods)
   if tab_fn_handler then
     tab_fn_handler(tab, clicks, button, mods)
   end
+end
+
+local session = nil
+
+function Galfo.save_session()
+  local state = {}
+  state.index = viewport.index
+  state.lo = viewport.lo
+  state.hi = viewport.hi
+  state.tabs = {}
+
+  for i = 1, #buf_cache do
+    local buf = buf_cache[i]
+    state.tabs[#state.tabs + 1] = {
+      path = nvim_buf_get_name(buf),
+      is_pinned = tabs_pin_cache[buf],
+    }
+  end
+
+  local win = nvim_get_current_win()
+  session = {
+    state = state,
+    current_path = nvim_buf_get_name(viewport.buf),
+    cwd = vim.uv.cwd(),
+    cursor = api.nvim_win_get_cursor(win),
+  }
+end
+
+function Galfo.load_session()
+  if session == nil then
+    return
+  end
+
+  vim.uv.chdir(session.cwd)
+
+  tabs_pin_cache = {}
+  Galfo.close_all_tabs(false)
+
+  viewport.index = session.state.index
+  viewport.lo = session.state.lo
+  viewport.hi = session.state.hi
+
+  local bufs = {}
+  for i = 1, #session.state.tabs do
+    local tab = session.state.tabs[i]
+    local buf = fn.bufadd(tab.path)
+    fn.bufload(buf)
+    bo[buf].buflisted = true
+    tabs_pin_cache[buf] = tab.is_pinned
+    bufs[#bufs + 1] = buf
+  end
+
+  init_bufs(bufs)
+
+  local target_buf = fn.bufnr(session.current_path)
+  if target_buf ~= -1 then
+    nvim_set_current_buf(target_buf)
+  end
+  api.nvim_win_set_cursor(0, session.cursor)
 end
 
 function Galfo.setup(opts)

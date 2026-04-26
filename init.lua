@@ -670,8 +670,10 @@ vim.api.nvim_create_autocmd("VimEnter", {
       indicators = {
         first = { text = "", highlight = indicator_sep },
         last = { text = "", highlight = indicator_sep },
-        truncate_left = { text = "…", highlight = indicator_sep },
-        truncate_right = { text = "…", highlight = indicator_sep },
+        -- truncate_left = { text = "…", highlight = indicator_sep },
+        -- truncate_right = { text = "…", highlight = indicator_sep },
+        truncate_left = { text = " 󰁍 ", highlight = indicator_sep },
+        truncate_right = { text = " 󰁔 ", highlight = indicator_sep },
       },
       sidebar = {
         highlights = {
@@ -830,14 +832,20 @@ vim.api.nvim_create_autocmd("VimEnter", {
       tabline.toggle_pin(0)
     end, { silent = true, nowait = true })
     map("n", "<c-1>", function()
-      tabline.focus_by_index(1)
+      tabline.save_session()
     end, { silent = true, nowait = true })
     map("n", "<c-2>", function()
-      tabline.focus_by_index(2)
+      tabline.load_session()
     end, { silent = true, nowait = true })
-    map("n", "<c-3>", function()
-      tabline.focus_by_index(3)
-    end, { silent = true, nowait = true })
+    -- map("n", "<c-1>", function()
+    --   tabline.focus_by_index(1)
+    -- end, { silent = true, nowait = true })
+    -- map("n", "<c-2>", function()
+    --   tabline.focus_by_index(2)
+    -- end, { silent = true, nowait = true })
+    -- map("n", "<c-3>", function()
+    --   tabline.focus_by_index(3)
+    -- end, { silent = true, nowait = true })
   end,
 })
 
