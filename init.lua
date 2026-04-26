@@ -168,17 +168,16 @@ vim.keymap.set("n", "*", function()
 end)
 vim.keymap.set("v", "*", '"sy/\\V<c-r>s<cr>``') -- highlight all occurencies of the curren selection
 
--- add ";" to the end of line
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = "*",
-  callback = function()
-    vim.keymap.set({ "n", "i" }, "<c-;>", function()
-      local row = vim.api.nvim_win_get_cursor(0)[1] - 1
-      local len = vim.fn.col("$") - 1
-      vim.api.nvim_buf_set_text(0, row, len, row, len, { ";" })
-    end, { buffer = true })
-  end,
-})
+-- vim.api.nvim_create_autocmd("FileType", {
+--   pattern = "*",
+--   callback = function()
+--     vim.keymap.set({ "n", "i" }, "<c-;>", function()
+--       local row = vim.api.nvim_win_get_cursor(0)[1] - 1
+--       local len = vim.fn.col("$") - 1
+--       vim.api.nvim_buf_set_text(0, row, len, row, len, { ";" })
+--     end, { buffer = true })
+--   end,
+-- })
 
 -- go to beginning of the line function like DOOM Emacs
 local function beginning_of_the_line()
@@ -691,6 +690,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
           -- static = " ",
           highlights = {
             visible = { default = visible_separator, modified = visible_separator },
+            -- visible = { default = focused_diag_warn, modified = focused_diag_warn },
             focused = { default = focused_separator, modified = focused_separator },
           },
         },
@@ -779,6 +779,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
           static = " ",
           highlights = {
             visible = { default = visible_separator, modified = visible_separator },
+            -- visible = { default = focused_diag_warn, modified = focused_diag_warn },
             focused = { default = focused_separator, modified = focused_separator },
             -- visible = { default = visible_separator, modified = visible_separator },
             -- focused = { default = focused_separator, modified = focused_separator },
