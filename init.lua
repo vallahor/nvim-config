@@ -131,6 +131,8 @@ vim.keymap.set("n", "<right>", function()
   wincmd("l")
 end) -- move to window right
 
+vim.keymap.set("n", "<cr>", "<nop>")
+
 vim.keymap.set("n", "Y", "yg$") -- yank to end of line considering line wrap
 
 vim.keymap.set({ "n", "v" }, "<PageUp>", "<c-u>zzzz", { noremap = true }) -- page up
