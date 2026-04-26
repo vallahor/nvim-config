@@ -1,3 +1,5 @@
+local ns = vim.api.nvim_create_namespace("galfo_namespace")
+
 local bit = require("bit")
 local band, bor, lshift, rshift = bit.band, bit.bor, bit.lshift, bit.rshift
 
@@ -202,10 +204,9 @@ local config = {
   },
 
   ignore = {
-    terminal = true,
     bufnames = {},
     buftypes = {
-      "nofile",
+      "terminal",
       "prompt",
     },
     filetypes = {
@@ -1334,8 +1335,13 @@ function I.GalfoRender()
     end
 
     local current_tab = tabs_cache[viewport.index]
-    ---@cast current_tab Tab
-    ---
+    print(viewport.index, viewport.buf)
+
+    if current_tab == nil then
+      init_bufs()
+      viewport.index = buf_index[viewport.buf]
+      current_tab = tabs_cache[viewport.index]
+    end
 
     if not sidebar.focus and current_tab.visibility ~= STATES.FOCUSED then
       current_tab.visibility = STATES.FOCUSED
@@ -1718,6 +1724,17 @@ function Galfo.close_all_tab_right(force)
   end
 end
 
+function Galfo.close_all_tabs(force)
+  for i = #tabs_cache, 1, -1 do
+    local bufnr = buf_cache[i]
+    if not bufnr then
+      return
+    end
+
+    Galfo.close_tab(bufnr, force)
+  end
+end
+
 function Galfo.toggle_pin(bufnr)
   bufnr = bufnr == 0 and nvim_get_current_buf() or bufnr
   local index = buf_index[bufnr]
@@ -1757,8 +1774,39 @@ function Galfo.focus_by_index(index)
   nvim_set_current_buf(buf_cache[index])
 end
 
+api.nvim_set_decoration_provider(ns, {
+  on_start = function()
+    if #I.buf_queue == 0 then
+      return
+    end
+    local queue = I.buf_queue
+    I.buf_queue = {}
+    for i = #queue, 1, -1 do
+      ---@type integer
+      local buf = queue[i]
+      if
+        not nvim_buf_is_valid(buf)
+        or not bo[buf].buflisted
+        or buf_index[buf]
+        or I.ignore.buftypes[bo[buf].buftype]
+        or I.ignore.filetypes[bo[buf].filetype]
+        or I.ignore.bufnames[nvim_buf_get_name(buf)]
+      then
+        goto continue
+      end
+      insert_buf_into_tabline(buf)
+      ::continue::
+    end
+  end,
+})
+
 local function setup_autocmds()
-  api.nvim_create_autocmd("BufWinEnter", {
+  -- api.nvim_create_autocmd({ "BufAdd" }, {
+  --   callback = function(ev)
+  --     I.buf_queue[#I.buf_queue + 1] = ev.buf
+  --   end,
+  -- })
+  api.nvim_create_autocmd({ "BufReadPost" }, {
     callback = function(ev)
       local buf = ev.buf
       if
@@ -1771,42 +1819,27 @@ local function setup_autocmds()
       then
         return
       end
-
       insert_buf_into_tabline(buf)
-      redrawtabline()
     end,
   })
-
-  if I.ignore.terminal then
-    -- @check: Maybe theres a better way of doing this.
-    api.nvim_create_autocmd("TermOpen", {
-      callback = function(ev)
-        local buf = ev.buf
-        if not buf_index[buf] then
-          return
-        end
-
-        remove_buf_from_tabline(buf)
-      end,
-    })
-  end
 
   api.nvim_create_autocmd({ "BufEnter" }, {
     callback = function(ev)
       if viewport_state.should_not_focus then
         return
       end
+      local buf = ev.buf
 
-      if sidebar.enabled and sidebar_filetypes[bo[ev.buf].filetype] then
+      if sidebar.enabled and sidebar_filetypes[bo[buf].filetype] then
         sidebar.winnr = nvim_get_current_win()
       else
         sidebar.focus = false
-        local index = buf_index[ev.buf]
+        local index = buf_index[buf]
         if not index then
           return
         end
 
-        viewport.buf = ev.buf
+        viewport.buf = buf
         viewport.index = index
       end
 
@@ -2068,6 +2101,8 @@ function Galfo.setup(opts)
 
   viewport.sidebar_width = render_sidebar()
   viewport.width = vim.o.columns
+
+  I.buf_queue = {}
 
   I.dynamic = {
     diagnostics = {},
