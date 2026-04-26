@@ -938,6 +938,7 @@ local function remove_buf_from_tabline(bufnr)
   ---@type integer?
   local replacement = buf_cache[index] or buf_cache[index - 1]
   if not replacement then
+    -- @check: back to close splits when no other buf
     local bufs = nvim_list_bufs()
     for i = 1, #bufs do
       local buf = bufs[i]
@@ -1773,7 +1774,7 @@ function Galfo.focus_by_index(index)
 end
 
 local function setup_autocmds()
-  api.nvim_create_autocmd({ "BufReadPost" }, {
+  api.nvim_create_autocmd("BufReadPost", {
     callback = function(ev)
       local buf = ev.buf
       if
@@ -1988,10 +1989,13 @@ local session = nil
 
 function Galfo.save_session()
   local state = {}
-  state.index = viewport.index
-  state.lo = viewport.lo
-  state.hi = viewport.hi
+  state.viewport = {}
   state.tabs = {}
+
+  state.viewport.index = viewport.index
+  state.viewport.lo = viewport.lo
+  state.viewport.hi = viewport.hi
+  state.viewport.current_buf_path = nvim_buf_get_name(viewport.buf)
 
   for i = 1, #buf_cache do
     local buf = buf_cache[i]
@@ -2003,8 +2007,8 @@ function Galfo.save_session()
 
   local win = nvim_get_current_win()
   session = {
-    state = state,
-    current_path = nvim_buf_get_name(viewport.buf),
+    viewport = state.viewport,
+    tabs = state.tabs,
     cwd = vim.uv.cwd(),
     cursor = api.nvim_win_get_cursor(win),
   }
@@ -2020,13 +2024,13 @@ function Galfo.load_session()
   tabs_pin_cache = {}
   Galfo.close_all_tabs(false)
 
-  viewport.index = session.state.index
-  viewport.lo = session.state.lo
-  viewport.hi = session.state.hi
+  viewport.index = session.viewport.index
+  viewport.lo = session.viewport.lo
+  viewport.hi = session.viewport.hi
 
   local bufs = {}
-  for i = 1, #session.state.tabs do
-    local tab = session.state.tabs[i]
+  for i = 1, #session.tabs do
+    local tab = session.tabs[i]
     local buf = fn.bufadd(tab.path)
     fn.bufload(buf)
     bo[buf].buflisted = true
@@ -2036,7 +2040,7 @@ function Galfo.load_session()
 
   init_bufs(bufs)
 
-  local target_buf = fn.bufnr(session.current_path)
+  local target_buf = fn.bufnr(session.viewport.current_buf_path)
   if target_buf ~= -1 then
     nvim_set_current_buf(target_buf)
   end
