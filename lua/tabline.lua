@@ -757,7 +757,7 @@ local function build_tab(buf, dir, tail, ext)
 
     tab.display = rendered.display
     tab.width = rendered.width
-    viewport.total_tabs_width = viewport.total_tabs_width - tab.width + old_width
+    viewport.total_tabs_width = viewport.total_tabs_width + tab.width - old_width
     return tab.width ~= old_width
   end
 
@@ -1365,63 +1365,59 @@ function I.GalfoRender()
       end
     end
 
-    local indicators = 0
-
     local width = viewport.width - viewport.sidebar_width
 
     if viewport_state.simple_redraw and not viewport_state.updated and not viewport_state.tab_shrink then
       viewport_state.simple_redraw = false
-      goto build_viewport_str
-    end
-
-    if viewport.total_tabs_width > width then
-      calc_truncated_tabs(width)
     else
-      viewport.lo = 1
-      viewport.hi = #tabs_cache
-      viewport.prefix = viewport.indicator_first
-      viewport.postfix = ""
-      viewport.left_reserved = 0
-      viewport.right_reserved = 0
-    end
-
-    if viewport.lo == 1 then
-      indicators = viewport.indicator_first_width + viewport.truncate_right_width
-    elseif viewport.hi == #tabs_cache then
-      indicators = viewport.truncate_left_width + viewport.indicator_last_width
-    else
-      indicators = viewport.truncate_left_width + viewport.truncate_right_width
-    end
-
-    viewport_state.tab_shrink = current_tab and current_tab.width > width - indicators
-
-    if viewport_state.tab_shrink then
-      local available = width
-      viewport.lo = viewport.index
-      viewport.hi = viewport.index
-      if viewport.hi == #tabs_cache then
-        viewport.prefix = viewport.truncate_left
-        viewport.postfix = viewport.indicator_last
-        available = available - viewport.truncate_left_width - viewport.indicator_last_width
-      elseif viewport.lo == 1 then
-        viewport.prefix = viewport.indicator_first
-        viewport.postfix = viewport.truncate_right
-        available = available - viewport.indicator_first_width - viewport.truncate_right_width
+      local indicators = 0
+      if viewport.lo == 1 then
+        indicators = viewport.indicator_first_width + viewport.truncate_right_width
+      elseif viewport.hi == #tabs_cache then
+        indicators = viewport.truncate_left_width + viewport.indicator_last_width
       else
-        viewport.prefix = viewport.truncate_left
-        viewport.postfix = viewport.truncate_right
-        available = width - indicators
+        indicators = viewport.truncate_left_width + viewport.truncate_right_width
       end
 
-      local buf = buf_cache[viewport.index]
-      local focused = buf == viewport.buf and STATES.FOCUSED or STATES.VISIBLE
-      local state = bor(focused, current_tab.modified + current_tab.severity)
+      if viewport.total_tabs_width > width then
+        calc_truncated_tabs(width)
+      else
+        viewport.lo = 1
+        viewport.hi = #tabs_cache
+        viewport.prefix = viewport.indicator_first
+        viewport.postfix = ""
+        viewport.left_reserved = 0
+        viewport.right_reserved = 0
+      end
 
-      local pad = string_rep(" ", math_max(0, available - current_tab.rendered[state].width))
-      viewport.tab_shrink_str = current_tab.partial_left(available, focused) .. pad
+      viewport_state.tab_shrink = current_tab and current_tab.width > width - indicators
+
+      if viewport_state.tab_shrink then
+        local available = width
+        viewport.lo = viewport.index
+        viewport.hi = viewport.index
+        if viewport.hi == #tabs_cache then
+          viewport.prefix = viewport.truncate_left
+          viewport.postfix = viewport.indicator_last
+          available = available - viewport.truncate_left_width - viewport.indicator_last_width
+        elseif viewport.lo == 1 then
+          viewport.prefix = viewport.indicator_first
+          viewport.postfix = viewport.truncate_right
+          available = available - viewport.indicator_first_width - viewport.truncate_right_width
+        else
+          viewport.prefix = viewport.truncate_left
+          viewport.postfix = viewport.truncate_right
+          available = width - indicators
+        end
+
+        local buf = buf_cache[viewport.index]
+        local focused = buf == viewport.buf and STATES.FOCUSED or STATES.VISIBLE
+        local state = bor(focused, current_tab.modified + current_tab.severity)
+
+        local pad = string_rep(" ", math_max(0, available - current_tab.rendered[state].width))
+        viewport.tab_shrink_str = current_tab.partial_left(available, focused) .. pad
+      end
     end
-
-    ::build_viewport_str::
 
     local sidebar_str = ""
     if viewport.sidebar_width > 0 then
@@ -2027,8 +2023,6 @@ function Galfo.load_session()
   viewport.lo = session.viewport.lo
   viewport.hi = session.viewport.hi
 
-  -- @check: wrong size and position (width exploded)
-
   local missing = {}
   local bufs = {}
   local target_buf = nil
@@ -2057,6 +2051,8 @@ function Galfo.load_session()
 
   nvim_set_current_buf(target_buf)
   api.nvim_win_set_cursor(0, session.cursor)
+
+  viewport_state.tab_width_changed = true
 
   --@check: find a way to customize this. supress and other stuff
   if #missing > 0 then
