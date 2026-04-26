@@ -1995,7 +1995,6 @@ function Galfo.save_session()
   state.viewport.index = viewport.index
   state.viewport.lo = viewport.lo
   state.viewport.hi = viewport.hi
-  state.viewport.current_buf_path = nvim_buf_get_name(viewport.buf)
 
   for i = 1, #buf_cache do
     local buf = buf_cache[i]
@@ -2028,23 +2027,38 @@ function Galfo.load_session()
   viewport.lo = session.viewport.lo
   viewport.hi = session.viewport.hi
 
+  local missing = {}
   local bufs = {}
+  local target_buf = nil
   for i = 1, #session.tabs do
     local tab = session.tabs[i]
-    local buf = fn.bufadd(tab.path)
-    fn.bufload(buf)
-    bo[buf].buflisted = true
-    tabs_pin_cache[buf] = tab.is_pinned
-    bufs[#bufs + 1] = buf
+    if vim.uv.fs_stat(tab.path) then
+      local buf = fn.bufadd(tab.path)
+      fn.bufload(buf)
+      bo[buf].buflisted = true
+      tabs_pin_cache[buf] = tab.is_pinned
+      bufs[#bufs + 1] = buf
+      if i == viewport.index then
+        target_buf = buf
+      end
+    else
+      missing[#missing + 1] = tab.path
+    end
   end
 
   init_bufs(bufs)
 
-  local target_buf = fn.bufnr(session.viewport.current_buf_path)
-  if target_buf ~= -1 then
-    nvim_set_current_buf(target_buf)
+  if target_buf == nil then
+    target_buf = bufs[#bufs]
   end
+
+  nvim_set_current_buf(target_buf)
   api.nvim_win_set_cursor(0, session.cursor)
+
+  --@check: find a way to customize this. supress and other stuff
+  if #missing > 0 then
+    vim.notify("Session: missing files\n" .. table_concat(missing, "\n"), vim.log.levels.WARN)
+  end
 end
 
 function Galfo.setup(opts)
