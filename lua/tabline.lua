@@ -1417,10 +1417,7 @@ function I.GalfoRender()
 
         local buf = buf_cache[viewport.index]
         local focused = buf == viewport.buf and STATES.FOCUSED or STATES.VISIBLE
-        local state = bor(focused, current_tab.modified + current_tab.severity)
-
-        local pad = string_rep(" ", math_max(0, available - current_tab.rendered[state].width))
-        viewport.tab_shrink_str = current_tab.partial_left(available, focused) .. pad
+        viewport.tab_shrink_str = current_tab.partial_left(available, focused)
       end
     end
 
@@ -1802,6 +1799,8 @@ function Galfo.execute_buf_queue()
 end
 
 local function setup_autocmds()
+  -- without it that's impossible to load properly buffers like InspectTree
+  -- Terminal and others ... and still working with Scratch buffers.
   api.nvim_create_autocmd({ "BufWinEnter" }, {
     callback = function(ev)
       local buf = ev.buf
