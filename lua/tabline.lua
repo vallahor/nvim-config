@@ -1224,41 +1224,15 @@ local function handle_size_change(width)
   local right_remaining = 0
   if viewport.lo == 1 then
     viewport.hi, right_remaining = compute_right_remain_from_start(width)
+  elseif viewport.hi == #tabs_cache then
+    viewport.lo, left_remaining = compute_left_remain_from_end(width)
   else
-    if viewport.hi == #tabs_cache then
-      viewport.lo, left_remaining = compute_left_remain_from_end(width)
-    end
-
-    local indicator_left_size = compute_left_indicator()
-    local indicator_right_size = compute_right_indicator()
-    local indicators = indicator_left_size + indicator_right_size
-
-    if viewport.index <= viewport.lo and viewport.lo < viewport.hi then
-      if viewport.hi == #tabs_cache then
-        indicators = viewport.truncate_left_width + viewport.truncate_right_width
-      end
-      viewport.lo = viewport.index
-      viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators)
-      if viewport.hi == #tabs_cache then
-        viewport.lo, left_remaining = compute_left_remain_from_end(width)
-      else
-        left_remaining = indicators
-        right_remaining = right_remaining + indicators
-        viewport.left_reserved = 0
-      end
-    elseif viewport.hi < #tabs_cache then
-      if viewport.index > viewport.hi then
-        viewport.hi = viewport.index
-      end
-      viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicators)
-      if viewport.lo == 1 then
-        viewport.hi, right_remaining = compute_right_remain_from_start(width)
-      else
-        left_remaining = left_remaining + indicators
-        right_remaining = indicators
-        viewport.right_reserved = 0
-      end
-    end
+    local indicators = viewport.truncate_left_width + viewport.truncate_right_width
+    local reserved = viewport.right_reserved > 0 and viewport.right_reserved or indicators
+    viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - reserved)
+    make_prefix(left_remaining, 0)
+    make_postfix(viewport.right_reserved, indicators)
+    return
   end
 
   gen_prefix_postfix(left_remaining, right_remaining)
