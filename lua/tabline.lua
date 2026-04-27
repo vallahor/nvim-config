@@ -958,13 +958,13 @@ local function remove_buf_from_tabline(bufnr)
     local bufs = nvim_list_bufs()
     for i = 1, #bufs do
       local buf = bufs[i]
-      if bufnr and bo[buf].buflisted and nvim_buf_is_valid(buf) and nvim_buf_get_name(buf) == "" then
+      if buf ~= bufnr and bo[buf].buflisted and nvim_buf_is_valid(buf) and nvim_buf_get_name(buf) == "" then
         replacement = buf
         break
       end
     end
     if not replacement then
-      replacement = nvim_create_buf(true, true)
+      replacement = nvim_create_buf(true, false)
     end
     nvim_set_current_buf(replacement)
   end
@@ -1357,11 +1357,11 @@ function I.GalfoRender()
       viewport.buf = -1
     end
 
-    if #tabs_cache == 0 then
-      init_bufs()
-    end
-
     local current_tab = tabs_cache[viewport.index]
+
+    if current_tab == nil then
+      return viewport.display
+    end
 
     if not sidebar.focus and current_tab.visibility ~= STATES.FOCUSED then
       current_tab.visibility = STATES.FOCUSED
@@ -1419,8 +1419,6 @@ function I.GalfoRender()
         local focused = buf == viewport.buf and STATES.FOCUSED or STATES.VISIBLE
         local state = bor(focused, current_tab.modified + current_tab.severity)
 
-        print(available, current_tab.width)
-
         local pad = string_rep(" ", math_max(0, available - current_tab.rendered[state].width))
         viewport.tab_shrink_str = current_tab.partial_left(available, focused) .. pad
       end
@@ -1455,6 +1453,7 @@ function I.GalfoRender()
     if sidebar.right then
       local pad = ""
       if not viewport_state.tab_shrink then
+        local indicators = 0
         if viewport.total_tabs_width > width then
           if viewport.lo == 1 then
             indicators = viewport.indicator_first_width + compute_right_indicator()
@@ -1776,21 +1775,41 @@ function Galfo.focus_by_index(index)
   nvim_set_current_buf(buf_cache[index])
 end
 
+function Galfo.execute_buf_queue()
+  if #I.buf_queue == 0 then
+    return
+  end
+  local queue = I.buf_queue
+  I.buf_queue = {}
+  for i = 1, #queue do
+    ---@type integer
+    local buf = queue[i]
+    if
+      not nvim_buf_is_valid(buf)
+      or not bo[buf].buflisted
+      or buf_index[buf]
+      or I.ignore.buftypes[bo[buf].buftype]
+      or I.ignore.filetypes[bo[buf].filetype]
+      or I.ignore.bufnames[nvim_buf_get_name(buf)]
+    then
+      goto continue
+    end
+    insert_buf_into_tabline(buf)
+    ::continue::
+    nvim_set_current_buf(viewport.buf)
+    redrawtabline()
+  end
+end
+
 local function setup_autocmds()
-  api.nvim_create_autocmd("BufReadPost", {
+  api.nvim_create_autocmd({ "BufWinEnter" }, {
     callback = function(ev)
       local buf = ev.buf
-      if
-        not nvim_buf_is_valid(buf)
-        or not bo[buf].buflisted
-        or buf_index[buf]
-        or I.ignore.buftypes[bo[buf].buftype]
-        or I.ignore.filetypes[bo[buf].filetype]
-        or I.ignore.bufnames[nvim_buf_get_name(buf)]
-      then
+      if not nvim_buf_is_valid(buf) or not bo[buf].buflisted or buf_index[buf] then
         return
       end
-      insert_buf_into_tabline(buf)
+      I.buf_queue[#I.buf_queue + 1] = buf
+      vim.schedule(Galfo.execute_buf_queue)
     end,
   })
 
@@ -1806,9 +1825,9 @@ local function setup_autocmds()
       else
         sidebar.focus = false
         local index = buf_index[buf]
-        if not index then
-          return
-        end
+        -- if not index then
+        --   return
+        -- end
 
         viewport.buf = buf
         viewport.index = index
@@ -1834,11 +1853,13 @@ local function setup_autocmds()
         return
       end
 
-      tab.visibility = STATES.VISIBLE
+      if tab.visibility ~= STATES.VISIBLE then
+        tab.visibility = STATES.VISIBLE
 
-      if tab.set_new_display() then
-        if viewport.lo <= index and index <= viewport.hi then
-          viewport_state.tab_width_changed = true
+        if tab.set_new_display() then
+          if viewport.lo <= index and index <= viewport.hi then
+            viewport_state.tab_width_changed = true
+          end
         end
       end
     end,
@@ -2296,7 +2317,9 @@ function Galfo.setup(opts)
 end
 
 local function aeho()
-  --
+  local tab = tabs_cache[viewport.index]
+  print(tab.display)
+  print(tab.set_new_display())
 end
 
 api.nvim_create_user_command("Aeho", aeho, {})
