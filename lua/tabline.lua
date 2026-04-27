@@ -2038,7 +2038,6 @@ local function restore_layout(layout, bufs_by_path)
     local win = nvim_get_current_win()
     if node.type == "leaf" then
       local buf = bufs_by_path[node.path]
-      print(buf, node.path)
       if buf then
         nvim_win_set_buf(win, buf)
         if node.cursor then
@@ -2110,6 +2109,11 @@ end
 function Galfo.restore_session(state)
   if not state then
     return
+  end
+
+  if sidebar.focus then
+    vim.cmd.wincmd("p")
+    vim.cmd.only()
   end
 
   vim.uv.chdir(state.cwd)
