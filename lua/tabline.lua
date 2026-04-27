@@ -966,6 +966,8 @@ local function remove_buf_from_tabline(bufnr)
     if not replacement then
       replacement = nvim_create_buf(true, false)
     end
+
+    -- force BufEnter to the BufLeave be triggered.
     nvim_set_current_buf(replacement)
   end
 
