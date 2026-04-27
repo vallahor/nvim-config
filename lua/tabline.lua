@@ -966,9 +966,6 @@ local function remove_buf_from_tabline(bufnr)
     if not replacement then
       replacement = nvim_create_buf(true, false)
     end
-
-    -- force BufEnter to the BufLeave be triggered.
-    nvim_set_current_buf(replacement)
   end
 
   local wins = win_findbuf(bufnr)
@@ -979,6 +976,8 @@ local function remove_buf_from_tabline(bufnr)
     I.on_buf_replaced(cur_win, win)
   end
   update_buf_index()
+
+  nvim_set_current_buf(replacement)
 
   if I.dynamic.index then
     for i = index, #tabs_cache do
@@ -1290,6 +1289,11 @@ local function handle_tab_width_change(width)
     elseif viewport.hi == #tabs_cache then
       viewport.lo, left_remaining = compute_left_remain_from_end(width)
     elseif partial_deleted then
+      -- @check:
+      -- part of the issue is here
+      -- first .. it loses current_tab when in the edge and not recalculate the viewport
+      -- another thing is that when in #tabs_cache .. its not updating correctly
+      -- but if something triggers the update .. it update correctly.
       local indicators = viewport.truncate_left_width + viewport.truncate_right_width
       viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators)
       if viewport.hi == #tabs_cache then
@@ -2333,8 +2337,8 @@ end
 
 local function aeho()
   local tab = tabs_cache[viewport.index]
-  print(tab.display)
-  print(tab.set_new_display())
+  print(viewport.index)
+  -- print(tab.set_new_display())
 end
 
 api.nvim_create_user_command("Aeho", aeho, {})
