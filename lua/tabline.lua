@@ -1796,9 +1796,9 @@ function Galfo.execute_buf_queue()
     end
     insert_buf_into_tabline(buf)
     ::continue::
-    nvim_set_current_buf(viewport.buf)
-    redrawtabline()
   end
+  nvim_set_current_buf(viewport.buf)
+  redrawtabline()
 end
 
 local function setup_autocmds()
