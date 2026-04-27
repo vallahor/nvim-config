@@ -1087,6 +1087,40 @@ local function render_sidebar()
   return sidebar_width + sidebar.separator_width
 end
 
+local function make_prefix(left_remaining, indicator)
+  if viewport.lo > 1 then
+    viewport.prefix = viewport.truncate_left
+    if left_remaining > 0 then
+      local size = left_remaining - indicator
+      if size > 0 then
+        viewport.prefix = viewport.prefix .. tabs_cache[viewport.lo - 1].partial_left(size)
+      end
+    end
+    viewport.left_reserved = left_remaining
+  else
+    viewport.prefix = viewport.indicator_first
+    viewport.left_reserved = 0
+  end
+end
+
+local function make_postfix(right_remaining, indicator)
+  if viewport.hi < #tabs_cache then
+    viewport.postfix = viewport.truncate_right
+    if right_remaining > 0 then
+      local size = right_remaining - indicator
+      if size > 0 then
+        viewport.postfix = tabs_cache[viewport.hi + 1].partial_right(size) .. viewport.postfix
+      elseif size < 0 then
+        viewport.postfix = "%#TablineFill#" .. string_rep(" ", right_remaining) .. viewport.postfix
+      end
+    end
+    viewport.right_reserved = right_remaining
+  else
+    viewport.postfix = viewport.indicator_last
+    viewport.right_reserved = 0
+  end
+end
+
 local function get_viewport_hi(index, width)
   local w = tabs_cache[index].width
   local hi = index
@@ -1113,42 +1147,6 @@ local function get_viewport_lo(index, width)
     lo = pos
   end
   return lo, width - w
-end
-
-local function make_prefix(left_remaining, indicator)
-  if viewport.lo > 1 then
-    viewport.prefix = viewport.truncate_left
-    if left_remaining > 0 then
-      local size = left_remaining - indicator
-      if size > 0 then
-        viewport.prefix = viewport.prefix .. tabs_cache[viewport.lo - 1].partial_left(size)
-        -- else
-        --   viewport.prefix = viewport.prefix .. string_rep(" ", left_remaining)
-      end
-    end
-    viewport.left_reserved = left_remaining
-  else
-    viewport.prefix = viewport.indicator_first
-    viewport.left_reserved = 0
-  end
-end
-
-local function make_postfix(right_remaining, indicator)
-  if viewport.hi < #tabs_cache then
-    viewport.postfix = viewport.truncate_right
-    if right_remaining > 0 then
-      local size = right_remaining - indicator
-      if size > 0 then
-        viewport.postfix = tabs_cache[viewport.hi + 1].partial_right(size) .. viewport.postfix
-      elseif size < 0 then
-        viewport.postfix = "%#TablineFill#" .. string_rep(" ", right_remaining) .. viewport.postfix
-      end
-    end
-    viewport.right_reserved = right_remaining
-  else
-    viewport.postfix = viewport.indicator_last
-    viewport.right_reserved = 0
-  end
 end
 
 local function compute_left_indicator()
@@ -1220,7 +1218,7 @@ local function handle_index_after(width)
   gen_prefix_postfix(left_remaining, right_remaining)
 end
 
-local function handle_width_change(width)
+local function handle_size_change(width)
   viewport_state.size_changed = false
   local left_remaining = 0
   local right_remaining = 0
@@ -1289,11 +1287,6 @@ local function handle_tab_width_change(width)
     elseif viewport.hi == #tabs_cache then
       viewport.lo, left_remaining = compute_left_remain_from_end(width)
     elseif partial_deleted then
-      -- @check:
-      -- part of the issue is here
-      -- first .. it loses current_tab when in the edge and not recalculate the viewport
-      -- another thing is that when in #tabs_cache .. its not updating correctly
-      -- but if something triggers the update .. it update correctly.
       local indicators = viewport.truncate_left_width + viewport.truncate_right_width
       viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators)
       if viewport.hi == #tabs_cache then
@@ -1331,14 +1324,16 @@ end
 
 ---@param width integer
 local function calc_truncated_tabs(width)
+  if viewport_state.size_changed then
+    handle_size_change(width)
+  elseif viewport_state.tab_width_changed then
+    handle_tab_width_change(width)
+  end
+
   if viewport.index > viewport.hi then
     handle_index_after(width)
   elseif viewport.index < viewport.lo then
     handle_index_before(width)
-  elseif viewport_state.size_changed then
-    handle_width_change(width)
-  elseif viewport_state.tab_width_changed then
-    handle_tab_width_change(width)
   else
     if viewport_state.partial_left_redraw then
       make_prefix(viewport.left_reserved, 0)
@@ -1348,6 +1343,7 @@ local function calc_truncated_tabs(width)
       make_postfix(viewport.right_reserved, 0)
       viewport_state.partial_right_redraw = false
     end
+    return
   end
 end
 
