@@ -966,7 +966,7 @@ local function remove_buf_from_tabline(bufnr)
     if not replacement then
       replacement = nvim_create_buf(true, false)
     end
-    nvim_set_current_buf(replacement)
+    -- nvim_set_current_buf(replacement)
   end
 
   local wins = win_findbuf(bufnr)
@@ -1807,8 +1807,12 @@ local function setup_autocmds()
       if not nvim_buf_is_valid(buf) or not bo[buf].buflisted or buf_index[buf] then
         return
       end
-      I.buf_queue[#I.buf_queue + 1] = buf
-      vim.schedule(Galfo.execute_buf_queue)
+      if I.restoring_session then
+        insert_buf_into_tabline(buf)
+      else
+        I.buf_queue[#I.buf_queue + 1] = buf
+        vim.schedule(Galfo.execute_buf_queue)
+      end
     end,
   })
 
@@ -2007,7 +2011,9 @@ end
 
 local function save_layout()
   local win_bufs = {}
-  for _, win in ipairs(api.nvim_list_wins()) do
+  local wins = api.nvim_list_wins()
+  for i = 1, #wins do
+    local win = wins[i]
     local buf = api.nvim_win_get_buf(win)
     local ft = bo[buf].filetype
     local bt = bo[buf].buftype
@@ -2028,7 +2034,8 @@ local function save_layout()
       return { type = "leaf", path = data.path, cursor = data.cursor }
     end
     local children = {}
-    for _, child in ipairs(node[2]) do
+    for i = 1, #node[2] do
+      local child = node[2][i]
       local serialized = serialize(child)
       if serialized then
         children[#children + 1] = serialized
@@ -2065,7 +2072,8 @@ local function restore_layout(layout, bufs_by_path)
         end
       end
     elseif node.type == "row" then
-      for i, child in ipairs(node.children) do
+      for i = 1, #node.children do
+        local child = node.children[i]
         if i > 1 then
           vim.cmd("vsplit")
           vim.cmd(#node.children - i + 1 .. "wincmd l")
@@ -2074,7 +2082,8 @@ local function restore_layout(layout, bufs_by_path)
       end
       vim.cmd("1wincmd h")
     elseif node.type == "col" then
-      for i, child in ipairs(node.children) do
+      for i = 1, #node.children do
+        local child = node.children[i]
         if i > 1 then
           vim.cmd("split")
           vim.cmd(#node.children - i + 1 .. "wincmd j")
@@ -2133,6 +2142,7 @@ function Galfo.restore_session(state)
   if not state then
     return
   end
+  I.restoring_session = true
 
   if sidebar.focus then
     vim.cmd.wincmd("p")
@@ -2153,7 +2163,8 @@ function Galfo.restore_session(state)
   local bufs_by_path = {}
   local target_buf = nil
 
-  for i, path in ipairs(state.tabs) do
+  for i = 1, #state.tabs do
+    local path = state.tabs[i]
     if vim.uv.fs_stat(path) then
       local buf = fn.bufadd(path)
       fn.bufload(buf)
@@ -2179,7 +2190,9 @@ function Galfo.restore_session(state)
   init_bufs(bufs)
   restore_layout(state.layout, bufs_by_path)
 
-  for _, win in ipairs(api.nvim_list_wins()) do
+  local wins = api.nvim_list_wins()
+  for i = 1, #wins do
+    local win = wins[i]
     if api.nvim_win_get_buf(win) == target_buf then
       api.nvim_set_current_win(win)
       pcall(api.nvim_win_set_cursor, win, state.cursor)
@@ -2189,6 +2202,9 @@ function Galfo.restore_session(state)
 
   api.nvim_exec_autocmds("BufEnter", { buffer = target_buf })
   viewport_state.tab_width_changed = true
+
+  I.restoring_session = false
+  I.buf_queue = {}
 
   return missing
 end
@@ -2297,6 +2313,7 @@ function Galfo.setup(opts)
   viewport.sidebar_width = render_sidebar()
   viewport.width = vim.o.columns
 
+  I.restoring_session = false
   I.buf_queue = {}
 
   I.dynamic = {
