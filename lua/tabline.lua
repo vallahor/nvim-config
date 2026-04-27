@@ -23,7 +23,6 @@ local table_remove = table.remove
 local fnamemodify = fn.fnamemodify
 local strcharpart = fn.strcharpart
 local win_findbuf = fn.win_findbuf
-local fnameescape = fn.fnameescape
 local stdpath = fn.stdpath
 local json_encode = fn.json_encode
 local json_decode = fn.json_decode
@@ -243,11 +242,11 @@ local config = {
 ---@field partial_right_redraw boolean
 local viewport_state = {
   updated = true,
-  size_changed = true,
+  size_changed = false,
   should_not_focus = false,
   buf_deleted_partial = false,
   tab_width_changed = false,
-  simple_redraw = true,
+  simple_redraw = false,
   tab_shrink = false,
   partial_left_redraw = false,
   partial_right_redraw = false,
@@ -918,6 +917,16 @@ local function insert_buf_into_tabline(buf)
   update_buf_index()
 end
 
+local function init_bufs(bufs)
+  bufs = bufs or nvim_list_bufs()
+  for i = 1, #bufs do
+    local buf = bufs[i]
+    if bo[buf].buflisted and nvim_buf_is_valid(buf) and not buf_index[buf] then
+      insert_buf_into_tabline(buf)
+    end
+  end
+end
+
 local function remove_buf_from_tabline(bufnr)
   local index = buf_index[bufnr]
   if not index then
@@ -934,32 +943,34 @@ local function remove_buf_from_tabline(bufnr)
   table_remove(tabs_cache, index)
   table_remove(buf_cache, index)
 
+  buf_index[bufnr] = nil
   diag_cache[bufnr] = nil
+  tabs_pin_cache[bufnr] = nil
   click_tab_handlers[bufnr] = nil
   click_components_handlers[bufnr] = nil
 
   viewport_state.tab_width_changed = true
   viewport_state.buf_deleted_partial = index == viewport.lo - 1
 
-  ---@type integer?
+  ---@type integer
   local replacement = buf_cache[index] or buf_cache[index - 1]
   if not replacement then
-    -- @check: back to close splits when no other buf
     local bufs = nvim_list_bufs()
     for i = 1, #bufs do
       local buf = bufs[i]
-      if bo[buf].buflisted and nvim_buf_is_valid(buf) and nvim_buf_get_name(buf) == "" then
+      if bufnr and bo[buf].buflisted and nvim_buf_is_valid(buf) and nvim_buf_get_name(buf) == "" then
         replacement = buf
         break
       end
     end
     if not replacement then
-      replacement = nvim_create_buf(true, false)
+      replacement = nvim_create_buf(true, true)
     end
+    nvim_set_current_buf(replacement)
   end
 
-  local cur_win = nvim_get_current_win()
   local wins = win_findbuf(bufnr)
+  local cur_win = nvim_get_current_win()
   for i = 1, #wins do
     local win = wins[i]
     nvim_win_set_buf(win, replacement)
@@ -971,16 +982,6 @@ local function remove_buf_from_tabline(bufnr)
     for i = index, #tabs_cache do
       tabs_cache[i].rerender()
       tabs_cache[i].set_new_display()
-    end
-  end
-end
-
-local function init_bufs(bufs)
-  bufs = bufs or nvim_list_bufs()
-  for i = 1, #bufs do
-    local buf = bufs[i]
-    if bo[buf].buflisted and nvim_buf_is_valid(buf) and not buf_index[buf] then
-      insert_buf_into_tabline(buf)
     end
   end
 end
@@ -1356,13 +1357,11 @@ function I.GalfoRender()
       viewport.buf = -1
     end
 
-    local current_tab = tabs_cache[viewport.index]
-
-    if current_tab == nil then
+    if #tabs_cache == 0 then
       init_bufs()
-      viewport.index = buf_index[viewport.buf]
-      current_tab = tabs_cache[viewport.index]
     end
+
+    local current_tab = tabs_cache[viewport.index]
 
     if not sidebar.focus and current_tab.visibility ~= STATES.FOCUSED then
       current_tab.visibility = STATES.FOCUSED
@@ -2295,5 +2294,11 @@ function Galfo.setup(opts)
     I.on_buf_replaced = opts.on_buf_replaced
   end
 end
+
+local function aeho()
+  --
+end
+
+api.nvim_create_user_command("Aeho", aeho, {})
 
 return Galfo
