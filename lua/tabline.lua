@@ -1265,20 +1265,19 @@ local function handle_tab_width_change(width)
     viewport.lo, left_remaining = compute_left_remain_from_end(width)
   else
     local indicators = viewport.truncate_left_width + viewport.truncate_right_width
-    if viewport.index == viewport.hi then
-      if viewport.right_reserved == 0 then
-        viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicators)
-        make_prefix(left_remaining, 0)
-        return
-      end
+    if viewport.index == viewport.hi and viewport.right_reserved == 0 then
+      viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicators)
+      make_prefix(left_remaining, 0)
+      return
     end
     local reserved = viewport.left_reserved > 0 and viewport.left_reserved or indicators
-    viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - reserved)
+    local extra = viewport.left_reserved > 0 and indicators or 0
+    viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - reserved - extra)
     if viewport.hi == #tabs_cache then
       viewport.lo, left_remaining = compute_left_remain_from_end(width)
       right_remaining = 0
     else
-      make_prefix(viewport.left_reserved, indicators)
+      make_prefix(viewport.left_reserved, 0)
       make_postfix(right_remaining, 0)
       return
     end
