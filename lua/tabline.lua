@@ -2077,8 +2077,13 @@ local function session_json_path(path)
   if path then
     return path
   end
-  local cwd = vim.uv.cwd()
-  local name = string_gsub(cwd, "[/\\:]", "%%")
+  local cwd = vim.uv.cwd() or fn.getcwd()
+  local name
+  if IS_WINDOWS then
+    name = string_gsub(cwd, "[/\\:]", "%%")
+  else
+    name = string_gsub(cwd, "/", "%%")
+  end
   local dir = stdpath("data") .. "/galfo"
   mkdir(dir, "p")
   return dir .. "/" .. name .. ".json"
