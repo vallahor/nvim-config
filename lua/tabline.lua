@@ -1825,9 +1825,6 @@ local function setup_autocmds()
       else
         sidebar.focus = false
         local index = buf_index[buf]
-        -- if not index then
-        --   return
-        -- end
 
         viewport.buf = buf
         viewport.index = index
