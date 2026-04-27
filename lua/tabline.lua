@@ -11,6 +11,7 @@ local string_gsub = string.gsub
 local string_match = string.match
 local string_format = string.format
 
+local math_min = math.min
 local math_max = math.max
 local math_ceil = math.ceil
 local math_floor = math.floor
@@ -22,6 +23,11 @@ local table_remove = table.remove
 local fnamemodify = fn.fnamemodify
 local strcharpart = fn.strcharpart
 local win_findbuf = fn.win_findbuf
+local fnameescape = fn.fnameescape
+local stdpath = fn.stdpath
+local json_encode = fn.json_encode
+local json_decode = fn.json_decode
+local mkdir = fn.mkdir
 
 local nvim_strwidth = api.nvim_strwidth
 local nvim_buf_get_name = api.nvim_buf_get_name
@@ -194,7 +200,7 @@ local config = {
     label = "Explorer",
     label_position = "mid", -- "start"|"mid"|"end"
     separator = "│",
-    filetypes = { "NvimTree", "neo-tree" }, -- Default with ["NvimTree", "neo-tree"]
+    filetypes = { "NvimTree", "neo-tree", "aerial" }, -- Default with ["NvimTree", "neo-tree", "aerial"]
     highlights = {
       label = { focused = "TablineFocused", visible = "TablineVisible" },
       sep = "TablineVisible",
@@ -1981,83 +1987,202 @@ _G.TabOnClick = function(bufnr, clicks, button, mods)
   end
 end
 
-local session = nil
-
-function Galfo.save_session()
-  local state = {}
-  state.viewport = {}
-  state.tabs = {}
-
-  state.viewport.index = viewport.index
-  state.viewport.lo = viewport.lo
-  state.viewport.hi = viewport.hi
-
-  for i = 1, #buf_cache do
-    local buf = buf_cache[i]
-    state.tabs[#state.tabs + 1] = {
-      path = nvim_buf_get_name(buf),
-      is_pinned = tabs_pin_cache[buf],
-    }
+local function save_layout()
+  local win_bufs = {}
+  for _, win in ipairs(api.nvim_list_wins()) do
+    local buf = api.nvim_win_get_buf(win)
+    local ft = bo[buf].filetype
+    local bt = bo[buf].buftype
+    if bt == "" and not sidebar_filetypes[ft] then
+      win_bufs[win] = {
+        path = nvim_buf_get_name(buf),
+        cursor = api.nvim_win_get_cursor(win),
+      }
+    end
   end
 
-  local win = nvim_get_current_win()
-  session = {
-    viewport = state.viewport,
-    tabs = state.tabs,
-    cwd = vim.uv.cwd(),
-    cursor = api.nvim_win_get_cursor(win),
+  local function serialize(node)
+    if node[1] == "leaf" then
+      local data = win_bufs[node[2]]
+      if not data then
+        return nil
+      end
+      return { type = "leaf", path = data.path, cursor = data.cursor }
+    end
+    local children = {}
+    for _, child in ipairs(node[2]) do
+      local serialized = serialize(child)
+      if serialized then
+        children[#children + 1] = serialized
+      end
+    end
+    if #children == 0 then
+      return nil
+    end
+    return { type = node[1], children = children }
+  end
+
+  return {
+    tree = serialize(fn.winlayout()),
+    sizes = fn.winrestcmd(),
   }
 end
 
-function Galfo.load_session()
-  if session == nil then
+local function restore_layout(layout, bufs_by_path)
+  local wins = api.nvim_list_wins()
+  for i = 2, #wins do
+    pcall(api.nvim_win_close, wins[i], true)
+  end
+
+  local function build(node)
+    local win = nvim_get_current_win()
+    if node.type == "leaf" then
+      local buf = bufs_by_path[node.path]
+      print(buf, node.path)
+      if buf then
+        nvim_win_set_buf(win, buf)
+        if node.cursor then
+          local line_count = api.nvim_buf_line_count(buf)
+          local row = math_min(node.cursor[1], line_count)
+          pcall(api.nvim_win_set_cursor, win, { row, node.cursor[2] })
+        end
+      end
+    elseif node.type == "row" then
+      for i, child in ipairs(node.children) do
+        if i > 1 then
+          vim.cmd("vsplit")
+          vim.cmd(#node.children - i + 1 .. "wincmd l")
+        end
+        build(child)
+      end
+      vim.cmd("1wincmd h")
+    elseif node.type == "col" then
+      for i, child in ipairs(node.children) do
+        if i > 1 then
+          vim.cmd("split")
+          vim.cmd(#node.children - i + 1 .. "wincmd j")
+        end
+        build(child)
+      end
+      vim.cmd("1wincmd k")
+    end
+  end
+
+  build(layout.tree)
+  pcall(vim.cmd, layout.sizes)
+end
+
+local function session_json_path(path)
+  if path then
+    return path
+  end
+  local cwd = vim.uv.cwd()
+  local name = string_gsub(cwd, "[/\\:]", "%%")
+  local dir = stdpath("data") .. "/galfo"
+  mkdir(dir, "p")
+  return dir .. "/" .. name .. ".json"
+end
+
+function Galfo.capture_session()
+  local pins = {}
+  local tabs = {}
+  for i = 1, #buf_cache do
+    local buf = buf_cache[i]
+    local name = nvim_buf_get_name(buf)
+    tabs[#tabs + 1] = name
+    if tabs_pin_cache[buf] then
+      pins[name] = true
+    end
+  end
+
+  return {
+    lo = viewport.lo,
+    hi = viewport.hi,
+    index = viewport.index,
+    pins = pins,
+    layout = save_layout(),
+    tabs = tabs,
+    cwd = vim.uv.cwd(),
+    cursor = api.nvim_win_get_cursor(nvim_get_current_win()),
+  }
+end
+
+function Galfo.restore_session(state)
+  if not state then
     return
   end
 
-  vim.uv.chdir(session.cwd)
+  vim.uv.chdir(state.cwd)
 
   tabs_pin_cache = {}
   Galfo.close_all_tabs(false)
 
-  viewport.index = session.viewport.index
-  viewport.lo = session.viewport.lo
-  viewport.hi = session.viewport.hi
+  viewport.lo = state.lo
+  viewport.hi = state.hi
+  viewport.index = state.index
 
   local missing = {}
   local bufs = {}
+  local bufs_by_path = {}
   local target_buf = nil
-  for i = 1, #session.tabs do
-    local tab = session.tabs[i]
-    if vim.uv.fs_stat(tab.path) then
-      local buf = fn.bufadd(tab.path)
+
+  for i, path in ipairs(state.tabs) do
+    if vim.uv.fs_stat(path) then
+      local buf = fn.bufadd(path)
       fn.bufload(buf)
       bo[buf].buflisted = true
-      tabs_pin_cache[buf] = tab.is_pinned
+      tabs_pin_cache[buf] = state.pins[path] or nil
       bufs[#bufs + 1] = buf
-      if i == viewport.index then
+      bufs_by_path[path] = buf
+      if i == state.index then
         target_buf = buf
       end
     else
-      viewport.index = viewport.index + 1
-      missing[#missing + 1] = tab.path
+      if i == viewport.index then
+        viewport.index = viewport.index + 1
+      end
+      missing[#missing + 1] = path
     end
   end
 
-  init_bufs(bufs)
-
-  if target_buf == nil then
-    target_buf = bufs[#bufs]
+  if not target_buf then
+    target_buf = bufs[math_min(viewport.index, #bufs)]
   end
 
-  nvim_set_current_buf(target_buf)
-  api.nvim_win_set_cursor(0, session.cursor)
+  init_bufs(bufs)
+  restore_layout(state.layout, bufs_by_path)
 
+  for _, win in ipairs(api.nvim_list_wins()) do
+    if api.nvim_win_get_buf(win) == target_buf then
+      api.nvim_set_current_win(win)
+      pcall(api.nvim_win_set_cursor, win, state.cursor)
+      break
+    end
+  end
+
+  api.nvim_exec_autocmds("BufEnter", { buffer = target_buf })
   viewport_state.tab_width_changed = true
 
-  --@check: find a way to customize this. supress and other stuff
-  if #missing > 0 then
-    vim.notify("Session: missing files\n" .. table_concat(missing, "\n"), vim.log.levels.WARN)
+  return missing
+end
+
+function Galfo.save_session(path)
+  local state = Galfo.capture_session()
+  local f = io.open(session_json_path(path), "w")
+  if f then
+    f:write(json_encode(state))
+    f:close()
   end
+end
+
+function Galfo.load_session(path)
+  local f = io.open(session_json_path(path), "r")
+  if not f then
+    return
+  end
+  local state = json_decode(f:read("*a"))
+  f:close()
+  return Galfo.restore_session(state)
 end
 
 function Galfo.setup(opts)

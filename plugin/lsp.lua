@@ -48,12 +48,12 @@ vim.api.nvim_create_autocmd("LspAttach", {
     vim.keymap.set("n", "&", vim.diagnostic.open_float, opts)
     vim.keymap.set("n", "<f2>", vim.lsp.buf.rename, opts)
 
-    local client = vim.lsp.get_client_by_id(args.data.client_id)
-    if client and client:supports_method("textDocument/diagnostic") then
-      client:request("textDocument/diagnostic", {
-        textDocument = { uri = vim.uri_from_bufnr(bufnr) },
-      }, nil, bufnr)
-    end
+    -- local client = vim.lsp.get_client_by_id(args.data.client_id)
+    -- if client and client:supports_method("textDocument/diagnostic") then
+    --   client:request("textDocument/diagnostic", {
+    --     textDocument = { uri = vim.uri_from_bufnr(bufnr) },
+    --   }, nil, bufnr)
+    -- end
   end,
 })
 
