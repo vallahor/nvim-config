@@ -966,7 +966,7 @@ local function remove_buf_from_tabline(bufnr)
     if not replacement then
       replacement = nvim_create_buf(true, false)
     end
-    -- nvim_set_current_buf(replacement)
+    nvim_set_current_buf(replacement)
   end
 
   local wins = win_findbuf(bufnr)
