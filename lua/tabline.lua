@@ -1396,7 +1396,7 @@ function I.GalfoRender()
         viewport.right_reserved = 0
       end
 
-      viewport_state.tab_shrink = current_tab and current_tab.width > width - indicators
+      viewport_state.tab_shrink = current_tab.width > width - indicators
 
       if viewport_state.tab_shrink then
         local available = width
@@ -1413,12 +1413,14 @@ function I.GalfoRender()
         else
           viewport.prefix = viewport.truncate_left
           viewport.postfix = viewport.truncate_right
-          available = width - indicators
+          available = available - viewport.truncate_left_width - viewport.truncate_right_width
         end
 
         local buf = buf_cache[viewport.index]
         local focused = buf == viewport.buf and STATES.FOCUSED or STATES.VISIBLE
         local state = bor(focused, current_tab.modified + current_tab.severity)
+
+        print(available, current_tab.width)
 
         local pad = string_rep(" ", math_max(0, available - current_tab.rendered[state].width))
         viewport.tab_shrink_str = current_tab.partial_left(available, focused) .. pad
