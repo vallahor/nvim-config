@@ -715,8 +715,12 @@ vim.api.nvim_create_autocmd("VimEnter", {
         {
           text = function(tab)
             -- tab.unique_prefix:gsub("/", "\\") -- windows way
-            return tab.unique_prefix .. tab.name
-            -- return tab.index .. ": " .. tab.unique_prefix .. tab.name
+            -- return tab.unique_prefix .. tab.name
+            return tab.index
+              .. ": "
+              .. tab.unique_prefix
+              .. tab.name
+              .. (tab.is_modified and string.rep(" ", #tab.name) or "")
             -- .. (tab.is_focused and string.rep(" ", #tab.name) or "")
             -- .. (not tab.is_focused and "               " or "")
             -- return tab.unique_prefix .. tab.name

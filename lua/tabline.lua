@@ -966,6 +966,8 @@ local function remove_buf_from_tabline(bufnr)
     if not replacement then
       replacement = nvim_create_buf(true, false)
     end
+
+    nvim_set_current_buf(replacement)
   end
 
   local wins = win_findbuf(bufnr)
@@ -976,8 +978,6 @@ local function remove_buf_from_tabline(bufnr)
     I.on_buf_replaced(cur_win, win)
   end
   update_buf_index()
-
-  nvim_set_current_buf(replacement)
 
   if I.dynamic.index then
     for i = index, #tabs_cache do
@@ -1243,53 +1243,44 @@ local function handle_tab_width_change(width)
   local right_remaining = 0
   viewport_state.tab_width_changed = false
 
-  local partial_deleted = viewport_state.buf_deleted_partial
-  if partial_deleted then
+  if viewport_state.buf_deleted_partial then
     viewport_state.buf_deleted_partial = false
+    local indicators = viewport.truncate_left_width + viewport.truncate_right_width
     viewport.lo = math_max(1, viewport.lo - 1)
+    viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators)
+    right_remaining = right_remaining + indicators
+    left_remaining = indicators
+    viewport.left_reserved = 0
   end
 
-  if viewport.index == 1 then
-    viewport.lo = viewport.index
+  -- if viewport.index == 1 then
+  --   viewport.lo = viewport.index
+  -- elseif viewport.index == #tabs_cache then
+  --   viewport.hi = viewport.index
+  -- end
+
+  if viewport.lo == 1 then
     viewport.hi, right_remaining = compute_right_remain_from_start(width)
-  elseif viewport.index == #tabs_cache then
-    viewport.hi = viewport.index
+  elseif viewport.hi == #tabs_cache then
     viewport.lo, left_remaining = compute_left_remain_from_end(width)
   else
-    if viewport.lo == 1 then
-      viewport.hi, right_remaining = compute_right_remain_from_start(width)
-    elseif viewport.hi == #tabs_cache then
-      viewport.lo, left_remaining = compute_left_remain_from_end(width)
-    elseif partial_deleted then
-      local indicators = viewport.truncate_left_width + viewport.truncate_right_width
-      viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators)
-      if viewport.hi == #tabs_cache then
-        viewport.lo, left_remaining = compute_left_remain_from_end(width)
-        right_remaining = 0
-      else
-        right_remaining = right_remaining + indicators
-        left_remaining = indicators
-        viewport.left_reserved = 0
-      end
-    else
-      local indicators = viewport.truncate_left_width + viewport.truncate_right_width
-      if viewport.index == viewport.hi then
-        if viewport.right_reserved == 0 then
-          viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicators)
-          make_prefix(left_remaining, 0)
-          return
-        end
-      end
-      local reserved = viewport.left_reserved > 0 and viewport.left_reserved or indicators
-      viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - reserved)
-      if viewport.hi == #tabs_cache then
-        viewport.lo, left_remaining = compute_left_remain_from_end(width)
-        right_remaining = 0
-      else
-        make_prefix(viewport.left_reserved, indicators)
-        make_postfix(right_remaining, 0)
+    local indicators = viewport.truncate_left_width + viewport.truncate_right_width
+    if viewport.index == viewport.hi then
+      if viewport.right_reserved == 0 then
+        viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - indicators)
+        make_prefix(left_remaining, 0)
         return
       end
+    end
+    local reserved = viewport.left_reserved > 0 and viewport.left_reserved or indicators
+    viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - reserved)
+    if viewport.hi == #tabs_cache then
+      viewport.lo, left_remaining = compute_left_remain_from_end(width)
+      right_remaining = 0
+    else
+      make_prefix(viewport.left_reserved, indicators)
+      make_postfix(right_remaining, 0)
+      return
     end
   end
 
