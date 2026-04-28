@@ -52,115 +52,116 @@ vim.api.nvim_create_autocmd("VimEnter", {
       icons = {
         enabled = true,
       },
-      last_icon_blend = false,
+      last_icon_blend = true,
       -- dynamic = { diagnostics = true, focused = { diagnostics = false }, visible = { diagnostics = true } },
       dynamic = { index = false, diagnostics = false },
-      -- tabs = {
-      --   {
-      --     -- static = " ",
-      --     static = " ",
-      --     highlights = {
-      --       visible = { default = visible_separator, modified = visible_separator },
-      --       -- visible = { default = focused_diag_warn, modified = focused_diag_warn },
-      --       focused = { default = focused_separator, modified = focused_separator },
-      --     },
-      --   },
-      --   {
-      --     icon = function(icon, _tab)
-      --       return _tab.is_pinned and "󰐃" or icon
-      --       -- return icon
-      --     end,
-      --     on_click = function(buf)
-      --       galfo.toggle_pin(buf)
-      --     end,
-      --     -- highlights = {
-      --     --   focused = { default = focused_diag_error, modified = focused_diag_mod_error },
-      --     --   visible = { default = visible_diag_error, modified = visible_diag_mod_error },
-      --     -- },
-      --   },
-      --   { static = " " },
-      --   {
-      --     text = function(tab)
-      --       -- tab.unique_prefix:gsub("/", "\\") -- windows way
-      --       return tab.unique_prefix .. tab.name
-      --       -- return tab.index
-      --       --   .. ": "
-      --       --   .. tab.unique_prefix
-      --       --   .. tab.name
-      --       --   .. (tab.is_modified and string.rep(" ", math.floor(#tab.name * 2)) or "")
-      --       -- .. (tab.is_focused and string.rep(" ", #tab.name) or "")
-      --       -- .. (not tab.is_focused and "               " or "")
-      --       -- return tab.unique_prefix .. tab.name
-      --     end,
-      --     highlights = {
-      --       diagnostics = {
-      --         error = {
-      --           focused = { default = focused_diag_error, modified = focused_diag_mod_error },
-      --           visible = { default = visible_diag_error, modified = visible_diag_mod_error },
-      --         },
-      --         warn = {
-      --           focused = { default = focused_diag_warn, modified = focused_diag_mod_warn },
-      --           visible = { default = visible_diag_warn, modified = visible_diag_mod_warn },
-      --         },
-      --       },
-      --     },
-      --   },
-      --   { static = " " },
-      --   -- {
-      --   --   text = function(info)
-      --   --     return info.diagnostics[vim.diagnostic.severity.ERROR]
-      --   --         and info.diagnostics[vim.diagnostic.severity.ERROR] .. " E"
-      --   --       or ""
-      --   --   end,
-      --   --   highlights = {
-      --   --     diagnostics = {
-      --   --       error = {
-      --   --         focused = { default = focused_diag_error, modified = focused_diag_mod_error },
-      --   --         visible = { default = visible_diag_error, modified = visible_diag_mod_error },
-      --   --       },
-      --   --     },
-      --   --   },
-      --   -- },
-      --   -- { static = " " },
-      --   -- {
-      --   --   text = function(info)
-      --   --     return info.diagnostics[vim.diagnostic.severity.WARN]
-      --   --         and info.diagnostics[vim.diagnostic.severity.WARN] .. " W"
-      --   --       or ""
-      --   --   end,
-      --   --   highlights = {
-      --   --     diagnostics = {
-      --   --       warn = {
-      --   --         focused = { default = focused_diag_warn, modified = focused_diag_mod_warn },
-      --   --         visible = { default = visible_diag_warn, modified = visible_diag_mod_warn },
-      --   --       },
-      --   --     },
-      --   --   },
-      --   -- },
-      --   -- { static = " " },
-      --   {
-      --     icon_custom = function()
-      --       return "󰅖"
-      --     end,
-      --     on_click = function(bufnr, clicks, button, mods)
-      --       galfo.close_tab(bufnr, false)
-      --     end,
-      --   },
-      --   {
-      --     static = " ",
-      --     -- static = " ",
-      --     -- text = function(tab)
-      --     --   return not tab.is_focused and " |" or " "
-      --     -- end,
-      --     highlights = {
-      --       visible = { default = visible_separator, modified = visible_separator },
-      --       -- visible = { default = focused_diag_warn, modified = focused_diag_warn },
-      --       focused = { default = focused_separator, modified = focused_separator },
-      --       -- visible = { default = visible_separator, modified = visible_separator },
-      --       -- focused = { default = focused_separator, modified = focused_separator },
-      --     },
-      --   },
-      -- },
+      tabs = {
+        {
+          -- static = " ",
+          static = " ",
+          highlights = {
+            visible = { default = visible_separator, modified = visible_separator },
+            -- visible = { default = focused_diag_warn, modified = focused_diag_warn },
+            focused = { default = focused_separator, modified = focused_separator },
+          },
+        },
+        {
+          icon = function(icon, _tab)
+            return _tab.is_pinned and "󰐃" or icon
+            -- return icon
+          end,
+          on_click = function(buf)
+            galfo.toggle_pin(buf)
+          end,
+          -- highlights = {
+          --   focused = { default = focused_diag_error, modified = focused_diag_mod_error },
+          --   visible = { default = visible_diag_error, modified = visible_diag_mod_error },
+          -- },
+        },
+        { static = " " },
+        {
+          text = function(tab)
+            -- tab.unique_prefix:gsub("/", "\\") -- windows way
+            return tab.unique_prefix .. tab.name
+            -- return tab.index
+            --   .. ": "
+            --   .. tab.unique_prefix
+            --   .. tab.name
+            -- .. (tab.is_modified and string.rep(" ", math.floor(#tab.name * 2)) or "")
+            -- .. (tab.is_focused and string.rep(" ", #tab.name) or "")
+            -- .. (not tab.is_focused and "               " or "")
+            -- return tab.unique_prefix .. tab.name
+          end,
+          highlights = {
+            diagnostics = {
+              error = {
+                focused = { default = focused_diag_error, modified = focused_diag_mod_error },
+                visible = { default = visible_diag_error, modified = visible_diag_mod_error },
+              },
+              warn = {
+                focused = { default = focused_diag_warn, modified = focused_diag_mod_warn },
+                visible = { default = visible_diag_warn, modified = visible_diag_mod_warn },
+              },
+            },
+          },
+        },
+        { static = " " },
+        -- {
+        --   text = function(info)
+        --     return info.diagnostics[vim.diagnostic.severity.ERROR]
+        --         and info.diagnostics[vim.diagnostic.severity.ERROR] .. " E"
+        --       or ""
+        --   end,
+        --   highlights = {
+        --     diagnostics = {
+        --       error = {
+        --         focused = { default = focused_diag_error, modified = focused_diag_mod_error },
+        --         visible = { default = visible_diag_error, modified = visible_diag_mod_error },
+        --       },
+        --     },
+        --   },
+        -- },
+        -- { static = " " },
+        -- {
+        --   text = function(info)
+        --     return info.diagnostics[vim.diagnostic.severity.WARN]
+        --         and info.diagnostics[vim.diagnostic.severity.WARN] .. " W"
+        --       or ""
+        --   end,
+        --   highlights = {
+        --     diagnostics = {
+        --       warn = {
+        --         focused = { default = focused_diag_warn, modified = focused_diag_mod_warn },
+        --         visible = { default = visible_diag_warn, modified = visible_diag_mod_warn },
+        --       },
+        --     },
+        --   },
+        -- },
+        -- { static = " " },
+        {
+          icon_custom = function()
+            return "󰅖"
+          end,
+          on_click = function(bufnr, clicks, button, mods)
+            galfo.close_tab(bufnr, false)
+          end,
+        },
+        {
+          static = " ",
+          -- static = "▕",
+          -- static = " ",
+          -- text = function(tab)
+          --   return not tab.is_focused and " |" or " "
+          -- end,
+          highlights = {
+            -- visible = { default = visible_separator, modified = visible_separator },
+            visible = { default = focused_diag_warn, modified = focused_diag_warn },
+            focused = { default = focused_separator, modified = focused_separator },
+            -- visible = { default = visible_separator, modified = visible_separator },
+            -- focused = { default = focused_separator, modified = focused_separator },
+          },
+        },
+      },
       on_buf_replaced = function(cur_win, win)
         local hl = cur_win == win and cursor_line_active or cursor_line_inactive
         vim.api.nvim_set_option_value("winhighlight", hl, { win = win })

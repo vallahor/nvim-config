@@ -754,3 +754,39 @@ end, { silent = true })
 vim.keymap.set("x", "<Up>", function()
   move_lines(move_direction_up)
 end, { silent = true })
+
+-- Terminal toggle with Ctrl+;
+local term_buf = nil
+local term_win = nil
+
+local function toggle_terminal()
+  -- If window is open, close it
+  if term_win and vim.api.nvim_win_is_valid(term_win) then
+    vim.api.nvim_win_close(term_win, false)
+    term_win = nil
+    return
+  end
+
+  -- Open a new split at the bottom
+  vim.cmd("botright 15split")
+  term_win = vim.api.nvim_get_current_win()
+
+  -- Reuse existing buffer or create a new terminal
+  if term_buf and vim.api.nvim_buf_is_valid(term_buf) then
+    vim.api.nvim_win_set_buf(term_win, term_buf)
+  else
+    vim.cmd("terminal")
+    term_buf = vim.api.nvim_get_current_buf()
+  end
+
+  vim.cmd("startinsert")
+end
+
+-- Map Ctrl+; in normal, terminal, and insert modes
+vim.keymap.set("n", "<C-;>", toggle_terminal, { desc = "Toggle terminal" })
+vim.keymap.set("t", "<C-;>", function()
+  vim.cmd("stopinsert")
+  toggle_terminal()
+end, { desc = "Toggle terminal" })
+vim.keymap.set("i", "<C-;>", toggle_terminal, { desc = "Toggle terminal" })
+vim.keymap.set("t", "<Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
