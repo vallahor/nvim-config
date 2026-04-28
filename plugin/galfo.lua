@@ -51,7 +51,6 @@ vim.api.nvim_create_autocmd("VimEnter", {
       },
       icons = {
         enabled = true,
-        provider = "nvim-web-devicons.aeho",
       },
       last_icon_blend = false,
       -- dynamic = { diagnostics = true, focused = { diagnostics = false }, visible = { diagnostics = true } },

@@ -504,8 +504,8 @@ local function update_visual_cursor(buf)
   visual_state[buf].visual_end = cursor_end
 end
 
-vim.pack.add({ "https://github.com/jake-stewart/multicursor.nvim" })
-local mc = require("multicursor-nvim")
+-- vim.pack.add({ "https://github.com/jake-stewart/multicursor.nvim" })
+-- local mc = require("multicursor-nvim")
 vim.api.nvim_create_autocmd("ModeChanged", {
   callback = function(ev)
     local m = vim.api.nvim_get_mode().mode
@@ -514,7 +514,7 @@ vim.api.nvim_create_autocmd("ModeChanged", {
 
     visual_state[ev.buf] = {
       in_visual = in_visual,
-      has_cursors = mc.hasCursors() and mc.cursorsEnabled(),
+      -- has_cursors = mc.hasCursors() and mc.cursorsEnabled(),
     }
 
     if in_visual then
