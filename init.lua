@@ -24,7 +24,6 @@ vim.opt.shortmess:append("aoOtTIcF")
 vim.opt.mouse = "a"
 vim.opt.mousefocus = true
 vim.opt.cursorline = true
-vim.opt.scrolloff = 3
 vim.opt.backup = false
 vim.opt.writebackup = false
 vim.opt.cindent = false -- check
@@ -37,6 +36,7 @@ vim.opt.history = 20
 -- vim.opt.timeout = false
 vim.opt.timeoutlen = 200
 vim.opt.autoread = true
+-- vim.opt.incsearch = false
 
 vim.wo.signcolumn = "no"
 vim.wo.relativenumber = true
@@ -498,13 +498,16 @@ vim.api.nvim_create_autocmd("ModeChanged", {
   callback = function(ev)
     local m = vim.api.nvim_get_mode().mode
     local in_visual = m == "v" or m == "V" or m == "\x16"
+    local was_visual = visual_state[ev.buf] and visual_state[ev.buf].in_visual
+
     visual_state[ev.buf] = {
       in_visual = in_visual,
       has_cursors = mc.hasCursors() and mc.cursorsEnabled(),
     }
+
     if in_visual then
       update_visual_cursor(ev.buf)
-    else
+    elseif was_visual then
       for _, w in ipairs(vim.fn.win_findbuf(ev.buf)) do
         vim.api.nvim__redraw({ win = w, statuscolumn = true })
       end
