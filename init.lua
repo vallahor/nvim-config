@@ -688,7 +688,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
       },
       last_icon_blend = false,
       -- dynamic = { diagnostics = true, focused = { diagnostics = false }, visible = { diagnostics = true } },
-      -- dynamic = { diagnostics = true },
+      dynamic = { index = false, diagnostics = false },
       tabs = {
         {
           static = " ",
@@ -797,16 +797,16 @@ vim.api.nvim_create_autocmd("VimEnter", {
     })
 
     local map = vim.keymap.set
-    -- map("n", "<home>", tabline.prev_tab_cycle, { silent = true })
-    -- map("n", "<end>", tabline.next_tab_cycle, { silent = true })
-    map("n", "<home>", tabline.prev_tab, { silent = true })
-    map("n", "<end>", tabline.next_tab, { silent = true })
+    map("n", "<home>", tabline.prev_tab_cycle, { silent = true })
+    map("n", "<end>", tabline.next_tab_cycle, { silent = true })
+    -- map("n", "<home>", tabline.prev_tab, { silent = true })
+    -- map("n", "<end>", tabline.next_tab, { silent = true })
     map("n", "<s-home>", tabline.move_to_begin, { silent = true })
     map("n", "<s-end>", tabline.move_to_end, { silent = true })
-    -- map("n", "<c-home>", tabline.move_tab_left_cycle, { silent = true })
-    -- map("n", "<c-end>", tabline.move_tab_right_cycle, { silent = true })
-    map("n", "<c-home>", tabline.move_tab_left, { silent = true })
-    map("n", "<c-end>", tabline.move_tab_right, { silent = true })
+    map("n", "<c-home>", tabline.move_tab_left_cycle, { silent = true })
+    map("n", "<c-end>", tabline.move_tab_right_cycle, { silent = true })
+    -- map("n", "<c-home>", tabline.move_tab_left, { silent = true })
+    -- map("n", "<c-end>", tabline.move_tab_right, { silent = true })
     map("n", "<c-s-home>", tabline.move_tab_begin, { silent = true })
     map("n", "<c-s-end>", tabline.move_tab_end, { silent = true })
     map("n", "<c-w>", function()

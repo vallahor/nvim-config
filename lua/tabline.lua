@@ -2053,20 +2053,16 @@ local function restore_layout(layout, bufs_by_path)
   pcall(vim.cmd, layout.sizes)
 end
 
-local function session_json_path(path)
-  if path then
-    return path
+local function session_json_path(path, name)
+  local dir = path or I.session_dir
+
+  if name then
+    return dir .. "/" .. name .. ".json"
   end
+
   local cwd = vim.uv.cwd() or fn.getcwd()
-  local name
-  if IS_WINDOWS then
-    name = string_gsub(cwd, "[/\\:]", "%%")
-  else
-    name = string_gsub(cwd, "/", "%%")
-  end
-  local dir = stdpath("data") .. "/galfo"
-  mkdir(dir, "p")
-  return dir .. "/" .. name .. ".json"
+  local sanitized = string_gsub(cwd, IS_WINDOWS and "[/\\:]" or "/", "%%")
+  return dir .. "/" .. sanitized .. ".json"
 end
 
 function Galfo.capture_session()
@@ -2164,17 +2160,18 @@ function Galfo.restore_session(state)
   return missing
 end
 
-function Galfo.save_session(path)
+function Galfo.save_session(path, name)
+  mkdir(I.session_dir, "p")
   local state = Galfo.capture_session()
-  local f = io.open(session_json_path(path), "w")
+  local f = io.open(session_json_path(path, name), "w")
   if f then
     f:write(json_encode(state))
     f:close()
   end
 end
 
-function Galfo.load_session(path)
-  local f = io.open(session_json_path(path), "r")
+function Galfo.load_session(path, name)
+  local f = io.open(session_json_path(path, name), "r")
   if not f then
     return
   end
@@ -2270,6 +2267,8 @@ function Galfo.setup(opts)
 
   I.restoring_session = false
   I.buf_queue = {}
+
+  I.session_dir = config.session_dir or (stdpath("data") .. "/galfo")
 
   I.dynamic = {
     diagnostics = {},
