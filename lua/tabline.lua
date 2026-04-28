@@ -234,7 +234,6 @@ local config = {
 ---@field updated boolean
 ---@field size_changed boolean
 ---@field should_not_focus boolean
----@field buf_deleted_partial boolean
 ---@field tab_width_changed boolean
 ---@field simple_redraw boolean
 ---@field tab_shrink boolean
@@ -244,7 +243,6 @@ local viewport_state = {
   updated = true,
   size_changed = false,
   should_not_focus = false,
-  buf_deleted_partial = false,
   tab_width_changed = false,
   simple_redraw = false,
   tab_shrink = false,
@@ -950,7 +948,11 @@ local function remove_buf_from_tabline(bufnr)
   click_components_handlers[bufnr] = nil
 
   viewport_state.tab_width_changed = true
-  viewport_state.buf_deleted_partial = index == viewport.lo - 1
+
+  if index == viewport.lo - 1 then
+    viewport.lo = math_max(1, viewport.lo - 1)
+    viewport.left_reserved = 0
+  end
 
   ---@type integer
   local replacement = buf_cache[index] or buf_cache[index - 1]
@@ -1251,26 +1253,14 @@ local function handle_tab_width_change(width)
   local right_remaining = 0
   viewport_state.tab_width_changed = false
 
-  if viewport_state.buf_deleted_partial then
-    viewport_state.buf_deleted_partial = false
-    local indicators = viewport.truncate_left_width + viewport.truncate_right_width
-    viewport.lo = math_max(1, viewport.lo - 1)
-    viewport.hi, right_remaining = get_viewport_hi(viewport.lo, width - indicators)
-    right_remaining = right_remaining + indicators
-    left_remaining = indicators
-    viewport.left_reserved = 0
-  end
-
-  -- if viewport.index == 1 then
-  --   viewport.lo = viewport.index
-  -- elseif viewport.index == #tabs_cache then
-  --   viewport.hi = viewport.index
-  -- end
-
   if viewport.lo == 1 then
     viewport.hi, right_remaining = compute_right_remain_from_start(width)
   elseif viewport.hi == #tabs_cache then
     viewport.lo, left_remaining = compute_left_remain_from_end(width)
+    if viewport.index < viewport.lo then
+      handle_index_before(width)
+      return
+    end
   else
     local indicators = viewport.truncate_left_width + viewport.truncate_right_width
     if viewport.index == viewport.hi and viewport.right_reserved == 0 then
@@ -1296,14 +1286,14 @@ end
 
 ---@param width integer
 local function calc_truncated_tabs(width)
-  if viewport_state.size_changed then
-    handle_size_change(width)
-  elseif viewport_state.tab_width_changed then
-    handle_tab_width_change(width)
-  elseif viewport.index > viewport.hi then
+  if viewport.index > viewport.hi then
     handle_index_after(width)
   elseif viewport.index < viewport.lo then
     handle_index_before(width)
+  elseif viewport_state.size_changed then
+    handle_size_change(width)
+  elseif viewport_state.tab_width_changed then
+    handle_tab_width_change(width)
   else
     if viewport_state.partial_left_redraw then
       make_prefix(viewport.left_reserved, 0)
