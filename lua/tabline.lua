@@ -1234,6 +1234,7 @@ local function handle_size_change(width)
     if viewport.lo == 1 then
       viewport.hi, right_remaining = compute_right_remain_from_start(width)
     elseif viewport.index < viewport.lo then
+      handle_index_before(width)
       return
     else
       make_prefix(left_remaining, 0)
@@ -1299,9 +1300,7 @@ local function calc_truncated_tabs(width)
     handle_size_change(width)
   elseif viewport_state.tab_width_changed then
     handle_tab_width_change(width)
-  end
-
-  if viewport.index > viewport.hi then
+  elseif viewport.index > viewport.hi then
     handle_index_after(width)
   elseif viewport.index < viewport.lo then
     handle_index_before(width)
@@ -1314,7 +1313,6 @@ local function calc_truncated_tabs(width)
       make_postfix(viewport.right_reserved, 0)
       viewport_state.partial_right_redraw = false
     end
-    return
   end
 end
 
