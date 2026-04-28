@@ -1111,7 +1111,7 @@ local function make_postfix(right_remaining, indicator)
       if size > 0 then
         viewport.postfix = tabs_cache[viewport.hi + 1].partial_right(size) .. viewport.postfix
       elseif size < 0 then
-        viewport.postfix = "%#TablineFill#" .. string_rep(" ", right_remaining) .. viewport.postfix
+        viewport.postfix = "%#TablineFill#" .. string_rep("-", right_remaining) .. viewport.postfix
       end
     end
     viewport.right_reserved = right_remaining
@@ -1222,6 +1222,7 @@ local function handle_size_change(width)
   viewport_state.size_changed = false
   local left_remaining = 0
   local right_remaining = 0
+
   if viewport.lo == 1 then
     viewport.hi, right_remaining = compute_right_remain_from_start(width)
   elseif viewport.hi == #tabs_cache then
@@ -1230,9 +1231,15 @@ local function handle_size_change(width)
     local indicators = viewport.truncate_left_width + viewport.truncate_right_width
     local reserved = viewport.right_reserved > 0 and viewport.right_reserved or indicators
     viewport.lo, left_remaining = get_viewport_lo(viewport.hi, width - reserved)
-    make_prefix(left_remaining, 0)
-    make_postfix(viewport.right_reserved, indicators)
-    return
+    if viewport.lo == 1 then
+      viewport.hi, right_remaining = compute_right_remain_from_start(width)
+    elseif viewport.index < viewport.lo then
+      return
+    else
+      make_prefix(left_remaining, 0)
+      make_postfix(viewport.right_reserved, indicators)
+      return
+    end
   end
 
   gen_prefix_postfix(left_remaining, right_remaining)

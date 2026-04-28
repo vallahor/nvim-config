@@ -686,6 +686,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
       icons = {
         enabled = true,
       },
+      last_icon_blend = false,
       -- dynamic = { diagnostics = true, focused = { diagnostics = false }, visible = { diagnostics = true } },
       -- dynamic = { diagnostics = true },
       tabs = {
@@ -715,12 +716,9 @@ vim.api.nvim_create_autocmd("VimEnter", {
         {
           text = function(tab)
             -- tab.unique_prefix:gsub("/", "\\") -- windows way
-            -- return tab.unique_prefix .. tab.name
-            return tab.index
-              .. ": "
-              .. tab.unique_prefix
-              .. tab.name
-              .. (tab.is_modified and string.rep(" ", #tab.name) or "")
+            return tab.unique_prefix .. tab.name
+            -- return tab.index .. ": " .. tab.unique_prefix .. tab.name
+            -- .. (tab.is_modified and string.rep(" ", math.floor(#tab.name * 1.5)) or "")
             -- .. (tab.is_focused and string.rep(" ", #tab.name) or "")
             -- .. (not tab.is_focused and "               " or "")
             -- return tab.unique_prefix .. tab.name
