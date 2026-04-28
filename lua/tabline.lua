@@ -2163,7 +2163,9 @@ function Galfo.restore_session(state)
 end
 
 function Galfo.save_session(path, name)
-  mkdir(I.session_dir, "p")
+  local dir = path or I.session_dir
+  mkdir(dir, "p")
+
   local state = Galfo.capture_session()
   local f = io.open(session_json_path(path, name), "w")
   if f then
