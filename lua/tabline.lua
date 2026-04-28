@@ -68,6 +68,8 @@ local config = {
     focused = { default = "TablineFocused", modified = "" },
   },
 
+  session_dir = stdpath("data") .. "/galfo",
+
   scratch_buffer_name = "[No Name]",
 
   -- Only useful if on windows.
