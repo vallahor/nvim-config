@@ -1336,15 +1336,6 @@ function I.GalfoRender()
     if viewport_state.simple_redraw and not viewport_state.updated and not viewport_state.tab_shrink then
       viewport_state.simple_redraw = false
     else
-      local indicators = 0
-      if viewport.lo == 1 then
-        indicators = viewport.indicator_first_width + viewport.truncate_right_width
-      elseif viewport.hi == #tabs_cache then
-        indicators = viewport.truncate_left_width + viewport.indicator_last_width
-      else
-        indicators = viewport.truncate_left_width + viewport.truncate_right_width
-      end
-
       if viewport.total_tabs_width > width then
         calc_truncated_tabs(width)
       else
@@ -1354,6 +1345,15 @@ function I.GalfoRender()
         viewport.postfix = ""
         viewport.left_reserved = 0
         viewport.right_reserved = 0
+      end
+
+      local indicators = 0
+      if viewport.lo == 1 then
+        indicators = viewport.indicator_first_width + viewport.truncate_right_width
+      elseif viewport.hi == #tabs_cache then
+        indicators = viewport.truncate_left_width + viewport.indicator_last_width
+      else
+        indicators = viewport.truncate_left_width + viewport.truncate_right_width
       end
 
       viewport_state.tab_shrink = current_tab.width > width - indicators
