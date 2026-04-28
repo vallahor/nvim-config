@@ -355,19 +355,13 @@ local hl_cache = {}
 ---@field tail string
 ---@field ext string
 ---@field unique_prefix string
+---@field buf integer
 ---@field width integer
 ---@field visibility integer
 ---@field severity integer
 ---@field modified integer
 ---@field icon TabIcon?
 ---@field rendered table<integer, Rendered?>
----@field update fun()
----@field rerender fun(): boolean
----@field set_new_display fun(): boolean
----@field update_unique_prefix fun()
----@field resolve_string fun(state: integer): Rendered
----@field partial_left fun(width: integer, state: integer?): string
----@field partial_right fun(width: integer): string
 
 ---@type {[integer]: Tab}
 local tabs_cache = {}
@@ -629,215 +623,215 @@ local function resolve_hl(hl, state)
   return bucket.default or ""
 end
 
+local function tab_update_unique_prefix(tab)
+  tab.unique_prefix = resolve_buf_repeated_names(tab.tail) and tab.dir or ""
+end
+
+local function tab_resolve_state(tab, state)
+  local tab_state = {
+    name = tab.tail,
+    index = buf_index[tab.buf] or #tabs_cache + 1,
+    unique_prefix = tab.unique_prefix,
+    is_focused = band(state, STATES.FOCUSED) ~= 0,
+    is_modified = band(state, STATES.MODIFIED) ~= 0,
+    is_pinned = tabs_pin_cache[tab.buf] ~= nil,
+    diagnostics = diag_cache[tab.buf] or {},
+  }
+
+  -- register in the handlers the `tab.on_click` with the current buf
+  click_tab_handlers[tab.buf] = I.tab.on_click
+
+  -- init the tab with `tab.on_click`
+  local display = { tab_on_click(tab.buf) }
+
+  local tab_width = 0
+  local components = {}
+
+  for i = 1, #I.tabs do
+    local comp = I.tabs[i]
+    local hl = comp.highlights and resolve_hl(comp.highlights, state) or resolve_hl(I.base_highlights, state)
+
+    local text
+    if comp.icon and tab.icon then
+      hl = comp.highlights and hl or Galfo.derive_hl(hl, { fg = tab.icon.color })
+      text = comp.icon(tab.icon.str, tab_state)
+      comp.is_icon = true
+    elseif comp.static then
+      text = comp.static
+    elseif comp.text then
+      text = comp.text(tab_state)
+    end
+
+    if not text then
+      goto continue
+    end
+
+    local text_width = nvim_strwidth(text)
+    tab_width = tab_width + text_width
+
+    if comp.on_click then
+      local on_click_str = component_on_click(tab.buf, i, text)
+      click_components_handlers[tab.buf] = click_components_handlers[tab.buf] or {}
+      click_components_handlers[tab.buf][i] = comp.on_click
+      display[#display + 1] = "%#" .. hl .. "#" .. on_click_str
+      components[#components + 1] = {
+        text = text,
+        text_width = text_width,
+        hl = hl,
+        is_icon = comp.is_icon or false,
+        on_click = on_click_str,
+      }
+      goto continue
+    end
+
+    if text then
+      display[#display + 1] = "%#" .. hl .. "#" .. text
+      components[#components + 1] = {
+        text = text,
+        text_width = text_width,
+        hl = hl,
+        is_icon = comp.is_icon or false,
+      }
+    end
+
+    ::continue::
+  end
+
+  return {
+    components = components,
+    display = table_concat(display),
+    width = tab_width,
+  }
+end
+
+local function tab_update(tab)
+  local flags = tab.modified + tab.severity
+  local _ = tab.rendered[STATES.VISIBLE + flags]
+  local _ = tab.rendered[STATES.FOCUSED + flags]
+end
+
+local function tab_rerender(tab)
+  tab.rendered = setmetatable({}, getmetatable(tab.rendered))
+  tab_update(tab)
+end
+
+local function tab_set_new_display(tab)
+  local old_width = tab.width
+  local flags = tab.visibility + tab.modified + tab.severity
+  local rendered = tab.rendered[flags]
+  ---@cast rendered Rendered
+
+  tab.display = rendered.display
+  tab.width = rendered.width
+  viewport.total_tabs_width = viewport.total_tabs_width + tab.width - old_width
+  return tab.width ~= old_width
+end
+
+---@param tab Tab
+local function tab_partial_left(tab, width, state)
+  state = state or STATES.VISIBLE
+  ---@type Components[]
+  local components = tab.rendered[bor(state, tab.modified + tab.severity)].components
+  ---@type string[]
+  local partial_left = {}
+  ---@type integer
+  local w = 0
+  local total = #components
+
+  for i = total, 1, -1 do
+    ---@type Components?
+    local component = components[i]
+    ---@cast component Components
+    if w + component.text_width + (component.is_icon and 1 or 0) > width then
+      local remaining = width - w
+      ---@cast remaining integer
+      if remaining > 0 then
+        local part = strcharpart(component.text, component.text_width - remaining)
+        partial_left[#partial_left + 1] = "%#"
+          .. component.hl
+          .. "#"
+          .. (component.on_click and component_on_click(tab.buf, i, part) or part)
+      end
+      break
+    end
+    w = w + component.text_width
+    partial_left[#partial_left + 1] = "%#" .. component.hl .. "#" .. (component.on_click or component.text)
+  end
+
+  local n = #partial_left
+  for i = 1, math_floor(n / 2) do
+    partial_left[i], partial_left[n - i + 1] = partial_left[n - i + 1], partial_left[i]
+  end
+
+  return tab_on_click(tab.buf) .. table_concat(partial_left)
+end
+
+local function tab_partial_right(tab, width)
+  ---@type Components[]
+  local components = tab.rendered[STATES.VISIBLE + tab.modified + tab.severity].components
+  ---@type string[]
+  local partial_right = { tab_on_click(tab.buf) }
+  ---@type integer
+  local w = 0
+  for i = 1, #components do
+    ---@type Components
+    local component = components[i]
+    if w + component.text_width + (component.is_icon and 1 or 0) > width then
+      local remaining = width - w
+      ---@cast remaining integer
+      if remaining > 0 then
+        if component.is_icon and remaining == 1 and not I.tab.last_icon_blend then
+          -- If not substitute the icon with one space, it blends with the next
+          -- icon/indicator or got cut in half.
+          partial_right[#partial_right + 1] = " "
+        else
+          local text = component.text
+          local part = strcharpart(text, 0, remaining, 1)
+          partial_right[#partial_right + 1] = "%#"
+            .. component.hl
+            .. "#"
+            .. (component.on_click and component_on_click(tab.buf, i, part) or part)
+        end
+        w = w + remaining
+      end
+      break
+    end
+    w = w + component.text_width
+    partial_right[#partial_right + 1] = "%#" .. component.hl .. "#" .. (component.on_click or component.text)
+  end
+  local pad = string_rep(" ", math_max(0, width - w))
+  partial_right[#partial_right + 1] = pad
+  return table_concat(partial_right)
+end
+
 ---@param buf integer
 ---@param dir string
 ---@param tail string
 ---@param ext string
 ---@return Tab
 local function build_tab(buf, dir, tail, ext)
-  local unique_prefix = resolve_buf_repeated_names(tail) and dir or ""
-  local tab_icon = make_tab_icon(ext)
-
   local tab = {
-    dir = dir,
-    visibility = STATES.VISIBLE,
+    display = "",
     tail = tail,
-    unique_prefix = unique_prefix,
     ext = ext,
-    str = "",
-    icon = tab_icon,
-    modified = 0,
+    dir = dir,
+    unique_prefix = resolve_buf_repeated_names(tail) and dir or "",
+    icon = make_tab_icon(ext),
+    buf = buf,
     width = 0,
-    rendered = {},
+    visibility = STATES.VISIBLE,
+    modified = 0,
     severity = 0,
+    rendered = {},
   }
-
-  tab.update_unique_prefix = function()
-    tab.unique_prefix = resolve_buf_repeated_names(tail) and dir or ""
-  end
-
-  tab.resolve_string = function(state)
-    local tab_state = {
-      name = tail,
-      index = buf_index[buf] or #tabs_cache + 1,
-      unique_prefix = tab.unique_prefix,
-      is_focused = band(state, STATES.FOCUSED) ~= 0,
-      is_modified = band(state, STATES.MODIFIED) ~= 0,
-      is_pinned = tabs_pin_cache[buf] ~= nil,
-      diagnostics = diag_cache[buf] or {},
-    }
-
-    -- register in the handlers the `tab.on_click` with the current buf
-    click_tab_handlers[buf] = I.tab.on_click
-
-    -- init the tab with `tab.on_click`
-    local display = { tab_on_click(buf) }
-
-    local tab_width = 0
-    local components = {}
-
-    for i = 1, #I.tabs do
-      local comp = I.tabs[i]
-      local hl = comp.highlights and resolve_hl(comp.highlights, state) or resolve_hl(I.base_highlights, state)
-
-      local text
-      if comp.icon and tab_icon then
-        hl = comp.highlights and hl or Galfo.derive_hl(hl, { fg = tab_icon.color })
-        text = comp.icon(tab_icon.str, tab_state)
-        comp.is_icon = true
-      elseif comp.static then
-        text = comp.static
-      elseif comp.text then
-        text = comp.text(tab_state)
-      end
-
-      if not text then
-        goto continue
-      end
-
-      local text_width = nvim_strwidth(text)
-      tab_width = tab_width + text_width
-
-      if comp.on_click then
-        local on_click_str = component_on_click(buf, i, text)
-        click_components_handlers[buf] = click_components_handlers[buf] or {}
-        click_components_handlers[buf][i] = comp.on_click
-        display[#display + 1] = "%#" .. hl .. "#" .. on_click_str
-        components[#components + 1] = {
-          text = text,
-          text_width = text_width,
-          hl = hl,
-          is_icon = comp.is_icon or false,
-          on_click = on_click_str,
-        }
-        goto continue
-      end
-
-      if text then
-        display[#display + 1] = "%#" .. hl .. "#" .. text
-        components[#components + 1] = {
-          text = text,
-          text_width = text_width,
-          hl = hl,
-          is_icon = comp.is_icon or false,
-        }
-      end
-
-      ::continue::
-    end
-
-    return {
-      components = components,
-      display = table_concat(display),
-      width = tab_width,
-    }
-  end
 
   tab.rendered = setmetatable({}, {
     __index = function(t, state)
-      local result = tab.resolve_string(state)
+      local result = tab_resolve_state(tab, state)
       rawset(t, state, result)
       return result
     end,
   })
-
-  tab.update = function()
-    local flags = tab.modified + tab.severity
-    local _ = tab.rendered[STATES.VISIBLE + flags]
-    local _ = tab.rendered[STATES.FOCUSED + flags]
-  end
-
-  tab.rerender = function()
-    tab.rendered = setmetatable({}, getmetatable(tab.rendered))
-    tab.update()
-  end
-
-  tab.set_new_display = function()
-    local old_width = tab.width
-    local flags = tab.visibility + tab.modified + tab.severity
-    local rendered = tab.rendered[flags]
-    ---@cast rendered Rendered
-
-    tab.display = rendered.display
-    tab.width = rendered.width
-    viewport.total_tabs_width = viewport.total_tabs_width + tab.width - old_width
-    return tab.width ~= old_width
-  end
-
-  tab.partial_right = function(width)
-    ---@type Components[]
-    local components = tab.rendered[STATES.VISIBLE + tab.modified + tab.severity].components
-    ---@type string[]
-    local partial_right = { tab_on_click(buf) }
-    ---@type integer
-    local w = 0
-    for i = 1, #components do
-      ---@type Components
-      local component = components[i]
-      if w + component.text_width + (component.is_icon and 1 or 0) > width then
-        local remaining = width - w
-        ---@cast remaining integer
-        if remaining > 0 then
-          if component.is_icon and remaining == 1 and not I.tab.last_icon_blend then
-            -- If not substitute the icon with one space, it blends with the next
-            -- icon/indicator or got cut in half.
-            partial_right[#partial_right + 1] = " "
-          else
-            local text = component.text
-            local part = strcharpart(text, 0, remaining, 1)
-            partial_right[#partial_right + 1] = "%#"
-              .. component.hl
-              .. "#"
-              .. (component.on_click and component_on_click(buf, i, part) or part)
-          end
-          w = w + remaining
-        end
-        break
-      end
-      w = w + component.text_width
-      partial_right[#partial_right + 1] = "%#" .. component.hl .. "#" .. (component.on_click or component.text)
-    end
-    local pad = string_rep(" ", math_max(0, width - w))
-    partial_right[#partial_right + 1] = pad
-    return table_concat(partial_right)
-  end
-
-  tab.partial_left = function(width, state)
-    state = state or STATES.VISIBLE
-    ---@type Components[]
-    local components = tab.rendered[bor(state, tab.modified + tab.severity)].components
-    ---@type string[]
-    local partial_left = {}
-    ---@type integer
-    local w = 0
-    local total = #components
-
-    for i = total, 1, -1 do
-      ---@type Components?
-      local component = components[i]
-      if w + component.text_width + (component.is_icon and 1 or 0) > width then
-        local remaining = width - w
-        ---@cast remaining integer
-        if remaining > 0 then
-          local part = strcharpart(component.text, component.text_width - remaining)
-          partial_left[#partial_left + 1] = "%#"
-            .. component.hl
-            .. "#"
-            .. (component.on_click and component_on_click(buf, i, part) or part)
-        end
-        break
-      end
-      w = w + component.text_width
-      partial_left[#partial_left + 1] = "%#" .. component.hl .. "#" .. (component.on_click or component.text)
-    end
-
-    local n = #partial_left
-    for i = 1, math_floor(n / 2) do
-      partial_left[i], partial_left[n - i + 1] = partial_left[n - i + 1], partial_left[i]
-    end
-
-    return tab_on_click(buf) .. table_concat(partial_left)
-  end
 
   return tab
 end
@@ -848,9 +842,9 @@ local function refresh_tab(index)
   if not tab then
     return
   end
-  tab.update_unique_prefix()
-  tab.rerender()
-  tab.set_new_display()
+  tab_update_unique_prefix(tab)
+  tab_rerender(tab)
+  tab_set_new_display(tab)
 end
 
 local function repeated_names_remove(buf, tail)
@@ -897,8 +891,8 @@ local function resolve_update_tab(buf)
     repeated_names_insert(buf, new_tail)
   end
   local tab = build_tab(buf, dir, new_tail, ext)
-  tab.update()
-  tab.set_new_display()
+  tab_update(tab)
+  tab_set_new_display(tab)
   tabs_cache[index] = tab
   update_buf_index()
 end
@@ -907,8 +901,8 @@ local function insert_buf_into_tabline(buf)
   local dir, tail, ext = resolve_buf_name(buf)
   repeated_names_insert(buf, tail)
   local tab = build_tab(buf, dir, tail, ext)
-  tab.update()
-  tab.set_new_display()
+  tab_update(tab)
+  tab_set_new_display(tab)
   table_insert(buf_cache, buf)
   table_insert(tabs_cache, tab)
   viewport.buf = buf
@@ -983,8 +977,8 @@ local function remove_buf_from_tabline(bufnr)
 
   if I.dynamic.index then
     for i = index, #tabs_cache do
-      tabs_cache[i].rerender()
-      tabs_cache[i].set_new_display()
+      tab_rerender(tabs_cache[i])
+      tab_set_new_display(tabs_cache[i])
     end
   end
 end
@@ -1095,7 +1089,7 @@ local function make_prefix(left_remaining, indicator)
     if left_remaining > 0 then
       local size = left_remaining - indicator
       if size > 0 then
-        viewport.prefix = viewport.prefix .. tabs_cache[viewport.lo - 1].partial_left(size)
+        viewport.prefix = viewport.prefix .. tab_partial_left(tabs_cache[viewport.lo - 1], size)
       end
     end
     viewport.left_reserved = left_remaining
@@ -1111,7 +1105,7 @@ local function make_postfix(right_remaining, indicator)
     if right_remaining > 0 then
       local size = right_remaining - indicator
       if size > 0 then
-        viewport.postfix = tabs_cache[viewport.hi + 1].partial_right(size) .. viewport.postfix
+        viewport.postfix = tab_partial_right(tabs_cache[viewport.hi + 1], size) .. viewport.postfix
       elseif size < 0 then
         viewport.postfix = "%#TablineFill#" .. string_rep("-", right_remaining) .. viewport.postfix
       end
@@ -1326,7 +1320,7 @@ function I.GalfoRender()
 
     if not sidebar.focus and current_tab.visibility ~= STATES.FOCUSED then
       current_tab.visibility = STATES.FOCUSED
-      if current_tab.set_new_display() then
+      if tab_set_new_display(current_tab) then
         viewport_state.tab_width_changed = true
       end
     end
@@ -1378,7 +1372,7 @@ function I.GalfoRender()
 
         local buf = buf_cache[viewport.index]
         local focused = buf == viewport.buf and STATES.FOCUSED or STATES.VISIBLE
-        viewport.tab_shrink_str = current_tab.partial_left(available, focused)
+        viewport.tab_shrink_str = tab_partial_left(current_tab, available, focused)
       end
     end
 
@@ -1504,11 +1498,11 @@ local function swap(i, j)
   buf_index[buf_cache[j]] = j
 
   if I.dynamic.index then
-    tabs_cache[i].rerender()
-    tabs_cache[j].rerender()
+    tab_rerender(tabs_cache[i])
+    tab_rerender(tabs_cache[j])
 
-    local tab_i_changed = tabs_cache[i].set_new_display()
-    local tab_j_changed = tabs_cache[j].set_new_display()
+    local tab_i_changed = tab_set_new_display(tabs_cache[i])
+    local tab_j_changed = tab_set_new_display(tabs_cache[j])
 
     if tab_i_changed or tab_j_changed then
       viewport_state.tab_width_changed = true
@@ -1585,8 +1579,8 @@ function Galfo.move_tab_begin()
 
     if I.dynamic.index then
       for index = i, 1, -1 do
-        tabs_cache[index].rerender()
-        tabs_cache[index].set_new_display()
+        tab_rerender(tabs_cache[index])
+        tab_set_new_display(tabs_cache[index])
       end
       viewport_state.tab_width_changed = true
     end
@@ -1610,8 +1604,8 @@ function Galfo.move_tab_end()
 
     if I.dynamic.index then
       for index = i, #tabs_cache do
-        tabs_cache[index].rerender()
-        tabs_cache[index].set_new_display()
+        tab_rerender(tabs_cache[index])
+        tab_set_new_display(tabs_cache[index])
       end
       viewport_state.tab_width_changed = true
     end
@@ -1711,8 +1705,8 @@ function Galfo.toggle_pin(bufnr)
   end
 
   local tab = tabs_cache[index]
-  tab.rerender()
-  local width_changed = tab.set_new_display()
+  tab_rerender(tab)
+  local width_changed = tab_set_new_display(tab)
 
   if viewport.lo <= index and index <= viewport.hi then
     if width_changed then
@@ -1817,7 +1811,7 @@ local function setup_autocmds()
       if tab.visibility ~= STATES.VISIBLE then
         tab.visibility = STATES.VISIBLE
 
-        if tab.set_new_display() then
+        if tab_set_new_display(tab) then
           if viewport.lo <= index and index <= viewport.hi then
             viewport_state.tab_width_changed = true
           end
@@ -1856,8 +1850,8 @@ local function setup_autocmds()
 
         tab.modified = modified
 
-        tab.rerender()
-        local width_changed = tab.set_new_display()
+        tab_rerender(tab)
+        local width_changed = tab_set_new_display(tab)
 
         if viewport.lo <= index and index <= viewport.hi then
           if width_changed then
@@ -1898,8 +1892,8 @@ local function setup_autocmds()
 
         if changed then
           tab.severity = new_severity
-          tab.update()
-          local width_changed = tab.set_new_display()
+          tab_update(tab)
+          local width_changed = tab_set_new_display(tab)
 
           if viewport.lo <= index and index <= viewport.hi then
             if width_changed then
@@ -2289,13 +2283,5 @@ function Galfo.setup(opts)
     I.on_buf_replaced = opts.on_buf_replaced
   end
 end
-
-local function aeho()
-  local tab = tabs_cache[viewport.index]
-  print(viewport.index)
-  -- print(tab.set_new_display())
-end
-
-api.nvim_create_user_command("Aeho", aeho, {})
 
 return Galfo
