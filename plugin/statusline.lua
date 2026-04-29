@@ -34,7 +34,7 @@ local modes = setmetatable({
   [CTRL_S] = { short = "S-B", hl = "%#StatuslineModeVisual#" },
   ["i"] = { short = "I", hl = "%#StatuslineModeInsert#" },
   ["R"] = { short = "R", hl = "%#StatuslineModeReplace#" },
-  ["c"] = { short = "C", hl = "%#StatuslineModeCommand#" },
+  ["c"] = { short = "C", hl = "%#StatuslineModeNormal#" },
   ["r"] = { short = "P", hl = "%#StatuslineModeOther#" },
   ["!"] = { short = "Sh", hl = "%#StatuslineModeOther#" },
   ["t"] = { short = "T", hl = "%#StatuslineModeOther#" },

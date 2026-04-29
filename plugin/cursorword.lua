@@ -1,3 +1,4 @@
+local b = vim.b
 local matchadd = vim.fn.matchadd
 local matchdelete = vim.fn.matchdelete
 local escape = vim.fn.escape
@@ -13,6 +14,12 @@ local nvim_create_augroup = vim.api.nvim_create_augroup
 
 local string_sub = string.sub
 local string_match = string.match
+
+vim.api.nvim_set_hl(0, "Cursorword", {
+  sp = "none",
+  fg = "none",
+  bg = "#2D2829",
+})
 
 local match_ids = {}
 local match_words = {}
@@ -116,13 +123,13 @@ nvim_create_autocmd("WinClosed", {
 nvim_create_autocmd("FileType", {
   pattern = { "NvimTree", "neo-tree", "SidebarNvim" },
   callback = function()
-    vim.b.cursorword_disable = true
+    b.cursorword_disable = true
   end,
 })
 
 nvim_create_autocmd({ "BufEnter", "FileType" }, {
   group = augroup,
   callback = function(ev)
-    disabled_bufs[ev.buf] = vim.b[ev.buf].cursorword_disable or false
+    disabled_bufs[ev.buf] = b[ev.buf].cursorword_disable or false
   end,
 })
