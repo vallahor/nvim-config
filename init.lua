@@ -634,27 +634,6 @@ local guicursor_hidden = "n:block-Cursor,i-ci-c:block-iCursor,v:block-vCursor,a:
 local cursor_line_active = "CursorLine:CursorLine,CursorLineNr:CursorLineNr"
 local cursor_line_inactive = "CursorLine:CursorLineInative,CursorLineNr:CursorLineNrInative"
 
--- highlights = {
---   visible = {
---     default = "",
---     modified = "",
---   },
---   focused = {
---     default = "",
---     modified = "",
---   },
---   diagnostics = {
---     error = {
---       visible = { default = "", modified = "" },
---       focused = { default = "", modified = "" },
---     },
---     warn = {
---       visible = { default = "", modified = "" },
---       focused = { default = "", modified = "" },
---     },
---   },
--- }
-
 vim.api.nvim_set_option_value("guicursor", guicursor_default, {})
 
 local ignore_file_types = { NvimTree = true }
