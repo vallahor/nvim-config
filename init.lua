@@ -170,17 +170,6 @@ vim.keymap.set("n", "*", function()
 end)
 vim.keymap.set("v", "*", '"sy/\\V<c-r>s<cr>``') -- highlight all occurencies of the curren selection
 
--- vim.api.nvim_create_autocmd("FileType", {
---   pattern = "*",
---   callback = function()
---     vim.keymap.set({ "n", "i" }, "<c-;>", function()
---       local row = vim.api.nvim_win_get_cursor(0)[1] - 1
---       local len = vim.fn.col("$") - 1
---       vim.api.nvim_buf_set_text(0, row, len, row, len, { ";" })
---     end, { buffer = true })
---   end,
--- })
-
 -- go to beginning of the line function like DOOM Emacs
 local function beginning_of_the_line()
   local old_pos = vim.fn.col(".")
@@ -423,48 +412,50 @@ end
 -- endlocal
 
 -- paths to check for project.godot file
-local paths_to_check = { "/", "/../" }
-local godot_project_path = ""
-local cwd = vim.fn.getcwd()
+if false then
+  local godot_project_path = ""
 
--- iterate over paths and check
-for _, value in pairs(paths_to_check) do
-  if vim.uv.fs_stat(cwd .. value .. "project.godot") then
-    godot_project_path = cwd .. value
-    break
-  end
-end
-
-if godot_project_path ~= "" then
-  local is_server_running = vim.uv.fs_stat(godot_project_path .. "/server.pipe")
-
-  local addr = godot_project_path .. "/server.pipe"
-  if vim.fn.has("win32") == 1 then
-    addr = "127.0.0.1:6004"
-  end
-
-  local started_godot_server = false
-  if vim.fn.filereadable(cwd .. "/project.godot") == 1 and not is_server_running then
-    if vim.v.servername ~= addr then
-      local ok = pcall(function()
-        vim.fn.serverstart(addr)
-      end)
-
-      if ok then
-        started_godot_server = true
-      end
+  local paths_to_check = { "/", "/../" }
+  local cwd = vim.fn.getcwd()
+  -- iterate over paths and check
+  for _, value in pairs(paths_to_check) do
+    if vim.uv.fs_stat(cwd .. value .. "project.godot") then
+      godot_project_path = cwd .. value
+      break
     end
   end
 
-  vim.api.nvim_create_autocmd("VimLeavePre", {
-    callback = function()
-      if started_godot_server then
-        pcall(function()
-          vim.fn.serverstop(addr)
+  if godot_project_path ~= "" then
+    local is_server_running = vim.uv.fs_stat(godot_project_path .. "/server.pipe")
+
+    local addr = godot_project_path .. "/server.pipe"
+    if vim.fn.has("win32") == 1 then
+      addr = "127.0.0.1:6004"
+    end
+
+    local started_godot_server = false
+    if vim.fn.filereadable(cwd .. "/project.godot") == 1 and not is_server_running then
+      if vim.v.servername ~= addr then
+        local ok = pcall(function()
+          vim.fn.serverstart(addr)
         end)
+
+        if ok then
+          started_godot_server = true
+        end
       end
-    end,
-  })
+    end
+
+    vim.api.nvim_create_autocmd("VimLeavePre", {
+      callback = function()
+        if started_godot_server then
+          pcall(function()
+            vim.fn.serverstop(addr)
+          end)
+        end
+      end,
+    })
+  end
 end
 -- GODOT END
 
@@ -482,14 +473,6 @@ vim.api.nvim_set_hl(0, "CursorVisualNr", { fg = "#a1495c", bg = "#2d1524" })
 vim.api.nvim_set_hl(0, "VisualNr", { fg = "#493441", bg = "#2d1524" })
 vim.o.statuscolumn = "%!v:lua.StatusColumn()"
 
----@type table<integer, string>
-local cursor_diag_hl_map = {
-  [vim.diagnostic.severity.ERROR] = "%#DiagnosticLineNumhlError#",
-  [vim.diagnostic.severity.WARN] = "%#DiagnosticLineNumhlWarn#",
-  [vim.diagnostic.severity.INFO] = "%#DiagnosticLineNumhlInfo#",
-  [vim.diagnostic.severity.HINT] = "%#DiagnosticLineNumhlHint#",
-}
-
 ---@type table<integer?, table<string, boolean|integer>>
 local visual_state = {}
 
@@ -504,25 +487,17 @@ local function update_visual_cursor(buf)
   visual_state[buf].visual_end = cursor_end
 end
 
-vim.pack.add({ "https://github.com/jake-stewart/multicursor.nvim" })
-local mc = require("multicursor-nvim")
 vim.api.nvim_create_autocmd("ModeChanged", {
   callback = function(ev)
     local m = vim.api.nvim_get_mode().mode
     local in_visual = m == "v" or m == "V" or m == "\x16"
-    local was_visual = visual_state[ev.buf] and visual_state[ev.buf].in_visual
 
     visual_state[ev.buf] = {
       in_visual = in_visual,
-      has_cursors = mc.hasCursors() and mc.cursorsEnabled(),
     }
 
     if in_visual then
       update_visual_cursor(ev.buf)
-    elseif was_visual then
-      for _, w in ipairs(vim.fn.win_findbuf(ev.buf)) do
-        vim.api.nvim__redraw({ win = w, statuscolumn = true })
-      end
     end
   end,
 })
@@ -545,30 +520,23 @@ vim.api.nvim_create_autocmd("BufWipeout", {
 })
 
 function _G.StatusColumn()
-  local hl = ""
+  local hl = " "
   local relnum = vim.v.relnum
   local win = vim.g.statusline_winid
-  local buf = vim.api.nvim_win_get_buf(win)
-  local state = visual_state[buf]
-  if relnum == 0 then
-    if state and state.in_visual and win == vim.api.nvim_get_current_win() and not state.has_cursors then
-      hl = "%#CursorVisualNr#"
+  local state = visual_state[vim.api.nvim_win_get_buf(win)]
+
+  if state and state.in_visual and win == vim.api.nvim_get_current_win() then
+    if relnum == 0 then
+      hl = "%#CursorVisualNr# "
     else
-      local mode = vim.api.nvim_get_mode().mode
-      if mode ~= "i" and mode ~= "ic" and mode ~= "ix" then
-        local diags = vim.diagnostic.count(buf, { lnum = vim.v.lnum - 1 })
-        if #diags > 0 then
-          hl = cursor_diag_hl_map[next(diags)]
-        end
+      local lnum = vim.v.lnum
+      if lnum >= state.visual_start and lnum <= state.visual_end then
+        hl = "%#VisualNr# "
       end
     end
-  elseif state and state.in_visual and not state.hasecursors then
-    local lnum = vim.v.lnum
-    if lnum >= state.visual_start and lnum <= state.visual_end then
-      hl = "%#VisualNr#"
-    end
   end
-  return string.format("%s%3d ", hl, relnum)
+
+  return hl .. (relnum < 10 and " " .. relnum or relnum)
 end
 
 local _select = require("vim.treesitter._select")
@@ -754,39 +722,3 @@ end, { silent = true })
 vim.keymap.set("x", "<Up>", function()
   move_lines(move_direction_up)
 end, { silent = true })
-
--- Terminal toggle with Ctrl+;
-local term_buf = nil
-local term_win = nil
-
-local function toggle_terminal()
-  -- If window is open, close it
-  if term_win and vim.api.nvim_win_is_valid(term_win) then
-    vim.api.nvim_win_close(term_win, false)
-    term_win = nil
-    return
-  end
-
-  -- Open a new split at the bottom
-  vim.cmd("botright 15split")
-  term_win = vim.api.nvim_get_current_win()
-
-  -- Reuse existing buffer or create a new terminal
-  if term_buf and vim.api.nvim_buf_is_valid(term_buf) then
-    vim.api.nvim_win_set_buf(term_win, term_buf)
-  else
-    vim.cmd("terminal")
-    term_buf = vim.api.nvim_get_current_buf()
-  end
-
-  vim.cmd("startinsert")
-end
-
--- Map Ctrl+; in normal, terminal, and insert modes
-vim.keymap.set("n", "<C-;>", toggle_terminal, { desc = "Toggle terminal" })
-vim.keymap.set("t", "<C-;>", function()
-  vim.cmd("stopinsert")
-  toggle_terminal()
-end, { desc = "Toggle terminal" })
-vim.keymap.set("i", "<C-;>", toggle_terminal, { desc = "Toggle terminal" })
-vim.keymap.set("t", "<Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
