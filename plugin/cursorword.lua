@@ -21,16 +21,15 @@ vim.api.nvim_set_hl(0, "Cursorword", {
   bg = "#2D2829",
 })
 
-local match_ids = {}
-local match_words = {}
 local disabled_bufs = {}
+local matches = {}
 
 local function clear(win)
   win = win or nvim_get_current_win()
-  if match_ids[win] then
-    matchdelete(match_ids[win], win)
-    match_ids[win] = nil
-    match_words[win] = nil
+  local m = matches[win]
+  if m then
+    matchdelete(m.id, win)
+    matches[win] = nil
   end
 end
 
@@ -38,6 +37,18 @@ local function get_word(line, col)
   local left = string_match(string_sub(line, 1, col + 1), "[%w_]+$") or ""
   local right = string_match(string_sub(line, col + 2), "^[%w_]+") or ""
   return left .. right
+end
+
+local function set_match(win, pattern, priority)
+  local m = matches[win]
+  if m and m.pattern == pattern then
+    return
+  end
+  clear(win)
+  matches[win] = {
+    pattern = pattern,
+    id = matchadd("Cursorword", pattern, priority, -1, { window = win }),
+  }
 end
 
 local function highlight(mode)
@@ -53,11 +64,7 @@ local function highlight(mode)
     local to = getpos(".")
     local text = getregion(from, to, { type = mode })[1]
     if text and #text >= 2 then
-      if match_words[win] ~= text then
-        clear(win)
-        match_words[win] = text
-        match_ids[win] = matchadd("Cursorword", [[\V]] .. escape(text, [[\]]), 10, -1, { window = win })
-      end
+      set_match(win, [[\V]] .. escape(text, [[\]]), 10)
     else
       clear(win)
     end
@@ -76,11 +83,7 @@ local function highlight(mode)
 
   local word = get_word(line, col)
   if #word >= 2 then
-    if match_words[win] ~= word then
-      clear(win)
-      match_words[win] = word
-      match_ids[win] = matchadd("Cursorword", [[\V\<]] .. escape(word, [[\]]) .. [[\>]], -2, -1, { window = win })
-    end
+    set_match(win, [[\V\<]] .. escape(word, [[\]]) .. [[\>]], -2)
   else
     clear(win)
   end
@@ -109,14 +112,15 @@ nvim_create_autocmd("ModeChanged", {
 
 nvim_create_autocmd({ "InsertEnter", "TermEnter", "QuitPre" }, {
   group = augroup,
-  callback = clear,
+  callback = function()
+    clear()
+  end,
 })
 
 nvim_create_autocmd("WinClosed", {
   group = augroup,
   callback = function(ev)
-    match_ids[ev.match] = nil
-    match_words[ev.match] = nil
+    matches[tonumber(ev.match)] = nil
   end,
 })
 
