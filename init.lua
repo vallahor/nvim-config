@@ -117,13 +117,11 @@ g.python_indent = {
 }
 
 -- MAPPING --
-
 local function esc_normal_mode()
   local wins = nvim_list_wins()
   for i = 1, #wins do
     local win = wins[i]
-    local config = nvim_win_get_config(win)
-    if config.relative == "win" or config.relative == "laststatus" then
+    if #nvim_win_get_config(win).relative > 0 then
       nvim_win_close(win, false)
     end
   end
