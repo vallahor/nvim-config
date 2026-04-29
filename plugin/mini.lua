@@ -1,26 +1,4 @@
 vim.pack.add({ "https://github.com/echasnovski/mini.nvim" })
--- Cursor Word
-require("mini.cursorword").setup({
-  delay = 0,
-})
-
-vim.api.nvim_set_hl(0, "MiniCursorword", {
-  sp = "none",
-  fg = "none",
-  bg = "#2D2829",
-})
-vim.api.nvim_set_hl(0, "MiniCursorwordCurrent", {
-  sp = "none",
-  fg = "none",
-  bg = "#2D2829",
-})
-
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "NvimTree", "neo-tree", "SidebarNvim" },
-  callback = function()
-    vim.b.minicursorword_disable = true
-  end,
-})
 
 local MiniIcons = require("mini.icons")
 MiniIcons.setup()

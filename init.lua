@@ -713,3 +713,9 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.api.nvim_set_option_value("number", true, { win = 0 })
   end,
 })
+
+vim.api.nvim_set_hl(0, "Cursorword", {
+  sp = "none",
+  fg = "none",
+  bg = "#2D2829",
+})
