@@ -1,9 +1,16 @@
+local nvim_set_hl = vim.api.nvim_set_hl
+
 vim.pack.add({ "https://github.com/neovim/nvim-lspconfig" })
 local capabilities = require("blink.cmp").get_lsp_capabilities()
 
 vim.lsp.config("*", {
   capabilities = capabilities,
 })
+
+nvim_set_hl(0, "DiagnosticLineNumhlError", { fg = "#a1495c", bg = "#221418" })
+nvim_set_hl(0, "DiagnosticLineNumhlWarn", { fg = "#a1495c", bg = "#221c12" })
+nvim_set_hl(0, "DiagnosticLineNumhlInfo", { fg = "#a1495c", bg = "#1c1a1c" })
+nvim_set_hl(0, "DiagnosticLineNumhlHint", { fg = "#a1495c", bg = "#1a1a1a" })
 
 vim.diagnostic.config({
   update_in_insert = false,
