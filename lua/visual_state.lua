@@ -1,5 +1,6 @@
 local nvim_create_autocmd = vim.api.nvim_create_autocmd
 local nvim_get_current_win = vim.api.nvim_get_current_win
+local nvim_win_get_config = vim.api.nvim_win_get_config
 local nvim_get_mode = vim.api.nvim_get_mode
 local line = vim.fn.line
 
@@ -20,6 +21,9 @@ end
 nvim_create_autocmd("ModeChanged", {
   callback = function()
     local state = M[nvim_get_current_win()]
+    if not state then
+      return
+    end
 
     local m = nvim_get_mode().mode
     local in_visual = m == "v" or m == "V" or m == "\x16"
@@ -44,7 +48,10 @@ nvim_create_autocmd("CursorMoved", {
 })
 
 local function init_state()
-  M[nvim_get_current_win()] = { in_visual = false }
+  local win = nvim_get_current_win()
+  if #nvim_win_get_config(win).relative == 0 then
+    M[win] = { in_visual = false }
+  end
 end
 
 nvim_create_autocmd("VimEnter", {
