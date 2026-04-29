@@ -1,53 +1,113 @@
+local g = vim.g
+local bo = vim.bo
+local v = vim.v
+local cmd = vim.cmd
+local schedule = vim.schedule
+local opt = vim.opt
+local wo = vim.wo
+
+local keymap_set = vim.keymap.set
+local resize = cmd.resize
+local wincmd = cmd.wincmd
+local normal = cmd.normal
+local redraw = cmd.redraw
+local undo = cmd.undo
+local redo = cmd.redo
+local cc = cmd.cc
+local cclose = cmd.cclose
+local checktime = cmd.checktime
+local redrawstatus = cmd.redrawstatus
+local nohl = cmd.nohl
+local edit = cmd.edit
+local source = cmd.source
+
+local nvim_set_option_value = vim.api.nvim_set_option_value
+local nvim_get_current_win = vim.api.nvim_get_current_win
+local nvim_get_current_buf = vim.api.nvim_get_current_buf
+local nvim_win_get_buf = vim.api.nvim_win_get_buf
+local nvim_get_mode = vim.api.nvim_get_mode
+local nvim_feedkeys = vim.api.nvim_feedkeys
+local nvim_win_set_cursor = vim.api.nvim_win_set_cursor
+local nvim_set_hl = vim.api.nvim_set_hl
+local nvim_win_get_cursor = vim.api.nvim_win_get_cursor
+local nvim_list_wins = vim.api.nvim_list_wins
+local nvim_win_get_config = vim.api.nvim_win_get_config
+local nvim_win_close = vim.api.nvim_win_close
+local nvim_create_autocmd = vim.api.nvim_create_autocmd
+
+local snippet_stop = vim.snippet.stop
+
+local get_parser = vim.treesitter.get_parser
+
+local get_col = vim.fn.col
+local setpos = vim.fn.setpos
+local getpos = vim.fn.getpos
+local getregionpos = vim.fn.getregionpos
+local matchaddpos = vim.fn.matchaddpos
+local matchdelete = vim.fn.matchdelete
+local winsaveview = vim.fn.winsaveview
+local winrestview = vim.fn.winrestview
+
+local setreg = vim.fn.setreg
+local expand = vim.fn.expand
+
+local diag_jump = vim.diagnostic.jump
+
+local line = vim.fn.line
+
+local string_format = string.format
+
+local comment = require("vim._comment")
+
 vim.env.LANG = "en_US.UTF-8"
 
 -- SETTINGS --
-vim.opt.guifont = { "JetBrainsMono NF:h11" }
-vim.opt.shiftwidth = 4
-vim.opt.tabstop = 4
-vim.opt.softtabstop = 4
-vim.opt.expandtab = true
-vim.opt.smartindent = true
-vim.opt.smarttab = true
-vim.opt.smartcase = true
-vim.opt.autoindent = true
-vim.opt.hidden = true
-vim.opt.ignorecase = true
-vim.opt.shiftround = true
-vim.opt.splitright = true
-vim.opt.splitbelow = true
-vim.opt.clipboard = "unnamedplus"
-vim.opt.pumheight = 10
-vim.opt.switchbuf = "useopen,uselast"
-vim.opt.inccommand = "nosplit"
-vim.opt.backspace = "indent,eol,start"
-vim.opt.shortmess:append("aoOtTIcF")
-vim.opt.mouse = "a"
-vim.opt.mousefocus = true
-vim.opt.cursorline = true
-vim.opt.backup = false
-vim.opt.writebackup = false
-vim.opt.cindent = false -- check
-vim.opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
-vim.opt.winborder = "rounded"
-vim.opt.isfname:append("(") -- " @windows: nextjs and sveltekit folder name pattern
-vim.opt.swapfile = false
-vim.opt.wrap = false
-vim.opt.history = 20
--- vim.opt.timeout = false
-vim.opt.timeoutlen = 200
-vim.opt.autoread = true
--- vim.opt.incsearch = false
+opt.guifont = { "JetBrainsMono NF:h11" }
+opt.shiftwidth = 4
+opt.tabstop = 4
+opt.softtabstop = 4
+opt.expandtab = true
+opt.smartindent = true
+opt.smarttab = true
+opt.smartcase = true
+opt.autoindent = true
+opt.hidden = true
+opt.ignorecase = true
+opt.shiftround = true
+opt.splitright = true
+opt.splitbelow = true
+opt.clipboard = "unnamedplus"
+opt.pumheight = 10
+opt.switchbuf = "useopen,uselast"
+opt.inccommand = "nosplit"
+opt.backspace = "indent,eol,start"
+opt.shortmess:append("aoOtTIcF")
+opt.mouse = "a"
+opt.mousefocus = true
+opt.cursorline = true
+opt.backup = false
+opt.writebackup = false
+opt.cindent = false -- check
+opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
+opt.winborder = "rounded"
+opt.isfname:append("(") -- " @windows: nextjs and sveltekit folder name pattern
+opt.swapfile = false
+opt.wrap = false
+opt.history = 20
+opt.timeout = false
+-- opt.timeoutlen = 200
+opt.autoread = true
 
-vim.wo.signcolumn = "no"
-vim.wo.relativenumber = true
-vim.wo.wrap = false
+wo.signcolumn = "no"
+wo.relativenumber = true
+wo.wrap = false
 
-vim.opt.linespace = 5
-vim.opt.cmdheight = 1
-vim.opt.showcmdloc = "statusline"
+opt.linespace = 5
+opt.cmdheight = 1
+opt.showcmdloc = "statusline"
 
 -- work around on python default configs
-vim.g.python_indent = {
+g.python_indent = {
   disable_parentheses_indenting = false,
   closed_paren_align_last_line = false,
   searchpair_timeout = 150,
@@ -59,215 +119,217 @@ vim.g.python_indent = {
 -- MAPPING --
 
 local function esc_normal_mode()
-  for _, win in ipairs(vim.api.nvim_list_wins()) do
-    local config = vim.api.nvim_win_get_config(win)
+  local wins = nvim_list_wins()
+  for i = 1, #wins do
+    local win = wins[i]
+    local config = nvim_win_get_config(win)
     if config.relative == "win" or config.relative == "laststatus" then
-      vim.api.nvim_win_close(win, false)
+      nvim_win_close(win, false)
     end
   end
-  vim.snippet.stop()
-  vim.cmd.nohl()
-  vim.cmd.normal({ "", bang = true })
+  snippet_stop()
+  nohl()
+  normal({ "", bang = true })
 end
 
-vim.keymap.set("n", "<esc>", esc_normal_mode)
+keymap_set("n", "<esc>", esc_normal_mode)
 
 pcall(vim.keymap.del, "n", "gcc")
-vim.keymap.set("n", "gc", function()
-  local row = vim.api.nvim_win_get_cursor(0)[1]
-  require("vim._comment").toggle_lines(row, row)
+keymap_set("n", "gc", function()
+  local row = nvim_win_get_cursor(0)[1]
+  comment.toggle_lines(row, row)
 end, { noremap = true, silent = true })
 
-vim.keymap.set({ "i", "s" }, "<esc>", function()
-  vim.snippet.stop()
+keymap_set({ "i", "s" }, "<esc>", function()
+  snippet_stop()
   return "<esc>"
 end, { expr = true })
 
 -- vim.keymap.set("i", "<s-enter>", "<c-o>O") -- new line up
 -- vim.keymap.set("i", "<c-enter>", "<c-o>o") -- new line down
 
-vim.keymap.set({ "n", "v" }, "<s-s>", function()
-  vim.cmd.write({ bang = true, mods = { silent = true } })
+keymap_set({ "n", "v" }, "<s-s>", function()
+  cmd.write({ bang = true, mods = { silent = true } })
 end) -- save file
 
-vim.keymap.set("n", "\\", vim.cmd.close) -- close current window
-vim.keymap.set("n", "|", vim.cmd.vsplit) -- split vertical window
-vim.keymap.set("n", "_", vim.cmd.split) -- split horizontal window
-vim.keymap.set("n", "<c-9>", "<c-w>o") -- close other windows
-vim.keymap.set("n", "<c-8>", "<c-w>r") -- rotate windows
+keymap_set("n", "\\", cmd.close) -- close current window
+keymap_set("n", "|", cmd.vsplit) -- split vertical window
+keymap_set("n", "_", cmd.split) -- split horizontal window
+keymap_set("n", "<c-9>", "<c-w>o") -- close other windows
+keymap_set("n", "<c-8>", "<c-w>r") -- rotate windows
 
 -- resize windows
-vim.keymap.set("n", "<c-=>", function()
-  vim.cmd.wincmd({ "=", mods = { silent = true } })
+keymap_set("n", "<c-=>", function()
+  wincmd({ "=", mods = { silent = true } })
 end) -- resize all windows
 
-vim.keymap.set("n", "<c-6>", function()
-  vim.cmd.resize({ "+2", mods = { vertical = true } })
+keymap_set("n", "<c-6>", function()
+  resize({ "+2", mods = { vertical = true } })
 end) -- make the window biger   vertically
-vim.keymap.set("n", "<c-4>", function()
-  vim.cmd.resize({ "-2", mods = { vertical = true } })
+keymap_set("n", "<c-4>", function()
+  resize({ "-2", mods = { vertical = true } })
 end) -- make the window smaller vertically
-vim.keymap.set("n", "<c-8>", function()
-  vim.cmd.resize({ "+2", mods = { horizontal = true } })
+keymap_set("n", "<c-8>", function()
+  resize({ "+2", mods = { horizontal = true } })
 end) -- make the window bigger  horizontally
-vim.keymap.set("n", "<c-5>", function()
-  vim.cmd.resize({ "-2", mods = { horizontal = true } })
+keymap_set("n", "<c-5>", function()
+  resize({ "-2", mods = { horizontal = true } })
 end) -- make the window smaller horizontally
 
-local function wincmd(dir)
-  vim.cmd.wincmd({ dir, mods = { silent = true } })
+local function _wincmd(dir)
+  wincmd({ dir, mods = { silent = true } })
 end
 
-vim.keymap.set("n", "<left>", function()
-  wincmd("h")
+keymap_set("n", "<left>", function()
+  _wincmd("h")
 end) -- move to window left
-vim.keymap.set("n", "<down>", function()
-  wincmd("j")
+keymap_set("n", "<down>", function()
+  _wincmd("j")
 end) -- move to window down
-vim.keymap.set("n", "<up>", function()
-  wincmd("k")
+keymap_set("n", "<up>", function()
+  _wincmd("k")
 end) -- move to window up
-vim.keymap.set("n", "<right>", function()
-  wincmd("l")
+keymap_set("n", "<right>", function()
+  _wincmd("l")
 end) -- move to window right
 
-vim.keymap.set("n", "<cr>", "<nop>")
+keymap_set("n", "<cr>", "<nop>")
 
-vim.keymap.set("n", "Y", "yg$") -- yank to end of line considering line wrap
+keymap_set("n", "Y", "yg$") -- yank to end of line considering line wrap
 
-vim.keymap.set({ "n", "v" }, "<PageUp>", "<c-u>zzzz", { noremap = true }) -- page up
-vim.keymap.set({ "n", "v" }, "<PageDown>", "<c-d>zzzz", { noremap = true }) -- page down
+keymap_set({ "n", "v" }, "<PageUp>", "<c-u>zzzz", { noremap = true }) -- page up
+keymap_set({ "n", "v" }, "<PageDown>", "<c-d>zzzz", { noremap = true }) -- page down
 
-vim.keymap.set("i", "<PageUp>", "<nop>", { noremap = true }) -- page up
-vim.keymap.set("i", "<PageDown>", "<nop>", { noremap = true }) -- page down
+keymap_set("i", "<PageUp>", "<nop>", { noremap = true }) -- page up
+keymap_set("i", "<PageDown>", "<nop>", { noremap = true }) -- page down
 
-vim.keymap.set({ "i", "c" }, "<c-v>", [[<c-r>+]]) -- paste to command line mode
+keymap_set({ "i", "c" }, "<c-v>", [[<c-r>+]]) -- paste to command line mode
 
-vim.keymap.set("n", "u", function()
-  vim.cmd.undo({ mods = { silent = true } })
-  vim.cmd.redrawstatus()
+keymap_set("n", "u", function()
+  undo({ mods = { silent = true } })
+  redrawstatus()
 end)
 
-vim.keymap.set("n", "<C-r>", function()
-  vim.cmd.redo({ mods = { silent = true } })
-  vim.cmd.redrawstatus()
+keymap_set("n", "<C-r>", function()
+  redo({ mods = { silent = true } })
+  redrawstatus()
 end)
 
-vim.keymap.set("v", "v", "V", { noremap = true }) -- visual line mode
+keymap_set("v", "v", "V", { noremap = true }) -- visual line mode
 
-vim.keymap.set("c", "<c-bs>", "<c-w>") -- delete previous word (cmd)
+keymap_set("c", "<c-bs>", "<c-w>") -- delete previous word (cmd)
 
-vim.keymap.set("n", "x", '"_x') -- delete current char without copying
-vim.keymap.set("n", "<c-d>", '"_dd') -- delete line without copying
-vim.keymap.set("v", "x", '"_d') -- delete char in visual mode without copying
-vim.keymap.set({ "n", "v" }, "c", '"_c') -- change verb without copying
+keymap_set("n", "x", '"_x') -- delete current char without copying
+keymap_set("n", "<c-d>", '"_dd') -- delete line without copying
+keymap_set("v", "x", '"_d') -- delete char in visual mode without copying
+keymap_set({ "n", "v" }, "c", '"_c') -- change verb without copying
 
-vim.keymap.set("n", "dx", '"_d') -- delete without copying to register @check working ok with default timeoutlen
+keymap_set("n", "dx", '"_d') -- delete without copying to register @check working ok with default timeoutlen
 
-vim.keymap.set("n", "*", function()
-  vim.fn.setreg("/", "\\<" .. vim.fn.expand("<cword>") .. "\\>")
-  vim.opt.hlsearch = true
+keymap_set("n", "*", function()
+  setreg("/", "\\<" .. expand("<cword>") .. "\\>")
+  opt.hlsearch = true
 end)
-vim.keymap.set("v", "*", '"sy/\\V<c-r>s<cr>``') -- highlight all occurencies of the curren selection
+keymap_set("v", "*", '"sy/\\V<c-r>s<cr>``') -- highlight all occurencies of the curren selection
 
 -- go to beginning of the line function like DOOM Emacs
 local function beginning_of_the_line()
-  local old_pos = vim.fn.col(".")
-  vim.cmd.normal("^")
-  if old_pos == vim.fn.col(".") then
-    vim.fn.setpos(".", { 0, vim.fn.line("."), 0, 0 })
+  local old_pos = get_col(".")
+  normal("^")
+  if old_pos == get_col(".") then
+    setpos(".", { 0, line("."), 0, 0 })
   end
 end
 
-vim.keymap.set("i", "<home>", beginning_of_the_line) -- go to beginning of the line
-vim.keymap.set({ "n", "v" }, "(", beginning_of_the_line) -- go to beginning of the line
-vim.keymap.set("n", ")", "$") -- go to end of line
-vim.keymap.set("v", ")", "$h") -- go to end of line (for some reason it's goes to wrong place in visual mode)
+keymap_set("i", "<home>", beginning_of_the_line) -- go to beginning of the line
+keymap_set({ "n", "v" }, "(", beginning_of_the_line) -- go to beginning of the line
+keymap_set("n", ")", "$") -- go to end of line
+keymap_set("v", ")", "$h") -- go to end of line (for some reason it's goes to wrong place in visual mode)
 
 -- duplicate line and lines
-vim.keymap.set("n", "<c-c>", function()
-  vim.cmd.normal('"0yy"0p')
+keymap_set("n", "<c-c>", function()
+  normal('"0yy"0p')
 end) -- duplicate line down
-vim.keymap.set("v", "<c-c>", function()
-  vim.cmd.normal('"0y"0Pgv')
+keymap_set("v", "<c-c>", function()
+  normal('"0y"0Pgv')
 end) -- like sublime duplicate line
 
 -- duplicate and comment
-vim.keymap.set("n", "<c-s-c>", function()
-  vim.cmd.normal('0yygc"0p')
+keymap_set("n", "<c-s-c>", function()
+  normal('0yygc"0p')
 end)
-vim.keymap.set("v", "<c-s-c>", function()
-  vim.cmd.normal('gcgv"0y"0Pgvgc')
+keymap_set("v", "<c-s-c>", function()
+  normal('gcgv"0y"0Pgvgc')
 end)
 
-vim.keymap.set("n", "<f4>", function()
-  vim.cmd.edit("$MYVIMRC")
+keymap_set("n", "<f4>", function()
+  edit("$MYVIMRC")
 end) -- open config file (vimrc or init.lua)
-vim.keymap.set("n", "<f5>", function()
-  vim.cmd.source("%")
+keymap_set("n", "<f5>", function()
+  source("%")
 end) -- execute current file (vim or lua)
-vim.keymap.set("n", "<f8>", function()
-  vim.cmd.edit("~/.config/ghostty/config")
+keymap_set("n", "<f8>", function()
+  edit("~/.config/ghostty/config")
 end) -- open ghostty config file (vimrc or init.lua)
-vim.keymap.set("n", "<f11>", function()
+keymap_set("n", "<f11>", function()
   vim.notify("Words: " .. vim.fn.wordcount().words)
 end) -- Count words of the current buffer
 
-vim.keymap.set("n", "`", "<C-^>") -- back to last buffer
+keymap_set("n", "`", "<C-^>") -- back to last buffer
 
-vim.keymap.set("n", "<f1>", vim.cmd.Inspect) -- inspect current token treesitter
-vim.keymap.set("n", "<f3>", vim.cmd.InspectTree) -- inspect current token treesitter
+keymap_set("n", "<f1>", cmd.Inspect) -- inspect current token treesitter
+keymap_set("n", "<f3>", cmd.InspectTree) -- inspect current token treesitter
 
 -- when it's not in lsp
-vim.keymap.set("n", "K", "<nop>")
+keymap_set("n", "K", "<nop>")
 
 -- -- add undo capabilities in insert mode
--- vim.keymap.set("i", "<space>", "<c-g>u<space>")
--- vim.keymap.set("i", "<enter>", "<c-g>u<enter>")
--- vim.keymap.set("i", "<tab>", "<c-g>u<tab>")
--- vim.keymap.set("i", "<bs>", "<c-g>u<bs>")
--- vim.keymap.set("i", "<c-bs>", "<c-g>u<c-bs>")
--- vim.keymap.set("i", "[", "[<c-g>u")
--- vim.keymap.set("i", "{", "{<c-g>u")
--- vim.keymap.set("i", "(", "(<c-g>u")
--- vim.keymap.set("i", "]", "]<c-g>u")
--- vim.keymap.set("i", "}", "}<c-g>u")
--- vim.keymap.set("i", ")", ")<c-g>u")
--- vim.keymap.set("i", ",", ",<c-g>u")
--- vim.keymap.set("i", ".", ".<c-g>u")
+-- keymap_set("i", "<space>", "<c-g>u<space>")
+-- keymap_set("i", "<enter>", "<c-g>u<enter>")
+-- keymap_set("i", "<tab>", "<c-g>u<tab>")
+-- keymap_set("i", "<bs>", "<c-g>u<bs>")
+-- keymap_set("i", "<c-bs>", "<c-g>u<c-bs>")
+-- keymap_set("i", "[", "[<c-g>u")
+-- keymap_set("i", "{", "{<c-g>u")
+-- keymap_set("i", "(", "(<c-g>u")
+-- keymap_set("i", "]", "]<c-g>u")
+-- keymap_set("i", "}", "}<c-g>u")
+-- keymap_set("i", ")", ")<c-g>u")
+-- keymap_set("i", ",", ",<c-g>u")
+-- keymap_set("i", ".", ".<c-g>u")
 
 -- visual mode - paste without copying
-vim.keymap.set({ "v", "x" }, "p", "P")
+keymap_set({ "v", "x" }, "p", "P")
 
 -- Open mini.pick buffer selection if not do this.
-vim.keymap.set("n", "<c-i>", "<c-i>")
+keymap_set("n", "<c-i>", "<c-i>")
 
 -- closes the current window and buffer
 -- to close the current buffer and not the window use <c-w>
-vim.keymap.set("n", "<c-s-x>", vim.cmd.bdelete()) -- close current buffer and window -- not work with ghostty (combination in use)
+keymap_set("n", "<c-s-x>", cmd.bdelete()) -- close current buffer and window -- not work with ghostty (combination in use)
 
 -- close quickfix menu after selecting choice
-vim.api.nvim_create_autocmd("FileType", {
+nvim_create_autocmd("FileType", {
   pattern = { "qf" },
   callback = function()
     local function enter_and_close()
-      vim.cmd.cc(vim.fn.line("."))
-      vim.cmd.cclose()
+      cc(line("."))
+      cclose()
     end
-    vim.keymap.set("n", "<cr>", enter_and_close, { buffer = true })
-    vim.keymap.set("n", "o", enter_and_close, { buffer = true })
-    vim.keymap.set("n", "q", vim.cmd.cclose, { buffer = true })
-    vim.keymap.set("n", "<esc>", vim.cmd.cclose, { buffer = true })
+    keymap_set("n", "<cr>", enter_and_close, { buffer = true })
+    keymap_set("n", "o", enter_and_close, { buffer = true })
+    keymap_set("n", "q", cclose, { buffer = true })
+    keymap_set("n", "<esc>", cclose, { buffer = true })
   end,
 })
 
-vim.api.nvim_create_autocmd("FocusGained", {
+nvim_create_autocmd("FocusGained", {
   callback = function()
-    vim.cmd.checktime({ mods = { silent = true } })
+    checktime({ mods = { silent = true } })
   end,
 })
 
-vim.api.nvim_create_autocmd("FileType", {
+nvim_create_autocmd("FileType", {
   pattern = {
     "css",
     "javascript",
@@ -276,14 +338,14 @@ vim.api.nvim_create_autocmd("FileType", {
     "typescriptreact",
   },
   callback = function(args)
-    if not vim.g.editorconfig then
-      vim.api.nvim_set_option_value("shiftwidth", 2, { buf = args.buf })
-      vim.api.nvim_set_option_value("tabstop", 2, { buf = args.buf })
+    if not g.editorconfig then
+      nvim_set_option_value("shiftwidth", 2, { buf = args.buf })
+      nvim_set_option_value("tabstop", 2, { buf = args.buf })
     end
   end,
 })
 
-vim.api.nvim_create_autocmd("FileType", {
+nvim_create_autocmd("FileType", {
   pattern = {
     "eex",
     "heex",
@@ -294,70 +356,71 @@ vim.api.nvim_create_autocmd("FileType", {
     "svelte",
   },
   callback = function(args)
-    vim.api.nvim_set_option_value("shiftwidth", 2, { buf = args.buf })
-    vim.api.nvim_set_option_value("tabstop", 2, { buf = args.buf })
+    nvim_set_option_value("shiftwidth", 2, { buf = args.buf })
+    nvim_set_option_value("tabstop", 2, { buf = args.buf })
   end,
 })
 
-vim.keymap.set("n", "<", "<<", { nowait = true, remap = true }) -- indent left
-vim.keymap.set("n", ">", ">>", { nowait = true, remap = true }) -- indent right
+keymap_set("n", "<", "<<", { nowait = true, remap = true }) -- indent left
+keymap_set("n", ">", ">>", { nowait = true, remap = true }) -- indent right
 
 local cow = require("close_other_window")
-vim.keymap.set({ "n", "v" }, "<c-left>", cow.left)
-vim.keymap.set({ "n", "v" }, "<c-down>", cow.down)
-vim.keymap.set({ "n", "v" }, "<c-up>", cow.up)
-vim.keymap.set({ "n", "v" }, "<c-right>", cow.right)
+keymap_set({ "n", "v" }, "<c-left>", cow.left)
+keymap_set({ "n", "v" }, "<c-down>", cow.down)
+keymap_set({ "n", "v" }, "<c-up>", cow.up)
+keymap_set({ "n", "v" }, "<c-right>", cow.right)
 
 local sb = require("swap_buffer")
-vim.keymap.set({ "n", "v" }, "<s-left>", sb.left)
-vim.keymap.set({ "n", "v" }, "<s-down>", sb.down)
-vim.keymap.set({ "n", "v" }, "<s-up>", sb.up)
-vim.keymap.set({ "n", "v" }, "<s-right>", sb.right)
+keymap_set({ "n", "v" }, "<s-left>", sb.left)
+keymap_set({ "n", "v" }, "<s-down>", sb.down)
+keymap_set({ "n", "v" }, "<s-up>", sb.up)
+keymap_set({ "n", "v" }, "<s-right>", sb.right)
 
 -- movements with timeout
-vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
+nvim_create_autocmd({ "BufEnter", "BufWinEnter", "WinEnter" }, {
   pattern = "*",
   callback = function()
-    vim.keymap.set({ "n", "v", "x" }, "[", function()
-      vim.diagnostic.jump({ count = -1, float = false })
+    keymap_set({ "n", "v", "x" }, "[", function()
+      diag_jump({ count = -1, float = false })
     end, { nowait = true, buffer = true }) -- previous diagnostic
-    vim.keymap.set({ "n", "v", "x" }, "]", function()
-      vim.diagnostic.jump({ count = 1, float = false })
+    keymap_set({ "n", "v", "x" }, "]", function()
+      diag_jump({ count = 1, float = false })
     end, { nowait = true, buffer = true }) -- next diagnostic
 
     -- move indentation
-    vim.keymap.set({ "v", "x" }, "<", function()
-      vim.cmd.normal({ "<gv", bang = true })
+    keymap_set({ "v", "x" }, "<", function()
+      normal({ "<gv", bang = true })
     end, { nowait = true, buffer = true })
 
-    vim.keymap.set({ "v", "x" }, ">", function()
-      vim.cmd.normal({ ">gv", bang = true })
+    keymap_set({ "v", "x" }, ">", function()
+      normal({ ">gv", bang = true })
     end, { nowait = true, buffer = true })
   end,
 })
 
-vim.api.nvim_create_autocmd("TextYankPost", {
+nvim_create_autocmd("TextYankPost", {
   group = vim.api.nvim_create_augroup("highlight-yank", { clear = true }),
   callback = function()
-    local yank = vim.v.event
+    local yank = v.event
     if yank.operator ~= "y" then
       return
     end
 
-    local pos1, pos2 = vim.fn.getpos("'["), vim.fn.getpos("']")
-    local region_list = vim.fn.getregionpos(pos1, pos2, { type = yank.regtype, eol = true })
+    local pos1, pos2 = getpos("'["), getpos("']")
+    local region_list = getregionpos(pos1, pos2, { type = yank.regtype, eol = true })
 
     local positions = {}
-    for _, region in ipairs(region_list) do
+    for i = 1, #region_list do
+      local region = region_list[i]
       local srow, scol, ecol = region[1][2], region[1][3], region[2][3]
       positions[#positions + 1] = { srow, scol, ecol - scol + 1 }
     end
 
-    local win = vim.api.nvim_get_current_win()
-    local id = vim.fn.matchaddpos("VisualYank", positions, 999) --[[@as integer]]
+    local win = nvim_get_current_win()
+    local id = matchaddpos("VisualYank", positions, 999) --[[@as integer]]
 
     vim.defer_fn(function()
-      pcall(vim.fn.matchdelete, id, win)
+      pcall(matchdelete, id, win)
     end, 200)
   end,
 })
@@ -375,24 +438,24 @@ vim.filetype.add({
   },
 })
 
-vim.api.nvim_create_autocmd("BufWritePre", {
+nvim_create_autocmd("BufWritePre", {
   pattern = "*",
   callback = function()
-    local save = vim.fn.winsaveview()
-    vim.cmd([[keeppatterns %s/\s+$//e]])
-    vim.fn.winrestview(save)
+    local save = winsaveview()
+    cmd([[keeppatterns %s/\s+$//e]])
+    winrestview(save)
   end,
 })
 
-if vim.g.neovide then
-  vim.g.neovide_input_ime = false
-  vim.g.neovide_cursor_animation_length = 0
-  vim.g.neovide_scroll_animation_length = 0
-  vim.g.neovide_cursor_trail_size = 0.0
-  vim.g.neovide_position_animation_length = 0.0
-  vim.g.neovide_refresh_rate = 144
-  vim.g.neovide_cursor_animate_in_insert_mode = false
-  vim.g.neovide_cursor_animate_in_command_line = false
+if g.neovide then
+  g.neovide_input_ime = false
+  g.neovide_cursor_animation_length = 0
+  g.neovide_scroll_animation_length = 0
+  g.neovide_cursor_trail_size = 0.0
+  g.neovide_position_animation_length = 0.0
+  g.neovide_refresh_rate = 144
+  g.neovide_cursor_animate_in_insert_mode = false
+  g.neovide_cursor_animate_in_command_line = false
 end
 
 -- GODOT BEGIN
@@ -439,7 +502,7 @@ if false then
 
     local started_godot_server = false
     if vim.fn.filereadable(cwd .. "/project.godot") == 1 and not is_server_running then
-      if vim.v.servername ~= addr then
+      if v.servername ~= addr then
         local ok = pcall(function()
           vim.fn.serverstart(addr)
         end)
@@ -450,7 +513,7 @@ if false then
       end
     end
 
-    vim.api.nvim_create_autocmd("VimLeavePre", {
+    nvim_create_autocmd("VimLeavePre", {
       callback = function()
         if started_godot_server then
           pcall(function()
@@ -463,26 +526,26 @@ if false then
 end
 -- GODOT END
 
--- vim.api.nvim_set_hl(0, "@attribute.gdscript", { fg = "#9B668F" })
-vim.api.nvim_set_hl(0, "@attribute.gdscript", { fg = "#96674E" })
--- vim.api.nvim_set_hl(0, "@string.special.url.gdscript", { fg = "#926C83" })
-vim.api.nvim_set_hl(0, "@string.special.url.gdscript", { fg = "#9B668F" })
+-- nvim_set_hl(0, "@attribute.gdscript", { fg = "#9B668F" })
+nvim_set_hl(0, "@attribute.gdscript", { fg = "#96674E" })
+-- nvim_set_hl(0, "@string.special.url.gdscript", { fg = "#926C83" })
+nvim_set_hl(0, "@string.special.url.gdscript", { fg = "#9B668F" })
 
-vim.api.nvim_set_hl(0, "DiagnosticLineNumhlError", { fg = "#a1495c", bg = "#221418" })
-vim.api.nvim_set_hl(0, "DiagnosticLineNumhlWarn", { fg = "#a1495c", bg = "#221c12" })
-vim.api.nvim_set_hl(0, "DiagnosticLineNumhlInfo", { fg = "#a1495c", bg = "#1c1a1c" })
-vim.api.nvim_set_hl(0, "DiagnosticLineNumhlHint", { fg = "#a1495c", bg = "#1a1a1a" })
+nvim_set_hl(0, "DiagnosticLineNumhlError", { fg = "#a1495c", bg = "#221418" })
+nvim_set_hl(0, "DiagnosticLineNumhlWarn", { fg = "#a1495c", bg = "#221c12" })
+nvim_set_hl(0, "DiagnosticLineNumhlInfo", { fg = "#a1495c", bg = "#1c1a1c" })
+nvim_set_hl(0, "DiagnosticLineNumhlHint", { fg = "#a1495c", bg = "#1a1a1a" })
 
-vim.api.nvim_set_hl(0, "CursorVisualNr", { fg = "#a1495c", bg = "#2d1524" })
-vim.api.nvim_set_hl(0, "VisualNr", { fg = "#493441", bg = "#2d1524" })
+nvim_set_hl(0, "CursorVisualNr", { fg = "#a1495c", bg = "#2d1524" })
+nvim_set_hl(0, "VisualNr", { fg = "#493441", bg = "#2d1524" })
 vim.o.statuscolumn = "%!v:lua.StatusColumn()"
 
 ---@type table<integer?, table<string, boolean|integer>>
 local visual_state = {}
 
 local function update_visual_cursor(buf)
-  local cursor_start = vim.fn.line("v")
-  local cursor_end = vim.fn.line(".")
+  local cursor_start = line("v")
+  local cursor_end = line(".")
   if cursor_start > cursor_end then
     cursor_start, cursor_end = cursor_end, cursor_start
   end
@@ -491,9 +554,9 @@ local function update_visual_cursor(buf)
   visual_state[buf].visual_end = cursor_end
 end
 
-vim.api.nvim_create_autocmd("ModeChanged", {
+nvim_create_autocmd("ModeChanged", {
   callback = function(ev)
-    local m = vim.api.nvim_get_mode().mode
+    local m = nvim_get_mode().mode
     local in_visual = m == "v" or m == "V" or m == "\x16"
 
     visual_state[ev.buf] = {
@@ -506,7 +569,7 @@ vim.api.nvim_create_autocmd("ModeChanged", {
   end,
 })
 
-vim.api.nvim_create_autocmd("CursorMoved", {
+nvim_create_autocmd("CursorMoved", {
   callback = function(ev)
     local state = visual_state[ev.buf]
     if not state or not state.in_visual then
@@ -517,7 +580,7 @@ vim.api.nvim_create_autocmd("CursorMoved", {
   end,
 })
 
-vim.api.nvim_create_autocmd("BufWipeout", {
+nvim_create_autocmd("BufWipeout", {
   callback = function(ev)
     visual_state[ev.buf] = nil
   end,
@@ -525,15 +588,15 @@ vim.api.nvim_create_autocmd("BufWipeout", {
 
 function _G.StatusColumn()
   local hl = " "
-  local relnum = vim.v.relnum
-  local win = vim.g.statusline_winid
-  local state = visual_state[vim.api.nvim_win_get_buf(win)]
+  local relnum = v.relnum
+  local win = g.statusline_winid
+  local state = visual_state[nvim_win_get_buf(win)]
 
-  if state and state.in_visual and win == vim.api.nvim_get_current_win() then
+  if state and state.in_visual and win == nvim_get_current_win() then
     if relnum == 0 then
       hl = "%#CursorVisualNr# "
     else
-      local lnum = vim.v.lnum
+      local lnum = v.lnum
       if lnum >= state.visual_start and lnum <= state.visual_end then
         hl = "%#VisualNr# "
       end
@@ -548,28 +611,26 @@ end
 local move_direction_up = 2
 local move_direction_down = 1
 local function move_lines(direction)
-  local state = visual_state[vim.api.nvim_get_current_buf()]
+  local state = visual_state[nvim_get_current_buf()]
   if not state then
     return
   end
 
   local vstart = state.visual_start
   local vend = state.visual_end
-  if
-    direction == move_direction_down and vend >= vim.fn.line("$") or direction == move_direction_up and vstart <= 1
-  then
+  if direction == move_direction_down and vend >= line("$") or direction == move_direction_up and vstart <= 1 then
     return
   end
 
-  vim.cmd.normal({ "\27", bang = true })
-  vim.cmd(string.format("%d,%dm %d", vstart, vend, direction == move_direction_down and vend + 1 or vstart - 2))
-  vim.cmd.normal({ "gv=gv", bang = true })
+  normal({ "\27", bang = true })
+  cmd(string_format("%d,%dm %d", vstart, vend, direction == move_direction_down and vend + 1 or vstart - 2))
+  normal({ "gv=gv", bang = true })
 end
 
-vim.keymap.set("x", "<Down>", function()
+keymap_set("x", "<Down>", function()
   move_lines(move_direction_down)
 end, { silent = true })
-vim.keymap.set("x", "<Up>", function()
+keymap_set("x", "<Up>", function()
   move_lines(move_direction_up)
 end, { silent = true })
 
@@ -578,7 +639,7 @@ local _select = require("vim.treesitter._select")
 local stack = {}
 
 local function decrement_selection()
-  local m = vim.api.nvim_get_mode().mode
+  local m = nvim_get_mode().mode
   if not (m == "v" or m == "V" or m == "\x16") then
     return
   end
@@ -587,114 +648,108 @@ local function decrement_selection()
   stack[#stack] = nil
 
   if #stack == 0 then
-    vim.api.nvim_feedkeys("\27", "nx", true)
+    nvim_feedkeys("\27", "nx", true)
     if range ~= nil then
-      vim.api.nvim_win_set_cursor(0, { range[1] + 1, range[2] })
+      nvim_win_set_cursor(0, { range[1] + 1, range[2] })
     end
     return
   end
 
-  vim.cmd.normal({ "v\27", bang = true })
-  vim.fn.setpos("'<", { 0, range[1] + 1, range[2] + 1, 0 })
-  vim.fn.setpos("'>", { 0, range[3] + 1, range[4], 0 })
-  vim.cmd.normal({ "gv", bang = true })
+  normal({ "v\27", bang = true })
+  setpos("'<", { 0, range[1] + 1, range[2] + 1, 0 })
+  setpos("'>", { 0, range[3] + 1, range[4], 0 })
+  normal({ "gv", bang = true })
 end
 
 local function increment_selection()
-  if not vim.treesitter.get_parser(nil, nil, { error = false }) then
+  if not get_parser(nil, nil, { error = false }) then
     return
   end
 
-  if vim.api.nvim_get_mode().mode ~= "v" then
+  if nvim_get_mode().mode ~= "v" then
     stack = {}
   end
 
-  local vline, vcol = vim.fn.line("v"), vim.fn.col("v")
-  local cline, ccol = vim.fn.line("."), vim.fn.col(".")
+  local vline, vcol = line("v"), get_col("v")
+  local cline, ccol = line("."), get_col(".")
 
   stack[#stack + 1] = { vline - 1, vcol - 1, cline - 1, ccol }
-  _select.select_parent(vim.v.count1)
+  _select.select_parent(v.count1)
 end
 
-vim.keymap.set({ "n", "v", "o" }, "M", decrement_selection, { noremap = true })
-vim.keymap.set({ "n", "x", "o" }, "m", increment_selection, { noremap = true })
-vim.keymap.set("x", "<Esc>", function()
+keymap_set({ "n", "v", "o" }, "M", decrement_selection, { noremap = true })
+keymap_set({ "n", "x", "o" }, "m", increment_selection, { noremap = true })
+keymap_set("x", "<Esc>", function()
   stack = {}
   return "<esc>"
 end, { expr = true })
 
 -- Better highlight
 -- https://coolors.co/gradient-palette/291c28-1e141d?number=7
-vim.api.nvim_set_hl(0, "CursorHidden", { blend = 100, bg = "#121112" })
-vim.api.nvim_set_hl(0, "CursorLineInative", { bg = "#20151F" })
-vim.api.nvim_set_hl(0, "CursorLineNrInative", { fg = "#a1495c", bg = "#20151F" })
+nvim_set_hl(0, "CursorHidden", { blend = 100, bg = "#121112" })
+nvim_set_hl(0, "CursorLineInative", { bg = "#20151F" })
+nvim_set_hl(0, "CursorLineNrInative", { fg = "#a1495c", bg = "#20151F" })
 
 local guicursor_default = "n:block-Cursor,i-ci-c:block-iCursor,v:block-vCursor"
 local guicursor_hidden = "n:block-Cursor,i-ci-c:block-iCursor,v:block-vCursor,a:CursorHidden/lCursorHidden"
 local cursor_line_active = "CursorLine:CursorLine,CursorLineNr:CursorLineNr"
 local cursor_line_inactive = "CursorLine:CursorLineInative,CursorLineNr:CursorLineNrInative"
 
-vim.api.nvim_set_option_value("guicursor", guicursor_default, {})
+nvim_set_option_value("guicursor", guicursor_default, {})
 
 local ignore_file_types = { NvimTree = true }
-vim.api.nvim_create_autocmd("WinEnter", {
+nvim_create_autocmd("WinEnter", {
   callback = function()
-    if ignore_file_types[vim.bo.filetype] then
-      vim.api.nvim_set_option_value("guicursor", guicursor_hidden, {})
+    if ignore_file_types[bo.filetype] then
+      nvim_set_option_value("guicursor", guicursor_hidden, {})
     else
-      vim.api.nvim_set_option_value("guicursor", guicursor_default, {})
+      nvim_set_option_value("guicursor", guicursor_default, {})
     end
   end,
 })
 
 local cmdline_active = false
-vim.api.nvim_create_autocmd("CmdlineEnter", {
+nvim_create_autocmd("CmdlineEnter", {
   callback = function()
-    if ignore_file_types[vim.bo.filetype] then
+    if ignore_file_types[bo.filetype] then
       cmdline_active = true
-      vim.schedule(function()
+      schedule(function()
         if cmdline_active then
-          vim.api.nvim_set_option_value("guicursor", guicursor_default, {})
-          vim.cmd.redraw()
+          nvim_set_option_value("guicursor", guicursor_default, {})
+          redraw()
         end
       end)
       return
     end
-    vim.cmd.redraw()
+    redraw()
   end,
 })
 
-vim.api.nvim_create_autocmd("CmdlineLeave", {
+nvim_create_autocmd("CmdlineLeave", {
   callback = function()
     cmdline_active = false
-    if ignore_file_types[vim.bo.filetype] then
-      vim.api.nvim_set_option_value("guicursor", guicursor_hidden, {})
+    if ignore_file_types[bo.filetype] then
+      nvim_set_option_value("guicursor", guicursor_hidden, {})
     end
   end,
 })
 
-vim.api.nvim_create_autocmd("WinEnter", {
+nvim_create_autocmd("WinEnter", {
   callback = function()
-    vim.api.nvim_set_option_value("winhighlight", cursor_line_active, { win = vim.api.nvim_get_current_win() })
+    nvim_set_option_value("winhighlight", cursor_line_active, { win = nvim_get_current_win() })
   end,
 })
 
-vim.api.nvim_create_autocmd("WinLeave", {
+nvim_create_autocmd("WinLeave", {
   callback = function()
-    vim.api.nvim_set_option_value("winhighlight", cursor_line_inactive, { win = vim.api.nvim_get_current_win() })
+    nvim_set_option_value("winhighlight", cursor_line_inactive, { win = nvim_get_current_win() })
   end,
 })
 
-vim.api.nvim_create_autocmd("FileType", {
+nvim_create_autocmd("FileType", {
   pattern = { "help", "text", "man" },
   callback = function()
-    vim.api.nvim_set_option_value("statuscolumn", "", { win = 0 })
-    vim.api.nvim_set_option_value("number", true, { win = 0 })
+    nvim_set_option_value("statuscolumn", "", { win = 0 })
+    nvim_set_option_value("number", true, { win = 0 })
   end,
-})
-
-vim.api.nvim_set_hl(0, "Cursorword", {
-  sp = "none",
-  fg = "none",
-  bg = "#2D2829",
 })
