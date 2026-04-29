@@ -33,12 +33,7 @@ local function get_word(line, col)
   return left .. right
 end
 
-local total_time = 0
-local call_count = 0
-
 local function highlight(mode)
-  local t = vim.uv.hrtime()
-
   local win = nvim_get_current_win()
 
   if disabled_bufs[nvim_get_current_buf()] then
@@ -82,8 +77,6 @@ local function highlight(mode)
   else
     clear(win)
   end
-  total_time = total_time + (vim.uv.hrtime() - t)
-  call_count = call_count + 1
 end
 
 local augroup = nvim_create_augroup("cursorword", { clear = true })
@@ -126,19 +119,6 @@ nvim_create_autocmd("FileType", {
     vim.b.cursorword_disable = true
   end,
 })
-
-vim.keymap.set("n", "<f12>", function()
-  print(
-    string.format(
-      "calls: %d | avg: %.3fµs | total: %.2fms",
-      call_count,
-      (total_time / call_count) / 1000,
-      total_time / 1000000
-    )
-  )
-  total_time = 0
-  call_count = 0
-end)
 
 nvim_create_autocmd({ "BufEnter", "FileType" }, {
   group = augroup,
