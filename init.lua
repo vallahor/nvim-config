@@ -242,6 +242,10 @@ vim.keymap.set({ "v", "x" }, "p", "P")
 -- Open mini.pick buffer selection if not do this.
 vim.keymap.set("n", "<c-i>", "<c-i>")
 
+-- closes the current window and buffer
+-- to close the current buffer and not the window use <c-w>
+vim.keymap.set("n", "<c-s-x>", vim.cmd.bdelete()) -- close current buffer and window -- not work with ghostty (combination in use)
+
 -- close quickfix menu after selecting choice
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "qf" },
@@ -539,6 +543,36 @@ function _G.StatusColumn()
   return hl .. (relnum < 10 and " " .. relnum or relnum)
 end
 
+-- Uses `visual_state[buf]` to get the visual position
+-- cached, instead of calculating it everytime.
+local move_direction_up = 2
+local move_direction_down = 1
+local function move_lines(direction)
+  local state = visual_state[vim.api.nvim_get_current_buf()]
+  if not state then
+    return
+  end
+
+  local vstart = state.visual_start
+  local vend = state.visual_end
+  if
+    direction == move_direction_down and vend >= vim.fn.line("$") or direction == move_direction_up and vstart <= 1
+  then
+    return
+  end
+
+  vim.cmd.normal({ "\27", bang = true })
+  vim.cmd(string.format("%d,%dm %d", vstart, vend, direction == move_direction_down and vend + 1 or vstart - 2))
+  vim.cmd.normal({ "gv=gv", bang = true })
+end
+
+vim.keymap.set("x", "<Down>", function()
+  move_lines(move_direction_down)
+end, { silent = true })
+vim.keymap.set("x", "<Up>", function()
+  move_lines(move_direction_up)
+end, { silent = true })
+
 local _select = require("vim.treesitter._select")
 ---@type { [1]:integer, [2]:integer, [3]:integer, [4]:integer }[]
 local stack = {}
@@ -672,18 +706,6 @@ vim.api.nvim_create_autocmd("WinLeave", {
   end,
 })
 
--- vim.api.nvim_create_autocmd("CmdlineLeave", {
---   callback = function()
---     vim.api.nvim_set_option_value("cmdheight", 0, {})
---   end,
--- })
---
--- vim.api.nvim_create_autocmd("CmdlineEnter", {
---   callback = function()
---     vim.api.nvim_set_option_value("cmdheight", 1, {})
---   end,
--- })
-
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "help", "text", "man" },
   callback = function()
@@ -691,34 +713,3 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.api.nvim_set_option_value("number", true, { win = 0 })
   end,
 })
-
--- Uses `visual_state[buf]` to get the visual position
--- cached, instead of calculating it everytime.
-local move_direction_up = 2
-local move_direction_down = 1
-local function move_lines(direction)
-  local buf = vim.api.nvim_get_current_buf()
-  local state = visual_state[buf]
-  if not state then
-    return
-  end
-
-  local vstart = state.visual_start
-  local vend = state.visual_end
-  if
-    direction == move_direction_down and vend >= vim.fn.line("$") or direction == move_direction_up and vstart <= 1
-  then
-    return
-  end
-
-  vim.cmd.normal({ "\27", bang = true })
-  vim.cmd(string.format("%d,%dm %d", vstart, vend, direction == move_direction_down and vend + 1 or vstart - 2))
-  vim.cmd.normal({ "gv=gv", bang = true })
-end
-
-vim.keymap.set("x", "<Down>", function()
-  move_lines(move_direction_down)
-end, { silent = true })
-vim.keymap.set("x", "<Up>", function()
-  move_lines(move_direction_up)
-end, { silent = true })
