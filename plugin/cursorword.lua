@@ -69,11 +69,12 @@ local function set_match_visual(win, lines)
   for i = 1, n do
     escaped[i] = string_gsub(lines[i], [[\]], [[\\]])
   end
-  local pattern = table_concat(escaped, [[\n]])
 
+  local pattern = table_concat(escaped, [[\n]])
   if last_pattern[win] == pattern then
     return
   end
+
   clear(win)
   last_pattern[win] = pattern
 
@@ -138,14 +139,8 @@ local function highlight(mode)
     local from = getpos("v")
     local to = getpos(".")
     local lines = getregion(from, to, { type = mode })
-    local n = #lines
 
-    if n == 0 then
-      clear(win)
-      return
-    end
-
-    if n == 1 then
+    if #lines == 1 then
       local text = lines[1]
       ---@cast text string
       if #text >= 2 then
@@ -154,15 +149,7 @@ local function highlight(mode)
         clear(win)
       end
     else
-      local total_len = 0
-      for i = 1, n do
-        total_len = total_len + #lines[i]
-      end
-      if total_len >= 2 then
-        set_match_visual(win, lines)
-      else
-        clear(win)
-      end
+      set_match_visual(win, lines)
     end
     return
   elseif mode ~= "n" and mode ~= "no" then
@@ -178,7 +165,7 @@ local function highlight(mode)
   end
 
   local word = get_word(line, col)
-  if #word >= 2 then
+  if #word >= 1 then
     set_match(win, [[\V\<]] .. escape(word, [[\]]) .. [[\>]], 100)
   else
     clear(win)
@@ -234,9 +221,3 @@ nvim_create_autocmd({ "BufEnter", "FileType" }, {
     disabled_bufs[ev.buf] = b[ev.buf].cursorword_disable or false
   end,
 })
-
-function aeho()
-  print(vim.inspect(matches))
-end
-
-vim.api.nvim_create_user_command("Aeho", aeho, {})
