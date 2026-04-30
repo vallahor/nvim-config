@@ -1,6 +1,4 @@
 local b = vim.b
-local matchadd = vim.fn.matchadd
-local matchdelete = vim.fn.matchdelete
 local escape = vim.fn.escape
 local getpos = vim.fn.getpos
 local getregion = vim.fn.getregion
@@ -11,9 +9,18 @@ local nvim_get_current_win = vim.api.nvim_get_current_win
 local nvim_get_current_buf = vim.api.nvim_get_current_buf
 local nvim_create_autocmd = vim.api.nvim_create_autocmd
 local nvim_create_augroup = vim.api.nvim_create_augroup
+local nvim_win_get_buf = vim.api.nvim_win_get_buf
+local nvim_buf_get_lines = vim.api.nvim_buf_get_lines
+local matchadd = vim.fn.matchadd
+local matchaddpos = vim.fn.matchaddpos
+local matchdelete = vim.fn.matchdelete
+local line_fn = vim.fn.line
 
 local string_sub = string.sub
 local string_match = string.match
+local string_find = string.find
+local string_gsub = string.gsub
+local table_concat = table.concat
 
 vim.api.nvim_set_hl(0, "Cursorword", {
   sp = "none",
@@ -22,16 +29,8 @@ vim.api.nvim_set_hl(0, "Cursorword", {
 })
 
 local disabled_bufs = {}
+local last_pattern = {}
 local matches = {}
-
-local function clear(win)
-  win = win or nvim_get_current_win()
-  local m = matches[win]
-  if m then
-    matchdelete(m.id, win)
-    matches[win] = nil
-  end
-end
 
 local function get_word(line, col)
   local left = string_match(string_sub(line, 1, col + 1), "[%w_]+$") or ""
@@ -39,16 +38,92 @@ local function get_word(line, col)
   return left .. right
 end
 
-local function set_match(win, pattern, priority)
+local function clear(win)
+  win = win or nvim_get_current_win()
   local m = matches[win]
-  if m and m.pattern == pattern then
+  if m then
+    local ids = m.ids
+    local n = #ids
+    for i = 1, n do
+      pcall(matchdelete, ids[i], win)
+    end
+    matches[win] = nil
+  end
+  last_pattern[win] = nil
+end
+
+local function set_match(win, pattern, priority)
+  if last_pattern[win] == pattern then
     return
   end
   clear(win)
+  last_pattern[win] = pattern
   matches[win] = {
-    pattern = pattern,
-    id = matchadd("Cursorword", pattern, priority, -1, { window = win }),
+    ids = { matchadd("Cursorword", pattern, priority, -1, { window = win }) },
   }
+end
+
+local function set_match_visual(win, lines)
+  local n = #lines
+  local escaped = {}
+  for i = 1, n do
+    escaped[i] = string_gsub(lines[i], [[\]], [[\\]])
+  end
+  local pattern = table_concat(escaped, [[\n]])
+
+  if last_pattern[win] == pattern then
+    return
+  end
+  clear(win)
+  last_pattern[win] = pattern
+
+  local buf = nvim_win_get_buf(win)
+  local top = line_fn("w0")
+  local bot = line_fn("w$")
+  local buf_lines = nvim_buf_get_lines(buf, top - 1, bot, false)
+  local total = #buf_lines
+  local offset = top - 1
+  local first = lines[1]
+  local last = lines[n]
+  local ids = {}
+  local ids_n = 0
+  local pos_tbl = { { 0, 0, 0 } }
+  local pos_entry = pos_tbl[1]
+
+  for row = 1, total - n + 1 do
+    local bl = buf_lines[row]
+    ---@cast bl string
+    local col = string_find(bl, first, 1, true)
+    if col then
+      local match = true
+      for i = 2, n - 1 do
+        if buf_lines[row + i - 1] ~= lines[i] then
+          match = false
+          break
+        end
+      end
+      if match and n > 1 then
+        if not string_find(buf_lines[row + n - 1], last, 1, true) then
+          match = false
+        end
+      end
+      if match then
+        for i = 1, n do
+          local l = lines[i]
+          local ll = #l
+          if ll >= 1 then
+            pos_entry[1] = offset + row + i - 1
+            pos_entry[2] = i == 1 and col or 1
+            pos_entry[3] = ll
+            ids_n = ids_n + 1
+            ids[ids_n] = matchaddpos("Cursorword", pos_tbl, 200, -1, { window = win })
+          end
+        end
+      end
+    end
+  end
+
+  matches[win] = { ids = ids }
 end
 
 local function highlight(mode)
@@ -63,28 +138,31 @@ local function highlight(mode)
     local from = getpos("v")
     local to = getpos(".")
     local lines = getregion(from, to, { type = mode })
+    local n = #lines
 
-    if #lines == 0 then
+    if n == 0 then
       clear(win)
       return
     end
 
-    local text
-    if #lines == 1 then
-      text = escape(lines[1], [[\]])
+    if n == 1 then
+      local text = lines[1]
+      ---@cast text string
+      if #text >= 2 then
+        set_match(win, [[\V]] .. escape(text, [[\]]), 10)
+      else
+        clear(win)
+      end
     else
-      text = table.concat(
-        vim.tbl_map(function(l)
-          return escape(l, [[\]])
-        end, lines),
-        [[\n]]
-      )
-    end
-
-    if #text >= 2 then
-      set_match(win, [[\V]] .. text, 10)
-    else
-      clear(win)
+      local total_len = 0
+      for i = 1, n do
+        total_len = total_len + #lines[i]
+      end
+      if total_len >= 2 then
+        set_match_visual(win, lines)
+      else
+        clear(win)
+      end
     end
     return
   elseif mode ~= "n" and mode ~= "no" then
@@ -101,7 +179,7 @@ local function highlight(mode)
 
   local word = get_word(line, col)
   if #word >= 2 then
-    set_match(win, [[\V\<]] .. escape(word, [[\]]) .. [[\>]], -2)
+    set_match(win, [[\V\<]] .. escape(word, [[\]]) .. [[\>]], 100)
   else
     clear(win)
   end
@@ -138,6 +216,7 @@ nvim_create_autocmd({ "InsertEnter", "TermEnter", "QuitPre" }, {
 nvim_create_autocmd("WinClosed", {
   group = augroup,
   callback = function(ev)
+    last_pattern[tonumber(ev.match)] = nil
     matches[tonumber(ev.match)] = nil
   end,
 })
@@ -155,3 +234,9 @@ nvim_create_autocmd({ "BufEnter", "FileType" }, {
     disabled_bufs[ev.buf] = b[ev.buf].cursorword_disable or false
   end,
 })
+
+function aeho()
+  print(vim.inspect(matches))
+end
+
+vim.api.nvim_create_user_command("Aeho", aeho, {})
