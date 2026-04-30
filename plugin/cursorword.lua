@@ -64,14 +64,25 @@ local function highlight(mode)
     local to = getpos(".")
     local lines = getregion(from, to, { type = mode })
 
-    if #lines ~= 1 then
+    if #lines == 0 then
       clear(win)
       return
     end
 
-    local text = lines[1]
-    if text and #text >= 2 then
-      set_match(win, [[\V]] .. escape(text, [[\]]), 10)
+    local text
+    if #lines == 1 then
+      text = escape(lines[1], [[\]])
+    else
+      text = table.concat(
+        vim.tbl_map(function(l)
+          return escape(l, [[\]])
+        end, lines),
+        [[\n]]
+      )
+    end
+
+    if #text >= 2 then
+      set_match(win, [[\V]] .. text, 10)
     else
       clear(win)
     end
