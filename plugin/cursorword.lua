@@ -62,7 +62,14 @@ local function highlight(mode)
   if mode == "v" or mode == "V" or mode == "\22" then
     local from = getpos("v")
     local to = getpos(".")
-    local text = getregion(from, to, { type = mode })[1]
+    local lines = getregion(from, to, { type = mode })
+
+    if #lines ~= 1 then
+      clear(win)
+      return
+    end
+
+    local text = lines[1]
     if text and #text >= 2 then
       set_match(win, [[\V]] .. escape(text, [[\]]), 10)
     else

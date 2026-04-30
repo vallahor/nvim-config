@@ -8,7 +8,7 @@ local line = vim.fn.line
 
 local string_format = string.format
 local visual_state = require("visual_state")
--- Uses `visual_state[buf]` to get the visual position
+-- Uses `visual_state[win]` to get the visual position
 -- cached, instead of calculating it everytime.
 local move_direction_up = 2
 local move_direction_down = 1
