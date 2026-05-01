@@ -17,7 +17,6 @@ local matchdelete = vim.fn.matchdelete
 local line_fn = vim.fn.line
 
 local string_sub = string.sub
-local string_match = string.match
 local string_find = string.find
 local string_gsub = string.gsub
 local table_concat = table.concat
@@ -32,10 +31,31 @@ local disabled_bufs = {}
 local last_pattern = {}
 local matches = {}
 
-local function get_word(line, col)
-  local left = string_match(string_sub(line, 1, col + 1), "[%w_]+$") or ""
-  local right = string_match(string_sub(line, col + 2), "^[%w_]+") or ""
-  return left .. right
+local byte = string.byte
+
+local function is_word_byte(_b)
+  return _b == 95 -- _
+    or (_b >= 48 and _b <= 57) -- 0-9
+    or (_b >= 65 and _b <= 90) -- A-Z
+    or (_b >= 97 and _b <= 122) -- a-z
+end
+
+local function get_word(line, col, rb)
+  local s = col + 1
+  local e = col + 1
+  local n = #line
+  -- expand left
+  local lb = byte(line, s - 1)
+  while s > 1 and lb and is_word_byte(lb) do
+    s = s - 1
+    lb = byte(line, s - 1)
+  end
+  -- expand right
+  while e <= n and rb and is_word_byte(rb) do
+    e = e + 1
+    rb = byte(line, e)
+  end
+  return string_sub(line, s, e - 1)
 end
 
 local function clear(win)
@@ -158,14 +178,14 @@ local function highlight(mode)
 
   local col = nvim_win_get_cursor(0)[2]
   local line = nvim_get_current_line()
-  local char = string_sub(line, col + 1, col + 1)
-  if not string_match(char, "[%w_]") then
+  local _b = byte(line, col + 1)
+  if not _b or not is_word_byte(_b) then
     clear(win)
     return
   end
 
-  local word = get_word(line, col)
-  if #word >= 1 then
+  local word = get_word(line, col, _b)
+  if #word > 0 then
     set_match(win, [[\V\<]] .. escape(word, [[\]]) .. [[\>]], 100)
   else
     clear(win)
