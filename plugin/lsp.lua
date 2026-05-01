@@ -54,13 +54,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
     end, opts)
     vim.keymap.set("n", "&", vim.diagnostic.open_float, opts)
     vim.keymap.set("n", "<f2>", vim.lsp.buf.rename, opts)
-
-    -- local client = vim.lsp.get_client_by_id(args.data.client_id)
-    -- if client and client:supports_method("textDocument/diagnostic") then
-    --   client:request("textDocument/diagnostic", {
-    --     textDocument = { uri = vim.uri_from_bufnr(bufnr) },
-    --   }, nil, bufnr)
-    -- end
   end,
 })
 
@@ -73,7 +66,6 @@ vim.lsp.config("gdscript", {
   cmd = { "ncat", "localhost", port },
 })
 
--- vim.lsp.config("lua_ls", {
 vim.lsp.config("emmylua_ls", {
   settings = {
     Lua = {
@@ -132,7 +124,6 @@ mason_lspconfig.setup({
     "clangd",
     "cssls",
     "emmylua_ls",
-    -- "lua_ls",
     "html",
     "jsonls",
     "rust_analyzer",

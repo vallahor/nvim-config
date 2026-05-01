@@ -114,7 +114,9 @@ mc.onSafeState(function()
   local selection_pos = {}
 
   for _, m in ipairs(vim.api.nvim_buf_get_extmarks(0, mc_ns, 0, -1, { details = true })) do
-    local details = m[4] --[[@as vim.api.keyset.extmark_details]]
+    local details = m[4]
+    ---@cast details vim.api.keyset.extmark_details
+
     local hl_group = details.hl_group
     if hl_group == "MultiCursorCursor" then
       cursor_pos[#cursor_pos + 1] = { m[2] + 1, m[3] + 1, details.end_col and (details.end_col - m[3]) or 1 }

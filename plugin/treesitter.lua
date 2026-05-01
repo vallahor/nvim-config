@@ -81,9 +81,6 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
--- require("nvim-treesitter.install").compilers = { "clang" }
--- require("nvim-treesitter.install").compilers = { "zig" }
-
 require("nvim-ts-autotag").setup()
 require("nvim-treesitter.endwise")
 require("ts-comments").setup()
