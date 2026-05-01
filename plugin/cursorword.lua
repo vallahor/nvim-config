@@ -134,11 +134,12 @@ local function set_match_visual(win, lines)
         end
       end
       if match then
+        local base = offset + row
         for i = 1, n do
           local ll = lens[i]
           if ll >= 1 then
             pos_n = pos_n + 1
-            pos[pos_n] = { offset + row + i - 1, i == 1 and col or 1, ll }
+            pos[pos_n] = { base + i - 1, i == 1 and col or 1, ll }
           end
         end
       end
