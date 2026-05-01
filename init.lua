@@ -53,11 +53,15 @@ opt.isfname:append("(") -- " @windows: nextjs and sveltekit folder name pattern
 opt.swapfile = false
 opt.wrap = false
 opt.timeout = false
+opt.timeoutlen = 0
 
 wo.signcolumn = "no"
 wo.relativenumber = true
 
 opt.linespace = 5
+
+g.loaded_matchit = 1
+g.defaults_keymaps = false
 
 -- work around on python default configs
 g.python_indent = {
