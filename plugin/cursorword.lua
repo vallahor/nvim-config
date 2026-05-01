@@ -14,7 +14,7 @@ local nvim_buf_get_lines = vim.api.nvim_buf_get_lines
 local matchadd = vim.fn.matchadd
 local matchaddpos = vim.fn.matchaddpos
 local matchdelete = vim.fn.matchdelete
-local line_fn = vim.fn.line
+local line = vim.fn.line
 
 local string_sub = string.sub
 local string_find = string.find
@@ -99,8 +99,8 @@ local function set_match_visual(win, lines)
   last_pattern[win] = pattern
 
   local buf = nvim_win_get_buf(win)
-  local top = line_fn("w0")
-  local bot = line_fn("w$")
+  local top = line("w0")
+  local bot = line("w$")
   local buf_lines = nvim_buf_get_lines(buf, top - 1, bot, false)
   local total = #buf_lines
   local offset = top - 1
@@ -108,8 +108,13 @@ local function set_match_visual(win, lines)
   local last = lines[n]
   local ids = {}
   local ids_n = 0
-  local pos_tbl = { { 0, 0, 0 } }
-  local pos_entry = pos_tbl[1]
+  local pos = {}
+  local pos_n = 0
+
+  local lens = {}
+  for i = 1, n do
+    lens[i] = #lines[i]
+  end
 
   for row = 1, total - n + 1 do
     local bl = buf_lines[row]
@@ -130,20 +135,20 @@ local function set_match_visual(win, lines)
       end
       if match then
         for i = 1, n do
-          local l = lines[i]
-          local ll = #l
+          local ll = lens[i]
           if ll >= 1 then
-            pos_entry[1] = offset + row + i - 1
-            pos_entry[2] = i == 1 and col or 1
-            pos_entry[3] = ll
-            ids_n = ids_n + 1
-            ids[ids_n] = matchaddpos("Cursorword", pos_tbl, 200, -1, { window = win })
+            pos_n = pos_n + 1
+            pos[pos_n] = { offset + row + i - 1, i == 1 and col or 1, ll }
           end
         end
       end
     end
   end
 
+  if pos_n > 0 then
+    ids_n = ids_n + 1
+    ids[ids_n] = matchaddpos("Cursorword", pos, 200, -1, { window = win })
+  end
   matches[win] = { ids = ids }
 end
 
