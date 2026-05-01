@@ -106,6 +106,8 @@ local function set_match_visual(win, lines)
   local offset = top - 1
   local first = lines[1]
   local last = lines[n]
+  local first_len = #first
+  local last_len = #last
   local ids = {}
   local ids_n = 0
   local pos = {}
@@ -119,8 +121,7 @@ local function set_match_visual(win, lines)
   for row = 1, total - n + 1 do
     local bl = buf_lines[row]
     ---@cast bl string
-    local col = string_find(bl, first, 1, true)
-    if col then
+    if #bl >= first_len and string_sub(bl, -first_len) == first then
       local match = true
       for i = 2, n - 1 do
         if buf_lines[row + i - 1] ~= lines[i] then
@@ -128,13 +129,15 @@ local function set_match_visual(win, lines)
           break
         end
       end
-      if match and n > 1 then
-        if not string_find(buf_lines[row + n - 1], last, 1, true) then
+      if match then
+        local last_line = buf_lines[row + n - 1]
+        if not last_line or #last_line < last_len or string_sub(last_line, 1, last_len) ~= last then
           match = false
         end
       end
       if match then
         local base = offset + row
+        local col = #bl - first_len + 1
         for i = 1, n do
           local ll = lens[i]
           if ll >= 1 then
