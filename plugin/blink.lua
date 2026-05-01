@@ -14,6 +14,9 @@ vim.pack.add({
 vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter" }, {
   once = true,
   callback = function()
+    local cmp_text_kind = require("blink.cmp.types").CompletionItemKind.Text
+    local cmp_item_kind = require("blink.cmp.types").CompletionItemKind
+
     ---@diagnostic disable: param-type-mismatch, missing-fields
     require("blink.cmp").setup({
       keymap = {
@@ -78,21 +81,23 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter" }, {
         providers = {
           lsp = {
             transform_items = function(_, items)
-              for _, item in ipairs(items) do
-                local cmp_item_kind = require("blink.cmp.types").CompletionItemKind
+              local result = {}
+              for i = 1, #items do
+                local item = items[i]
+                if item.kind ~= cmp_text_kind then
+                  if item.kind == cmp_item_kind.Property or item.kind == cmp_item_kind.Field then
+                    item.score_offset = item.score_offset + 1
+                  end
 
-                if item.kind == cmp_item_kind.Property or item.kind == cmp_item_kind.Field then
-                  item.score_offset = item.score_offset + 1
-                end
+                  if item.kind == cmp_item_kind.Operator then
+                    item.score_offset = item.score_offset - 1
+                  end
 
-                if item.kind == cmp_item_kind.Operator then
-                  item.score_offset = item.score_offset - 1
+                  result[#result + 1] = item
                 end
               end
 
-              return vim.tbl_filter(function(item)
-                return item.kind ~= require("blink.cmp.types").CompletionItemKind.Text
-              end, items)
+              return result
             end,
           },
           path = {
