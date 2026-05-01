@@ -182,14 +182,14 @@ local function highlight(mode)
   end
 
   local col = nvim_win_get_cursor(0)[2]
-  local line = nvim_get_current_line()
-  local _b = byte(line, col + 1)
+  local _line = nvim_get_current_line()
+  local _b = byte(_line, col + 1)
   if not _b or not is_word_byte(_b) then
     clear(win)
     return
   end
 
-  local word = get_word(line, col, _b)
+  local word = get_word(_line, col, _b)
   if #word > 0 then
     set_match(win, [[\V\<]] .. escape(word, [[\]]) .. [[\>]], 100)
   else
