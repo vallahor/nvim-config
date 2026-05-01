@@ -59,16 +59,16 @@ end
 
 local function clear(win)
   win = win or nvim_get_current_win()
-  local m = matches[win]
-  if m then
-    local ids = m.ids
-    local n = #ids
-    for i = 1, n do
-      pcall(matchdelete, ids[i], win)
-    end
-    matches[win] = nil
-  end
+
   last_pattern[win] = nil
+
+  local m = matches[win]
+  if not m then
+    return
+  end
+
+  matches[win] = nil
+  matchdelete(m.id, win)
 end
 
 local function set_match(win, pattern, priority)
@@ -77,9 +77,7 @@ local function set_match(win, pattern, priority)
   end
   clear(win)
   last_pattern[win] = pattern
-  matches[win] = {
-    ids = { matchadd("Cursorword", pattern, priority, -1, { window = win }) },
-  }
+  matches[win] = { id = matchadd("Cursorword", pattern, priority, -1, { window = win }) }
 end
 
 local function set_match_visual(win, lines)
@@ -107,10 +105,7 @@ local function set_match_visual(win, lines)
   local last = lines[n]
   local first_len = #first
   local last_len = #last
-  local ids = {}
-  local ids_n = 0
   local pos = {}
-  local pos_n = 0
 
   local lens = {}
   for i = 1, n do
@@ -140,19 +135,16 @@ local function set_match_visual(win, lines)
         for i = 1, n do
           local ll = lens[i]
           if ll >= 1 then
-            pos_n = pos_n + 1
-            pos[pos_n] = { base + i - 1, i == 1 and col or 1, ll }
+            pos[#pos + 1] = { base + i - 1, i == 1 and col or 1, ll }
           end
         end
       end
     end
   end
 
-  if pos_n > 0 then
-    ids_n = ids_n + 1
-    ids[ids_n] = matchaddpos("Cursorword", pos, 200, -1, { window = win })
+  if #pos > 0 then
+    matches[win] = { id = matchaddpos("Cursorword", pos, 200, -1, { window = win }) }
   end
-  matches[win] = { ids = ids }
 end
 
 local function highlight(mode)
