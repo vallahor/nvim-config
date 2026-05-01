@@ -17,7 +17,6 @@ local matchdelete = vim.fn.matchdelete
 local line = vim.fn.line
 
 local string_sub = string.sub
-local string_find = string.find
 local string_gsub = string.gsub
 local table_concat = table.concat
 
@@ -40,22 +39,22 @@ local function is_word_byte(_b)
     or (_b >= 97 and _b <= 122) -- a-z
 end
 
-local function get_word(line, col, rb)
+local function get_word(_line, col, rb)
   local s = col + 1
   local e = col + 1
-  local n = #line
+  local n = #_line
   -- expand left
-  local lb = byte(line, s - 1)
+  local lb = byte(_line, s - 1)
   while s > 1 and lb and is_word_byte(lb) do
     s = s - 1
-    lb = byte(line, s - 1)
+    lb = byte(_line, s - 1)
   end
   -- expand right
   while e <= n and rb and is_word_byte(rb) do
     e = e + 1
-    rb = byte(line, e)
+    rb = byte(_line, e)
   end
-  return string_sub(line, s, e - 1)
+  return string_sub(_line, s, e - 1)
 end
 
 local function clear(win)
