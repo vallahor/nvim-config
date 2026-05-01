@@ -13,7 +13,6 @@ local checktime = cmd.checktime
 local nohl = cmd.nohl
 
 local nvim_set_option_value = vim.api.nvim_set_option_value
-local nvim_set_hl = vim.api.nvim_set_hl
 local nvim_win_get_cursor = vim.api.nvim_win_get_cursor
 local nvim_list_wins = vim.api.nvim_list_wins
 local nvim_win_get_config = vim.api.nvim_win_get_config
@@ -450,7 +449,7 @@ if false then
 end
 -- GODOT END
 
--- nvim_set_hl(0, "@attribute.gdscript", { fg = "#9B668F" })
-nvim_set_hl(0, "@attribute.gdscript", { fg = "#96674E" })
--- nvim_set_hl(0, "@string.special.url.gdscript", { fg = "#926C83" })
-nvim_set_hl(0, "@string.special.url.gdscript", { fg = "#9B668F" })
+-- vim.api.nvim_set_hl(0, "@attribute.gdscript", { fg = "#9B668F" })
+vim.api.nvim_set_hl(0, "@attribute.gdscript", { fg = "#96674E" })
+-- vim.api.nvim_set_hl(0, "@string.special.url.gdscript", { fg = "#926C83" })
+vim.api.nvim_set_hl(0, "@string.special.url.gdscript", { fg = "#9B668F" })

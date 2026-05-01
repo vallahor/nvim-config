@@ -27,8 +27,8 @@ nvim_set_hl(0, "StatuslineModeOther", { link = "IncSearch" })
 local modes = setmetatable({
   ["n"] = { short = "N", hl = "%#StatuslineModeNormal#" },
   ["v"] = { short = "V", hl = "%#StatuslineModeVisual#" },
-  ["V"] = { short = "V-L", hl = "%#StatuslineModeVisual#" },
-  [CTRL_V] = { short = "V-B", hl = "%#StatuslineModeVisual#" },
+  ["V"] = { short = "L", hl = "%#StatuslineModeVisual#" },
+  [CTRL_V] = { short = "B", hl = "%#StatuslineModeVisual#" },
   ["s"] = { short = "S", hl = "%#StatuslineModeVisual#" },
   ["S"] = { short = "S-L", hl = "%#StatuslineModeVisual#" },
   [CTRL_S] = { short = "S-B", hl = "%#StatuslineModeVisual#" },
@@ -36,7 +36,7 @@ local modes = setmetatable({
   ["R"] = { short = "R", hl = "%#StatuslineModeReplace#" },
   ["c"] = { short = "C", hl = "%#StatuslineModeNormal#" },
   ["r"] = { short = "P", hl = "%#StatuslineModeOther#" },
-  ["!"] = { short = "Sh", hl = "%#StatuslineModeOther#" },
+  ["!"] = { short = "!", hl = "%#StatuslineModeOther#" },
   ["t"] = { short = "T", hl = "%#StatuslineModeOther#" },
   ["no"] = { short = "O", hl = "%#StatuslineModeOther#" },
 }, {
