@@ -60,14 +60,13 @@ end
 local function clear(win)
   win = win or nvim_get_current_win()
 
-  last_pattern[win] = nil
-
   local m = matches[win]
   if not m then
     return
   end
 
   matches[win] = nil
+  last_pattern[win] = nil
   matchdelete(m.id, win)
 end
 
