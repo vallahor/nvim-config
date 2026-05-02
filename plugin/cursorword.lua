@@ -127,14 +127,19 @@ local function set_match_visual(win, selected_lines)
       end
       if match then
         local last_line = buf_lines[row + n - 1]
-        if not last_line or #last_line < last_len or string_sub(last_line, 1, last_len) ~= last then
+        if
+          not last_line
+          or #last_line < last_len
+          or (#last_line > last_len and last_len == 0)
+          or string_sub(last_line, 1, last_len) ~= last
+        then
           match = false
         end
       end
       if match then
         local base = offset + row
         local col = #buf_line - first_len + 1
-        row = row + n
+        row = row + n + 1
         for i = 1, n do
           local line_len = lens[i]
           if line_len >= 1 then
