@@ -20,6 +20,9 @@ local string_sub = string.sub
 local string_gsub = string.gsub
 local table_concat = table.concat
 
+local min = math.min
+local max = math.max
+
 vim.api.nvim_set_hl(0, "Cursorword", {
   sp = "none",
   fg = "none",
@@ -79,11 +82,11 @@ local function set_match(win, pattern, priority)
   matches[win] = { id = matchadd("Cursorword", pattern, priority, -1, { window = win }) }
 end
 
-local function set_match_visual(win, lines)
-  local n = #lines
+local function set_match_visual(win, selected_lines)
+  local n = #selected_lines
   local escaped = {}
   for i = 1, n do
-    escaped[i] = string_gsub(lines[i], [[\]], [[\\]])
+    escaped[i] = string_gsub(selected_lines[i], [[\]], [[\\]])
   end
 
   local pattern = table_concat(escaped, [[\n]])
@@ -95,29 +98,29 @@ local function set_match_visual(win, lines)
   last_pattern[win] = pattern
 
   local buf = nvim_win_get_buf(win)
-  local top = line("w0")
-  local bot = line("w$")
+  local top = max(line("w0") - n, 1)
+  local bot = min(line("w$") + n, line("$"))
   local buf_lines = nvim_buf_get_lines(buf, top - 1, bot, false)
   local total = #buf_lines
   local offset = top - 1
-  local first = lines[1]
-  local last = lines[n]
+  local first = selected_lines[1]
+  local last = selected_lines[n]
   local first_len = #first
   local last_len = #last
   local pos = {}
 
   local lens = {}
   for i = 1, n do
-    lens[i] = #lines[i]
+    lens[i] = #selected_lines[i]
   end
 
   for row = 1, total - n + 1 do
-    local bl = buf_lines[row]
-    ---@cast bl string
-    if #bl >= first_len and string_sub(bl, -first_len) == first then
+    local buf_line = buf_lines[row]
+    ---@cast buf_line string
+    if #buf_line >= first_len and string_sub(buf_line, -first_len) == first then
       local match = true
       for i = 2, n - 1 do
-        if buf_lines[row + i - 1] ~= lines[i] then
+        if buf_lines[row + i - 1] ~= selected_lines[i] then
           match = false
           break
         end
@@ -130,11 +133,12 @@ local function set_match_visual(win, lines)
       end
       if match then
         local base = offset + row
-        local col = #bl - first_len + 1
+        local col = #buf_line - first_len + 1
+        row = row + n
         for i = 1, n do
-          local ll = lens[i]
-          if ll >= 1 then
-            pos[#pos + 1] = { base + i - 1, i == 1 and col or 1, ll }
+          local line_len = lens[i]
+          if line_len >= 1 then
+            pos[#pos + 1] = { base + i - 1, i == 1 and col or 1, line_len }
           end
         end
       end
@@ -162,6 +166,7 @@ local function highlight(mode)
     if #lines == 1 then
       local text = lines[1]
       ---@cast text string
+
       if #text >= 2 then
         set_match(win, [[\V]] .. escape(text, [[\]]), 10)
       else
