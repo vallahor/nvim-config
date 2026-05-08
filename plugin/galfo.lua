@@ -20,8 +20,8 @@ vim.api.nvim_create_autocmd("VimEnter", {
     local sidebar_visible_label = galfo.derive_hl("TablineVisible", { fg = focused.fg })
     local sidebar_sep = galfo.derive_hl("WinSeparator", { bg = fill.bg })
     local indicator_sep = galfo.derive_hl("TablineVisible", { bg = fill.bg })
-    local focused_separator = galfo.derive_hl("TablineFocused", { fg = fill.bg })
-    local visible_separator = galfo.derive_hl("TablineVisible", { fg = fill.bg })
+    -- local focused_separator = galfo.derive_hl("TablineFocused", { fg = fill.bg })
+    -- local visible_separator = galfo.derive_hl("TablineVisible", { fg = fill.bg })
     local focused_diag_error = galfo.derive_hl("TablineFocused", { fg = diag_error.fg })
     local visible_diag_error = galfo.derive_hl("TablineVisible", { fg = diag_error.fg })
     local focused_diag_warn = galfo.derive_hl("TablineFocused", { fg = diag_warn.fg })
@@ -36,6 +36,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
         visible = { default = "TablineVisible", modified = visible_modified },
         focused = { default = "TablineFocused", modified = focused_modified },
       },
+      always_show_path = false,
       indicators = {
         first = { text = "", highlight = indicator_sep },
         last = { text = "", highlight = indicator_sep },
@@ -51,47 +52,47 @@ vim.api.nvim_create_autocmd("VimEnter", {
         },
       },
       icons = {
-        enabled = true,
+        enabled = false,
       },
       last_icon_blend = true,
       -- dynamic = { diagnostics = true, focused = { diagnostics = false }, visible = { diagnostics = true } },
       dynamic = { index = false, diagnostics = false },
       tabs = {
-        {
-          -- static = " ",
-          static = " ",
-          highlights = {
-            visible = { default = visible_separator, modified = visible_separator },
-            -- visible = { default = focused_diag_warn, modified = focused_diag_warn },
-            focused = { default = focused_separator, modified = focused_separator },
-          },
-        },
-        {
-          icon = function(icon, _tab)
-            return _tab.is_pinned and "󰐃" or icon
-            -- return icon
-          end,
-          on_click = function(buf)
-            galfo.toggle_pin(buf)
-          end,
-          -- highlights = {
-          --   focused = { default = focused_diag_error, modified = focused_diag_mod_error },
-          --   visible = { default = visible_diag_error, modified = visible_diag_mod_error },
-          -- },
-        },
+        -- {
+        --   -- static = " ",
+        --   static = " ",
+        --   highlights = {
+        --     visible = { default = visible_separator, modified = visible_separator },
+        --     -- visible = { default = focused_diag_warn, modified = focused_diag_warn },
+        --     focused = { default = focused_separator, modified = focused_separator },
+        --   },
+        -- },
+        -- {
+        --   icon = function(icon, _tab)
+        --     return _tab.is_pinned and "󰐃" or icon
+        --     -- return icon
+        --   end,
+        --   on_click = function(buf)
+        --     galfo.toggle_pin(buf)
+        --   end,
+        --   -- highlights = {
+        --   --   focused = { default = focused_diag_error, modified = focused_diag_mod_error },
+        --   --   visible = { default = visible_diag_error, modified = visible_diag_mod_error },
+        --   -- },
+        -- },
         { static = " " },
         {
           text = function(tab)
-            -- tab.unique_prefix:gsub("/", "\\") -- windows way
-            return tab.unique_prefix .. tab.name
+            -- tab.path:gsub("/", "\\") -- windows way
+            return tab.path .. tab.name
             -- return tab.index
             --   .. ": "
-            --   .. tab.unique_prefix
+            --   .. tab.path
             --   .. tab.name
             -- .. (tab.is_modified and string.rep(" ", math.floor(#tab.name * 2)) or "")
             -- .. (tab.is_focused and string.rep(" ", #tab.name) or "")
             -- .. (not tab.is_focused and "               " or "")
-            -- return tab.unique_prefix .. tab.name
+            -- return tab.path .. tab.name
           end,
           highlights = {
             diagnostics = {
@@ -139,29 +140,29 @@ vim.api.nvim_create_autocmd("VimEnter", {
         --   },
         -- },
         -- { static = " " },
-        {
-          icon_custom = function()
-            return "󰅖"
-          end,
-          on_click = function(bufnr, clicks, button, mods)
-            galfo.close_tab(bufnr, false)
-          end,
-        },
-        {
-          static = " ",
-          -- static = "▕",
-          -- static = " ",
-          -- text = function(tab)
-          --   return not tab.is_focused and " |" or " "
-          -- end,
-          highlights = {
-            visible = { default = visible_separator, modified = visible_separator },
-            -- visible = { default = focused_diag_warn, modified = focused_diag_warn },
-            focused = { default = focused_separator, modified = focused_separator },
-            -- visible = { default = visible_separator, modified = visible_separator },
-            -- focused = { default = focused_separator, modified = focused_separator },
-          },
-        },
+        -- {
+        --   icon_custom = function()
+        --     return "󰅖"
+        --   end,
+        --   on_click = function(bufnr, clicks, button, mods)
+        --     galfo.close_tab(bufnr, false)
+        --   end,
+        -- },
+        -- {
+        --   static = " ",
+        --   -- static = "▕",
+        --   -- static = " ",
+        --   -- text = function(tab)
+        --   --   return not tab.is_focused and " |" or " "
+        --   -- end,
+        --   highlights = {
+        --     visible = { default = visible_separator, modified = visible_separator },
+        --     -- visible = { default = focused_diag_warn, modified = focused_diag_warn },
+        --     focused = { default = focused_separator, modified = focused_separator },
+        --     -- visible = { default = visible_separator, modified = visible_separator },
+        --     -- focused = { default = focused_separator, modified = focused_separator },
+        --   },
+        -- },
       },
       on_buf_replaced = function(cur_win, win)
         local hl = cur_win == win and cursor_line_active or cursor_line_inactive

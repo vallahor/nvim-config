@@ -97,12 +97,13 @@ vim.api.nvim_create_autocmd("ColorScheme", {
   end,
 })
 
+local matchdelete = vim.fn.matchdelete
 local mc_ns = vim.api.nvim_get_namespaces()["multicursor-nvim"]
 local mc_match_ids = {}
 
 mc.onSafeState(function()
   for _, id in ipairs(mc_match_ids) do
-    vim.fn.matchdelete(id)
+    matchdelete(id)
   end
   mc_match_ids = {}
 

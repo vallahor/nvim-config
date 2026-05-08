@@ -1,20 +1,3 @@
-local fn = vim.fn
-local nvim_create_autocmd = vim.api.nvim_create_autocmd
-
-vim.pack.add({ "https://github.com/tpope/vim-repeat" })
-
-nvim_create_autocmd("FileType", {
-  pattern = { "godot", "gdresource", "gdshader" },
-  callback = function()
-    vim.opt_local.expandtab = false
-    vim.cmd([[
-      setlocal tabstop=4
-      setlocal shiftwidth=4
-      setlocal indentexpr=
-    ]])
-  end,
-})
-
 -- GODOT BEGIN
 -- vim_godot.{bat|sh}: {file} {line} {col}
 -- batch file to run as the external editor
@@ -37,6 +20,21 @@ nvim_create_autocmd("FileType", {
 
 -- paths to check for project.godot file
 if false then
+  local fn = vim.fn
+  local nvim_create_autocmd = vim.api.nvim_create_autocmd
+
+  nvim_create_autocmd("FileType", {
+    pattern = { "godot", "gdresource", "gdshader" },
+    callback = function()
+      vim.opt_local.expandtab = false
+      vim.cmd([[
+      setlocal tabstop=4
+      setlocal shiftwidth=4
+      setlocal indentexpr=
+    ]])
+    end,
+  })
+
   local v = vim.v
   local godot_project_path = ""
 

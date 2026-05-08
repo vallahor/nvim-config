@@ -8,10 +8,7 @@ vim.api.nvim_create_autocmd("PackChanged", {
 
 local getcwd = vim.fn.getcwd
 
-vim.pack.add({
-  "https://github.com/Saghen/blink.lib",
-  { src = "https://github.com/Saghen/blink.cmp", version = vim.version.range("*") },
-})
+vim.pack.add({ { src = "https://github.com/Saghen/blink.cmp", version = vim.version.range("*") } })
 
 vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter" }, {
   once = true,
