@@ -26,11 +26,9 @@ nvim_create_autocmd("ModeChanged", {
     end
 
     local m = nvim_get_mode().mode
-    local in_visual = m == "v" or m == "V" or m == "\x16"
+    state.in_visual = m == "v" or m == "V" or m == "\x16"
 
-    state.in_visual = in_visual
-
-    if in_visual then
+    if state.in_visual then
       update_visual_cursor(state)
     end
   end,
