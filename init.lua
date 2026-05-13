@@ -128,7 +128,7 @@ end) -- resize all windows
 
 keymap_set("n", "<c-6>", function()
   resize({ "+2", mods = { vertical = true } })
-end) -- make the window biger   vertically
+end) -- make the window bigger vertically
 keymap_set("n", "<c-4>", function()
   resize({ "-2", mods = { vertical = true } })
 end) -- make the window smaller vertically
@@ -158,7 +158,7 @@ end) -- move to window right
 
 keymap_set("n", "<cr>", "<nop>")
 
-keymap_set("n", "Y", "yg$") -- yank to end of line considering line wrap
+keymap_set("n", "Y", "y$") -- yank to end of line considering line wrap
 
 keymap_set({ "n", "v" }, "<PageUp>", "<c-u>", { noremap = true }) -- page up
 keymap_set({ "n", "v" }, "<PageDown>", "<c-d>", { noremap = true }) -- page down
