@@ -23,6 +23,7 @@ local table_concat = table.concat
 local min = math.min
 local max = math.max
 
+-- Highlight Color
 vim.api.nvim_set_hl(0, "Cursorword", {
   sp = "none",
   fg = "none",
@@ -32,33 +33,6 @@ vim.api.nvim_set_hl(0, "Cursorword", {
 local disabled_bufs = {}
 local last_pattern = {}
 local matches = {}
-
-local byte = string.byte
-
-local function is_word_byte(_b)
-  return _b == 95 -- _
-    or (_b >= 48 and _b <= 57) -- 0-9
-    or (_b >= 65 and _b <= 90) -- A-Z
-    or (_b >= 97 and _b <= 122) -- a-z
-end
-
-local function get_word(_line, col, rb)
-  local s = col + 1
-  local e = col + 1
-  local n = #_line
-  -- expand left
-  local lb = byte(_line, s - 1)
-  while s > 1 and lb and is_word_byte(lb) do
-    s = s - 1
-    lb = byte(_line, s - 1)
-  end
-  -- expand right
-  while e <= n and rb and is_word_byte(rb) do
-    e = e + 1
-    rb = byte(_line, e)
-  end
-  return string_sub(_line, s, e - 1)
-end
 
 local function clear(win)
   win = win or nvim_get_current_win()
@@ -187,13 +161,14 @@ local function highlight(mode)
 
   local col = nvim_win_get_cursor(0)[2]
   local _line = nvim_get_current_line()
-  local _b = byte(_line, col + 1)
-  if not _b or not is_word_byte(_b) then
+
+  local char = string_sub(_line, col + 1, col + 1)
+  if vim.fn.match(char, [[\k]]) == -1 then
     clear(win)
     return
   end
 
-  local word = get_word(_line, col, _b)
+  local word = vim.fn.expand("<cword>")
   if #word > 0 then
     set_match(win, [[\V\<]] .. escape(word, [[\]]) .. [[\>]], 100)
   else
