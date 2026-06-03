@@ -122,13 +122,13 @@ mason_lspconfig.setup({
   ensure_installed = {
     "basedpyright",
     "clangd",
-    "cssls",
+    -- "cssls",
     "emmylua_ls",
     "html",
     "jsonls",
     "rust_analyzer",
     "svelte",
-    "tailwindcss",
+    -- "tailwindcss",
     "vtsls",
   },
   automatic_enable = {
@@ -145,5 +145,6 @@ mason_conform.setup({
     "ruff",
     "stylua",
     "gdtoolkit",
+    "gdscript-formatter",
   },
 })

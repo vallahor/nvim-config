@@ -18,6 +18,9 @@ vim.pack.add({
 })
 
 local languages = {
+  "gdscript",
+  "gdshader",
+  "godot_resource",
   "bash",
   "blade",
   "c",
@@ -45,12 +48,14 @@ local languages = {
 }
 
 local already_installed = require("nvim-treesitter.config").get_installed()
-local parsers_to_install = vim
-  .iter(languages)
-  :filter(function(parser)
-    return not vim.tbl_contains(already_installed, parser)
-  end)
-  :totable()
+
+local parsers_to_install = {}
+for i = 1, #languages do
+  local parser = languages[i]
+  if not vim.tbl_contains(already_installed, parser) then
+    parsers_to_install[#parsers_to_install + 1] = parser
+  end
+end
 require("nvim-treesitter").install(parsers_to_install)
 
 local disable_indent = {

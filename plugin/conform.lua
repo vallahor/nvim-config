@@ -13,6 +13,8 @@ conform.setup({
     python = { "ruff_format" },
     zig = { "zigfmt" },
     rust = { "rustfmt" },
+    gdscript = { "gdscript-formatter" },
+    -- gdscript = { "gdformat" },
   },
 })
 

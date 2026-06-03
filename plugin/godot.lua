@@ -19,7 +19,7 @@
 -- endlocal
 
 -- paths to check for project.godot file
-if false then
+if true then
   local fn = vim.fn
   local nvim_create_autocmd = vim.api.nvim_create_autocmd
 
