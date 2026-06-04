@@ -60,7 +60,7 @@ require("nvim-treesitter").install(parsers_to_install)
 
 local disable_indent = {
   cpp = true,
-  gdscript = true,
+  -- gdscript = true,
   odin = true,
   python = true,
   rust = true,

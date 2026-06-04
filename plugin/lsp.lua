@@ -68,13 +68,14 @@ vim.lsp.config("gdscript", {
 
 vim.lsp.config("emmylua_ls", {
   settings = {
-    Lua = {
+    emmylua = {
       runtime = {
         version = "LuaJIT",
       },
       workspace = {
         library = {
           vim.env.VIMRUNTIME,
+          vim.api.nvim_get_runtime_file("lua/lspconfig", false)[1],
           vim.fn.stdpath("data") .. "/site/pack/core/opt",
         },
         checkThirdParty = false,
