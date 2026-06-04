@@ -123,14 +123,15 @@ mason_lspconfig.setup({
   ensure_installed = {
     "basedpyright",
     "clangd",
-    -- "cssls",
     "emmylua_ls",
     "html",
     "jsonls",
     "rust_analyzer",
     "svelte",
-    -- "tailwindcss",
     "vtsls",
+    "zls",
+    -- "cssls",
+    -- "tailwindcss",
   },
   automatic_enable = {
     exclude = { "ruff" },
@@ -141,11 +142,11 @@ vim.pack.add({ "https://github.com/zapling/mason-conform.nvim" })
 local mason_conform = require("mason-conform")
 mason_conform.setup({
   ensure_installed = {
-    "prettierd",
+    "gdscript-formatter",
+    "gdtoolkit",
     "prettier",
+    "prettierd",
     "ruff",
     "stylua",
-    "gdtoolkit",
-    "gdscript-formatter",
   },
 })
