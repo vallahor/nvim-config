@@ -11,7 +11,7 @@ conform.setup({
     typescriptreact = { "prettierd", "prettier", stop_after_first = true },
     lua = { "stylua" },
     python = { "ruff_format" },
-    zig = { "zigfmt" },
+    -- zig = { "zigfmt" },
     rust = { "rustfmt" },
     gdscript = { "gdscript-formatter" },
     -- gdscript = { "gdformat" },
