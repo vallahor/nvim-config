@@ -1,4 +1,4 @@
--- vim.pack.add({ "https://github.com/habamax/vim-godot" })
+vim.pack.add({ "https://github.com/habamax/vim-godot" })
 
 -- vim_godot.{bat|sh}: {file} {line} {col}
 -- batch file to run as the external editor
@@ -19,9 +19,10 @@
 -- )
 -- endlocal
 
-if true then
-  return
-end
+-- if true then
+--   return
+-- end
+
 -- paths to check for project.godot file
 local fn = vim.fn
 local nvim_create_autocmd = vim.api.nvim_create_autocmd
@@ -33,6 +34,8 @@ nvim_create_autocmd("FileType", {
     vim.api.nvim_set_option_value("tabstop", 4, { scope = "local" })
     vim.api.nvim_set_option_value("shiftwidth", 4, { scope = "local" })
     -- vim.api.nvim_set_option_value("indentexpr", "", { scope = "local" })
+    vim.api.nvim_set_option_value("autoindent", true, { scope = "local" })
+    vim.api.nvim_set_option_value("smartindent", false, { scope = "local" })
   end,
 })
 
