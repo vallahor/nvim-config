@@ -15,6 +15,9 @@ conform.setup({
     rust = { "rustfmt" },
     gdscript = { "gdscript-formatter" },
     -- gdscript = { "gdformat" },
+    elixir = { "mix" },
+    eelixir = { "mix" },
+    heex = { "mix" },
   },
 })
 

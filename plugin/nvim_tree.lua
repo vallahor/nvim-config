@@ -6,16 +6,19 @@ vim.g.neo_tree_remove_legacy_commands = 1
 local api = require("nvim-tree.api")
 local view = require("nvim-tree.view")
 
+local guicursor_default = "n:block-Cursor,i-ci-c:block-iCursor,v:block-vCursor"
+local guicursor_hidden = "n:block-Cursor,i-ci-c:block-iCursor,v:block-vCursor,a:CursorHidden/lCursorHidden"
+
 api.events.subscribe(api.events.Event.TreeOpen, function()
   local winnr = view.get_winnr() --[[@as integer?]]
   if winnr then
     vim.wo[winnr].statuscolumn = ""
-    vim.api.nvim_set_option_value(
-      "guicursor",
-      "n:block-Cursor,i-ci-c:block-iCursor,v:block-vCursor,a:CursorHidden/lCursorHidden",
-      {}
-    )
+    vim.api.nvim_set_option_value("guicursor", guicursor_hidden, {})
   end
+end)
+
+api.events.subscribe(api.events.Event.TreeClose, function()
+  vim.api.nvim_set_option_value("guicursor", guicursor_default, {})
 end)
 
 api.events.subscribe(api.events.Event.FileRemoved, function(data)

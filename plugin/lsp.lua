@@ -125,6 +125,7 @@ mason_lspconfig.setup({
     "basedpyright",
     "clangd",
     "emmylua_ls",
+    "expert",
     "html",
     "jsonls",
     "rust_analyzer",

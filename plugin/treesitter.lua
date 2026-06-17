@@ -18,14 +18,17 @@ vim.pack.add({
 })
 
 local languages = {
-  "gdscript",
-  "gdshader",
-  "godot_resource",
   "bash",
   "blade",
   "c",
   "cpp",
   "css",
+  "eex",
+  "elixir",
+  "gdscript",
+  "gdshader",
+  "godot_resource",
+  "heex",
   "html",
   "hyprlang",
   "javascript",

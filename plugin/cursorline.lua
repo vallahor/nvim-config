@@ -22,7 +22,7 @@ local cursor_line_inactive = "CursorLine:CursorLineInative,CursorLineNr:CursorLi
 nvim_set_option_value("guicursor", guicursor_default, {})
 
 local ignore_file_types = { NvimTree = true }
-nvim_create_autocmd("WinEnter", {
+nvim_create_autocmd({ "WinEnter", "BufEnter" }, {
   callback = function()
     if ignore_file_types[bo.filetype] then
       nvim_set_option_value("guicursor", guicursor_hidden, {})
@@ -69,3 +69,8 @@ nvim_create_autocmd("WinLeave", {
     nvim_set_option_value("winhighlight", cursor_line_inactive, { win = nvim_get_current_win() })
   end,
 })
+
+return {
+  guicursor_default,
+  guicursor_hidden,
+}
