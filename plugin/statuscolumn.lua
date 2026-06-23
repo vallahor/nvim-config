@@ -9,7 +9,6 @@ local visual_state = require("visual_state")
 
 nvim_set_hl(0, "CursorVisualNr", { fg = "#a1495c", bg = "#2d1524" })
 nvim_set_hl(0, "VisualNr", { fg = "#493441", bg = "#2d1524" })
-vim.o.statuscolumn = "%!v:lua.StatusColumn()"
 
 function _G.StatusColumn()
   local hl = " "
@@ -38,3 +37,5 @@ nvim_create_autocmd("FileType", {
     nvim_set_option_value("number", true, { win = 0 })
   end,
 })
+
+vim.o.statuscolumn = "%!v:lua.StatusColumn()"
