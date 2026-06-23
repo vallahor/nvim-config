@@ -53,8 +53,10 @@ local function increment_selection()
   local skip_parent = false
 
   if #stack == 0 then
-    local word = vim.fn.expand("<cword>")
-    if word ~= "" then
+    local line_str = vim.api.nvim_get_current_line()
+    local _, col = unpack(vim.api.nvim_win_get_cursor(0))
+    local char = line_str:sub(col + 1, col + 1)
+    if char:match("[%w_]") ~= nil then
       cmd("normal! viw")
       skip_parent = true
     end
