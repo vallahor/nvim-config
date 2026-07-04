@@ -50,25 +50,11 @@ local function increment_selection()
     stack = {}
   end
 
-  local skip_parent = false
-
-  if #stack == 0 then
-    local line_str = vim.api.nvim_get_current_line()
-    local _, col = unpack(vim.api.nvim_win_get_cursor(0))
-    local char = line_str:sub(col + 1, col + 1)
-    if char:match("[%w_]") ~= nil then
-      cmd("normal! viw")
-      skip_parent = true
-    end
-  end
-
   local vline, vcol = line("v"), get_col("v")
   local cline, ccol = line("."), get_col(".")
   stack[#stack + 1] = { vline - 1, vcol - 1, cline - 1, ccol }
 
-  if not skip_parent then
-    _select.select_parent(v.count1)
-  end
+  _select.select_parent(v.count1)
 end
 
 keymap_set({ "n", "v", "o" }, "M", decrement_selection, { noremap = true })
