@@ -32,9 +32,11 @@ end
 
 nvim_create_autocmd("FileType", {
   pattern = { "help", "text", "man" },
-  callback = function()
-    nvim_set_option_value("statuscolumn", "", { win = 0 })
-    nvim_set_option_value("number", true, { win = 0 })
+  callback = function(args)
+    local win = vim.fn.bufwinid(args.buf)
+    nvim_set_option_value("statuscolumn", "", { scope = "local", win = win })
+    nvim_set_option_value("number", true, { scope = "local", win = win })
+    nvim_set_option_value("relativenumber", false, { scope = "local", win = win })
   end,
 })
 
