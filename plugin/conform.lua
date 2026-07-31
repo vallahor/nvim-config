@@ -15,6 +15,7 @@ conform.setup({
     odin = { lsp_format = "fallback" },
     -- zig = { "zigfmt" },
     rust = { "rustfmt" },
+    php = { "mago_format" },
     gdscript = { "gdscript-formatter" },
     -- gdscript = { "gdformat" },
     elixir = { "mix" },
