@@ -88,28 +88,59 @@ vim.lsp.config("emmylua_ls", {
   },
 })
 
-vim.lsp.config("vtsls", {
-  settings = {
-    vtsls = {
-      tsserver = {
-        globalPlugins = {
-          {
-            name = "typescript-svelte-plugin",
-            location = vim.fn.stdpath("data")
-              .. "/mason/packages/svelte-language-server/node_modules/typescript-svelte-plugin",
-            enableForWorkspaceTypeScriptVersions = true,
-          },
-        },
+vim.lsp.config("tsgo", {
+  init_options = {
+    hostInfo = "neovim",
+    plugins = {
+      {
+        name = "typescript-svelte-plugin",
+        location = vim.fn.stdpath("data")
+          .. "/mason/packages/svelte-language-server/node_modules/typescript-svelte-plugin",
+        enableForWorkspaceTypeScriptVersions = true,
       },
     },
   },
 })
+
+-- vim.lsp.config("tsgo", {
+--   init_options = {
+--     hostInfo = "neovim",
+--     plugins = {
+--       {
+--         name = "@vue/typescript-plugin",
+--         location = vim.fn.stdpath("data") .. "/mason/packages/vue-language-server/node_modules/@vue/language-server",
+--         languages = { "javascript", "typescript", "vue" },
+--       },
+--     },
+--   },
+-- })
+--
+-- vim.lsp.config("vue_ls", {
+--   init_options = {
+--     vue = {
+--       hybridMode = true,
+--     },
+--   },
+-- })
 
 vim.lsp.config("basedpyright", {
   settings = {
     basedpyright = {
       analysis = {
         typeCheckingMode = "standard",
+      },
+    },
+  },
+})
+
+vim.lsp.config("tailwindcss", {
+  settings = {
+    tailwindCSS = {
+      experimental = {
+        classRegex = {
+          [[class= "([^"]*)]],
+          [[class: "([^"]*)]],
+        },
       },
     },
   },
@@ -130,10 +161,16 @@ mason_lspconfig.setup({
     "jsonls",
     "rust_analyzer",
     "svelte",
-    "vtsls",
+    "vue_ls",
+    "tsgo",
+    -- "vtsls",
+    -- "ts_ls",
+    "laravel_ls",
+    "phpantom_lsp",
+    "ols",
     "zls",
-    -- "cssls",
-    -- "tailwindcss",
+    "cssls",
+    "tailwindcss",
   },
   automatic_enable = {
     exclude = { "ruff" },

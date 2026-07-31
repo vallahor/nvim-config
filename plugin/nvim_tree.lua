@@ -168,6 +168,17 @@ require("nvim-tree").setup({
       },
     },
   },
+  filesystem_watchers = {
+    enable = true,
+    max_events = 0, -- Set to 0 for unlimited events, preventing it from disabling early
+    ignore_dirs = {
+      "/.ccls-cache",
+      "/build",
+      "/node_modules",
+      "/target",
+      "/.zig-cache",
+    },
+  },
 })
 
 vim.keymap.set("n", "<c-e>", function()
