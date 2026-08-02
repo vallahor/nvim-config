@@ -1,4 +1,21 @@
 {
+  "PHP Action Class": {
+    "prefix": "phpaction",
+    "body": [
+      "<?php",
+      "",
+      "namespace App\\Actions;",
+      "",
+      "class $TM_FILENAME_BASE",
+      "{",
+      "\tpublic function ${1:handle}(${2:array \\$attributes}${3})",
+      "\t{",
+      "\t\t${0}",
+      "\t}",
+      "}"
+    ],
+    "description": "Creates a basic PHP action class structure."
+  },
   "PHP Service Class": {
     "prefix": "phpservice",
     "body": [

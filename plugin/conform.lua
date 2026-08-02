@@ -18,9 +18,9 @@ conform.setup({
     php = { "mago_format" },
     gdscript = { "gdscript-formatter" },
     -- gdscript = { "gdformat" },
-    elixir = { "mix" },
-    eelixir = { "mix" },
-    heex = { "mix" },
+    elixir = { "mix", lsp_format = "fallback" },
+    eelixir = { "mix", lsp_format = "fallback" },
+    heex = { "mix", lsp_format = "fallback" },
   },
 })
 

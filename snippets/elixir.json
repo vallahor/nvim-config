@@ -23,7 +23,7 @@
     "prefix": "defhe",
     "body": [
       "def handle_event(\"${1}\", %{\"${2}\" => ${2}${3}}, socket) do",
-      "    ${0}",
+      "  ${0}",
       "  {:noreply, socket}",
       "end"
     ]
@@ -32,7 +32,7 @@
     "prefix": "defhed",
     "body": [
       "def handle_event(\"${1}\", _params, socket) do",
-      "    ${0}",
+      "  ${0}",
       "  {:noreply, socket}",
       "end"
     ]
@@ -41,7 +41,7 @@
     "prefix": "defhp",
     "body": [
       "def handle_params(%${\"${1}\" => ${1}}, _uri, socket) do",
-      "    ${0}",
+      "  ${0}",
       "  {:noreply, socket}",
       "end"
     ]
@@ -50,7 +50,7 @@
     "prefix": "defhpd",
     "body": [
       "def handle_params(${1:_params}, _uri, socket) do",
-      "    ${0}",
+      "  ${0}",
       "  {:noreply, socket}",
       "end"
     ]
@@ -59,7 +59,7 @@
     "prefix": "defmd",
     "body": [
       "def mount(_params, _session, socket) do",
-      "    ${0}",
+      "  ${0}",
       "  {:ok, socket}",
       "end"
     ]

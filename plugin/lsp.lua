@@ -133,18 +133,13 @@ vim.lsp.config("basedpyright", {
   },
 })
 
-vim.lsp.config("tailwindcss", {
-  settings = {
-    tailwindCSS = {
-      experimental = {
-        classRegex = {
-          [[class= "([^"]*)]],
-          [[class: "([^"]*)]],
-        },
-      },
-    },
-  },
+vim.lsp.config("laravel_lsp", {
+  cmd = { "laravel-lsp" },
+  filetypes = { "php", "blade" },
+  root_markers = { "artisan", "composer.json", ".git" },
 })
+
+vim.lsp.enable("laravel_lsp")
 
 vim.pack.add({ "https://github.com/mason-org/mason.nvim" })
 require("mason").setup()
@@ -165,7 +160,7 @@ mason_lspconfig.setup({
     "tsgo",
     -- "vtsls",
     -- "ts_ls",
-    "laravel_ls",
+    -- "laravel_ls",
     "phpantom_lsp",
     "ols",
     "zls",
