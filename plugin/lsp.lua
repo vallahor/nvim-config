@@ -88,46 +88,114 @@ vim.lsp.config("emmylua_ls", {
   },
 })
 
-vim.lsp.config("tsgo", {
-  init_options = {
-    hostInfo = "neovim",
-    plugins = {
-      {
-        name = "typescript-svelte-plugin",
-        location = vim.fn.stdpath("data")
-          .. "/mason/packages/svelte-language-server/node_modules/typescript-svelte-plugin",
-        enableForWorkspaceTypeScriptVersions = true,
-      },
-    },
-  },
-})
-
 -- vim.lsp.config("tsgo", {
 --   init_options = {
 --     hostInfo = "neovim",
 --     plugins = {
 --       {
---         name = "@vue/typescript-plugin",
---         location = vim.fn.stdpath("data") .. "/mason/packages/vue-language-server/node_modules/@vue/language-server",
---         languages = { "javascript", "typescript", "vue" },
+--         name = "typescript-svelte-plugin",
+--         location = vim.fn.stdpath("data")
+--           .. "/mason/packages/svelte-language-server/node_modules/typescript-svelte-plugin",
+--         enableForWorkspaceTypeScriptVersions = true,
 --       },
 --     },
 --   },
 -- })
---
--- vim.lsp.config("vue_ls", {
---   init_options = {
---     vue = {
---       hybridMode = true,
+
+local mason = vim.fn.stdpath("data") .. "/mason/packages"
+local vue_ls_path = mason .. "/vue-language-server/node_modules/@vue/language-server"
+
+vim.lsp.config("ts_ls", {
+  init_options = {
+    hostInfo = "neovim",
+    plugins = {
+      {
+        name = "@vue/typescript-plugin",
+        location = vue_ls_path,
+        languages = { "vue" },
+      },
+    },
+  },
+  filetypes = {
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact",
+    "vue",
+  },
+})
+
+vim.lsp.config("vue_ls", {
+  init_options = {
+    vue = {
+      hybridMode = true,
+    },
+    typescript = {
+      tsdk = vim.fn.stdpath("data") .. "/mason/packages/typescript-language-server/node_modules/typescript/lib",
+    },
+  },
+})
+
+-- vim.lsp.config("basedpyright", {
+--   settings = {
+--     basedpyright = {
+--       analysis = {
+--         typeCheckingMode = "standard",
+--       },
 --     },
 --   },
 -- })
 
+local function python_path(root_dir)
+  if not root_dir then
+    return nil
+  end
+
+  local candidates = {
+    root_dir .. "/.venv/Scripts/python.exe",
+    root_dir .. "/.venv/bin/python",
+    root_dir .. "/venv/Scripts/python.exe",
+    root_dir .. "/venv/bin/python",
+  }
+
+  for _, path in ipairs(candidates) do
+    if vim.fn.executable(path) == 1 then
+      return path
+    end
+  end
+end
+
 vim.lsp.config("basedpyright", {
+  filetypes = { "python" },
+  root_markers = { "manage.py", "pyproject.toml", "pyrightconfig.json", "setup.py", "setup.cfg", "requirements.txt", ".git" },
+  before_init = function(_, config)
+    local path = python_path(config.root_dir)
+    if path then
+      config.settings = config.settings or {}
+      config.settings.python = vim.tbl_deep_extend("force", config.settings.python or {}, {
+        pythonPath = path,
+      })
+    end
+  end,
   settings = {
     basedpyright = {
       analysis = {
         typeCheckingMode = "standard",
+        autoSearchPaths = true,
+        useLibraryCodeForTypes = true,
+        diagnosticMode = "workspace",
+        extraPaths = { "." },
+        diagnosticSeverityOverrides = {
+          reportIncompatibleMethodOverride = "none",
+          reportIncompatibleVariableOverride = "none",
+          reportAttributeAccessIssue = "none",
+          reportUnknownMemberType = "none",
+          reportUnknownVariableType = "none",
+          reportUnknownArgumentType = "none",
+          reportGeneralTypeIssues = "warning",
+          reportArgumentType = "none",
+          reportFunctionMemberAccess = "none",
+        },
       },
     },
   },
@@ -157,9 +225,9 @@ mason_lspconfig.setup({
     "rust_analyzer",
     "svelte",
     "vue_ls",
-    "tsgo",
+    -- "tsgo",
     -- "vtsls",
-    -- "ts_ls",
+    "ts_ls",
     -- "laravel_ls",
     "phpantom_lsp",
     "ols",

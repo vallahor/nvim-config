@@ -339,13 +339,20 @@ keymap_set({ "n", "v" }, "<s-down>", sb.down)
 keymap_set({ "n", "v" }, "<s-up>", sb.up)
 keymap_set({ "n", "v" }, "<s-right>", sb.right)
 
-keymap_set({ "n", "v", "x" }, "[", function()
-  diag_jump({ count = -1, float = false })
-end, { nowait = true })
-
-keymap_set({ "n", "v", "x" }, "]", function()
-  diag_jump({ count = 1, float = false })
-end, { nowait = true })
+nvim_create_autocmd("FileType", {
+  pattern = "*",
+  callback = function(ev)
+    vim.schedule(function()
+      local opts = { nowait = true, silent = true, buffer = ev.buf }
+      keymap_set({ "n", "v", "x" }, "[", function()
+        diag_jump({ count = -1, float = false })
+      end, opts)
+      keymap_set({ "n", "v", "x" }, "]", function()
+        diag_jump({ count = 1, float = false })
+      end, opts)
+    end)
+  end,
+})
 
 keymap_set({ "v", "x" }, "<", function()
   normal({ "<gv", bang = true })
