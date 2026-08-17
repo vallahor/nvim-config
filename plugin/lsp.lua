@@ -209,46 +209,51 @@ vim.lsp.config("laravel_lsp", {
 
 vim.lsp.enable("laravel_lsp")
 
-vim.pack.add({ "https://github.com/mason-org/mason.nvim" })
-require("mason").setup()
+vim.api.nvim_create_autocmd("VimEnter", {
+  once = true,
+  callback = function()
+    vim.schedule(function()
+      vim.pack.add({ "https://github.com/mason-org/mason.nvim" })
+      require("mason").setup()
 
-vim.pack.add({ "https://github.com/mason-org/mason-lspconfig.nvim" })
-local mason_lspconfig = require("mason-lspconfig")
-mason_lspconfig.setup({
-  ensure_installed = {
-    "basedpyright",
-    "clangd",
-    "emmylua_ls",
-    "expert",
-    "html",
-    "jsonls",
-    "rust_analyzer",
-    "svelte",
-    "vue_ls",
-    -- "tsgo",
-    -- "vtsls",
-    "ts_ls",
-    -- "laravel_ls",
-    "phpantom_lsp",
-    "ols",
-    "zls",
-    "cssls",
-    "tailwindcss",
-  },
-  automatic_enable = {
-    exclude = { "ruff" },
-  },
-})
+      vim.pack.add({ "https://github.com/mason-org/mason-lspconfig.nvim" })
+      require("mason-lspconfig").setup({
+        ensure_installed = {
+          "basedpyright",
+          "clangd",
+          "emmylua_ls",
+          "expert",
+          "html",
+          "jsonls",
+          "rust_analyzer",
+          "svelte",
+          "vue_ls",
+          -- "tsgo",
+          -- "vtsls",
+          "ts_ls",
+          -- "laravel_ls",
+          "phpantom_lsp",
+          "ols",
+          "zls",
+          "cssls",
+          "tailwindcss",
+        },
+        automatic_enable = {
+          exclude = { "ruff" },
+        },
+      })
 
-vim.pack.add({ "https://github.com/zapling/mason-conform.nvim" })
-local mason_conform = require("mason-conform")
-mason_conform.setup({
-  ensure_installed = {
-    "gdscript-formatter",
-    "gdtoolkit",
-    "prettier",
-    "prettierd",
-    "ruff",
-    "stylua",
-  },
+      vim.pack.add({ "https://github.com/zapling/mason-conform.nvim" })
+      require("mason-conform").setup({
+        ensure_installed = {
+          "gdscript-formatter",
+          "gdtoolkit",
+          "prettier",
+          "prettierd",
+          "ruff",
+          "stylua",
+        },
+      })
+    end)
+  end,
 })

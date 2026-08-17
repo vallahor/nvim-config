@@ -54,16 +54,21 @@ local languages = {
   "zig",
 }
 
-local already_installed = require("nvim-treesitter.config").get_installed()
+vim.schedule(function()
+  local already_installed = require("nvim-treesitter.config").get_installed()
 
-local parsers_to_install = {}
-for i = 1, #languages do
-  local parser = languages[i]
-  if not vim.tbl_contains(already_installed, parser) then
-    parsers_to_install[#parsers_to_install + 1] = parser
+  local parsers_to_install = {}
+  for i = 1, #languages do
+    local parser = languages[i]
+    if not vim.tbl_contains(already_installed, parser) then
+      parsers_to_install[#parsers_to_install + 1] = parser
+    end
   end
-end
-require("nvim-treesitter").install(parsers_to_install)
+
+  if #parsers_to_install > 0 then
+    require("nvim-treesitter").install(parsers_to_install)
+  end
+end)
 
 local disable_indent = {
   cpp = true,

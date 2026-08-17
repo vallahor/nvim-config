@@ -375,14 +375,14 @@ vim.filetype.add({
   },
 })
 
-nvim_create_autocmd("BufWritePre", {
-  pattern = "*",
-  callback = function()
-    local save = winsaveview()
-    cmd([[keeppatterns %s/\s+$//e]])
-    winrestview(save)
-  end,
-})
+-- nvim_create_autocmd("BufWritePre", {
+--   pattern = "*",
+--   callback = function()
+--     local save = winsaveview()
+--     cmd([[keeppatterns %s/\s+$//e]])
+--     winrestview(save)
+--   end,
+-- })
 
 -- vim.api.nvim_set_hl(0, "@attribute.gdscript", { fg = "#9B668F" })
 vim.api.nvim_set_hl(0, "@attribute.gdscript", { fg = "#96674E" })

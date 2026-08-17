@@ -5,18 +5,10 @@ require("snacks").setup({
     sources = {
       files = {
         cmd = "rg",
+        hidden = true,
+        exclude = { "node_modules", ".git", ".zig-cache" },
         args = {
-          "--files",
-          "--hidden",
-          "--ignore",
           "--no-require-git",
-          "--glob",
-          "!node_modules",
-          "--glob",
-          "!.git",
-          "--glob",
-          "!.zig-cache",
-          "--sortr=modified",
         },
       },
     },
@@ -24,7 +16,7 @@ require("snacks").setup({
       prompt_pos = "top",
     },
     matcher = {
-      frecency = true,
+      frecency = false,
     },
     formatters = {
       file = {
