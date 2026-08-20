@@ -18,12 +18,12 @@ local nvim_list_wins = vim.api.nvim_list_wins
 local nvim_win_get_config = vim.api.nvim_win_get_config
 local nvim_win_close = vim.api.nvim_win_close
 local nvim_create_autocmd = vim.api.nvim_create_autocmd
+local nvim_create_augroup = vim.api.nvim_create_augroup
 
 local snippet_stop = vim.snippet.stop
 
-local diag_jump = vim.diagnostic.jump
-local winsaveview = fn.winsaveview
-local winrestview = fn.winrestview
+-- local winsaveview = fn.winsaveview
+-- local winrestview = fn.winrestview
 
 local comment = require("vim._comment")
 
@@ -272,7 +272,10 @@ keymap_set("n", "<c-i>", "<c-i>")
 keymap_set("n", "<c-s-x>", cmd.bdelete) -- close current buffer and window -- not work with ghostty (combination in use)
 
 -- close quickfix menu after selecting choice
+local init_group = nvim_create_augroup("user_init", { clear = true })
+
 nvim_create_autocmd("FileType", {
+  group = init_group,
   pattern = { "qf" },
   callback = function()
     local function enter_and_close()
@@ -287,12 +290,14 @@ nvim_create_autocmd("FileType", {
 })
 
 nvim_create_autocmd("FocusGained", {
+  group = init_group,
   callback = function()
     checktime({ mods = { silent = true } })
   end,
 })
 
 nvim_create_autocmd("FileType", {
+  group = init_group,
   pattern = {
     "css",
     "javascript",
@@ -309,6 +314,7 @@ nvim_create_autocmd("FileType", {
 })
 
 nvim_create_autocmd("FileType", {
+  group = init_group,
   pattern = {
     "eex",
     "heex",
@@ -338,21 +344,6 @@ keymap_set({ "n", "v" }, "<s-left>", sb.left)
 keymap_set({ "n", "v" }, "<s-down>", sb.down)
 keymap_set({ "n", "v" }, "<s-up>", sb.up)
 keymap_set({ "n", "v" }, "<s-right>", sb.right)
-
-nvim_create_autocmd("FileType", {
-  pattern = "*",
-  callback = function(ev)
-    vim.schedule(function()
-      local opts = { nowait = true, silent = true, buffer = ev.buf }
-      keymap_set({ "n", "v", "x" }, "[", function()
-        diag_jump({ count = -1, float = false })
-      end, opts)
-      keymap_set({ "n", "v", "x" }, "]", function()
-        diag_jump({ count = 1, float = false })
-      end, opts)
-    end)
-  end,
-})
 
 keymap_set({ "v", "x" }, "<", function()
   normal({ "<gv", bang = true })

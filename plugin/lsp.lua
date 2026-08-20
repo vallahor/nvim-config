@@ -54,6 +54,14 @@ vim.api.nvim_create_autocmd("LspAttach", {
     end, opts)
     vim.keymap.set("n", "&", vim.diagnostic.open_float, opts)
     vim.keymap.set("n", "<f2>", vim.lsp.buf.rename, opts)
+
+    local diagnostic_opts = { buffer = bufnr, nowait = true, silent = true }
+    vim.keymap.set({ "n", "v", "x" }, "[", function()
+      vim.diagnostic.jump({ count = -1, float = false })
+    end, diagnostic_opts)
+    vim.keymap.set({ "n", "v", "x" }, "]", function()
+      vim.diagnostic.jump({ count = 1, float = false })
+    end, diagnostic_opts)
   end,
 })
 
