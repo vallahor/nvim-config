@@ -1,6 +1,7 @@
 -- vim.opt.runtimepath:prepend("C:/projects/galfo")
--- vim.pack.add({ "https://github.com/vallahor/galfo" })
-vim.pack.add({ "https://codeberg.org/vallahor/galfo" })
+-- vim.opt.runtimepath:prepend("~/projects/galfo")
+vim.pack.add({ "https://github.com/vallahor/galfo" })
+-- vim.pack.add({ "https://codeberg.org/vallahor/galfo" })
 
 local cursor_line_active = "CursorLine:CursorLine,CursorLineNr:CursorLineNr"
 local cursor_line_inactive = "CursorLine:CursorLineInative,CursorLineNr:CursorLineNrInative"
