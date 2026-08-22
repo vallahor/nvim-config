@@ -144,16 +144,6 @@ vim.lsp.config("vue_ls", {
   },
 })
 
--- vim.lsp.config("basedpyright", {
---   settings = {
---     basedpyright = {
---       analysis = {
---         typeCheckingMode = "standard",
---       },
---     },
---   },
--- })
-
 local function python_path(root_dir)
   if not root_dir then
     return nil
@@ -171,39 +161,41 @@ local function python_path(root_dir)
       return path
     end
   end
+
+  local virtual_env = vim.env.VIRTUAL_ENV
+  if virtual_env then
+    local path = virtual_env .. (vim.fn.has("win32") == 1 and "/Scripts/python.exe" or "/bin/python")
+    if vim.fn.executable(path) == 1 then
+      return path
+    end
+  end
 end
 
 vim.lsp.config("basedpyright", {
   filetypes = { "python" },
-  root_markers = { "manage.py", "pyproject.toml", "pyrightconfig.json", "setup.py", "setup.cfg", "requirements.txt", ".git" },
+  root_markers = {
+    "manage.py",
+    "pyrightconfig.json",
+    "pyproject.toml",
+    "setup.py",
+    "setup.cfg",
+    "requirements.txt",
+    "Pipfile",
+    ".git",
+  },
   before_init = function(_, config)
     local path = python_path(config.root_dir)
     if path then
-      config.settings = config.settings or {}
-      config.settings.python = vim.tbl_deep_extend("force", config.settings.python or {}, {
-        pythonPath = path,
+      config.settings = vim.tbl_deep_extend("force", config.settings or {}, {
+        python = { pythonPath = path },
       })
     end
   end,
   settings = {
     basedpyright = {
       analysis = {
-        typeCheckingMode = "standard",
-        autoSearchPaths = true,
-        useLibraryCodeForTypes = true,
-        diagnosticMode = "workspace",
-        extraPaths = { "." },
-        diagnosticSeverityOverrides = {
-          reportIncompatibleMethodOverride = "none",
-          reportIncompatibleVariableOverride = "none",
-          reportAttributeAccessIssue = "none",
-          reportUnknownMemberType = "none",
-          reportUnknownVariableType = "none",
-          reportUnknownArgumentType = "none",
-          reportGeneralTypeIssues = "warning",
-          reportArgumentType = "none",
-          reportFunctionMemberAccess = "none",
-        },
+        typeCheckingMode = "basic",
+        diagnosticMode = "openFilesOnly",
       },
     },
   },
