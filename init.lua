@@ -9,7 +9,6 @@ local resize = cmd.resize
 local wincmd = cmd.wincmd
 local normal = cmd.normal
 
-local checktime = cmd.checktime
 local nohl = cmd.nohl
 
 local nvim_set_option_value = vim.api.nvim_set_option_value
@@ -22,29 +21,12 @@ local nvim_create_augroup = vim.api.nvim_create_augroup
 
 local snippet_stop = vim.snippet.stop
 
--- local winsaveview = fn.winsaveview
--- local winrestview = fn.winrestview
-
 local comment = require("vim._comment")
 
-if g.neovide then
-  g.neovide_input_ime = false
-  g.neovide_cursor_animation_length = 0
-  g.neovide_scroll_animation_length = 0
-  g.neovide_cursor_trail_size = 0.0
-  g.neovide_position_animation_length = 0.0
-  g.neovide_refresh_rate = 144
-  g.neovide_cursor_animate_in_insert_mode = false
-  g.neovide_cursor_animate_in_command_line = false
-end
-
-vim.env.LANG = "en_US.UTF-8"
-
 -- SETTINGS --
-opt.guifont = { "JetBrainsMono NF:h11" }
 opt.shiftwidth = 4
 opt.tabstop = 4
-opt.softtabstop = 4
+opt.softtabstop = -1
 opt.expandtab = true
 opt.smartindent = true
 opt.smartcase = true
@@ -55,15 +37,14 @@ opt.splitbelow = true
 opt.clipboard = "unnamedplus"
 opt.pumheight = 10
 opt.switchbuf = "useopen,uselast"
-opt.shortmess:append("aoOtTIcF")
+opt.shortmess:append("aIc")
 opt.cursorline = true
-opt.cino:append("L0,g0,l1,t0,w1,(0,w4,(s,m1")
+opt.cino:append("L0,g0,l1,t0,(0,w4,(s,m1")
 opt.winborder = "rounded"
 opt.isfname:append("(") -- " @windows: nextjs and sveltekit folder name pattern
 opt.swapfile = false
 opt.wrap = false
 opt.timeout = false
-opt.timeoutlen = 0
 
 wo.signcolumn = "no"
 wo.relativenumber = true
@@ -71,16 +52,12 @@ wo.relativenumber = true
 opt.linespace = 5
 
 g.loaded_matchit = 1
-g.defaults_keymaps = false
 
 -- work around on python default configs
 g.python_indent = {
-  disable_parentheses_indenting = false,
   closed_paren_align_last_line = false,
-  searchpair_timeout = 150,
   continue = 4,
   open_paren = 4,
-  nested_paren = 4,
 }
 
 -- MAPPING --
@@ -158,13 +135,11 @@ end) -- move to window right
 
 keymap_set("n", "<cr>", "<nop>")
 
-keymap_set("n", "Y", "y$") -- yank to end of line considering line wrap
+keymap_set({ "n", "v" }, "<PageUp>", "<c-u>") -- page up
+keymap_set({ "n", "v" }, "<PageDown>", "<c-d>") -- page down
 
-keymap_set({ "n", "v" }, "<PageUp>", "<c-u>", { noremap = true }) -- page up
-keymap_set({ "n", "v" }, "<PageDown>", "<c-d>", { noremap = true }) -- page down
-
-keymap_set("i", "<PageUp>", "<nop>", { noremap = true }) -- page up
-keymap_set("i", "<PageDown>", "<nop>", { noremap = true }) -- page down
+keymap_set("i", "<PageUp>", "<nop>") -- page up
+keymap_set("i", "<PageDown>", "<nop>") -- page down
 
 keymap_set({ "i", "c" }, "<c-v>", [[<c-r>+]]) -- paste to command line mode
 
@@ -178,7 +153,7 @@ keymap_set("n", "<C-r>", function()
   cmd.redrawstatus()
 end)
 
-keymap_set("v", "v", "V", { noremap = true }) -- visual line mode
+keymap_set("v", "v", "V") -- visual line mode
 
 keymap_set("c", "<c-bs>", "<c-w>") -- delete previous word (cmd)
 
@@ -289,13 +264,6 @@ nvim_create_autocmd("FileType", {
   end,
 })
 
-nvim_create_autocmd("FocusGained", {
-  group = init_group,
-  callback = function()
-    checktime({ mods = { silent = true } })
-  end,
-})
-
 nvim_create_autocmd("FileType", {
   group = init_group,
   pattern = {
@@ -358,22 +326,9 @@ vim.filetype.add({
     ["*.gs"] = "glsl",
     ["*.vs"] = "glsl",
     ["*.fs"] = "glsl",
-    ["*.vert"] = "glsl",
-    ["*.frag"] = "glsl",
-    ["*.geom"] = "glsl",
     ["*.scm"] = "query",
-    [".*%.blade%.php"] = "blade",
   },
 })
-
--- nvim_create_autocmd("BufWritePre", {
---   pattern = "*",
---   callback = function()
---     local save = winsaveview()
---     cmd([[keeppatterns %s/\s+$//e]])
---     winrestview(save)
---   end,
--- })
 
 -- vim.api.nvim_set_hl(0, "@attribute.gdscript", { fg = "#9B668F" })
 vim.api.nvim_set_hl(0, "@attribute.gdscript", { fg = "#96674E" })
