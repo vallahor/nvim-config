@@ -80,7 +80,7 @@ pcall(vim.keymap.del, "n", "gcc")
 keymap_set("n", "gc", function()
   local row = nvim_win_get_cursor(0)[1]
   comment.toggle_lines(row, row)
-end, { noremap = true, silent = true })
+end, { silent = true })
 
 keymap_set({ "i", "s" }, "<esc>", function()
   snippet_stop()

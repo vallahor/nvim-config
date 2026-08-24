@@ -54,8 +54,8 @@ local function increment_selection()
   require("vim.treesitter._select").select_parent(v.count1)
 end
 
-keymap_set({ "n", "v", "o" }, "M", decrement_selection, { noremap = true })
-keymap_set({ "n", "x", "o" }, "m", increment_selection, { noremap = true })
+keymap_set({ "n", "v", "o" }, "M", decrement_selection)
+keymap_set({ "n", "x", "o" }, "m", increment_selection)
 keymap_set("x", "<Esc>", function()
   stack = {}
   return "<esc>"

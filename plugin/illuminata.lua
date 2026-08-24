@@ -169,6 +169,7 @@ local function highlight(mode)
   end
 
   local word = vim.fn.expand("<cword>")
+  ---@cast word string
   if #word > 0 then
     set_match(win, [[\V\<]] .. escape(word, [[\]]) .. [[\>]], 100)
   else

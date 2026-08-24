@@ -90,7 +90,7 @@ local function setup_nvim_tree()
         size = default_size
       end
 
-      vim.api.nvim_win_set_width(winnr, size)
+      vim.api.nvim_win_resize(winnr, size, -1)
       vim.cmd.wincmd("=")
     end
   end
@@ -103,21 +103,16 @@ local function setup_nvim_tree()
       if node and node.type == "directory" then
         api.node.open.edit()
       end
-    end, { buffer = bufnr, noremap = true, silent = true, nowait = true })
+    end, { buffer = bufnr, silent = true, nowait = true })
 
-    vim.keymap.set(
-      "n",
-      "h",
-      api.node.navigate.parent_close,
-      { buffer = bufnr, noremap = true, silent = true, nowait = true }
-    )
+    vim.keymap.set("n", "h", api.node.navigate.parent_close, { buffer = bufnr, silent = true, nowait = true })
 
     vim.keymap.set("n", "<C-t>", function()
       vim.cmd.wincmd("p")
-    end, { buffer = bufnr, noremap = true, silent = true, nowait = true })
+    end, { buffer = bufnr, silent = true, nowait = true })
     vim.keymap.set("n", "t", function()
       vim.cmd.wincmd("p")
-    end, { buffer = bufnr, noremap = true, silent = true, nowait = true })
+    end, { buffer = bufnr, silent = true, nowait = true })
 
     vim.keymap.set("n", "<c-)>", function()
       resize(10)
@@ -178,7 +173,7 @@ local function setup_nvim_tree()
       },
     },
     filesystem_watchers = {
-      enable = false,
+      enable = true,
     },
   })
 end
