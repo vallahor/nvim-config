@@ -52,6 +52,9 @@ wo.relativenumber = true
 opt.linespace = 5
 
 g.loaded_matchit = 1
+-- Prevent every built-in ftplugin from creating buffer-local mappings that
+-- take precedence over global mappings such as `[` and `]`.
+g.no_plugin_maps = 1
 
 -- work around on python default configs
 g.python_indent = {
@@ -220,6 +223,13 @@ keymap_set("n", "<f3>", cmd.InspectTree) -- inspect current token treesitter
 
 -- when it's not in lsp
 keymap_set("n", "K", "<nop>")
+
+keymap_set({ "n", "x" }, "[", function()
+  vim.diagnostic.jump({ count = -1, float = false })
+end, { nowait = true, silent = true })
+keymap_set({ "n", "x" }, "]", function()
+  vim.diagnostic.jump({ count = 1, float = false })
+end, { nowait = true, silent = true })
 
 -- -- add undo capabilities in insert mode
 -- keymap_set("i", "<space>", "<c-g>u<space>")
