@@ -14,8 +14,8 @@ nvim_set_hl(0, "CursorHidden", { blend = 100, bg = "#121112" })
 nvim_set_hl(0, "CursorLineInative", { bg = "#20151F" })
 nvim_set_hl(0, "CursorLineNrInative", { fg = "#a1495c", bg = "#20151F" })
 
-local guicursor_default = "n:block-Cursor,i-ci-c:block-iCursor,v:block-vCursor"
-local guicursor_hidden = "n:block-Cursor,i-ci-c:block-iCursor,v:block-vCursor,a:CursorHidden/lCursorHidden"
+local guicursor_default = vim.g.user_guicursor_default
+local guicursor_hidden = vim.g.user_guicursor_hidden
 local cursor_line_active = "CursorLine:CursorLine,CursorLineNr:CursorLineNr"
 local cursor_line_inactive = "CursorLine:CursorLineInative,CursorLineNr:CursorLineNrInative"
 

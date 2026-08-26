@@ -15,8 +15,8 @@ local function setup_nvim_tree()
   local api = require("nvim-tree.api")
   local view = require("nvim-tree.view")
 
-  local guicursor_default = "n:block-Cursor,i-ci-c:block-iCursor,v:block-vCursor"
-  local guicursor_hidden = "n:block-Cursor,i-ci-c:block-iCursor,v:block-vCursor,a:CursorHidden/lCursorHidden"
+  local guicursor_default = vim.g.user_guicursor_default
+  local guicursor_hidden = vim.g.user_guicursor_hidden
 
   api.events.subscribe(api.events.Event.TreeOpen, function()
     local winnr = view.get_winnr() --[[@as integer?]]

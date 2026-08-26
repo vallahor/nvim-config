@@ -23,6 +23,15 @@ local snippet_stop = vim.snippet.stop
 
 local comment = require("vim._comment")
 
+-- Zellij does not yet forward cursor-color changes on macOS, but it does
+-- preserve cursor shapes. Keep the colored block cursor elsewhere and use a
+-- vertical insert cursor on macOS so insert mode remains visually distinct.
+local is_macos = vim.uv.os_uname().sysname == "Darwin"
+g.user_guicursor_default = is_macos
+    and "n:block-Cursor,i-ci:ver25-iCursor,c:block-iCursor,v:block-vCursor"
+  or "n:block-Cursor,i-ci-c:block-iCursor,v:block-vCursor"
+g.user_guicursor_hidden = g.user_guicursor_default .. ",a:CursorHidden/lCursorHidden"
+
 -- SETTINGS --
 opt.shiftwidth = 4
 opt.tabstop = 4
