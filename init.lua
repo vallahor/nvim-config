@@ -25,10 +25,11 @@ local comment = require("vim._comment")
 
 -- Zellij does not yet forward cursor-color changes on macOS, but it does
 -- preserve cursor shapes. Keep the colored block cursor elsewhere and use a
--- vertical insert cursor on macOS so insert mode remains visually distinct.
+-- vertical insert and command-line cursor on macOS so text-entry modes remain
+-- visually distinct.
 local is_macos = vim.uv.os_uname().sysname == "Darwin"
 g.user_guicursor_default = is_macos
-    and "n:block-Cursor,i-ci:ver25-iCursor,c:block-iCursor,v:block-vCursor"
+    and "n:block-Cursor,i-ci-c:ver25-iCursor,v:block-vCursor"
   or "n:block-Cursor,i-ci-c:block-iCursor,v:block-vCursor"
 g.user_guicursor_hidden = g.user_guicursor_default .. ",a:CursorHidden/lCursorHidden"
 
@@ -168,6 +169,9 @@ end)
 keymap_set("v", "v", "V") -- visual line mode
 
 keymap_set("c", "<c-bs>", "<c-w>") -- delete previous word (cmd)
+-- Zellij reports Option+Backspace as Alt+Backspace; handle it explicitly so
+-- Neovim does not interpret the sequence as command-line cancellation.
+keymap_set("c", "<m-bs>", "<c-w>")
 
 keymap_set("n", "x", '"_x') -- delete current char without copying
 keymap_set("n", "<c-d>", '"_dd') -- delete line without copying
