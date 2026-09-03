@@ -15,19 +15,11 @@ local function setup_nvim_tree()
   local api = require("nvim-tree.api")
   local view = require("nvim-tree.view")
 
-  local guicursor_default = vim.g.user_guicursor_default
-  local guicursor_hidden = vim.g.user_guicursor_hidden
-
   api.events.subscribe(api.events.Event.TreeOpen, function()
     local winnr = view.get_winnr() --[[@as integer?]]
     if winnr then
       vim.wo[winnr].statuscolumn = ""
-      vim.api.nvim_set_option_value("guicursor", guicursor_hidden, {})
     end
-  end)
-
-  api.events.subscribe(api.events.Event.TreeClose, function()
-    vim.api.nvim_set_option_value("guicursor", guicursor_default, {})
   end)
 
   api.events.subscribe(api.events.Event.FileRemoved, function(data)

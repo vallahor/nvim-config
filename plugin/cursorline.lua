@@ -22,15 +22,37 @@ local cursor_line_inactive = "CursorLine:CursorLineInative,CursorLineNr:CursorLi
 nvim_set_option_value("guicursor", guicursor_default, {})
 
 local ignore_file_types = { NvimTree = true }
-nvim_create_autocmd({ "WinEnter", "BufEnter" }, {
-  callback = function()
-    if ignore_file_types[bo.filetype] then
-      nvim_set_option_value("guicursor", guicursor_hidden, {})
-    else
-      nvim_set_option_value("guicursor", guicursor_default, {})
-    end
-  end,
+local function update_window_cursors()
+  local current_win = nvim_get_current_win()
+
+  for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+    local cursor_line = win == current_win and cursor_line_active or cursor_line_inactive
+    nvim_set_option_value("winhighlight", cursor_line, { win = win })
+  end
+
+  local bufnr = vim.api.nvim_win_get_buf(current_win)
+  local guicursor = ignore_file_types[bo[bufnr].filetype] and guicursor_hidden or guicursor_default
+  nvim_set_option_value("guicursor", guicursor, {})
+end
+
+local update_scheduled = false
+local function schedule_window_cursor_update()
+  if update_scheduled then
+    return
+  end
+
+  update_scheduled = true
+  schedule(function()
+    update_scheduled = false
+    update_window_cursors()
+  end)
+end
+
+nvim_create_autocmd({ "WinEnter", "WinLeave", "WinNew", "BufEnter", "TabEnter" }, {
+  callback = schedule_window_cursor_update,
 })
+
+schedule_window_cursor_update()
 
 local cmdline_active = false
 nvim_create_autocmd("CmdlineEnter", {
@@ -55,18 +77,6 @@ nvim_create_autocmd("CmdlineLeave", {
     if ignore_file_types[bo.filetype] then
       nvim_set_option_value("guicursor", guicursor_hidden, {})
     end
-  end,
-})
-
-nvim_create_autocmd("WinEnter", {
-  callback = function()
-    nvim_set_option_value("winhighlight", cursor_line_active, { win = nvim_get_current_win() })
-  end,
-})
-
-nvim_create_autocmd("WinLeave", {
-  callback = function()
-    nvim_set_option_value("winhighlight", cursor_line_inactive, { win = nvim_get_current_win() })
   end,
 })
 

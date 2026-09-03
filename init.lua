@@ -28,8 +28,7 @@ local comment = require("vim._comment")
 -- vertical insert and command-line cursor on macOS so text-entry modes remain
 -- visually distinct.
 local is_macos = vim.uv.os_uname().sysname == "Darwin"
-g.user_guicursor_default = is_macos
-    and "n:block-Cursor,i-ci-c:ver25-iCursor,v:block-vCursor"
+g.user_guicursor_default = is_macos and "n:block-Cursor,i-ci-c:ver25-iCursor,v:block-vCursor"
   or "n:block-Cursor,i-ci-c:block-iCursor,v:block-vCursor"
 g.user_guicursor_hidden = g.user_guicursor_default .. ",a:CursorHidden/lCursorHidden"
 
@@ -51,7 +50,7 @@ opt.shortmess:append("aIc")
 opt.cursorline = true
 opt.cino:append("L0,g0,l1,t0,(0,w4,(s,m1")
 opt.winborder = "rounded"
-opt.isfname:append("(") -- " @windows: nextjs and sveltekit folder name pattern
+opt.isfname:append("(") -- @windows: nextjs and sveltekit folder name pattern
 opt.swapfile = false
 opt.wrap = false
 opt.timeout = false

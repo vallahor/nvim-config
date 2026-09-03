@@ -40,13 +40,38 @@ vim.diagnostic.config({
   },
 })
 
+local function go_to_definition()
+  local from = vim.fn.getpos(".")
+  local source_buf = vim.api.nvim_get_current_buf()
+  local source_win = vim.api.nvim_get_current_win()
+  local tagname = vim.fn.expand("<cword>")
+  from[1] = source_buf
+
+  vim.lsp.buf.definition({
+    on_list = function(what)
+      vim.list.unique(what.items, function(item)
+        return ("%s\0%d\0%d"):format(item.filename or "", item.lnum or 0, item.col or 0)
+      end)
+
+      vim.fn.setqflist({}, " ", what)
+
+      if #what.items == 1 then
+        vim.fn.settagstack(source_win, { items = { { tagname = tagname, from = from } } }, "t")
+        vim.cmd("cfirst")
+      else
+        vim.cmd("botright copen")
+      end
+    end,
+  })
+end
+
 vim.api.nvim_create_autocmd("LspAttach", {
   callback = function(args)
     local bufnr = args.buf
     vim.lsp.document_color.enable(true, { bufnr = bufnr }, { style = "● " })
 
     local opts = { buffer = bufnr }
-    vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+    vim.keymap.set("n", "gd", go_to_definition, opts)
     vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
     vim.keymap.set("n", "<c-a>", vim.lsp.buf.code_action, opts)
     vim.keymap.set("n", "K", function()
@@ -243,6 +268,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
           "prettier",
           "prettierd",
           "ruff",
+          "rustywind",
           "stylua",
         },
       })
