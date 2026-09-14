@@ -6,6 +6,7 @@ local normal = cmd.normal
 local nvim_get_mode = vim.api.nvim_get_mode
 local nvim_feedkeys = vim.api.nvim_feedkeys
 local nvim_win_set_cursor = vim.api.nvim_win_set_cursor
+local mc = require("user.multicursor")
 
 local get_col = vim.fn.col
 local setpos = vim.fn.setpos
@@ -40,6 +41,14 @@ end
 
 local function increment_selection()
   if not vim.treesitter.get_parser(nil, nil, { error = false }) then
+    return
+  end
+
+  if mc.has() then
+    -- Tree-sitter's Lua selection mutates only the primary Visual range, so it
+    -- cannot be replayed by the built-in multicursor engine. Use a real native
+    -- text object: it is semantic and selects the word at every cursor.
+    mc.feed(nvim_get_mode().mode == "v" and "iw" or "viw")
     return
   end
 
