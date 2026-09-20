@@ -30,6 +30,7 @@ local languages = {
   "godot_resource",
   "heex",
   "html",
+  "htmldjango",
   "hyprlang",
   "javascript",
   "json",

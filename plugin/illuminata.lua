@@ -15,7 +15,6 @@ local matchadd = vim.fn.matchadd
 local matchaddpos = vim.fn.matchaddpos
 local matchdelete = vim.fn.matchdelete
 local line = vim.fn.line
-local mc = require("user.multicursor")
 
 local string_sub = string.sub
 local string_gsub = string.gsub
@@ -133,14 +132,6 @@ end
 local function highlight(mode)
   local win = nvim_get_current_win()
 
-  -- Cursorword uses matchadd(), which can cover MCursor and MCursorVisual.
-  -- Hide it for the duration of a built-in multicursor session instead of
-  -- trying to out-prioritize Neovim's cursor/selection renderer.
-  if mc.has() then
-    clear(win)
-    return
-  end
-
   if disabled_bufs[nvim_get_current_buf()] then
     clear(win)
     return
@@ -211,16 +202,6 @@ nvim_create_autocmd({ "InsertEnter", "TermEnter", "QuitPre" }, {
   group = augroup,
   callback = function()
     clear()
-  end,
-})
-
--- Cursor creation/removal does not always move the primary cursor, so the
--- CursorMoved/ModeChanged handlers above may not run. CmdAtom fires after the
--- built-in multicursor command has updated its extmarks.
-nvim_create_autocmd("CmdAtom", {
-  group = augroup,
-  callback = function()
-    highlight(nvim_get_mode().mode)
   end,
 })
 

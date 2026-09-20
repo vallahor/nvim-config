@@ -6,12 +6,14 @@ local normal = cmd.normal
 local nvim_get_mode = vim.api.nvim_get_mode
 local nvim_feedkeys = vim.api.nvim_feedkeys
 local nvim_win_set_cursor = vim.api.nvim_win_set_cursor
-local mc = require("user.multicursor")
 
 local get_col = vim.fn.col
 local setpos = vim.fn.setpos
 
 local line = vim.fn.line
+
+local nvim_get_current_line = vim.api.nvim_get_current_line
+local nvim_win_get_cursor = vim.api.nvim_win_get_cursor
 
 ---@type { [1]:integer, [2]:integer, [3]:integer, [4]:integer }[]
 local stack = {}
@@ -44,23 +46,29 @@ local function increment_selection()
     return
   end
 
-  if mc.has() then
-    -- Tree-sitter's Lua selection mutates only the primary Visual range, so it
-    -- cannot be replayed by the built-in multicursor engine. Use a real native
-    -- text object: it is semantic and selects the word at every cursor.
-    mc.feed(nvim_get_mode().mode == "v" and "iw" or "viw")
-    return
-  end
-
   if nvim_get_mode().mode ~= "v" then
     stack = {}
+  end
+
+  local skip_parent = false
+
+  if #stack == 0 then
+    local line_str = nvim_get_current_line()
+    local _, col = unpack(nvim_win_get_cursor(0))
+    local char = line_str:sub(col + 1, col + 1)
+    if char:match("[%w_]") ~= nil then
+      normal({ "viw", bang = true })
+      skip_parent = true
+    end
   end
 
   local vline, vcol = line("v"), get_col("v")
   local cline, ccol = line("."), get_col(".")
   stack[#stack + 1] = { vline - 1, vcol - 1, cline - 1, ccol }
 
-  require("vim.treesitter._select").select_parent(v.count1)
+  if not skip_parent then
+    require("vim.treesitter._select").select_parent(v.count1)
+  end
 end
 
 keymap_set({ "n", "v", "o" }, "M", decrement_selection)
